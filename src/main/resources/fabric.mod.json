@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "seedmapper",
+  "version": "${version}",
+
+  "name": "SeedMapper",
+  "description": "A mod to compare a seed's terrain to the current terrain",
+  "authors": [
+    "xpple"
+  ],
+  "contact": {
+    "homepage": "https://xpple.dev/",
+    "sources": "https://github.com/xpple/SeedMapper/"
+  },
+
+  "license": "LGPL-3.0-or-later",
+  "icon": "assets/seedmapper/icon.png",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.xpple.seedmapper.SeedMapper"
+    ]
+  },
+  "mixins": [
+    "seedmapper.mixin.net.json",
+    "seedmapper.mixin.entity.json",
+    "seedmapper.mixin.render.json",
+    "seedmapper.mixin.client.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "clientcommands": "clientcommands"
+  }
+}
