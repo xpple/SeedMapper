@@ -34,9 +34,4 @@ public class MixinClientPlayNetworkHandler {
     public void onCommandTree(CommandTreeS2CPacket packet, CallbackInfo ci) {
         SeedMapper.registerCommands((CommandDispatcher<ServerCommandSource>) (Object) commandDispatcher);
     }
-
-    @Redirect(method = "onGameJoin", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;)V"))
-    private void redirect(ClientConnection clientConnection, Packet<?> packet) {
-        // bye bye Fabric detection
-    }
 }

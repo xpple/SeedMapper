@@ -25,8 +25,8 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -95,7 +95,7 @@ public class SeedOverlayCommand extends ClientCommand {
         final WorldChunk chunk = CLIENT.player.world.getChunk(playerBlockPos.getX() >> 4, playerBlockPos.getZ() >> 4);
         final ChunkPos chunkPos = chunk.getPos();
 
-        Set<Box> boxes = new HashSet<>();
+        Map<Box, Integer> boxes = new HashMap<>();
         int blocks = 0;
         for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
             mutable.setX(x);
@@ -115,7 +115,7 @@ public class SeedOverlayCommand extends ClientCommand {
                     if (seedBlockInt == terrainBlockInt) {
                         continue;
                     }
-                    boxes.add(new Box(mutable));
+                    boxes.put(new Box(mutable), seedBlockInt);
                     Chat.print("", chain(
                             highlight("Block at "),
                             copy(
@@ -135,8 +135,31 @@ public class SeedOverlayCommand extends ClientCommand {
                 }
             }
         }
-        for (Box box : boxes) {
-            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, 0XFFFB8919, 30 * 20);
+        for (Map.Entry<Box, Integer> entry : boxes.entrySet()) {
+            int colour;
+            switch (entry.getValue()) {
+                // stone
+                case 1 : colour = 0xFFAAAAAA;
+                break;
+                // bedrock
+                case 7 : colour = 0xFF313131;
+                break;
+                // water
+                case 9 : colour = 0xFF213F7C;
+                break;
+                // lava
+                case 11 : colour = 0xFFC6400B;
+                break;
+                // netherrack
+                case 87 : colour = 0xFF501514;
+                break;
+                // end_stone
+                case 121 : colour = 0xFFF5F8BB;
+                break;
+                // air
+                default : colour = 0xFFFFFFFF;
+            }
+            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, entry.getKey(), entry.getKey(), colour, 30 * 20);
         }
         if (blocks > 0) {
             Chat.print("", chain(
