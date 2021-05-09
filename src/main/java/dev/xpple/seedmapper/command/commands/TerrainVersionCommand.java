@@ -6,7 +6,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.util.blocks.SimpleBlockMap;
 import dev.xpple.seedmapper.util.chat.Chat;
