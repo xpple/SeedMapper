@@ -101,9 +101,9 @@ public class TerrainVersionCommand extends ClientCommand {
                 });
         if (version.get().startsWith("1")) {
             Chat.print("", chain(
-                    highlight("Version "),
+                    highlight(new TranslatableText("command.terrainversion.feedback.0")),
                     accent(version.get()),
-                    highlight(" is the best match.")
+                    highlight(new TranslatableText("command.terrainversion.feedback.1"))
             ));
         } else {
             Chat.print("", highlight(version.get()));

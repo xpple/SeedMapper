@@ -117,19 +117,19 @@ public class SeedOverlayCommand extends ClientCommand {
                     }
                     boxes.put(new Box(mutable), seedBlockInt);
                     Chat.print("", chain(
-                            highlight("Block at "),
+                            highlight(new TranslatableText("command.seedoverlay.feedback.0")),
                             copy(
                                     hover(
                                             accent("x: " + x + ", y: " + y + ", z: " + z),
                                             chain(
-                                                    base("Click to copy coordinates of "),
+                                                    base(new TranslatableText("command.seedoverlay.feedback.1")),
                                                     highlight(chunk.getBlockState(mutable).getBlock().getName())
                                             )
                                     ),
                                     String.format("%d %d %d", x, y ,z)
 
                             ),
-                            highlight(" doesn't match!")
+                            highlight(new TranslatableText("command.seedoverlay.feedback.2"))
                     ));
                     blocks++;
                 }
@@ -163,12 +163,12 @@ public class SeedOverlayCommand extends ClientCommand {
         }
         if (blocks > 0) {
             Chat.print("", chain(
-                    highlight("A total of "),
+                    highlight(new TranslatableText("command.seedoverlay.feedback.3")),
                     accent(String.valueOf(blocks)),
-                    highlight(" blocks didn't match.")
+                    highlight(new TranslatableText("command.seedoverlay.feedback.4"))
             ));
         } else {
-            Chat.print("", highlight("All blocks match!"));
+            Chat.print("", highlight(new TranslatableText("command.seedoverlay.feedback.5")));
         }
         return blocks;
     }

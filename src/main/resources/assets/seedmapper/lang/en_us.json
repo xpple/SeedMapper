@@ -4,6 +4,8 @@
   "commands.exceptions.unknownConfig": "Unknown config \"%s\".",
   "commands.exceptions.nullPointerException": "\"%s\" is null.",
 
+  "arguments.exceptions.tooFewArguments": "Too few arguments.",
+
   "command.config.setAutomate": "Set \"automate\" to %s.",
   "command.config.getAutomate": "\"automate\" is set to %s.",
   "command.config.toggleAutomate": "Toggled \"automate\" to %s.",
@@ -17,8 +19,13 @@
   "command.config.listBlocks": "Currently ignoring: %s.",
   "command.config.listBlocks.empty": "Currently not ignoring any blocks.",
 
-  "command.toggle.toggle": "Toggled \"%s\" to \"%s\".",
-  "command.toggle.set": "Set \"%s\" to \"%s\".",
+  "command.seedoverlay.feedback.0": "Block at ",
+  "command.seedoverlay.feedback.1": "Click to copy coordinates of ",
+  "command.seedoverlay.feedback.2": " doesn't match!",
+  "command.seedoverlay.feedback.3": "A total of ",
+  "command.seedoverlay.feedback.4": " blocks didn't match.",
+  "command.seedoveraly.feedback.5": "All blocks match!",
 
-  "arguments.exceptions.tooFewArguments": "Too few arguments."
+  "command.terrainversion.feedback.0": "All blocks match!",
+  "command.terrainversion.feedback.1": " is the best match."
 }
