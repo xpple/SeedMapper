@@ -10,6 +10,8 @@ import net.minecraft.util.Formatting;
 
 import java.util.*;
 
+import static dev.xpple.seedmapper.SeedMapper.MOD_ID;
+
 public class ChatBuilder {
 
     public static Formatting BASE = Formatting.GRAY;
@@ -20,7 +22,7 @@ public class ChatBuilder {
     public static Formatting ERROR = Formatting.RED;
 
     private static int runnableCount = 0;
-    public static String runnableCommandPrefix = "/xpple::internal::chatrun::" + new Random().ints(48, 122 + 1) // 0 to z
+    public static String runnableCommandPrefix = "/" + MOD_ID + "::internal::chatrun::" + new Random().ints(48, 122 + 1) // 0 to z
             .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
             .limit(10)
             .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
