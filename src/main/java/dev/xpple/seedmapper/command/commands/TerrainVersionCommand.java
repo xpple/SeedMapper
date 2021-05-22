@@ -53,10 +53,14 @@ public class TerrainVersionCommand extends ClientCommand {
         }
 
         long seed;
-        JsonElement element = Config.get("seed");
-        if (element instanceof JsonNull) {
-            throw NULL_POINTER_EXCEPTION.create("seed");
+        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
+        if (Config.getSeeds().containsKey(key)) {
+            seed = Config.getSeeds().get(key);
         } else {
+            JsonElement element = Config.get("seed");
+            if (element instanceof JsonNull) {
+                throw NULL_POINTER_EXCEPTION.create("seed");
+            }
             seed = element.getAsLong();
         }
 

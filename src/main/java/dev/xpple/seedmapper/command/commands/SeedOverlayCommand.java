@@ -61,6 +61,10 @@ public class SeedOverlayCommand extends ClientCommand {
     }
 
     private int seedOverlay(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
+        if (Config.getSeeds().containsKey(key)) {
+            return execute(Config.getSeeds().get(key), CLIENT.getGame().getVersion().getName());
+        }
         JsonElement element = Config.get("seed");
         if (element instanceof JsonNull) {
             throw NULL_POINTER_EXCEPTION.create("seed");

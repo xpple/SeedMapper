@@ -14,7 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static dev.xpple.seedmapper.SeedMapper.MOD_ID;
@@ -29,13 +31,25 @@ public class Config {
     private static JsonObject root = null;
 
     private static final Set<Block> ignoredBlocks = new HashSet<>();
+    private static final Map<String, Long> seeds = new HashMap<>();
 
     public static void init() {
         try {
             if (configPath.toFile().exists() && configPath.toFile().isFile()) {
                 root = parser.parse(Files.newBufferedReader(configPath)).getAsJsonObject();
-                for (JsonElement element : root.getAsJsonArray("ignoredBlocks")) {
-                    ignoredBlocks.add(Registry.BLOCK.get(new Identifier(element.getAsString())));
+                if (root.has("seeds")) {
+                    for (Map.Entry<String, JsonElement> element : root.getAsJsonObject("seeds").entrySet()) {
+                        seeds.put(element.getKey(), element.getValue().getAsLong());
+                    }
+                } else {
+                    root.add("seeds", new JsonObject());
+                }
+                if (root.has("ignoredBlocks")) {
+                    for (JsonElement element : root.getAsJsonArray("ignoredBlocks")) {
+                        ignoredBlocks.add(Registry.BLOCK.get(new Identifier(element.getAsString())));
+                    }
+                } else {
+                    root.add("ignoredBlocks", new JsonArray());
                 }
                 toggle("automate", false);
             } else {
@@ -44,6 +58,9 @@ public class Config {
                         "  \"automate\": {\n" +
                         "    \"enabled\": false\n" +
                         "  },\n" +
+                        "  \"seeds\": {\n" +
+                        "\n" +
+                        "   }," +
                         "  \"seed\": null,\n" +
                         "  \"ignoredBlocks\": [\n" +
                         "\n" +
@@ -58,6 +75,9 @@ public class Config {
 
     public static void save() {
         try {
+            JsonObject jsonSeeds = new JsonObject();
+            seeds.forEach((jsonSeeds::addProperty));
+            root.add("seeds", jsonSeeds);
             JsonArray jsonIgnoredBlocks = new JsonArray();
             ignoredBlocks.forEach(block -> jsonIgnoredBlocks.add(Registry.BLOCK.getId(block).getPath()));
             root.add("ignoredBlocks", jsonIgnoredBlocks);
@@ -93,6 +113,28 @@ public class Config {
             return;
         }
         throw new JsonParseException("No member \"enabled\" found for " + key);
+    }
+
+    public static boolean addSeed(String key, long seed) {
+        if (seeds.containsKey(key)) {
+            return false;
+        }
+        seeds.put(key, seed);
+        save();
+        return true;
+    }
+
+    public static boolean removeSeed(String key) {
+        if (seeds.containsKey(key)) {
+            seeds.remove(key);
+            save();
+            return true;
+        }
+        return false;
+    }
+
+    public static Map<String, Long> getSeeds() {
+        return seeds;
     }
 
     public static boolean addBlock(Block block) {

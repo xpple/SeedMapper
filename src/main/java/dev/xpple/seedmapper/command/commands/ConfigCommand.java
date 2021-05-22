@@ -17,8 +17,12 @@ import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
 import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
+import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static com.mojang.brigadier.arguments.StringArgumentType.string;
+import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.block;
 import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.getBlock;
+import static net.minecraft.command.CommandSource.suggestMatching;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -41,12 +45,21 @@ public class ConfigCommand extends ClientCommand {
                                         .executes(this::setSeed)))
                         .then(literal("get")
                                 .executes(this::getSeed)))
+                .then(literal("seeds")
+                        .then(literal("add")
+                                .then(argument("seed", longArg())
+                                        .executes(this::addSeed)))
+                        .then(literal("remove")
+                                .then(argument("key", string())
+                                        .suggests(((context, builder) -> suggestMatching(Config.getSeeds().keySet().stream(), builder)))
+                                        .executes(this::removeSeed))))
                 .then(literal("ignored")
                         .then(literal("add")
                                 .then(argument("block", block())
                                         .executes(this::addBlock)))
                         .then(literal("remove")
                                 .then(argument("block", block())
+                                        .suggests(((context, builder) -> suggestMatching(Config.getIgnoredBlocks().stream().map(block -> block.getName().getString()), builder)))
                                         .executes(this::removeBlock)))
                         .then(literal("list")
                                 .executes(this::listBlocks)));
@@ -95,6 +108,31 @@ public class ConfigCommand extends ClientCommand {
             Chat.print("", new TranslatableText("command.config.getSeed.null"));
         } else {
             Chat.print("", new TranslatableText("command.config.getSeed", element.getAsLong()));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    /*
+    If seeds are added to this list, they will be used if the server matches the key.
+    `CLIENT.getNetworkHandler().getConnection().getAddress().toString()` will be used to compare the key.
+     */
+    private int addSeed(CommandContext<ServerCommandSource> ctx) {
+        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
+        long seed = getLong(ctx, "seed");
+        if (Config.addSeed(key, seed)) {
+            Chat.print("", new TranslatableText("command.config.addSeed.success"));
+        } else {
+            Chat.print("", new TranslatableText("command.config.addSeed.alreadyAdded"));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int removeSeed(CommandContext<ServerCommandSource> ctx) {
+        String key = getString(ctx, "key");
+        if (Config.removeSeed(key)) {
+            Chat.print("", new TranslatableText("command.config.removeSeed.success"));
+        } else {
+            Chat.print("", new TranslatableText("command.config.removeSeed.notAdded"));
         }
         return Command.SINGLE_SUCCESS;
     }
