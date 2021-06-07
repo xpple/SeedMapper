@@ -1,0 +1,36 @@
+{
+    "commands.exceptions.dimensionNotSupported": "Wymiar \"%s\" nie jest wspierany.",
+    "commands.exceptions.versionNotFound": "Nie znaleziono wersji \"%s\"",
+    "commands.exceptions.unknownConfig": "Nieznane ustawienie \"%s\".",
+    "commands.exceptions.nullPointerException": "\"%s\" jest niezdefiniowany.",
+  
+    "arguments.exceptions.tooFewArguments": "Za mała ilość argumentów.",
+  
+    "command.config.setAutomate": "Ustawiono \"automate\" na %s.",
+    "command.config.getAutomate": "\"automate\" jest ustawiony na %s.",
+    "command.config.toggleAutomate": "Przełączono \"automate\" na %s.",
+    "command.config.setSeed": "Ustawiono \"seed\" na %d.",
+    "command.config.getSeed": "\"seed\" jest ustawiony na %d.",
+    "command.config.getSeed.null": "\"seed\" jest niezdefiniowany.",
+    "command.config.addSeed.success": "Dodano ziarno dla tego serwera.",
+    "command.config.addSeed.alreadyAdded": "Ziarno tego serwera zostało już dodane.",
+    "command.config.removeSeed.success": "Usunięto ziarno tego serwera.",
+    "command.config.removeSeed.notAdded": "Ziarno tego serwera nie było jeszcze dodane.",
+    "command.config.addBlock.success": "Teraz ignoruje %s.",
+    "command.config.addBlock.alreadyIgnored": "Już ignoruje %s.",
+    "command.config.removeBlock.success": "Już nie ignoruje %s.",
+    "command.config.removeBlock.notIgnored": "%s nigdy nie był ignorowany.",
+    "command.config.listBlocks": "Obecnie ignoruję: %s.",
+    "command.config.listBlocks.empty": "Obecnie nie ignoruję żadnego bloku.",
+  
+    "command.seedoverlay.feedback.0": "Blok na ",
+    "command.seedoverlay.feedback.1": "Kliknij by skopiować współrzędne ",
+    "command.seedoverlay.feedback.2": " nie pasuje!",
+    "command.seedoverlay.feedback.3": "Łącznie ",
+    "command.seedoverlay.feedback.4": " bloków nie pasuje.",
+    "command.seedoveraly.feedback.5": "Wszystkie bloki pasują!",
+  
+    "command.terrainversion.feedback.0": "Wszystkie bloki pasują!",
+    "command.terrainversion.feedback.1": " jest najlepszym trafieniem."
+  }
+  
