@@ -1,0 +1,35 @@
+{
+    "commands.exceptions.dimensionNotSupported": "Dimension \"%s\" wird nicht unterstützt.",
+    "commands.exceptions.versionNotFound": "Version \"%s\" konnte nicht gefunden werden.",
+    "commands.exceptions.unknownConfig": "Unbekannte Konfiguration \"%s\".",
+    "commands.exceptions.nullPointerException": "\"%s\" hat keinen Wert.",
+
+    "arguments.exceptions.tooFewArguments": "Zu wenig Argumente.",
+
+    "command.config.setAutomate": "\"automate\" wurde auf %s gesetzt.",
+    "command.config.getAutomate": "\"automate\" ist auf %s gesetzt.",
+    "command.config.toggleAutomate": "\"automate\" wurde auf umgeschaltet %s.",
+    "command.config.setSeed": "\"seed\" wurde auf %d gesetzt.",
+    "command.config.getSeed": "\"seed\" ist auf %d gesetzt.",
+    "command.config.getSeed.null": "\"seed\" hat keinen Wert.",
+    "command.config.addSeed.success": "Seed für den aktuellen Server hinzugefügt.",
+    "command.config.addSeed.alreadyAdded": "Ein Seed für den aktuellen Server wurde bereits hinzugefügt.",
+    "command.config.removeSeed.success": "Seed für den aktuellen Server entfernt.",
+    "command.config.removeSeed.notAdded": "Ein Seed für diesen Server wurde nicht hinzugefügt.",
+    "command.config.addBlock.success": "Ignoriere %s.",
+    "command.config.addBlock.alreadyIgnored": "%s wird bereits ignoriert.",
+    "command.config.removeBlock.success": "%s wird nicht mehr ignoriert.",
+    "command.config.removeBlock.notIgnored": "%s wurde nie ignoriert.",
+    "command.config.listBlocks": "Aktuell ignoriert: %s.",
+    "command.config.listBlocks.empty": "Aktuell werden keine Blöcke ignoriert.",
+
+    "command.seedoverlay.feedback.0": "Block bei ",
+    "command.seedoverlay.feedback.1": "Coordinaten copieren von ",
+    "command.seedoverlay.feedback.2": " stimmt nicht überein!",
+    "command.seedoverlay.feedback.3": "Insgesamt ",
+    "command.seedoverlay.feedback.4": " Blöcke stimmten nicht überein.",
+    "command.seedoverlay.feedback.5": "Alle Blöcke stimmen überein!",
+
+    "command.terrainversion.feedback.0": "Alle Blöcke stimmen überein!",
+    "command.terrainversion.feedback.1": " ist die beste Übereinstimming."
+}
