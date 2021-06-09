@@ -24,7 +24,7 @@
     "command.config.listBlocks.empty": "Aktuell werden keine Blöcke ignoriert.",
 
     "command.seedoverlay.feedback.0": "Block bei ",
-    "command.seedoverlay.feedback.1": "Coordinaten copieren von ",
+    "command.seedoverlay.feedback.1": "Coordinaten kopieren von ",
     "command.seedoverlay.feedback.2": " stimmt nicht überein!",
     "command.seedoverlay.feedback.3": "Insgesamt ",
     "command.seedoverlay.feedback.4": " Blöcke stimmten nicht überein.",
