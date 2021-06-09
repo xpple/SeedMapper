@@ -13,6 +13,8 @@ import static net.minecraft.block.Blocks.*;
 
 public class SimpleBlockMap {
     // "ungenerate" different blocks to compare them with the seed
+    // reference for ungenerating random patches:
+    // https://minecraft.fandom.com/wiki/Random_patch
     private static final Map<MCVersion, Map<Biome, Map<Block, Integer>>> versionedBiomeMap = ImmutableMap.<MCVersion, Map<Biome, Map<Block, Integer>>>builder()
             .put(MCVersion.v1_16_5, ImmutableMap.<Biome, Map<Block, Integer>>builder()
                     .put(OCEAN, ImmutableMap.<Block, Integer>builder()
@@ -105,6 +107,8 @@ public class SimpleBlockMap {
                             .put(RED_MUSHROOM, 0)
                             .put(BROWN_MUSHROOM, 0)
                             .put(DEAD_BUSH, 0)
+
+                            .put(GRASS, 0)
                             .build()
                     ).put(RIVER, ImmutableMap.<Block, Integer>builder()
                             .put(WATER, 9)
@@ -414,6 +418,8 @@ public class SimpleBlockMap {
                             .put(ACACIA_LEAVES, 0)
                             .put(OAK_LOG, 0)
                             .put(OAK_LEAVES, 0)
+
+                            .put(POPPY, 0)
                             .build()
                     ).put(SAVANNA_PLATEAU, ImmutableMap.<Block, Integer>builder()
                             .put(GRASS_BLOCK, 1)
@@ -422,6 +428,8 @@ public class SimpleBlockMap {
                             .put(ACACIA_LEAVES, 0)
                             .put(OAK_LOG, 0)
                             .put(OAK_LEAVES, 0)
+
+                            .put(GRASS, 0)
                             .build()
                     ).put(BADLANDS, ImmutableMap.<Block, Integer>builder()
                             .put(RED_SAND, 1)
@@ -813,6 +821,8 @@ public class SimpleBlockMap {
                             .put(ACACIA_LEAVES, 0)
                             .put(OAK_LOG, 0)
                             .put(OAK_LEAVES, 0)
+
+                            .put(GRASS, 0)
                             .build()
                     ).put(SHATTERED_SAVANNA_PLATEAU, ImmutableMap.<Block, Integer>builder()
                             .put(GRASS_BLOCK, 1)
@@ -907,6 +917,9 @@ public class SimpleBlockMap {
                             .put(OAK_LOG, 0)
                             .put(OAK_LEAVES, 0)
                             .put(MELON, 0)
+
+                            .put(GRASS, 0)
+                            .put(FERN, 0)
                             .build()
                     ).put(BAMBOO_JUNGLE_HILLS, ImmutableMap.<Block, Integer>builder()
                             .put(GRASS_BLOCK, 1)
