@@ -7,13 +7,13 @@ import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.source.BiomeSource;
+import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
-import kaptainwutax.terrainutils.ChunkGenerator;
-import kaptainwutax.terrainutils.utils.Block;
+import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.world.ClientChunkManager;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -25,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 public class MixinClientChunkManager {
 
     @Inject(method = "loadChunkFromPacket", at = @At("TAIL"))
-    private void onLoadChunk(int x, int z, BiomeArray biomes, PacketByteBuf buf, CompoundTag tag, int verticalStripBitmask, boolean complete, CallbackInfoReturnable<WorldChunk> cir) {
+    private void onLoadChunk(int x, int z, BiomeArray biomes, PacketByteBuf buf, NbtCompound nbt, BitSet bitSet, CallbackInfoReturnable<WorldChunk> cir) {
         if (Config.isEnabled("automate")) {
             String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
             Dimension dimension = Dimension.fromString(dimensionPath);
@@ -47,7 +48,7 @@ public class MixinClientChunkManager {
                 return;
             }
             BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, element.getAsLong());
-            ChunkGenerator generator = ChunkGenerator.of(dimension, biomeSource);
+            TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
             SimpleBlockMap map = new SimpleBlockMap(dimension);
 
             BlockPos.Mutable mutable = new BlockPos.Mutable();
@@ -69,7 +70,7 @@ public class MixinClientChunkManager {
                         if (Config.getIgnoredBlocks().contains(blockState.getBlock())) {
                             continue;
                         }
-                        int seedBlockInt = column[y].getValue();
+                        int seedBlockInt = column[y].getId();
                         if (seedBlockInt != terrainBlockInt) {
                             boxes.add(new Box(mutable));
                         }

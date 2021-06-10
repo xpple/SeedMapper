@@ -12,10 +12,10 @@ import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.source.BiomeSource;
+import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
-import kaptainwutax.terrainutils.ChunkGenerator;
-import kaptainwutax.terrainutils.utils.Block;
+import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
@@ -91,7 +91,7 @@ public class SeedOverlayCommand extends ClientCommand {
             throw VERSION_NOT_FOUND_EXCEPTION.create(version);
         }
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
-        ChunkGenerator generator = ChunkGenerator.of(dimension, biomeSource);
+        TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
         final SimpleBlockMap map = new SimpleBlockMap(dimension);
 
         BlockPos.Mutable mutable = new BlockPos.Mutable();
@@ -115,7 +115,7 @@ public class SeedOverlayCommand extends ClientCommand {
                         continue;
                     }
                     int terrainBlockInt = map.get(blockState.getBlock());
-                    int seedBlockInt = column[y].getValue();
+                    int seedBlockInt = column[y].getId();
                     if (seedBlockInt == terrainBlockInt) {
                         continue;
                     }
@@ -140,29 +140,22 @@ public class SeedOverlayCommand extends ClientCommand {
             }
         }
         for (Map.Entry<Box, Integer> entry : boxes.entrySet()) {
-            int colour;
-            switch (entry.getValue()) {
+            int colour = switch (entry.getValue()) {
                 // stone
-                case 1 : colour = 0xFFAAAAAA;
-                break;
+                case 1 -> 0xFFAAAAAA;
                 // bedrock
-                case 7 : colour = 0xFF313131;
-                break;
+                case 7 -> 0xFF313131;
                 // water
-                case 9 : colour = 0xFF213F7C;
-                break;
+                case 9 -> 0xFF213F7C;
                 // lava
-                case 11 : colour = 0xFFC6400B;
-                break;
+                case 11 -> 0xFFC6400B;
                 // netherrack
-                case 87 : colour = 0xFF501514;
-                break;
+                case 87 -> 0xFF501514;
                 // end_stone
-                case 121 : colour = 0xFFF5F8BB;
-                break;
+                case 121 -> 0xFFF5F8BB;
                 // air
-                default : colour = 0xFFFFFFFF;
-            }
+                default -> 0xFFFFFFFF;
+            };
             RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, entry.getKey(), entry.getKey(), colour, 30 * 20);
         }
         if (blocks > 0) {

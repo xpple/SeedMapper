@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.6-SNAPSHOT'
+	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -36,22 +36,22 @@ dependencies {
 
 	implementation('com.github.KaptainWutax:MathUtils:5531c4a87b0f1bb85d1dab2bdd18ce375400626a') {transitive = false}
 	implementation('com.github.KaptainWutax:SeedUtils:b6a383113ce5d8d09a59e91b28ff064fb97c0709') {transitive = false}
-	implementation('com.github.KaptainWutax:MCUtils:495708649d52e06687fa7d609faa002530fb39ce') {transitive = false}
-	implementation('com.github.KaptainWutax:NoiseUtils:a3954932b15a889aa51c82176942d62f291c3b12') {transitive = false}
+	implementation('com.github.KaptainWutax:MCUtils:13009755237551c6148cdbda87e8d924c5bfc1ef') {transitive = false}
+	implementation('com.github.KaptainWutax:NoiseUtils:288e1b60e0f427bead80f001d19565ad1adcbd73') {transitive = false}
 
-	implementation('com.github.KaptainWutax:BiomeUtils:4c16b06fb7dc8d8877c0214a66b0ab261f44104a') {transitive = false}
-	implementation('com.github.KaptainWutax:TerrainUtils:dbba2ba61a2c8920b48b1fb9a32fa8e9fe353d61') {transitive = false}
-	implementation('com.github.KaptainWutax:FeatureUtils:c1576921dd791f6660147215beb1f53b7ea587b1') {transitive = false}
+	implementation('com.github.KaptainWutax:BiomeUtils:cbb3d433c617087e5a6598ccec3cc0d04bf24e5a') {transitive = false}
+	implementation('com.github.KaptainWutax:TerrainUtils:322c2405600be7e87ded65f7bc6f2c4f042a5472') {transitive = false}
+	implementation('com.github.KaptainWutax:FeatureUtils:ff97b44038b0410cef83cd813b4569ef4a5e4d03') {transitive = false}
 
 
 	include('com.github.KaptainWutax:MathUtils:5531c4a87b0f1bb85d1dab2bdd18ce375400626a') {transitive = false}
 	include('com.github.KaptainWutax:SeedUtils:b6a383113ce5d8d09a59e91b28ff064fb97c0709') {transitive = false}
-	include('com.github.KaptainWutax:MCUtils:495708649d52e06687fa7d609faa002530fb39ce') {transitive = false}
-	include('com.github.KaptainWutax:NoiseUtils:a3954932b15a889aa51c82176942d62f291c3b12') {transitive = false}
+	include('com.github.KaptainWutax:MCUtils:13009755237551c6148cdbda87e8d924c5bfc1ef') {transitive = false}
+	include('com.github.KaptainWutax:NoiseUtils:288e1b60e0f427bead80f001d19565ad1adcbd73') {transitive = false}
 
-	include('com.github.KaptainWutax:BiomeUtils:4c16b06fb7dc8d8877c0214a66b0ab261f44104a') {transitive = false}
-	include('com.github.KaptainWutax:TerrainUtils:dbba2ba61a2c8920b48b1fb9a32fa8e9fe353d61') {transitive = false}
-	include('com.github.KaptainWutax:FeatureUtils:c1576921dd791f6660147215beb1f53b7ea587b1') {transitive = false}
+	include('com.github.KaptainWutax:BiomeUtils:cbb3d433c617087e5a6598ccec3cc0d04bf24e5a') {transitive = false}
+	include('com.github.KaptainWutax:TerrainUtils:322c2405600be7e87ded65f7bc6f2c4f042a5472') {transitive = false}
+	include('com.github.KaptainWutax:FeatureUtils:ff97b44038b0410cef83cd813b4569ef4a5e4d03') {transitive = false}
 }
 
 processResources {

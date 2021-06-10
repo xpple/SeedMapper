@@ -12,10 +12,10 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
 import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.source.BiomeSource;
+import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
-import kaptainwutax.terrainutils.ChunkGenerator;
-import kaptainwutax.terrainutils.utils.Block;
+import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
@@ -71,7 +71,7 @@ public class TerrainVersionCommand extends ClientCommand {
                 .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_12_2))
                 .forEach(mcVersion -> {
                     BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
-                    ChunkGenerator generator = ChunkGenerator.of(dimension, biomeSource);
+                    TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
                     SimpleBlockMap map = new SimpleBlockMap(dimension);
 
                     BlockPos.Mutable mutable = new BlockPos.Mutable();
@@ -89,7 +89,7 @@ public class TerrainVersionCommand extends ClientCommand {
                             map.setBiome(biome);
                             for (int y = 0; y < column.length; y++) {
                                 mutable.setY(y);
-                                int seedBlockInt = column[y].getValue();
+                                int seedBlockInt = column[y].getId();
                                 int terrainBlockInt = map.get(chunk.getBlockState(mutable).getBlock());
                                 if (seedBlockInt == terrainBlockInt) {
                                     continue;
