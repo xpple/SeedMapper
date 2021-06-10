@@ -58,5 +58,4 @@ public class Line extends Shape {
     public Vec3d getPos() {
         return start;
     }
-
 }

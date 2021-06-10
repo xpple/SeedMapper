@@ -47,5 +47,4 @@ public class Cuboid extends Shape {
     public Vec3d getPos() {
         return start;
     }
-
 }
