@@ -30,6 +30,5 @@
   "command.seedoverlay.feedback.4": " blocks didn't match.",
   "command.seedoverlay.feedback.5": "All blocks match!",
 
-  "command.terrainversion.feedback.0": "All blocks match!",
-  "command.terrainversion.feedback.1": " is the best match."
+  "command.terrainversion.feedback": " is the best match."
 }
