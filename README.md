@@ -1,5 +1,6 @@
 # SeedMapper
-In-game Minecraft mod that allows you to compare natural terrain to your current terrain.
+In-game Minecraft mod that allows you to compare natural terrain to your current terrain. For questions please go to my 
+[Discord](https://discord.xpple.dev/).
 
 ## Disclaimer
 This mod does not yet support terrain generation of Minecraft version 1.12.2 and below. Support for these versions will be added later.
