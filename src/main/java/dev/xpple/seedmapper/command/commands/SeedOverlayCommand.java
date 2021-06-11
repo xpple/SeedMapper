@@ -16,8 +16,8 @@ import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -32,8 +32,8 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.minecraft.command.CommandSource.suggestMatching;
-import static net.minecraft.server.command.CommandManager.argument;
 
 public class SeedOverlayCommand extends ClientCommand {
 
@@ -60,7 +60,7 @@ public class SeedOverlayCommand extends ClientCommand {
         return "overlay";
     }
 
-    private int seedOverlay(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    private int seedOverlay(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
             return execute(Config.getSeeds().get(key), CLIENT.getGame().getVersion().getName());
@@ -72,7 +72,7 @@ public class SeedOverlayCommand extends ClientCommand {
         return execute(element.getAsLong(), CLIENT.getGame().getVersion().getName());
     }
 
-    private int seedOverlayVersion(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    private int seedOverlayVersion(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
         JsonElement element = Config.get("seed");
         if (element instanceof JsonNull) {
             throw NULL_POINTER_EXCEPTION.create("seed");

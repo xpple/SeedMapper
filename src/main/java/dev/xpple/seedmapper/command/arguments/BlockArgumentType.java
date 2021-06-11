@@ -6,10 +6,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.registry.Registry;
 
@@ -28,7 +28,7 @@ public class BlockArgumentType implements ArgumentType<Block> {
         return new BlockArgumentType();
     }
 
-    public static Block getBlock(CommandContext<ServerCommandSource> context, String name) {
+    public static Block getBlock(CommandContext<FabricClientCommandSource> context, String name) {
         return context.getArgument(name, Block.class);
     }
 

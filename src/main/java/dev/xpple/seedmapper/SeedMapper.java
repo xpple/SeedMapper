@@ -2,15 +2,15 @@ package dev.xpple.seedmapper;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.seedmapper.command.ClientCommand;
-import dev.xpple.seedmapper.command.ClientCommandManager;
 import dev.xpple.seedmapper.command.commands.ConfigCommand;
 import dev.xpple.seedmapper.command.commands.SeedOverlayCommand;
 import dev.xpple.seedmapper.command.commands.TerrainVersionCommand;
 import dev.xpple.seedmapper.util.config.Config;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.command.ServerCommandSource;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -29,15 +29,14 @@ public class SeedMapper implements ClientModInitializer {
         MOD_PATH.toFile().mkdirs();
 
         Config.init();
+        registerCommands(ClientCommandManager.DISPATCHER);
     }
 
     public static void onTerminateClient() {
         //
     }
 
-    public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
-        ClientCommandManager.clearClientSideCommands();
-
+    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         ClientCommand.instantiate(new SeedOverlayCommand(), dispatcher);
         ClientCommand.instantiate(new TerrainVersionCommand(), dispatcher);
         ClientCommand.instantiate(new ConfigCommand(), dispatcher);

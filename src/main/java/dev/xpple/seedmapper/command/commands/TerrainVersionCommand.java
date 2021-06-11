@@ -16,7 +16,7 @@ import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.minecraft.server.command.ServerCommandSource;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -45,7 +45,7 @@ public class TerrainVersionCommand extends ClientCommand {
         return "terrainversion";
     }
 
-    private int execute(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    private int execute(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
         String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
         Dimension dimension = Dimension.fromString(dimensionPath);
         if (dimension == null) {
