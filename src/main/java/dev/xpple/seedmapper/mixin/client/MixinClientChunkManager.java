@@ -34,7 +34,7 @@ import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 @Mixin(ClientChunkManager.class)
 public class MixinClientChunkManager {
 
-    @Inject(method = "loadChunkFromPacket", at = @At("TAIL"))
+    @Inject(method = "loadChunkFromPacket", at = @At("RETURN"))
     private void onLoadChunk(int x, int z, BiomeArray biomes, PacketByteBuf buf, NbtCompound nbt, BitSet bitSet, CallbackInfoReturnable<WorldChunk> cir) {
         if (Config.isEnabled("automate")) {
             String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
@@ -52,7 +52,8 @@ public class MixinClientChunkManager {
             SimpleBlockMap map = new SimpleBlockMap(dimension);
 
             BlockPos.Mutable mutable = new BlockPos.Mutable();
-            final WorldChunk chunk = CLIENT.player.world.getChunk(x, z);
+
+            final WorldChunk chunk = cir.getReturnValue();
             final ChunkPos chunkPos = chunk.getPos();
 
             Set<Box> boxes = new HashSet<>();
