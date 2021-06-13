@@ -28,6 +28,7 @@
     "seedmapper.mixin.render.json",
     "seedmapper.mixin.client.json"
   ],
+  "accessWidener": "seedmapper.aw",
 
   "depends": {
     "fabricloader": ">=0.7.4",

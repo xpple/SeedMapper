@@ -1,7 +1,5 @@
 package dev.xpple.seedmapper.util.render;
 
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
 
 import java.util.*;
@@ -9,7 +7,7 @@ import java.util.*;
 public class RenderQueue {
     private static int tickCounter = 0;
     private static final List<AddQueueEntry> addQueue = new ArrayList<>();
-    private static final EnumMap<Layer, Map<Object, Shape>> queue = new EnumMap<>(Layer.class);
+    public static final EnumMap<Layer, Map<Object, Shape>> queue = new EnumMap<>(Layer.class);
 
     public static void add(Layer layer, Object key, Shape shape, int life) {
         addQueue.add(new AddQueueEntry(layer, key, shape, life));
@@ -48,11 +46,6 @@ public class RenderQueue {
                 shape.tick();
             }
         }
-    }
-
-    public static void render(Layer layer, MatrixStack matrixStack, VertexConsumerProvider.Immediate vertexConsumerProvider, float delta) {
-        if (!queue.containsKey(layer)) return;
-        queue.get(layer).values().forEach(shape -> shape.render(matrixStack, vertexConsumerProvider, delta));
     }
 
     public enum Layer {

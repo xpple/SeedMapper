@@ -11,8 +11,7 @@ public abstract class Shape {
     public void tick() {
     }
 
-    public abstract void render(MatrixStack matrixStack, VertexConsumerProvider.Immediate vertexConsumerProvider, float delta);
+    public abstract void render(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, float delta);
 
     public abstract Vec3d getPos();
-
 }
