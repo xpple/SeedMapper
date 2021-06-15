@@ -3,6 +3,7 @@ package dev.xpple.seedmapper;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.commands.ConfigCommand;
+import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.command.commands.SeedOverlayCommand;
 import dev.xpple.seedmapper.command.commands.TerrainVersionCommand;
 import dev.xpple.seedmapper.util.config.Config;
@@ -40,5 +41,6 @@ public class SeedMapper implements ClientModInitializer {
         ClientCommand.instantiate(new SeedOverlayCommand(), dispatcher);
         ClientCommand.instantiate(new TerrainVersionCommand(), dispatcher);
         ClientCommand.instantiate(new ConfigCommand(), dispatcher);
+        ClientCommand.instantiate(new LocateCommand(), dispatcher);
     }
 }
