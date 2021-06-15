@@ -10,7 +10,7 @@ This mod does not yet support terrain generation of Minecraft version 1.12.2 and
 1. Download the [Fabric API](https://minecraft.curseforge.com/projects/fabric/) and move it to your mods folder
    - Linux/Windows: `.minecraft/mods`
    - Mac: `minecraft/mods`
-1. Download SeedMapper from the [releases page](https://github.com/xpple/SeedMapper/releases/) and move it to your mods folder
+1. Download SeedMapper from the [releases page](https://modrinth.com/mod/seedmapper/versions/) and move it to your mods folder
 
 ## Post Scriptum
 When [QuiltMC](https://quiltmc.org/) officially releases this mod will transfer to Quilt, whereby it has to send the list 
