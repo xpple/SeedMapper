@@ -14,6 +14,7 @@ import kaptainwutax.biomeutils.biome.Biomes;
 import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.featureutils.Feature;
 import kaptainwutax.featureutils.misc.SlimeChunk;
+import kaptainwutax.featureutils.structure.Mineshaft;
 import kaptainwutax.featureutils.structure.RegionStructure;
 import kaptainwutax.featureutils.structure.Stronghold;
 import kaptainwutax.featureutils.structure.Structure;
@@ -130,7 +131,10 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static BPos locateBiome(Biome biome, int centerX, int centerZ, int radius, int increment, BiomeSource biomeSource) {
+    private static BPos locateBiome(Biome biome, int centerX, int centerZ, int radius, int increment, BiomeSource biomeSource) throws CommandSyntaxException {
+        if (biome.getDimension() != biomeSource.getDimension()) {
+            throw INVALID_DIMENSION_EXCEPTION.create();
+        }
         if (biome.equals(biomeSource.getBiome(centerX, 0, centerZ))) {
             return new BPos(centerX, 0, centerZ);
         }
@@ -217,7 +221,10 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static BPos locateStructure(Structure<?, ?> structure, BPos currentPos, int radius, ChunkRand chunkRand, BiomeSource source, TerrainGenerator terrainGenerator, int dimCoeff) {
+    private static BPos locateStructure(Structure<?, ?> structure, BPos currentPos, int radius, ChunkRand chunkRand, BiomeSource source, TerrainGenerator terrainGenerator, int dimCoeff) throws CommandSyntaxException {
+        if (!structure.isValidDimension(source.getDimension())) {
+            throw INVALID_DIMENSION_EXCEPTION.create();
+        }
         if (structure instanceof RegionStructure<?, ?> regionStructure) {
             int chunkInRegion = regionStructure.getSpacing();
             int regionSize = chunkInRegion * 16;
@@ -262,6 +269,27 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                 }
                 BPos dimPos = closest.toBlockPos().add(9, 0, 9);
                 return new BPos(dimPos.getX() << dimCoeff, 0, dimPos.getZ() << dimCoeff);
+            } else if (structure instanceof Mineshaft mineshaft) {
+                int x = currentPos.getX() >> 4;
+                int z = currentPos.getZ() >> 4;
+
+                float n = 1;
+                int floorN = 1;
+                for (int i = 0; floorN / 2 < radius; i++, n += 0.5) {
+                    floorN = (int) Math.floor(n);
+                    for (int j = 0; j < floorN; j++) {
+                        switch (i % 4) {
+                            case 0 -> z++;
+                            case 1 -> x++;
+                            case 2 -> z--;
+                            case 3 -> x--;
+                        }
+                        Feature.Data<Mineshaft> data = mineshaft.at(x, z);
+                        if (data.testStart(source.getWorldSeed(), chunkRand) && data.testBiome(source) && data.testGenerate(terrainGenerator)) {
+                            return new BPos(x << 4, 0, z << 4);
+                        }
+                    }
+                }
             }
         }
         return null;
@@ -295,7 +323,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
 
         BlockPos center = CLIENT.player.getBlockPos();
 
-        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(mcVersion), center.getX(), center.getZ(), 6400, seed, new ChunkRand(seed));
+        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(mcVersion), center.getX(), center.getZ(), 6400, seed, new ChunkRand(seed), dimension);
         if (slimeChunkPos == null) {
             Chat.print("", new TranslatableText("command.locate.feature.slimeChunk.noneFound"));
         } else {
@@ -324,7 +352,10 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static CPos locateSlimeChunk(SlimeChunk slimeChunk, int centerX, int centerZ, int radius, long seed, ChunkRand rand) {
+    private static CPos locateSlimeChunk(SlimeChunk slimeChunk, int centerX, int centerZ, int radius, long seed, ChunkRand rand, Dimension dimension) throws CommandSyntaxException {
+        if (!slimeChunk.isValidDimension(dimension)) {
+            throw INVALID_DIMENSION_EXCEPTION.create();
+        }
         int x = centerX >> 4;
         int z = centerZ >> 4;
 

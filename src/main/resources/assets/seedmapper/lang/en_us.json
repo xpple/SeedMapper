@@ -3,6 +3,7 @@
   "commands.exceptions.versionNotFound": "Version \"%s\" was not found.",
   "commands.exceptions.unknownConfig": "Unknown config \"%s\".",
   "commands.exceptions.nullPointerException": "\"%s\" is null.",
+  "commands.exceptions.invalidDimension": "Invalid dimension.",
   "commands.exceptions.biomeNotFound": "Biome \"%s\" was not found.",
   "commands.exceptions.structureNotFound": "Structure \"%s\" was not found.",
 
