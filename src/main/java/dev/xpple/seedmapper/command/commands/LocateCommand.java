@@ -31,10 +31,10 @@ import net.minecraft.util.registry.Registry;
 
 import java.util.Arrays;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
-import static dev.xpple.seedmapper.util.chat.ChatBuilder.highlight;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 import static net.minecraft.command.CommandSource.suggestMatching;
