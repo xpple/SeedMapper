@@ -2,7 +2,7 @@ package dev.xpple.seedmapper.mixin.client;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
-import dev.xpple.seedmapper.util.blocks.SimpleBlockMap;
+import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import kaptainwutax.biomeutils.biome.Biome;

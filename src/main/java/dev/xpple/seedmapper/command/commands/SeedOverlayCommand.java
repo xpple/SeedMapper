@@ -4,11 +4,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import dev.xpple.seedmapper.command.ClientCommand;
-import dev.xpple.seedmapper.util.blocks.SimpleBlockMap;
+import dev.xpple.seedmapper.command.SharedExceptions;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
+import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.source.BiomeSource;
@@ -35,11 +35,7 @@ import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
-public class SeedOverlayCommand extends ClientCommand {
-
-    private static final DynamicCommandExceptionType NULL_POINTER_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.nullPointerException", arg));
-    private static final DynamicCommandExceptionType DIMENSION_NOT_SUPPORTED_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.dimensionNotSupported", arg));
-    private static final DynamicCommandExceptionType VERSION_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.versionNotFound", arg));
+public class SeedOverlayCommand extends ClientCommand implements SharedExceptions {
 
     @Override
     protected void register() {

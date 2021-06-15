@@ -1,4 +1,4 @@
-package dev.xpple.seedmapper.util.blocks;
+package dev.xpple.seedmapper.util.maps;
 
 import com.google.common.collect.ImmutableMap;
 import kaptainwutax.biomeutils.biome.Biome;

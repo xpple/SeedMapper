@@ -7,7 +7,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import dev.xpple.seedmapper.command.ClientCommand;
-import dev.xpple.seedmapper.util.blocks.SimpleBlockMap;
+import dev.xpple.seedmapper.command.SharedExceptions;
+import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
 import kaptainwutax.biomeutils.biome.Biome;
@@ -29,10 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 
-public class TerrainVersionCommand extends ClientCommand {
-
-    private static final DynamicCommandExceptionType DIMENSION_NOT_SUPPORTED_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.dimensionNotSupported", arg));
-    private static final DynamicCommandExceptionType NULL_POINTER_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.nullPointerException", arg));
+public class TerrainVersionCommand extends ClientCommand implements SharedExceptions {
 
     @Override
     protected void register() {
