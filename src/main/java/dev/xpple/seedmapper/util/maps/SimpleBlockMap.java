@@ -2100,12 +2100,12 @@ public class SimpleBlockMap {
 
     public SimpleBlockMap(MCVersion mcVersion, Dimension dimension, Biome biome) {
         this.mcVersion = mcVersion;
-        this.map = versionedBiomeMap.get(this.mcVersion).get(biome);
+        this.map = versionedBiomeMap.getOrDefault(this.mcVersion, versionedBiomeMap.get(MCVersion.v1_17)).get(biome);
         this.dimension = dimension;
     }
 
     public void setBiome(Biome biome) {
-        this.map = versionedBiomeMap.get(this.mcVersion).get(biome);
+        this.map = versionedBiomeMap.getOrDefault(this.mcVersion, versionedBiomeMap.get(MCVersion.v1_17)).get(biome);
     }
 
     public int get(Block block) {
