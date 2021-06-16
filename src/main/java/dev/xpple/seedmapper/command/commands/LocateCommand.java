@@ -72,11 +72,11 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return "locate";
     }
 
-    private int locateBiome(FabricClientCommandSource source, String biomeName) throws CommandSyntaxException {
+    private static int locateBiome(FabricClientCommandSource source, String biomeName) throws CommandSyntaxException {
         return locateBiome(source, biomeName, CLIENT.getGame().getVersion().getName());
     }
 
-    private int locateBiome(FabricClientCommandSource source, String biomeName, String version) throws CommandSyntaxException {
+    private static int locateBiome(FabricClientCommandSource source, String biomeName, String version) throws CommandSyntaxException {
         long seed;
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
@@ -161,11 +161,11 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return null;
     }
 
-    private int locateStructure(FabricClientCommandSource source, String structure) throws CommandSyntaxException {
+    private static int locateStructure(FabricClientCommandSource source, String structure) throws CommandSyntaxException {
         return locateStructure(source, structure, CLIENT.getGame().getVersion().getName());
     }
 
-    private int locateStructure(FabricClientCommandSource source, String structureName, String version) throws CommandSyntaxException {
+    private static int locateStructure(FabricClientCommandSource source, String structureName, String version) throws CommandSyntaxException {
         long seed;
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
