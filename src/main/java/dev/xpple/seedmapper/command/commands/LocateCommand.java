@@ -201,7 +201,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
 
         BlockPos center = CLIENT.player.getBlockPos();
-        BPos structurePos = locateStructure((Structure<?, ?>) desiredFeature, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(seed), biomeSource, TerrainGenerator.of(biomeSource), dimension.getId());
+        BPos structurePos = locateStructure((Structure<?, ?>) desiredFeature, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(seed), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
             Chat.print("", new TranslatableText("command.locate.feature.structure.noneFound", structureName));
@@ -221,7 +221,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static BPos locateStructure(Structure<?, ?> structure, BPos currentPos, int radius, ChunkRand chunkRand, BiomeSource source, TerrainGenerator terrainGenerator, int dimCoeff) throws CommandSyntaxException {
+    private static BPos locateStructure(Structure<?, ?> structure, BPos currentPos, int radius, ChunkRand chunkRand, BiomeSource source, TerrainGenerator terrainGenerator) throws CommandSyntaxException {
         if (!structure.isValidDimension(source.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -251,7 +251,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                     }
                     if ((regionStructure.canSpawn(cpos, source)) && (terrainGenerator == null || regionStructure.canGenerate(cpos, terrainGenerator))) {
                         BPos dimPos = cpos.toBlockPos().add(9, 0, 9);
-                        return new BPos(dimPos.getX() << dimCoeff, 0, dimPos.getZ() << dimCoeff);
+                        return new BPos(dimPos.getX(), 0, dimPos.getZ());
                     }
                 }
             }
@@ -268,7 +268,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                     }
                 }
                 BPos dimPos = closest.toBlockPos().add(9, 0, 9);
-                return new BPos(dimPos.getX() << dimCoeff, 0, dimPos.getZ() << dimCoeff);
+                return new BPos(dimPos.getX(), 0, dimPos.getZ());
             } else if (structure instanceof Mineshaft mineshaft) {
                 int x = currentPos.getX() >> 4;
                 int z = currentPos.getZ() >> 4;
