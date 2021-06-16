@@ -5,13 +5,13 @@ import com.google.gson.JsonNull;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.SharedExceptions;
-import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
+import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import kaptainwutax.biomeutils.biome.Biome;
+import kaptainwutax.biomeutils.biome.Biomes;
 import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
@@ -70,7 +70,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedExcept
                 .forEach(mcVersion -> {
                     BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
                     TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
-                    SimpleBlockMap map = new SimpleBlockMap(dimension);
+                    SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
 
                     BlockPos.Mutable mutable = new BlockPos.Mutable();
                     final BlockPos playerBlockPos = CLIENT.player.getBlockPos();

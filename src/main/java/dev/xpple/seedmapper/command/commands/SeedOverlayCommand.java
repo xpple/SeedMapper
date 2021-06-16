@@ -11,6 +11,7 @@ import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import kaptainwutax.biomeutils.biome.Biome;
+import kaptainwutax.biomeutils.biome.Biomes;
 import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
@@ -88,8 +89,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
         }
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
         TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
-        final SimpleBlockMap map = new SimpleBlockMap(dimension);
-
+        final SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
         BlockPos.Mutable mutable = new BlockPos.Mutable();
         final BlockPos playerBlockPos = CLIENT.player.getBlockPos();
         final WorldChunk chunk = CLIENT.player.world.getChunk(playerBlockPos.getX() >> 4, playerBlockPos.getZ() >> 4);
