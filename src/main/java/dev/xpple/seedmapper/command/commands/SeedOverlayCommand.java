@@ -2,7 +2,6 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.SharedExceptions;
@@ -43,8 +42,8 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
         argumentBuilder
                 .then(argument("version", word())
                         .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_12_2)).map(mcVersion -> mcVersion.name), builder))
-                        .executes(this::seedOverlayVersion))
-                .executes(this::seedOverlay);
+                        .executes(ctx -> seedOverlay(ctx.getSource(), getString(ctx, "version"))))
+                .executes(ctx -> seedOverlay(ctx.getSource()));
     }
 
     @Override
@@ -57,7 +56,11 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
         return "overlay";
     }
 
-    private int seedOverlay(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
+    private static int seedOverlay(FabricClientCommandSource source) throws CommandSyntaxException {
+        return seedOverlay(source, CLIENT.getGame().getVersion().getName());
+    }
+
+    private static int seedOverlay(FabricClientCommandSource source, String version) throws CommandSyntaxException {
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
             return execute(Config.getSeeds().get(key), CLIENT.getGame().getVersion().getName());
@@ -66,15 +69,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
         if (element instanceof JsonNull) {
             throw NULL_POINTER_EXCEPTION.create("seed");
         }
-        return execute(element.getAsLong(), CLIENT.getGame().getVersion().getName());
-    }
-
-    private int seedOverlayVersion(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
-        JsonElement element = Config.get("seed");
-        if (element instanceof JsonNull) {
-            throw NULL_POINTER_EXCEPTION.create("seed");
-        }
-        return execute(element.getAsLong(), getString(ctx, "version"));
+        return execute(element.getAsLong(), version);
     }
 
     private static int execute(long seed, String version) throws CommandSyntaxException {
