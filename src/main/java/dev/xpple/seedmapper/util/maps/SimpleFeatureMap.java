@@ -12,14 +12,15 @@ public class SimpleFeatureMap {
     public static final Map<Class<? extends Feature<?, ?>>, FeatureFactory<?>> REGISTRY = new HashMap<>();
 
     static {
-        registerFeatures();
-    }
-
-    public static void registerFeatures() {
         register(BastionRemnant.class, BastionRemnant::new);
         register(BuriedTreasure.class, BuriedTreasure::new);
         register(DesertPyramid.class, DesertPyramid::new);
-        register(EndCity.class, EndCity::new);
+        register(EndCity.class, mcVersion -> new EndCity(mcVersion) {
+            @Override
+            public String getName() {
+                return "endcity";
+            }
+        });
         register(Fortress.class, Fortress::new);
         register(Igloo.class, Igloo::new);
         register(JunglePyramid.class, JunglePyramid::new);
@@ -50,7 +51,6 @@ public class SimpleFeatureMap {
             } catch (NullPointerException ignored) {
             }
         }
-
         return result;
     }
 
