@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedExceptions;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
@@ -16,7 +17,6 @@ import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
@@ -42,8 +42,8 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
         argumentBuilder
                 .then(argument("version", word())
                         .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_12_2)).map(mcVersion -> mcVersion.name), builder))
-                        .executes(ctx -> seedOverlay(ctx.getSource(), getString(ctx, "version"))))
-                .executes(ctx -> seedOverlay(ctx.getSource()));
+                        .executes(ctx -> seedOverlay((CustomClientCommandSource) ctx.getSource(), getString(ctx, "version"))))
+                .executes(ctx -> seedOverlay((CustomClientCommandSource) ctx.getSource()));
     }
 
     @Override
@@ -56,11 +56,11 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
         return "overlay";
     }
 
-    private static int seedOverlay(FabricClientCommandSource source) throws CommandSyntaxException {
+    private static int seedOverlay(CustomClientCommandSource source) throws CommandSyntaxException {
         return seedOverlay(source, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int seedOverlay(FabricClientCommandSource source, String version) throws CommandSyntaxException {
+    private static int seedOverlay(CustomClientCommandSource source, String version) throws CommandSyntaxException {
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
             return execute(Config.getSeeds().get(key), CLIENT.getGame().getVersion().getName());

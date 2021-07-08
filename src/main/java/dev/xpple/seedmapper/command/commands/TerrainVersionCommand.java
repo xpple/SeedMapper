@@ -3,9 +3,9 @@ package dev.xpple.seedmapper.command.commands;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedExceptions;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
@@ -17,7 +17,6 @@ import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -35,7 +34,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedExcept
     @Override
     protected void register() {
         argumentBuilder
-                .executes(this::execute);
+                .executes(ctx -> execute((CustomClientCommandSource) ctx.getSource()));
     }
 
     @Override
@@ -43,7 +42,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedExcept
         return "terrainversion";
     }
 
-    private int execute(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
+    private int execute(CustomClientCommandSource source) throws CommandSyntaxException {
         String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
         Dimension dimension = Dimension.fromString(dimensionPath);
         if (dimension == null) {

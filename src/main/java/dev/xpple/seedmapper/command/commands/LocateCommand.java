@@ -5,6 +5,7 @@ import com.google.gson.JsonNull;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedExceptions;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
@@ -24,7 +25,6 @@ import kaptainwutax.mcutils.util.pos.BPos;
 import kaptainwutax.mcutils.util.pos.CPos;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -48,23 +48,23 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                 .then(literal("biome")
                         .then(argument("biome", word())
                                 .suggests((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.BIOME_KEY).getIds().stream().map(Identifier::getPath), builder))
-                                .executes(ctx -> locateBiome(ctx.getSource(), getString(ctx, "biome")))
+                                .executes(ctx -> locateBiome((CustomClientCommandSource) ctx.getSource(), getString(ctx, "biome")))
                                 .then(argument("version", word())
                                         .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateBiome(ctx.getSource(), getString(ctx, "biome"), getString(ctx, "version"))))))
+                                        .executes(ctx -> locateBiome((CustomClientCommandSource) ctx.getSource(), getString(ctx, "biome"), getString(ctx, "version"))))))
                 .then(literal("feature")
                         .then(literal("structure")
                                 .then(argument("structure", word())
                                         .suggests(((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.STRUCTURE_FEATURE_KEY).getIds().stream().map(Identifier::getPath), builder)))
-                                        .executes(ctx -> locateStructure(ctx.getSource(), getString(ctx, "structure")))
+                                        .executes(ctx -> locateStructure((CustomClientCommandSource) ctx.getSource(), getString(ctx, "structure")))
                                         .then(argument("version", word())
                                                 .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                                .executes(ctx -> locateStructure(ctx.getSource(), getString(ctx, "structure"), getString(ctx, "version"))))))
+                                                .executes(ctx -> locateStructure((CustomClientCommandSource) ctx.getSource(), getString(ctx, "structure"), getString(ctx, "version"))))))
                         .then(literal("slimechunk")
-                                .executes(ctx -> locateSlimeChunk(ctx.getSource()))
+                                .executes(ctx -> locateSlimeChunk((CustomClientCommandSource) ctx.getSource()))
                                 .then(argument("version", word())
                                         .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateSlimeChunk(ctx.getSource(), getString(ctx, "version"))))));
+                                        .executes(ctx -> locateSlimeChunk((CustomClientCommandSource) ctx.getSource(), getString(ctx, "version"))))));
     }
 
     @Override
@@ -72,11 +72,11 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return "locate";
     }
 
-    private static int locateBiome(FabricClientCommandSource source, String biomeName) throws CommandSyntaxException {
+    private static int locateBiome(CustomClientCommandSource source, String biomeName) throws CommandSyntaxException {
         return locateBiome(source, biomeName, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int locateBiome(FabricClientCommandSource source, String biomeName, String version) throws CommandSyntaxException {
+    private static int locateBiome(CustomClientCommandSource source, String biomeName, String version) throws CommandSyntaxException {
         long seed;
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
@@ -161,11 +161,11 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return null;
     }
 
-    private static int locateStructure(FabricClientCommandSource source, String structure) throws CommandSyntaxException {
+    private static int locateStructure(CustomClientCommandSource source, String structure) throws CommandSyntaxException {
         return locateStructure(source, structure, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int locateStructure(FabricClientCommandSource source, String structureName, String version) throws CommandSyntaxException {
+    private static int locateStructure(CustomClientCommandSource source, String structureName, String version) throws CommandSyntaxException {
         long seed;
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
@@ -295,11 +295,11 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return null;
     }
 
-    private static int locateSlimeChunk(FabricClientCommandSource source) throws CommandSyntaxException {
+    private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
         return locateSlimeChunk(source, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int locateSlimeChunk(FabricClientCommandSource source, String version) throws CommandSyntaxException {
+    private static int locateSlimeChunk(CustomClientCommandSource source, String version) throws CommandSyntaxException {
         long seed;
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
