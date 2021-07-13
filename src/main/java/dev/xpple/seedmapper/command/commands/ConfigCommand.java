@@ -51,7 +51,7 @@ public class ConfigCommand extends ClientCommand {
                                         .executes(this::addSeed)))
                         .then(literal("remove")
                                 .then(argument("key", greedyString())
-                                        .suggests(((context, builder) -> suggestMatching(Config.getSeeds().keySet().stream(), builder)))
+                                        .suggests((context, builder) -> suggestMatching(Config.getSeeds().keySet().stream(), builder))
                                         .executes(this::removeSeed))))
                 .then(literal("ignored")
                         .then(literal("add")
@@ -59,7 +59,7 @@ public class ConfigCommand extends ClientCommand {
                                         .executes(this::addBlock)))
                         .then(literal("remove")
                                 .then(argument("block", block())
-                                        .suggests(((context, builder) -> suggestMatching(Config.getIgnoredBlocks().stream().map(block -> block.getName().getString()), builder)))
+                                        .suggests((context, builder) -> suggestMatching(Config.getIgnoredBlocks().stream().map(block -> block.getName().getString()), builder))
                                         .executes(this::removeBlock)))
                         .then(literal("list")
                                 .executes(this::listBlocks)));
@@ -70,8 +70,8 @@ public class ConfigCommand extends ClientCommand {
         return "config";
     }
 
-    /*
-    If automation is set to true, new chunks will automatically be compared.
+    /**
+     * If automation is set to true, new chunks will automatically be compared.
     */
     private int setAutomate(CommandContext<FabricClientCommandSource> ctx) {
         boolean value = getBool(ctx, "bool");
@@ -92,8 +92,8 @@ public class ConfigCommand extends ClientCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    /*
-    The seed that will be used for the comparison.
+    /**
+     * The seed that will be used for the comparison.
     */
     private int setSeed(CommandContext<FabricClientCommandSource> ctx) {
         long seed = getLong(ctx, "seed");
@@ -112,9 +112,9 @@ public class ConfigCommand extends ClientCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    /*
-    If seeds are added to this list, they will be used if the server matches the key.
-    `CLIENT.getNetworkHandler().getConnection().getAddress().toString()` will be used to compare the key.
+    /**
+     * If seeds are added to this list, they will be used if the server matches the key.
+     * <code>CLIENT.getNetworkHandler().getConnection().getAddress().toString()</code> will be used to compare the key.
      */
     private int addSeed(CommandContext<FabricClientCommandSource> ctx) {
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
@@ -137,8 +137,8 @@ public class ConfigCommand extends ClientCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    /*
-    If blocks are added to this list, they will be ignored in the overlay process.
+    /**
+     * If blocks are added to this list, they will be ignored in the overlay process.
     */
     private int addBlock(CommandContext<FabricClientCommandSource> ctx) {
         Block block = getBlock(ctx, "block");
