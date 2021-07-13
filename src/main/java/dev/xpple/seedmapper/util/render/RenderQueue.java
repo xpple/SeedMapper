@@ -1,7 +1,6 @@
 package dev.xpple.seedmapper.util.render;
 
 import net.minecraft.util.math.Box;
-
 import java.util.*;
 
 public class RenderQueue {
