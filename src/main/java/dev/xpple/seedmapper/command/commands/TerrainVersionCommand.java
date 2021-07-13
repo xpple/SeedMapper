@@ -18,6 +18,7 @@ import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
@@ -34,7 +35,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedExcept
     @Override
     protected void register() {
         argumentBuilder
-                .executes(ctx -> execute((CustomClientCommandSource) ctx.getSource()));
+                .executes(ctx -> execute(CustomClientCommandSource.of(ctx.getSource())));
     }
 
     @Override
@@ -43,7 +44,12 @@ public class TerrainVersionCommand extends ClientCommand implements SharedExcept
     }
 
     private int execute(CustomClientCommandSource source) throws CommandSyntaxException {
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = Dimension.fromString(dimensionPath);
         if (dimension == null) {
             throw DIMENSION_NOT_SUPPORTED_EXCEPTION.create(dimensionPath);
@@ -72,8 +78,8 @@ public class TerrainVersionCommand extends ClientCommand implements SharedExcept
                     SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
 
                     BlockPos.Mutable mutable = new BlockPos.Mutable();
-                    final BlockPos playerBlockPos = CLIENT.player.getBlockPos();
-                    final WorldChunk chunk = CLIENT.player.world.getChunk(playerBlockPos.getX() >> 4, playerBlockPos.getZ() >> 4);
+                    final BlockPos center = new BlockPos(source.getPosition());
+                    final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
                     final ChunkPos chunkPos = chunk.getPos();
 
                     int newBlocks = 0;

@@ -19,6 +19,7 @@ import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.block.BlockState;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
@@ -42,8 +43,8 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
         argumentBuilder
                 .then(argument("version", word())
                         .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_12_2)).map(mcVersion -> mcVersion.name), builder))
-                        .executes(ctx -> seedOverlay((CustomClientCommandSource) ctx.getSource(), getString(ctx, "version"))))
-                .executes(ctx -> seedOverlay((CustomClientCommandSource) ctx.getSource()));
+                        .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "version"))))
+                .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource())));
     }
 
     @Override
@@ -63,17 +64,22 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
     private static int seedOverlay(CustomClientCommandSource source, String version) throws CommandSyntaxException {
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
-            return execute(Config.getSeeds().get(key), CLIENT.getGame().getVersion().getName());
+            return execute(source, Config.getSeeds().get(key), CLIENT.getGame().getVersion().getName());
         }
         JsonElement element = Config.get("seed");
         if (element instanceof JsonNull) {
             throw NULL_POINTER_EXCEPTION.create("seed");
         }
-        return execute(element.getAsLong(), version);
+        return execute(source, element.getAsLong(), version);
     }
 
-    private static int execute(long seed, String version) throws CommandSyntaxException {
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+    private static int execute(CustomClientCommandSource source, long seed, String version) throws CommandSyntaxException {
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = Dimension.fromString(dimensionPath);
         if (dimension == null) {
             throw DIMENSION_NOT_SUPPORTED_EXCEPTION.create(dimensionPath);
@@ -86,8 +92,8 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
         TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
         final SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
         BlockPos.Mutable mutable = new BlockPos.Mutable();
-        final BlockPos playerBlockPos = CLIENT.player.getBlockPos();
-        final WorldChunk chunk = CLIENT.player.world.getChunk(playerBlockPos.getX() >> 4, playerBlockPos.getZ() >> 4);
+        final BlockPos center = new BlockPos(source.getPosition());
+        final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
         final ChunkPos chunkPos = chunk.getPos();
 
         Map<Box, Integer> boxes = new HashMap<>();

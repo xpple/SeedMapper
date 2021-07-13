@@ -11,6 +11,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
@@ -31,6 +32,13 @@ public class CustomClientCommandSource extends ClientCommandSource implements Fa
         this.rotation = rotation;
         this.world = world;
         this.meta = meta;
+    }
+
+    public static CustomClientCommandSource of(FabricClientCommandSource source) {
+        if (source instanceof CustomClientCommandSource custom) {
+            return custom;
+        }
+        return new CustomClientCommandSource(CLIENT.getNetworkHandler(), CLIENT, source.getEntity(), source.getPosition(), source.getRotation(), source.getWorld(), new HashMap<>());
     }
 
     @Override
@@ -89,5 +97,14 @@ public class CustomClientCommandSource extends ClientCommandSource implements Fa
 
     public CustomClientCommandSource withRotation(Vec2f rotation) {
         return new CustomClientCommandSource(CLIENT.getNetworkHandler(), CLIENT, this.entity, this.position, rotation, this.world, this.meta);
+    }
+
+    public CustomClientCommandSource withWorld(ClientWorld world) {
+        return new CustomClientCommandSource(CLIENT.getNetworkHandler(), CLIENT, this.entity, this.position, this.rotation, world, this.meta);
+    }
+
+    public CustomClientCommandSource withMeta(String key, Object value) {
+        this.meta.put(key, value);
+        return this;
     }
 }

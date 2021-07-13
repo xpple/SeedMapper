@@ -48,23 +48,23 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                 .then(literal("biome")
                         .then(argument("biome", word())
                                 .suggests((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.BIOME_KEY).getIds().stream().map(Identifier::getPath), builder))
-                                .executes(ctx -> locateBiome((CustomClientCommandSource) ctx.getSource(), getString(ctx, "biome")))
+                                .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "biome")))
                                 .then(argument("version", word())
                                         .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateBiome((CustomClientCommandSource) ctx.getSource(), getString(ctx, "biome"), getString(ctx, "version"))))))
+                                        .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "biome"), getString(ctx, "version"))))))
                 .then(literal("feature")
                         .then(literal("structure")
                                 .then(argument("structure", word())
                                         .suggests(((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.STRUCTURE_FEATURE_KEY).getIds().stream().map(Identifier::getPath), builder)))
-                                        .executes(ctx -> locateStructure((CustomClientCommandSource) ctx.getSource(), getString(ctx, "structure")))
+                                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure")))
                                         .then(argument("version", word())
                                                 .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                                .executes(ctx -> locateStructure((CustomClientCommandSource) ctx.getSource(), getString(ctx, "structure"), getString(ctx, "version"))))))
+                                                .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure"), getString(ctx, "version"))))))
                         .then(literal("slimechunk")
-                                .executes(ctx -> locateSlimeChunk((CustomClientCommandSource) ctx.getSource()))
+                                .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))
                                 .then(argument("version", word())
                                         .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateSlimeChunk((CustomClientCommandSource) ctx.getSource(), getString(ctx, "version"))))));
+                                        .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "version"))))));
     }
 
     @Override
@@ -88,7 +88,12 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
             }
             seed = element.getAsLong();
         }
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = Dimension.fromString(dimensionPath);
         if (dimension == null) {
             throw DIMENSION_NOT_SUPPORTED_EXCEPTION.create(dimensionPath);
@@ -110,7 +115,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         }
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
 
-        BlockPos center = CLIENT.player.getBlockPos();
+        BlockPos center = new BlockPos(source.getPosition());
         BPos biomePos = locateBiome(desiredBiome, center.getX(), center.getZ(), 6400, 8, biomeSource);
 
         if (biomePos == null) {
@@ -177,7 +182,12 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
             }
             seed = element.getAsLong();
         }
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = Dimension.fromString(dimensionPath);
         if (dimension == null) {
             throw DIMENSION_NOT_SUPPORTED_EXCEPTION.create(dimensionPath);
@@ -200,7 +210,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
 
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
 
-        BlockPos center = CLIENT.player.getBlockPos();
+        BlockPos center = new BlockPos(source.getPosition());
         BPos structurePos = locateStructure((Structure<?, ?>) desiredFeature, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(seed), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
@@ -311,7 +321,12 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
             }
             seed = element.getAsLong();
         }
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = Dimension.fromString(dimensionPath);
         if (dimension == null) {
             throw DIMENSION_NOT_SUPPORTED_EXCEPTION.create(dimensionPath);
@@ -321,7 +336,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
             throw VERSION_NOT_FOUND_EXCEPTION.create(version);
         }
 
-        BlockPos center = CLIENT.player.getBlockPos();
+        BlockPos center = new BlockPos(source.getPosition());
 
         CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(mcVersion), center.getX(), center.getZ(), 6400, seed, new ChunkRand(seed), dimension);
         if (slimeChunkPos == null) {
