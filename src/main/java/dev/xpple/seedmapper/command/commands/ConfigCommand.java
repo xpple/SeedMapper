@@ -18,7 +18,7 @@ import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
 import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.string;
+import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.block;
 import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.getBlock;
@@ -50,7 +50,7 @@ public class ConfigCommand extends ClientCommand {
                                 .then(argument("seed", longArg())
                                         .executes(this::addSeed)))
                         .then(literal("remove")
-                                .then(argument("key", string())
+                                .then(argument("key", greedyString())
                                         .suggests(((context, builder) -> suggestMatching(Config.getSeeds().keySet().stream(), builder)))
                                         .executes(this::removeSeed))))
                 .then(literal("ignored")
