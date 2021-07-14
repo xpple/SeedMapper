@@ -6,6 +6,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.SharedExceptions;
+import dev.xpple.seedmapper.util.SpiralIterator;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleFeatureMap;
@@ -31,6 +32,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -109,9 +113,12 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
             throw BIOME_NOT_FOUND_EXCEPTION.create(biomeName);
         }
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
+        if (desiredBiome.getDimension() != biomeSource.getDimension()) {
+            throw INVALID_DIMENSION_EXCEPTION.create();
+        }
 
         BlockPos center = CLIENT.player.getBlockPos();
-        BPos biomePos = locateBiome(desiredBiome, center.getX(), center.getZ(), 6400, 8, biomeSource);
+        BPos biomePos = locateBiome(desiredBiome::equals, center.getX(), center.getZ(), 6400, 8, biomeSource);
 
         if (biomePos == null) {
             Chat.print("", new TranslatableText("command.locate.biome.noneFound", biomeName));
@@ -131,34 +138,14 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static BPos locateBiome(Biome biome, int centerX, int centerZ, int radius, int increment, BiomeSource biomeSource) throws CommandSyntaxException {
-        if (biome.getDimension() != biomeSource.getDimension()) {
-            throw INVALID_DIMENSION_EXCEPTION.create();
-        }
-        if (biome.equals(biomeSource.getBiome(centerX, 0, centerZ))) {
+    private static BPos locateBiome(Predicate<Biome> predicate, int centerX, int centerZ, int radius, int increment, BiomeSource biomeSource) throws CommandSyntaxException {
+        if (predicate.test(biomeSource.getBiome(centerX, 0, centerZ))) {
             return new BPos(centerX, 0, centerZ);
         }
-
-        int x = centerX;
-        int z = centerZ;
-
-        float n = 1;
-        int floorN = 1;
-        for (int i = 0; floorN / 2 < radius; i++, n += 0.5) {
-            floorN = (int) Math.floor(n);
-            for (int j = 0; j < floorN; j++) {
-                switch (i % 4) {
-                    case 0 -> z += increment;
-                    case 1 -> x += increment;
-                    case 2 -> z -= increment;
-                    case 3 -> x -= increment;
-                }
-                if (biome.equals(biomeSource.getBiome(x, 0, z))) {
-                    return new BPos(x, 0, z);
-                }
-            }
-        }
-        return null;
+        SpiralIterator<BPos> spiralIterator = new SpiralIterator<>(new BPos(centerX, 0, centerZ), radius, increment, BPos::new);
+        return StreamSupport.stream(spiralIterator.spliterator(), false)
+                .filter(bPos -> predicate.test(biomeSource.getBiome(bPos)))
+                .findAny().orElse(null);
     }
 
     private static int locateStructure(FabricClientCommandSource source, String structure) throws CommandSyntaxException {
@@ -199,9 +186,12 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         }
 
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
+        if (!desiredFeature.isValidDimension(biomeSource.getDimension())) {
+            throw INVALID_DIMENSION_EXCEPTION.create();
+        }
 
         BlockPos center = CLIENT.player.getBlockPos();
-        BPos structurePos = locateStructure((Structure<?, ?>) desiredFeature, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(seed), biomeSource, TerrainGenerator.of(biomeSource));
+        BPos structurePos = locateStructure((Structure<?, ?>) desiredFeature, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
             Chat.print("", new TranslatableText("command.locate.feature.structure.noneFound", structureName));
@@ -222,39 +212,16 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
     }
 
     private static BPos locateStructure(Structure<?, ?> structure, BPos currentPos, int radius, ChunkRand chunkRand, BiomeSource source, TerrainGenerator terrainGenerator) throws CommandSyntaxException {
-        if (!structure.isValidDimension(source.getDimension())) {
-            throw INVALID_DIMENSION_EXCEPTION.create();
-        }
         if (structure instanceof RegionStructure<?, ?> regionStructure) {
             int chunkInRegion = regionStructure.getSpacing();
             int regionSize = chunkInRegion * 16;
 
-            int centerX = currentPos.toRegionPos(regionSize).getX();
-            int centerZ = currentPos.toRegionPos(regionSize).getZ();
-            int x = centerX;
-            int z = centerZ;
-
-            float n = 1;
-            int floorN = 1;
-            for (int i = 0; floorN / 2 < radius; i++, n += 0.5) {
-                floorN = (int) Math.floor(n);
-                for (int j = 0; j < floorN; j++) {
-                    switch (i % 4) {
-                        case 0 -> z++;
-                        case 1 -> x++;
-                        case 2 -> z--;
-                        case 3 -> x--;
-                    }
-                    CPos cpos = regionStructure.getInRegion(source.getWorldSeed(), x, z, chunkRand);
-                    if (cpos == null) {
-                        continue;
-                    }
-                    if ((regionStructure.canSpawn(cpos, source)) && (terrainGenerator == null || regionStructure.canGenerate(cpos, terrainGenerator))) {
-                        BPos dimPos = cpos.toBlockPos().add(9, 0, 9);
-                        return new BPos(dimPos.getX(), 0, dimPos.getZ());
-                    }
-                }
-            }
+            SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(new CPos(currentPos.toRegionPos(regionSize).getX(), currentPos.toRegionPos(regionSize).getZ()), radius, 1, (x, y, z) -> new CPos(x, z));
+            return StreamSupport.stream(spiralIterator.spliterator(), false)
+                    .map(cPos -> regionStructure.getInRegion(source.getWorldSeed(), cPos.getX(), cPos.getZ(), chunkRand))
+                    .filter(Objects::nonNull)
+                    .filter(cPos -> (regionStructure.canSpawn(cPos, source)) && (terrainGenerator == null || regionStructure.canGenerate(cPos, terrainGenerator)))
+                    .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
         } else {
             if (structure instanceof Stronghold strongholdStructure) {
                 CPos currentChunkPos = currentPos.toChunkPos();
@@ -270,26 +237,14 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                 BPos dimPos = closest.toBlockPos().add(9, 0, 9);
                 return new BPos(dimPos.getX(), 0, dimPos.getZ());
             } else if (structure instanceof Mineshaft mineshaft) {
-                int x = currentPos.getX() >> 4;
-                int z = currentPos.getZ() >> 4;
+                SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(new CPos(currentPos.getX() >> 4, currentPos.getZ() >> 4), radius, 1, (x, y, z) -> new CPos(x, z));
 
-                float n = 1;
-                int floorN = 1;
-                for (int i = 0; floorN / 2 < radius; i++, n += 0.5) {
-                    floorN = (int) Math.floor(n);
-                    for (int j = 0; j < floorN; j++) {
-                        switch (i % 4) {
-                            case 0 -> z++;
-                            case 1 -> x++;
-                            case 2 -> z--;
-                            case 3 -> x--;
-                        }
-                        Feature.Data<Mineshaft> data = mineshaft.at(x, z);
-                        if (data.testStart(source.getWorldSeed(), chunkRand) && data.testBiome(source) && data.testGenerate(terrainGenerator)) {
-                            return new BPos(x << 4, 0, z << 4);
-                        }
-                    }
-                }
+                return StreamSupport.stream(spiralIterator.spliterator(), false)
+                        .filter(cPos -> {
+                            Feature.Data<Mineshaft> data = mineshaft.at(cPos.getX(), cPos.getZ());
+                            return data.testStart(source.getWorldSeed(), chunkRand) && data.testBiome(source) && data.testGenerate(terrainGenerator);
+                        })
+                        .findAny().map(CPos::toBlockPos).orElse(null);
             }
         }
         return null;
@@ -323,7 +278,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
 
         BlockPos center = CLIENT.player.getBlockPos();
 
-        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(mcVersion), center.getX(), center.getZ(), 6400, seed, new ChunkRand(seed), dimension);
+        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(mcVersion), center.getX(), center.getZ(), 6400, seed, new ChunkRand(), dimension);
         if (slimeChunkPos == null) {
             Chat.print("", new TranslatableText("command.locate.feature.slimeChunk.noneFound"));
         } else {
@@ -356,24 +311,11 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         if (!slimeChunk.isValidDimension(dimension)) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
-        int x = centerX >> 4;
-        int z = centerZ >> 4;
-
-        float n = 1;
-        int floorN = 1;
-        for (int i = 0; floorN / 2 < radius; i++, n += 0.5) {
-            floorN = (int) Math.floor(n);
-            for (int j = 0; j < floorN; j++) {
-                switch (i % 4) {
-                    case 0 -> z++;
-                    case 1 -> x++;
-                    case 2 -> z--;
-                    case 3 -> x--;
-                }
-                SlimeChunk.Data data = slimeChunk.at(x, z, true);
-                if (data.testStart(seed, rand)) {
-                    return new CPos(x, z);
-                }
+        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(new CPos(centerX >> 4, centerZ >> 4), radius, 1, (x, y, z) -> new CPos(x, z));
+        for (CPos next : spiralIterator) {
+            SlimeChunk.Data data = slimeChunk.at(next.getX(), next.getZ(), true);
+            if (data.testStart(seed, rand)) {
+                return next;
             }
         }
         return null;
