@@ -6,6 +6,7 @@
   "commands.exceptions.invalidDimension": "Invalid dimension.",
   "commands.exceptions.biomeNotFound": "Biome \"%s\" was not found.",
   "commands.exceptions.structureNotFound": "Structure \"%s\" was not found.",
+  "commands.exceptions.lootItemNotFound": "Loot item \"%s\" was not found.",
 
   "arguments.exceptions.tooFewArguments": "Too few arguments.",
 
@@ -37,6 +38,9 @@
   "command.locate.feature.slimeChunk.success.1": "Click to copy coordinates of this slime chunk",
   "command.locate.feature.slimeChunk.success.2": " (Chunk ",
   "command.locate.feature.slimeChunk.success.3": "Click to copy chunk coordinates of this slime chunk",
+  "command.locate.loot.noneFound": "Couldn't locate %s within 6400 blocks.",
+  "command.locate.loot.success.0": "%s found at ",
+  "command.locate.loot.success.1": "Click to copy coordinates of %s.",
 
   "command.seedoverlay.feedback.0": "Block at ",
   "command.seedoverlay.feedback.1": "Click to copy coordinates of ",
