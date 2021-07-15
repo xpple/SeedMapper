@@ -211,7 +211,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static BPos locateStructure(Structure<?, ?> structure, BPos currentPos, int radius, ChunkRand chunkRand, BiomeSource source, TerrainGenerator terrainGenerator) throws CommandSyntaxException {
+    private static BPos locateStructure(Structure<?, ?> structure, BPos currentPos, int radius, ChunkRand chunkRand, BiomeSource source, TerrainGenerator terrainGenerator) {
         if (structure instanceof RegionStructure<?, ?> regionStructure) {
             int chunkInRegion = regionStructure.getSpacing();
             int regionSize = chunkInRegion * 16;
@@ -228,7 +228,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                 int squaredDistance = Integer.MAX_VALUE;
                 CPos closest = new CPos(0, 0);
                 for (CPos stronghold : strongholdStructure.getAllStarts(source, chunkRand)) {
-                    int newSquaredDistance = (currentChunkPos.getX() - stronghold.getX()) * (currentChunkPos.getX() - stronghold.getX()) + (currentChunkPos.getX() - stronghold.getX()) * (currentChunkPos.getZ() - stronghold.getZ());
+                    int newSquaredDistance = (currentChunkPos.getX() - stronghold.getX()) * (currentChunkPos.getX() - stronghold.getX()) + (currentChunkPos.getZ() - stronghold.getZ()) * (currentChunkPos.getZ() - stronghold.getZ());
                     if (newSquaredDistance < squaredDistance) {
                         squaredDistance = newSquaredDistance;
                         closest = stronghold;
