@@ -14,12 +14,18 @@ import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.biome.Biomes;
 import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.featureutils.Feature;
+import kaptainwutax.featureutils.loot.ChestContent;
+import kaptainwutax.featureutils.loot.ILoot;
+import kaptainwutax.featureutils.loot.LootTable;
+import kaptainwutax.featureutils.loot.entry.ItemEntry;
+import kaptainwutax.featureutils.loot.item.Item;
+import kaptainwutax.featureutils.loot.item.Items;
 import kaptainwutax.featureutils.misc.SlimeChunk;
-import kaptainwutax.featureutils.structure.Mineshaft;
-import kaptainwutax.featureutils.structure.RegionStructure;
-import kaptainwutax.featureutils.structure.Stronghold;
-import kaptainwutax.featureutils.structure.Structure;
+import kaptainwutax.featureutils.structure.*;
+import kaptainwutax.featureutils.structure.generator.Generator;
+import kaptainwutax.featureutils.structure.generator.Generators;
 import kaptainwutax.mcutils.rand.ChunkRand;
+import kaptainwutax.mcutils.rand.seed.WorldSeed;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.util.pos.BPos;
 import kaptainwutax.mcutils.util.pos.CPos;
@@ -32,12 +38,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
@@ -48,6 +57,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
 
     @Override
     protected void register() {
+        String[] lootableItems = new String[]{"diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings", "diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings"};
         argumentBuilder
                 .then(literal("biome")
                         .then(argument("biome", word())
@@ -68,7 +78,14 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                                 .executes(ctx -> locateSlimeChunk(ctx.getSource()))
                                 .then(argument("version", word())
                                         .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateSlimeChunk(ctx.getSource(), getString(ctx, "version"))))));
+                                        .executes(ctx -> locateSlimeChunk(ctx.getSource(), getString(ctx, "version"))))))
+                .then(literal("loot")
+                        .then(argument("item", string())
+                                .suggests(((context, builder) -> suggestMatching(lootableItems, builder)))
+                                .executes(ctx -> locateLoot(ctx.getSource(), getString(ctx, "item")))
+                                .then(argument("version", word())
+                                        .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
+                                        .executes(ctx -> locateLoot(ctx.getSource(), getString(ctx, "item"), getString(ctx, "version"))))));
     }
 
     @Override
@@ -316,6 +333,126 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
             SlimeChunk.Data data = slimeChunk.at(next.getX(), next.getZ(), true);
             if (data.testStart(seed, rand)) {
                 return next;
+            }
+        }
+        return null;
+    }
+
+    private static int locateLoot(FabricClientCommandSource source, String item) throws CommandSyntaxException {
+        return locateLoot(source, item, CLIENT.getGame().getVersion().getName());
+    }
+
+    private static int locateLoot(FabricClientCommandSource source, String item, String version) throws CommandSyntaxException {
+        long seed;
+        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
+        if (Config.getSeeds().containsKey(key)) {
+            seed = Config.getSeeds().get(key);
+        } else {
+            JsonElement element = Config.get("seed");
+            if (element instanceof JsonNull) {
+                throw NULL_POINTER_EXCEPTION.create("seed");
+            }
+            seed = element.getAsLong();
+        }
+        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        Dimension dimension = Dimension.fromString(dimensionPath);
+        if (dimension == null) {
+            throw DIMENSION_NOT_SUPPORTED_EXCEPTION.create(dimensionPath);
+        }
+        MCVersion mcVersion = MCVersion.fromString(version);
+        if (mcVersion == null) {
+            throw VERSION_NOT_FOUND_EXCEPTION.create(version);
+        }
+        Item desiredItem = null;
+        for (Item value : Items.getItems().values()) {
+            if (value.getName().equals(item)) {
+                desiredItem = value;
+            }
+        }
+
+        if (desiredItem == null) {
+            throw LOOT_ITEM_NOT_FOUND_EXCEPTION.create(item);
+        }
+        Set<RegionStructure<?, ?>> lootableStructures = SimpleFeatureMap.getForVersion(mcVersion).values().stream()
+                .filter(structure -> structure instanceof ILoot)
+                .map(structure -> (RegionStructure<?, ?>) structure)
+                .collect(Collectors.toUnmodifiableSet());
+
+        BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
+
+        BlockPos center = CLIENT.player.getBlockPos();
+
+        BPos lootPos = locateLoot(desiredItem, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, lootableStructures);
+        if (lootPos == null) {
+            Chat.print("", new TranslatableText("command.locate.loot.noneFound", desiredItem.getName()));
+        } else {
+            Chat.print("", chain(
+                    highlight(new TranslatableText("command.locate.loot.success.0", desiredItem.getName())),
+                    copy(
+                            hover(
+                                    accent("x: " + lootPos.getX() + ", z: " + lootPos.getZ()),
+                                    base(new TranslatableText("command.locate.loot.success.1", desiredItem.getName()))
+                            ),
+                            String.format("%d ~ %d", lootPos.getX(), lootPos.getZ())
+                    ),
+                    highlight(".")
+            ));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static BPos locateLoot(Item item, BPos center, int radius, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
+        for (RegionStructure<?, ?> structure : structures) {
+            Generator.GeneratorFactory<?> factory;
+            if (structure.getName().equals("endcity")) {
+                factory = Generators.get(EndCity.class);
+            } else {
+                factory = Generators.get(structure.getClass());
+            }
+            if (factory == null) {
+                continue;
+            }
+            Generator structureGenerator = factory.create(biomeSource.getVersion());
+
+            boolean isPossibleLootItem = false;
+            for (Generator.ILootType lootType : structureGenerator.getLootTypes()) {
+                LootTable lootTable = lootType.getLootTable(biomeSource.getVersion());
+                if (lootTable != null) {
+                    if (Arrays.stream(lootTable.lootPools)
+                            .map(e -> e.lootEntries).flatMap(Stream::of)
+                            .filter(e -> e instanceof ItemEntry)
+                            .map(e -> ((ItemEntry) e).item)
+                            .anyMatch(e -> e.equals(item))) {
+                        isPossibleLootItem = true;
+                    }
+                }
+            }
+            if (!isPossibleLootItem) {
+                continue;
+            }
+
+            int chunkInRegion = structure.getSpacing();
+            int regionSize = chunkInRegion * 16;
+            TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
+            SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(new CPos(center.toRegionPos(regionSize).getX(), center.toRegionPos(regionSize).getZ()), radius >> 4, 1, (x, y, z) -> new CPos(x, z));
+            Stream<BPos> positions = StreamSupport.stream(spiralIterator.spliterator(), false)
+                    .map(cPos -> structure.getInRegion(biomeSource.getWorldSeed(), cPos.getX(), cPos.getZ(), chunkRand))
+                    .filter(Objects::nonNull)
+                    .filter(cPos -> (structure.canSpawn(cPos, biomeSource)) && (terrainGenerator == null || structure.canGenerate(cPos, terrainGenerator)))
+                    .map(cPos -> cPos.toBlockPos().add(9, 0, 9));
+
+            BPos lootPos = positions.filter(bPos -> {
+                if (!structureGenerator.generate(terrainGenerator, bPos.toChunkPos(), chunkRand)) {
+                    return false;
+                }
+                List<ChestContent> loot = ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), structureGenerator, chunkRand, false);
+                for (ChestContent chest : loot) {
+                    return chest.contains(item);
+                }
+                return false;
+            }).findAny().orElse(null);
+            if (lootPos != null) {
+                return lootPos;
             }
         }
         return null;
