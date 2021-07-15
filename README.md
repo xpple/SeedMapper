@@ -26,6 +26,12 @@ Usage: `/seedmapper:locate (biome <biome> <version>)|(feature (structure <struct
 Locates a given feature or biome closest to the player. Depending on the rarity of the biome, this process can take at 
 most 30 seconds.
 
+### Source
+Usage: `/seedmapper:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotation>)|(in <dimension>)`
+
+Executes a given command from a modified source. For example, modifying the source's position will execute the command 
+as if from that position.
+
 ## Installation
 1. Install the [Fabric Loader](https://fabricmc.net/use/)
 1. Download the [Fabric API](https://minecraft.curseforge.com/projects/fabric/) and move it to your mods folder
