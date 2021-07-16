@@ -338,11 +338,11 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return null;
     }
 
-    private static int locateLoot(FabricClientCommandSource source, String item) throws CommandSyntaxException {
-        return locateLoot(source, item, CLIENT.getGame().getVersion().getName());
+    private static int locateLoot(FabricClientCommandSource source, String itemString) throws CommandSyntaxException {
+        return locateLoot(source, itemString, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int locateLoot(FabricClientCommandSource source, String item, String version) throws CommandSyntaxException {
+    private static int locateLoot(FabricClientCommandSource source, String itemString, String version) throws CommandSyntaxException {
         long seed;
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         if (Config.getSeeds().containsKey(key)) {
@@ -363,15 +363,10 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         if (mcVersion == null) {
             throw VERSION_NOT_FOUND_EXCEPTION.create(version);
         }
-        Item desiredItem = null;
-        for (Item value : Items.getItems().values()) {
-            if (value.getName().equals(item)) {
-                desiredItem = value;
-            }
-        }
+        final Item desiredItem = Items.getItems().values().stream().filter(item -> item.getName().equals(itemString)).findAny().orElse(null);
 
         if (desiredItem == null) {
-            throw LOOT_ITEM_NOT_FOUND_EXCEPTION.create(item);
+            throw LOOT_ITEM_NOT_FOUND_EXCEPTION.create(itemString);
         }
         Set<RegionStructure<?, ?>> lootableStructures = SimpleFeatureMap.getForVersion(mcVersion).values().stream()
                 .filter(structure -> structure instanceof ILoot)
@@ -382,7 +377,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
 
         BlockPos center = CLIENT.player.getBlockPos();
 
-        BPos lootPos = locateLoot(desiredItem, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, lootableStructures);
+        BPos lootPos = locateLoot(item -> item.getName().equals(desiredItem.getName()), new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, lootableStructures);
         if (lootPos == null) {
             Chat.print("", new TranslatableText("command.locate.loot.noneFound", desiredItem.getName()));
         } else {
@@ -401,7 +396,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static BPos locateLoot(Item item, BPos center, int radius, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
+    private static BPos locateLoot(Predicate<Item> item, BPos center, int radius, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
         for (RegionStructure<?, ?> structure : structures) {
             Generator.GeneratorFactory<?> factory;
             if (structure.getName().equals("endcity")) {
@@ -422,7 +417,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                             .map(e -> e.lootEntries).flatMap(Stream::of)
                             .filter(e -> e instanceof ItemEntry)
                             .map(e -> ((ItemEntry) e).item)
-                            .anyMatch(e -> e.equals(item))) {
+                            .anyMatch(item)) {
                         isPossibleLootItem = true;
                     }
                 }
@@ -447,7 +442,9 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                 }
                 List<ChestContent> loot = ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), structureGenerator, chunkRand, false);
                 for (ChestContent chest : loot) {
-                    return chest.contains(item);
+                    if (chest.getCount(item) >= 1) {
+                        return true;
+                    }
                 }
                 return false;
             }).findAny().orElse(null);
