@@ -408,21 +408,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                 continue;
             }
             Generator structureGenerator = factory.create(biomeSource.getVersion());
-
-            boolean isPossibleLootItem = false;
-            for (Generator.ILootType lootType : structureGenerator.getLootTypes()) {
-                LootTable lootTable = lootType.getLootTable(biomeSource.getVersion());
-                if (lootTable != null) {
-                    if (Arrays.stream(lootTable.lootPools)
-                            .map(e -> e.lootEntries).flatMap(Stream::of)
-                            .filter(e -> e instanceof ItemEntry)
-                            .map(e -> ((ItemEntry) e).item)
-                            .anyMatch(item)) {
-                        isPossibleLootItem = true;
-                    }
-                }
-            }
-            if (!isPossibleLootItem) {
+            if (structureGenerator.getPossibleLootItems().stream().noneMatch(item)) {
                 continue;
             }
 
