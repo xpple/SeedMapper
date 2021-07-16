@@ -16,8 +16,6 @@ import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.featureutils.Feature;
 import kaptainwutax.featureutils.loot.ChestContent;
 import kaptainwutax.featureutils.loot.ILoot;
-import kaptainwutax.featureutils.loot.LootTable;
-import kaptainwutax.featureutils.loot.entry.ItemEntry;
 import kaptainwutax.featureutils.loot.item.Item;
 import kaptainwutax.featureutils.loot.item.Items;
 import kaptainwutax.featureutils.misc.SlimeChunk;
