@@ -54,9 +54,9 @@ public class Config {
                 toggle("automate", false);
             } else {
                 root = new JsonObject();
-                JsonObject enabled = new JsonObject();
-                enabled.addProperty("enabled", false);
-                root.add("automate", enabled);
+                JsonObject automate = new JsonObject();
+                automate.addProperty("enabled", false);
+                root.add("automate", automate);
                 root.add("seeds", new JsonObject());
                 root.add("seed", null);
                 root.add("ignoredBlocks", new JsonArray());
