@@ -53,20 +53,14 @@ public class Config {
                 }
                 toggle("automate", false);
             } else {
-                String standardJson = "" +
-                        "{\n" +
-                        "  \"automate\": {\n" +
-                        "    \"enabled\": false\n" +
-                        "  },\n" +
-                        "  \"seeds\": {\n" +
-                        "\n" +
-                        "   }," +
-                        "  \"seed\": null,\n" +
-                        "  \"ignoredBlocks\": [\n" +
-                        "\n" +
-                        "  ]\n" +
-                        "}\n";
-                Files.write(configPath, standardJson.getBytes(StandardCharsets.UTF_8));
+                root = new JsonObject();
+                JsonObject enabled = new JsonObject();
+                enabled.addProperty("enabled", false);
+                root.add("automate", enabled);
+                root.add("seeds", new JsonObject());
+                root.add("seed", null);
+                root.add("ignoredBlocks", new JsonArray());
+                save();
             }
         } catch (IOException e) {
             LOGGER.error("Could not load config file. Your client may crash due to this.");
