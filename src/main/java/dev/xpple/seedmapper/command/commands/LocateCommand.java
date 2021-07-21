@@ -9,7 +9,7 @@ import dev.xpple.seedmapper.command.SharedExceptions;
 import dev.xpple.seedmapper.util.SpiralIterator;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
-import dev.xpple.seedmapper.util.maps.SimpleFeatureMap;
+import dev.xpple.seedmapper.util.maps.SimpleStructureMap;
 import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.biome.Biomes;
 import kaptainwutax.biomeutils.source.BiomeSource;
@@ -189,10 +189,10 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
             throw VERSION_NOT_FOUND_EXCEPTION.create(version);
         }
 
-        Feature<?, ?> desiredFeature = null;
-        for (Feature<?, ?> feature : SimpleFeatureMap.getForVersion(mcVersion).values()) {
-            if (feature.getName().equals(structureName)) {
-                desiredFeature = feature;
+        Structure<?, ?> desiredFeature = null;
+        for (Structure<?, ?> structure : SimpleStructureMap.getForVersion(mcVersion).values()) {
+            if (structure.getName().equals(structureName)) {
+                desiredFeature = structure;
                 break;
             }
         }
@@ -206,7 +206,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         }
 
         BlockPos center = CLIENT.player.getBlockPos();
-        BPos structurePos = locateStructure((Structure<?, ?>) desiredFeature, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
+        BPos structurePos = locateStructure(desiredFeature, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
             Chat.print("", new TranslatableText("command.locate.feature.structure.noneFound", structureName));
@@ -366,7 +366,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         if (desiredItem == null) {
             throw LOOT_ITEM_NOT_FOUND_EXCEPTION.create(itemString);
         }
-        Set<RegionStructure<?, ?>> lootableStructures = SimpleFeatureMap.getForVersion(mcVersion).values().stream()
+        Set<RegionStructure<?, ?>> lootableStructures = SimpleStructureMap.getForVersion(mcVersion).values().stream()
                 .filter(structure -> structure instanceof ILoot)
                 .map(structure -> (RegionStructure<?, ?>) structure)
                 .collect(Collectors.toUnmodifiableSet());

@@ -1,15 +1,14 @@
 package dev.xpple.seedmapper.util.maps;
 
-import kaptainwutax.featureutils.Feature;
 import kaptainwutax.featureutils.structure.*;
 import kaptainwutax.mcutils.version.MCVersion;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class SimpleFeatureMap {
+public class SimpleStructureMap {
 
-    public static final Map<Class<? extends Feature<?, ?>>, FeatureFactory<?>> REGISTRY = new HashMap<>();
+    public static final Map<Class<? extends Structure<?, ?>>, StructureFactory<?>> REGISTRY = new HashMap<>();
 
     static {
         register(BastionRemnant.class, BastionRemnant::new);
@@ -36,17 +35,17 @@ public class SimpleFeatureMap {
         register(Stronghold.class, Stronghold::new);
     }
 
-    public static <T extends Feature<?, ?>> void register(Class<T> clazz, FeatureFactory<T> factory) {
+    public static <T extends Structure<?, ?>> void register(Class<T> clazz, StructureFactory<T> factory) {
         REGISTRY.put(clazz, factory);
     }
 
-    public static Map<Class<? extends Feature<?, ?>>, Feature<?, ?>> getForVersion(MCVersion version) {
-        Map<Class<? extends Feature<?, ?>>, Feature<?, ?>> result = new HashMap<>();
-        for (Map.Entry<Class<? extends Feature<?, ?>>, FeatureFactory<?>> entry : REGISTRY.entrySet()) {
+    public static Map<Class<? extends Structure<?, ?>>, Structure<?, ?>> getForVersion(MCVersion version) {
+        Map<Class<? extends Structure<?, ?>>, Structure<?, ?>> result = new HashMap<>();
+        for (Map.Entry<Class<? extends Structure<?, ?>>, StructureFactory<?>> entry : REGISTRY.entrySet()) {
             try {
-                Feature<?, ?> feature = entry.getValue().create(version);
-                if (feature.getConfig() != null) {
-                    result.put(entry.getKey(), feature);
+                Structure<?, ?> structure = entry.getValue().create(version);
+                if (structure.getConfig() != null) {
+                    result.put(entry.getKey(), structure);
                 }
             } catch (NullPointerException ignored) {
             }
@@ -55,7 +54,7 @@ public class SimpleFeatureMap {
     }
 
     @FunctionalInterface
-    interface FeatureFactory<T extends Feature<?, ?>> {
+    interface StructureFactory<T extends Structure<?, ?>> {
         T create(MCVersion version);
     }
 }
