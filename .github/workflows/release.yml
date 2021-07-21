@@ -1,0 +1,26 @@
+name: Build and upload jar as asset
+on:
+    release:
+        types:
+            - released
+
+jobs:
+    build-and-upload:
+        runs-on: ubuntu-latest
+        container: openjdk:16
+        steps:
+            - name: Checkout latest commit
+              uses: actions/checkout@v2
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+            - name: Build jar
+              run: ./gradlew remapJar
+            - name: Hash jar
+              run: sha256sum build/libs/*[^-dev].jar
+            - name: Upload asset
+              uses: svenstaro/upload-release-action@v2
+              with:
+                  repo_token: ${{ secrets.GITHUB_TOKEN }}
+                  file: build/libs/*[^-dev].jar
+                  tag: ${{ github.ref }}
+                  file_glob: true
