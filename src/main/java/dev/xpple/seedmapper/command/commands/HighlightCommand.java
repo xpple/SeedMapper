@@ -3,6 +3,7 @@ package dev.xpple.seedmapper.command.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.maps.SimpleOreMap;
@@ -19,8 +20,8 @@ import kaptainwutax.mcutils.util.pos.BPos;
 import kaptainwutax.mcutils.util.pos.CPos;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
@@ -44,10 +45,10 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                 .then(literal("block")
                         .then(argument("block", word())
                                 .suggests((context, builder) -> suggestMatching(blocks, builder))
-                                .executes(ctx -> highlightBlock(ctx.getSource(), getString(ctx, "block")))
+                                .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))
                                 .then(argument("version", word())
                                         .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> highlightBlock(ctx.getSource(), getString(ctx, "block"), getString(ctx, "version"))))));
+                                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getString(ctx, "version"))))));
     }
 
     @Override
@@ -55,13 +56,18 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         return "highlight";
     }
 
-    private static int highlightBlock(FabricClientCommandSource source, String blockString) throws CommandSyntaxException {
+    private static int highlightBlock(CustomClientCommandSource source, String blockString) throws CommandSyntaxException {
         return highlightBlock(source, blockString, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int highlightBlock(FabricClientCommandSource source, String blockString, String version) throws CommandSyntaxException {
+    private static int highlightBlock(CustomClientCommandSource source, String blockString, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
         MCVersion mcVersion = SharedHelpers.getMCVersion(version);
 
@@ -78,7 +84,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
 
         final Set<Box> boxes = new HashSet<>();
-        BlockPos center = CLIENT.player.getBlockPos();
+        BlockPos center = new BlockPos(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
         SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(10, 10), (x, y, z) -> new CPos(x, z));
         StreamSupport.stream(spiralIterator.spliterator(), false)
