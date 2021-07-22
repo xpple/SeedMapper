@@ -261,7 +261,7 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
                             Feature.Data<Mineshaft> data = mineshaft.at(cPos.getX(), cPos.getZ());
                             return data.testStart(source.getWorldSeed(), chunkRand) && data.testBiome(source) && data.testGenerate(terrainGenerator);
                         })
-                        .findAny().map(CPos::toBlockPos).orElse(null);
+                        .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
             }
         }
         return null;
@@ -300,8 +300,8 @@ public class LocateCommand extends ClientCommand implements SharedExceptions {
         if (slimeChunkPos == null) {
             Chat.print("", new TranslatableText("command.locate.feature.slimeChunk.noneFound"));
         } else {
-            int x = slimeChunkPos.getX() << 4;
-            int z = slimeChunkPos.getZ() << 4;
+            int x = (slimeChunkPos.getX() << 4) + 9;
+            int z = (slimeChunkPos.getZ() << 4) + 9;
             Chat.print("", chain(
                     highlight(new TranslatableText("command.locate.feature.slimeChunk.success.0")),
                     copy(
