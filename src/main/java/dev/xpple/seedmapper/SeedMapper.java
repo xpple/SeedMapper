@@ -2,10 +2,7 @@ package dev.xpple.seedmapper;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.seedmapper.command.ClientCommand;
-import dev.xpple.seedmapper.command.commands.ConfigCommand;
-import dev.xpple.seedmapper.command.commands.LocateCommand;
-import dev.xpple.seedmapper.command.commands.SeedOverlayCommand;
-import dev.xpple.seedmapper.command.commands.TerrainVersionCommand;
+import dev.xpple.seedmapper.command.commands.*;
 import dev.xpple.seedmapper.util.config.Config;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
@@ -42,5 +39,6 @@ public class SeedMapper implements ClientModInitializer {
         ClientCommand.instantiate(new TerrainVersionCommand(), dispatcher);
         ClientCommand.instantiate(new ConfigCommand(), dispatcher);
         ClientCommand.instantiate(new LocateCommand(), dispatcher);
+        ClientCommand.instantiate(new HighlightCommand(), dispatcher);
     }
 }
