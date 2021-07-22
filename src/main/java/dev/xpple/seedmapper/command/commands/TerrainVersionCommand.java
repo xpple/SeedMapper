@@ -1,14 +1,11 @@
 package dev.xpple.seedmapper.command.commands;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
-import dev.xpple.seedmapper.command.SharedExceptions;
+import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
-import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.biome.Biomes;
@@ -30,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 
-public class TerrainVersionCommand extends ClientCommand implements SharedExceptions {
+public class TerrainVersionCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
     protected void register() {
@@ -44,34 +41,20 @@ public class TerrainVersionCommand extends ClientCommand implements SharedExcept
     }
 
     private int execute(CustomClientCommandSource source) throws CommandSyntaxException {
+        long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
             dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
         } else {
             dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
         }
-        Dimension dimension = Dimension.fromString(dimensionPath);
-        if (dimension == null) {
-            throw DIMENSION_NOT_SUPPORTED_EXCEPTION.create(dimensionPath);
-        }
+        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
 
-        long seed;
-        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        if (Config.getSeeds().containsKey(key)) {
-            seed = Config.getSeeds().get(key);
-        } else {
-            JsonElement element = Config.get("seed");
-            if (element instanceof JsonNull) {
-                throw NULL_POINTER_EXCEPTION.create("seed");
-            }
-            seed = element.getAsLong();
-        }
-
-        final AtomicInteger blocks = new AtomicInteger(65536);
-        final AtomicReference<String> version = new AtomicReference<>("This chunk was modified too drastically.");
+        final AtomicInteger blocks = new AtomicInteger(Integer.MAX_VALUE);
+        final AtomicReference<String> version = new AtomicReference<>();
 
         Arrays.stream(MCVersion.values())
-                .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_12_2))
+                .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2))
                 .forEach(mcVersion -> {
                     BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
                     TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);

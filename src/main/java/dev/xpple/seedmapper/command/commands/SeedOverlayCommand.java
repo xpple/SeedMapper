@@ -1,11 +1,9 @@
 package dev.xpple.seedmapper.command.commands;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
-import dev.xpple.seedmapper.command.SharedExceptions;
+import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
@@ -36,13 +34,13 @@ import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
-public class SeedOverlayCommand extends ClientCommand implements SharedExceptions {
+public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
     protected void register() {
         argumentBuilder
                 .then(argument("version", word())
-                        .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_12_2)).map(mcVersion -> mcVersion.name), builder))
+                        .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2)).map(mcVersion -> mcVersion.name), builder))
                         .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "version"))))
                 .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource())));
     }
@@ -62,32 +60,16 @@ public class SeedOverlayCommand extends ClientCommand implements SharedException
     }
 
     private static int seedOverlay(CustomClientCommandSource source, String version) throws CommandSyntaxException {
-        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        if (Config.getSeeds().containsKey(key)) {
-            return execute(source, Config.getSeeds().get(key), CLIENT.getGame().getVersion().getName());
-        }
-        JsonElement element = Config.get("seed");
-        if (element instanceof JsonNull) {
-            throw NULL_POINTER_EXCEPTION.create("seed");
-        }
-        return execute(source, element.getAsLong(), version);
-    }
-
-    private static int execute(CustomClientCommandSource source, long seed, String version) throws CommandSyntaxException {
+        long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
             dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
         } else {
             dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
         }
-        Dimension dimension = Dimension.fromString(dimensionPath);
-        if (dimension == null) {
-            throw DIMENSION_NOT_SUPPORTED_EXCEPTION.create(dimensionPath);
-        }
-        MCVersion mcVersion = MCVersion.fromString(version);
-        if (mcVersion == null) {
-            throw VERSION_NOT_FOUND_EXCEPTION.create(version);
-        }
+        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
+        MCVersion mcVersion = SharedHelpers.getMCVersion(version);
+
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
         TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
         final SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);

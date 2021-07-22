@@ -3,7 +3,7 @@ In-game Minecraft mod that allows you to compare natural terrain to your current
 [Discord](https://discord.xpple.dev/).
 
 ## Disclaimer
-This mod does not yet support terrain generation of Minecraft version 1.12.2 and below. Support for these versions will be added later.
+This mod does not yet support terrain generation of Minecraft version 1.10.2 and below. Support for these versions will be added later.
 
 ## Features
 Before using any of these commands, make sure the seed has been configured using `/seedmapper:config seed set <seed>`.

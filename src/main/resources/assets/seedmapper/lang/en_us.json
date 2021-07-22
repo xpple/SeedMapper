@@ -7,6 +7,7 @@
   "commands.exceptions.biomeNotFound": "Biome \"%s\" was not found.",
   "commands.exceptions.structureNotFound": "Structure \"%s\" was not found.",
   "commands.exceptions.lootItemNotFound": "Loot item \"%s\" was not found.",
+  "commands.exceptions.blockNotFound": "Block \"%s\" was not found.",
 
   "arguments.exceptions.tooFewArguments": "Too few arguments.",
 
@@ -26,6 +27,9 @@
   "command.config.removeBlock.notIgnored": "%s was never ignored.",
   "command.config.listBlocks": "Currently ignoring: %s.",
   "command.config.listBlocks.empty": "Currently not ignoring any blocks.",
+
+  "command.highlight.block.noneFound": "No %s could be highlighted.",
+  "command.highlight.block.success": "Highlighted %d %s.",
 
   "command.locate.biome.noneFound": "Couldn't locate %s within 6400 blocks.",
   "command.locate.biome.success.0": "%s found at ",
