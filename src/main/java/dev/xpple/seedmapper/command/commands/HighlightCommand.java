@@ -1,13 +1,10 @@
 package dev.xpple.seedmapper.command.commands;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
-import dev.xpple.seedmapper.command.SharedExceptions;
+import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
-import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleOreMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import kaptainwutax.biomeutils.biome.Biome;
@@ -38,7 +35,8 @@ import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.arg
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
-public class HighlightCommand extends ClientCommand implements SharedExceptions {
+public class HighlightCommand extends ClientCommand implements SharedHelpers.Exceptions {
+
     @Override
     protected void register() {
         final String[] blocks = new String[]{"ancient_debris", "andesite", "blackstone", "clay", "coal_ore", "copper_ore", "deepslate", "diamond_ore", "diorite", "dirt", "emerald_ore", "gold_ore", "granite", "gravel", "iron_ore", "lapis_ore", "magma_block", "nether_gold_ore", "quartz_ore", "redstone_ore", "sand", "soulsand", "tuff"};
@@ -62,26 +60,10 @@ public class HighlightCommand extends ClientCommand implements SharedExceptions 
     }
 
     private static int highlightBlock(FabricClientCommandSource source, String blockString, String version) throws CommandSyntaxException {
-        long seed;
-        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        if (Config.getSeeds().containsKey(key)) {
-            seed = Config.getSeeds().get(key);
-        } else {
-            JsonElement element = Config.get("seed");
-            if (element instanceof JsonNull) {
-                throw NULL_POINTER_EXCEPTION.create("seed");
-            }
-            seed = element.getAsLong();
-        }
+        long seed = SharedHelpers.getSeed();
         String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
-        Dimension dimension = Dimension.fromString(dimensionPath);
-        if (dimension == null) {
-            throw DIMENSION_NOT_SUPPORTED_EXCEPTION.create(dimensionPath);
-        }
-        MCVersion mcVersion = MCVersion.fromString(version);
-        if (mcVersion == null) {
-            throw VERSION_NOT_FOUND_EXCEPTION.create(version);
-        }
+        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
+        MCVersion mcVersion = SharedHelpers.getMCVersion(version);
 
         final Set<OreDecorator<?, ?>> oreDecorators = SimpleOreMap.getForVersion(mcVersion).values().stream()
                 .filter(oreDecorator -> oreDecorator.isValidDimension(dimension))
