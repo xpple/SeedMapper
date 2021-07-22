@@ -26,6 +26,12 @@ Usage: `/seedmapper:locate (biome <biome> <version>)|(feature (structure <struct
 Locates a given feature, biome or loot item closest to the player. Depending on the rarity of the biome or loot item, 
 this process can take at most 30 seconds.
 
+### Highlight
+Usage: `/seedmapper:highlight block <block> <version>`
+
+Highlights a given block in a 10 chunk radius. This highlight uses the seed to determine the locations of these blocks, 
+which means very few locations may not be valid (especially around caves).
+
 ## Installation
 1. Install the [Fabric Loader](https://fabricmc.net/use/)
 1. Download the [Fabric API](https://minecraft.curseforge.com/projects/fabric/) and move it to your mods folder
