@@ -49,7 +49,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
         final AtomicReference<String> version = new AtomicReference<>();
 
         Arrays.stream(MCVersion.values())
-                .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_12_2))
+                .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2))
                 .forEach(mcVersion -> {
                     BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
                     TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);

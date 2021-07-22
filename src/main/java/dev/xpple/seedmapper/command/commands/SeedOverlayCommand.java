@@ -39,7 +39,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
     protected void register() {
         argumentBuilder
                 .then(argument("version", word())
-                        .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_12_2)).map(mcVersion -> mcVersion.name), builder))
+                        .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2)).map(mcVersion -> mcVersion.name), builder))
                         .executes(ctx -> seedOverlay(ctx.getSource(), getString(ctx, "version"))))
                 .executes(ctx -> seedOverlay(ctx.getSource()));
     }
