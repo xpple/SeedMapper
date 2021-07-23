@@ -1,9 +1,9 @@
 package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
@@ -14,8 +14,8 @@ import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 
 public class TerrainVersionCommand extends ClientCommand implements SharedHelpers.Exceptions {
@@ -32,7 +31,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
     @Override
     protected void register() {
         argumentBuilder
-                .executes(this::execute);
+                .executes(ctx -> execute(CustomClientCommandSource.of(ctx.getSource())));
     }
 
     @Override
@@ -40,9 +39,14 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
         return "terrainversion";
     }
 
-    private int execute(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
+    private int execute(CustomClientCommandSource source) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
 
         final AtomicInteger blocks = new AtomicInteger(Integer.MAX_VALUE);
@@ -56,8 +60,8 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                     SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
 
                     BlockPos.Mutable mutable = new BlockPos.Mutable();
-                    final BlockPos playerBlockPos = CLIENT.player.getBlockPos();
-                    final WorldChunk chunk = CLIENT.player.world.getChunk(playerBlockPos.getX() >> 4, playerBlockPos.getZ() >> 4);
+                    final BlockPos center = new BlockPos(source.getPosition());
+                    final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
                     final ChunkPos chunkPos = chunk.getPos();
 
                     int newBlocks = 0;

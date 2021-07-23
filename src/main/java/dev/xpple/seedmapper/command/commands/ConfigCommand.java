@@ -3,11 +3,10 @@ package dev.xpple.seedmapper.command.commands;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.context.CommandContext;
 import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.text.TranslatableText;
 
@@ -21,7 +20,6 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.block;
-import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.getBlock;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 import static net.minecraft.command.CommandSource.suggestMatching;
@@ -34,35 +32,35 @@ public class ConfigCommand extends ClientCommand {
                 .then(literal("automate")
                         .then(literal("set")
                                 .then(argument("bool", bool())
-                                        .executes(this::setAutomate)))
+                                        .executes(ctx -> setAutomate(CustomClientCommandSource.of(ctx.getSource()), getBool(ctx, "bool")))))
                         .then(literal("get")
-                                .executes(this::getAutomate))
+                                .executes(ctx -> getAutomate(CustomClientCommandSource.of(ctx.getSource()))))
                         .then(literal("toggle")
-                                .executes(this::toggleAutomate)))
+                                .executes(ctx -> toggleAutomate(CustomClientCommandSource.of(ctx.getSource())))))
                 .then(literal("seed")
                         .then(literal("set")
                                 .then(argument("seed", longArg())
-                                        .executes(this::setSeed)))
+                                        .executes(ctx -> setSeed(CustomClientCommandSource.of(ctx.getSource()), getLong(ctx, "seed")))))
                         .then(literal("get")
-                                .executes(this::getSeed)))
+                                .executes(ctx -> getSeed(CustomClientCommandSource.of(ctx.getSource())))))
                 .then(literal("seeds")
                         .then(literal("add")
                                 .then(argument("seed", longArg())
-                                        .executes(this::addSeed)))
+                                        .executes(ctx -> addSeed(CustomClientCommandSource.of(ctx.getSource()), getLong(ctx, "seed")))))
                         .then(literal("remove")
                                 .then(argument("key", greedyString())
                                         .suggests((context, builder) -> suggestMatching(Config.getSeeds().keySet().stream(), builder))
-                                        .executes(this::removeSeed))))
+                                        .executes(ctx -> removeSeed(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "key"))))))
                 .then(literal("ignored")
                         .then(literal("add")
                                 .then(argument("block", block())
-                                        .executes(this::addBlock)))
+                                        .executes(ctx -> addBlock(CustomClientCommandSource.of(ctx.getSource()), ctx.getArgument("block", Block.class)))))
                         .then(literal("remove")
                                 .then(argument("block", block())
                                         .suggests((context, builder) -> suggestMatching(Config.getIgnoredBlocks().stream().map(block -> block.getName().getString()), builder))
-                                        .executes(this::removeBlock)))
+                                        .executes(ctx -> removeBlock(CustomClientCommandSource.of(ctx.getSource()), ctx.getArgument("block", Block.class)))))
                         .then(literal("list")
-                                .executes(this::listBlocks)));
+                                .executes(ctx -> listBlocks(CustomClientCommandSource.of(ctx.getSource())))));
     }
 
     @Override
@@ -73,19 +71,18 @@ public class ConfigCommand extends ClientCommand {
     /**
      * If automation is set to true, new chunks will automatically be compared.
     */
-    private int setAutomate(CommandContext<FabricClientCommandSource> ctx) {
-        boolean value = getBool(ctx, "bool");
+    private int setAutomate(CustomClientCommandSource source, boolean value) {
         Config.toggle("automate", value);
         Chat.print("", new TranslatableText("command.config.setAutomate", value));
         return Command.SINGLE_SUCCESS;
     }
 
-    private int getAutomate(CommandContext<FabricClientCommandSource> ctx) {
+    private int getAutomate(CustomClientCommandSource source) {
         Chat.print("", new TranslatableText("command.config.getAutomate", Config.isEnabled("automate")));
         return Command.SINGLE_SUCCESS;
     }
 
-    private int toggleAutomate(CommandContext<FabricClientCommandSource> ctx) {
+    private int toggleAutomate(CustomClientCommandSource source) {
         boolean old = Config.isEnabled("automate");
         Config.toggle("automate", !old);
         Chat.print("", new TranslatableText("command.config.toggleAutomate", !old));
@@ -95,14 +92,13 @@ public class ConfigCommand extends ClientCommand {
     /**
      * The seed that will be used for the comparison.
     */
-    private int setSeed(CommandContext<FabricClientCommandSource> ctx) {
-        long seed = getLong(ctx, "seed");
+    private int setSeed(CustomClientCommandSource source, long seed) {
         Config.set("seed", seed);
         Chat.print("", new TranslatableText("command.config.setSeed", seed));
         return Command.SINGLE_SUCCESS;
     }
 
-    private int getSeed(CommandContext<FabricClientCommandSource> ctx) {
+    private int getSeed(CustomClientCommandSource source) {
         JsonElement element = Config.get("seed");
         if (element instanceof JsonNull) {
             Chat.print("", new TranslatableText("command.config.getSeed.null"));
@@ -116,9 +112,8 @@ public class ConfigCommand extends ClientCommand {
      * If seeds are added to this list, they will be used if the server matches the key.
      * <code>CLIENT.getNetworkHandler().getConnection().getAddress().toString()</code> will be used to compare the key.
      */
-    private int addSeed(CommandContext<FabricClientCommandSource> ctx) {
+    private int addSeed(CustomClientCommandSource source, long seed) {
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        long seed = getLong(ctx, "seed");
         if (Config.addSeed(key, seed)) {
             Chat.print("", new TranslatableText("command.config.addSeed.success"));
         } else {
@@ -127,8 +122,7 @@ public class ConfigCommand extends ClientCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private int removeSeed(CommandContext<FabricClientCommandSource> ctx) {
-        String key = getString(ctx, "key");
+    private int removeSeed(CustomClientCommandSource source, String key) {
         if (Config.removeSeed(key)) {
             Chat.print("", new TranslatableText("command.config.removeSeed.success"));
         } else {
@@ -140,8 +134,7 @@ public class ConfigCommand extends ClientCommand {
     /**
      * If blocks are added to this list, they will be ignored in the overlay process.
     */
-    private int addBlock(CommandContext<FabricClientCommandSource> ctx) {
-        Block block = getBlock(ctx, "block");
+    private int addBlock(CustomClientCommandSource source, Block block) {
         if (Config.addBlock(block)) {
             Chat.print("", new TranslatableText("command.config.addBlock.success", block.getName()));
         } else {
@@ -150,8 +143,7 @@ public class ConfigCommand extends ClientCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private int removeBlock(CommandContext<FabricClientCommandSource> ctx) {
-        Block block = getBlock(ctx, "block");
+    private int removeBlock(CustomClientCommandSource source, Block block) {
         if (Config.removeBlock(block)) {
             Chat.print("", new TranslatableText("command.config.removeBlock.success", block.getName()));
         } else {
@@ -160,7 +152,7 @@ public class ConfigCommand extends ClientCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private int listBlocks(CommandContext<FabricClientCommandSource> ctx) {
+    private int listBlocks(CustomClientCommandSource source) {
         if (Config.getIgnoredBlocks().isEmpty()) {
             Chat.print("", new TranslatableText("command.config.listBlocks.empty"));
         } else {

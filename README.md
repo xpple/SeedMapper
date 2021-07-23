@@ -32,6 +32,12 @@ Usage: `/seedmapper:highlight block <block> <version>`
 Highlights a given block in a 10 chunk radius. This highlight uses the seed to determine the locations of these blocks, 
 which means very few locations may not be valid (especially around caves).
 
+### Source
+Usage: `/seedmapper:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotation>)|(in <dimension>)`
+
+Executes a given command from a modified source. For example, modifying the source's position will execute the command 
+as if from that position.
+
 ## Installation
 1. Install the [Fabric Loader](https://fabricmc.net/use/)
 1. Download the [Fabric API](https://minecraft.curseforge.com/projects/fabric/) and move it to your mods folder

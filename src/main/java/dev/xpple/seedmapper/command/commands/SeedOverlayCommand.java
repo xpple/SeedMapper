@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
@@ -14,9 +15,9 @@ import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
@@ -40,8 +41,8 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         argumentBuilder
                 .then(argument("version", word())
                         .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2)).map(mcVersion -> mcVersion.name), builder))
-                        .executes(ctx -> seedOverlay(ctx.getSource(), getString(ctx, "version"))))
-                .executes(ctx -> seedOverlay(ctx.getSource()));
+                        .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "version"))))
+                .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource())));
     }
 
     @Override
@@ -54,13 +55,18 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         return "overlay";
     }
 
-    private static int seedOverlay(FabricClientCommandSource source) throws CommandSyntaxException {
+    private static int seedOverlay(CustomClientCommandSource source) throws CommandSyntaxException {
         return seedOverlay(source, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int seedOverlay(FabricClientCommandSource source, String version) throws CommandSyntaxException {
+    private static int seedOverlay(CustomClientCommandSource source, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
         MCVersion mcVersion = SharedHelpers.getMCVersion(version);
 
@@ -68,8 +74,8 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
         final SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
         BlockPos.Mutable mutable = new BlockPos.Mutable();
-        final BlockPos playerBlockPos = CLIENT.player.getBlockPos();
-        final WorldChunk chunk = CLIENT.player.world.getChunk(playerBlockPos.getX() >> 4, playerBlockPos.getZ() >> 4);
+        final BlockPos center = new BlockPos(source.getPosition());
+        final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
         final ChunkPos chunkPos = chunk.getPos();
 
         Map<Box, Integer> boxes = new HashMap<>();

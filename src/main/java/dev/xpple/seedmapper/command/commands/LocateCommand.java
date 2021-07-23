@@ -3,6 +3,7 @@ package dev.xpple.seedmapper.command.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.maps.SimpleStructureMap;
@@ -28,8 +29,6 @@ import kaptainwutax.mcutils.util.pos.CPos;
 import kaptainwutax.mcutils.util.pos.RPos;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -60,32 +59,32 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 .then(literal("biome")
                         .then(argument("biome", word())
                                 .suggests((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.BIOME_KEY).getIds().stream().map(Identifier::getPath), builder))
-                                .executes(ctx -> locateBiome(ctx.getSource(), getString(ctx, "biome")))
+                                .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "biome")))
                                 .then(argument("version", word())
                                         .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateBiome(ctx.getSource(), getString(ctx, "biome"), getString(ctx, "version"))))))
+                                        .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "biome"), getString(ctx, "version"))))))
                 .then(literal("feature")
                         .then(literal("structure")
                                 .then(argument("structure", word())
                                         .suggests((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.STRUCTURE_FEATURE_KEY).getIds().stream().map(Identifier::getPath), builder))
-                                        .executes(ctx -> locateStructure(ctx.getSource(), getString(ctx, "structure")))
+                                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure")))
                                         .then(argument("version", word())
                                                 .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                                .executes(ctx -> locateStructure(ctx.getSource(), getString(ctx, "structure"), getString(ctx, "version"))))))
+                                                .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure"), getString(ctx, "version"))))))
                         .then(literal("slimechunk")
-                                .executes(ctx -> locateSlimeChunk(ctx.getSource()))
+                                .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))
                                 .then(argument("version", word())
                                         .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateSlimeChunk(ctx.getSource(), getString(ctx, "version"))))))
+                                        .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "version"))))))
                 .then(literal("loot")
                         .then(argument("item", string())
                                 .suggests((context, builder) -> suggestMatching(lootableItems, builder))
-                                .executes(ctx -> locateLoot(ctx.getSource(), getString(ctx, "item")))
+                                .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "item")))
                                 .then(argument("amount", integer(1))
-                                        .executes(ctx -> locateLoot(ctx.getSource(), getString(ctx, "item"), getInteger(ctx, "amount")))
+                                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "item"), getInteger(ctx, "amount")))
                                         .then(argument("version", word())
                                                 .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                                .executes(ctx -> locateLoot(ctx.getSource(), getString(ctx, "item"), getInteger(ctx, "amount"), getString(ctx, "version")))))));
+                                                .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "item"), getInteger(ctx, "amount"), getString(ctx, "version")))))));
     }
 
     @Override
@@ -93,13 +92,18 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         return "locate";
     }
 
-    private static int locateBiome(FabricClientCommandSource source, String biomeName) throws CommandSyntaxException {
+    private static int locateBiome(CustomClientCommandSource source, String biomeName) throws CommandSyntaxException {
         return locateBiome(source, biomeName, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int locateBiome(FabricClientCommandSource source, String biomeName, String version) throws CommandSyntaxException {
+    private static int locateBiome(CustomClientCommandSource source, String biomeName, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
         MCVersion mcVersion = SharedHelpers.getMCVersion(version);
 
@@ -118,7 +122,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
-        BlockPos center = CLIENT.player.getBlockPos();
+        BlockPos center = new BlockPos(source.getPosition());
         BPos biomePos = locateBiome(desiredBiome::equals, new BPos(center.getX(), 0, center.getZ()), 6400, 8, biomeSource);
 
         if (biomePos == null) {
@@ -149,13 +153,18 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 .findAny().orElse(null);
     }
 
-    private static int locateStructure(FabricClientCommandSource source, String structure) throws CommandSyntaxException {
+    private static int locateStructure(CustomClientCommandSource source, String structure) throws CommandSyntaxException {
         return locateStructure(source, structure, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int locateStructure(FabricClientCommandSource source, String structureName, String version) throws CommandSyntaxException {
+    private static int locateStructure(CustomClientCommandSource source, String structureName, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
         MCVersion mcVersion = SharedHelpers.getMCVersion(version);
 
@@ -175,7 +184,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
-        BlockPos center = CLIENT.player.getBlockPos();
+        BlockPos center = new BlockPos(source.getPosition());
         BPos structurePos = locateStructure(desiredFeature, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
@@ -236,17 +245,22 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         return null;
     }
 
-    private static int locateSlimeChunk(FabricClientCommandSource source) throws CommandSyntaxException {
+    private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
         return locateSlimeChunk(source, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int locateSlimeChunk(FabricClientCommandSource source, String version) throws CommandSyntaxException {
+    private static int locateSlimeChunk(CustomClientCommandSource source, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
         MCVersion mcVersion = SharedHelpers.getMCVersion(version);
 
-        BlockPos center = CLIENT.player.getBlockPos();
+        BlockPos center = new BlockPos(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
 
         CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(mcVersion), centerChunk, 6400, seed, new ChunkRand(), dimension);
@@ -292,17 +306,22 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         return null;
     }
 
-    private static int locateLoot(FabricClientCommandSource source, String itemString) throws CommandSyntaxException {
+    private static int locateLoot(CustomClientCommandSource source, String itemString) throws CommandSyntaxException {
         return locateLoot(source, itemString, 1);
     }
 
-    private static int locateLoot(FabricClientCommandSource source, String itemString, int amount) throws CommandSyntaxException {
+    private static int locateLoot(CustomClientCommandSource source, String itemString, int amount) throws CommandSyntaxException {
         return locateLoot(source, itemString, amount, CLIENT.getGame().getVersion().getName());
     }
 
-    private static int locateLoot(FabricClientCommandSource source, String itemString, int amount, String version) throws CommandSyntaxException {
+    private static int locateLoot(CustomClientCommandSource source, String itemString, int amount, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
-        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
         MCVersion mcVersion = SharedHelpers.getMCVersion(version);
 
@@ -319,7 +338,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
 
-        BlockPos center = CLIENT.player.getBlockPos();
+        BlockPos center = new BlockPos(source.getPosition());
 
         Set<BPos> lootPositions = locateLoot(item -> item.getName().equals(desiredItem.getName()), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
         if (lootPositions == null || lootPositions.isEmpty()) {

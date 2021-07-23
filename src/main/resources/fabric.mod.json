@@ -26,7 +26,8 @@
     "seedmapper.mixin.net.json",
     "seedmapper.mixin.entity.json",
     "seedmapper.mixin.render.json",
-    "seedmapper.mixin.client.json"
+    "seedmapper.mixin.client.json",
+    "seedmapper.mixin.command.json"
   ],
   "accessWidener": "seedmapper.aw",
 
