@@ -22,7 +22,7 @@ public class SimpleOreMap {
         register(SmallDebrisOre.class, SmallDebrisOre::new);
         register(SoulSandOre.class, SoulSandOre::new);
         register(AndesiteOre.class, AndesiteOre::new);
-        register(ClayDisk.class, ClayDisk::new);
+        //register(ClayDisk.class, ClayDisk::new);
         register(CoalOre.class, CoalOre::new);
         register(CopperOre.class, CopperOre::new);
         register(DeepslateOre.class, DeepslateOre::new);
@@ -33,11 +33,11 @@ public class SimpleOreMap {
         register(ExtraGoldOre.class, ExtraGoldOre::new);
         register(GoldOre.class, GoldOre::new);
         register(GraniteOre.class, GraniteOre::new);
-        register(GravelDisk.class, GravelDisk::new);
+        //register(GravelDisk.class, GravelDisk::new);
         register(IronOre.class, IronOre::new);
         register(LapisOre.class, LapisOre::new);
         register(RedstoneOre.class, RedstoneOre::new);
-        register(SandDisk.class, SandDisk::new);
+        //register(SandDisk.class, SandDisk::new);
         register(TuffOre.class, TuffOre::new);
     }
 
