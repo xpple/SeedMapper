@@ -21,6 +21,7 @@ import kaptainwutax.featureutils.structure.generator.Generators;
 import kaptainwutax.mcutils.rand.ChunkRand;
 import kaptainwutax.mcutils.rand.seed.WorldSeed;
 import kaptainwutax.mcutils.state.Dimension;
+import kaptainwutax.mcutils.util.data.Pair;
 import kaptainwutax.mcutils.util.data.SpiralIterator;
 import kaptainwutax.mcutils.util.pos.BPos;
 import kaptainwutax.mcutils.util.pos.CPos;
@@ -28,20 +29,21 @@ import kaptainwutax.mcutils.util.pos.RPos;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
@@ -79,9 +81,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                         .then(argument("item", string())
                                 .suggests((context, builder) -> suggestMatching(lootableItems, builder))
                                 .executes(ctx -> locateLoot(ctx.getSource(), getString(ctx, "item")))
-                                .then(argument("version", word())
-                                        .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateLoot(ctx.getSource(), getString(ctx, "item"), getString(ctx, "version"))))));
+                                .then(argument("amount", integer(1))
+                                        .executes(ctx -> locateLoot(ctx.getSource(), getString(ctx, "item"), getInteger(ctx, "amount")))
+                                        .then(argument("version", word())
+                                                .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
+                                                .executes(ctx -> locateLoot(ctx.getSource(), getString(ctx, "item"), getInteger(ctx, "amount"), getString(ctx, "version")))))));
     }
 
     @Override
@@ -289,10 +293,14 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateLoot(FabricClientCommandSource source, String itemString) throws CommandSyntaxException {
-        return locateLoot(source, itemString, CLIENT.getGame().getVersion().getName());
+        return locateLoot(source, itemString, 1);
     }
 
-    private static int locateLoot(FabricClientCommandSource source, String itemString, String version) throws CommandSyntaxException {
+    private static int locateLoot(FabricClientCommandSource source, String itemString, int amount) throws CommandSyntaxException {
+        return locateLoot(source, itemString, amount, CLIENT.getGame().getVersion().getName());
+    }
+
+    private static int locateLoot(FabricClientCommandSource source, String itemString, int amount, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
@@ -313,26 +321,29 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BlockPos center = CLIENT.player.getBlockPos();
 
-        BPos lootPos = locateLoot(item -> item.getName().equals(desiredItem.getName()), new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
-        if (lootPos == null) {
+        Set<BPos> lootPositions = locateLoot(item -> item.getName().equals(desiredItem.getName()), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
+        if (lootPositions == null || lootPositions.isEmpty()) {
             Chat.print("", new TranslatableText("command.locate.loot.noneFound", desiredItem.getName()));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.loot.success.0", desiredItem.getName())),
-                    copy(
-                            hover(
-                                    accent("x: " + lootPos.getX() + ", z: " + lootPos.getZ()),
-                                    base(new TranslatableText("command.locate.loot.success.1", desiredItem.getName()))
-                            ),
-                            String.format("%d ~ %d", lootPos.getX(), lootPos.getZ())
-                    ),
+                    highlight(new TranslatableText("command.locate.loot.success.0", amount, desiredItem.getName())),
+                    join(highlight(", "), lootPositions.stream().map(bPos ->
+                            copy(
+                                    hover(
+                                            accent("x: " + bPos.getX() + ", z: " + bPos.getZ()),
+                                            base(new TranslatableText("command.locate.loot.success.1", desiredItem.getName()))
+                                    ),
+                                    String.format("%d ~ %d", bPos.getX(), bPos.getZ())
+                            )
+                    ).collect(Collectors.toList())),
                     highlight(".")
             ));
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private static BPos locateLoot(Predicate<Item> item, BPos center, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
+    private static Set<BPos> locateLoot(Predicate<Item> item, int amount, BPos center, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
+        AtomicInteger itemsFound = new AtomicInteger(0);
         for (RegionStructure<?, ?> structure : structures) {
             Generator.GeneratorFactory<?> factory;
             if (structure.getName().equals("endcity")) {
@@ -353,27 +364,20 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
             final int border = 30_000_000;
             SpiralIterator<RPos> spiralIterator = new SpiralIterator<>(center.toRegionPos(regionSize), new BPos(-border, 0, -border).toRegionPos(regionSize), new BPos(border, 0, border).toRegionPos(regionSize), 1, (x, y, z) -> new RPos(x, z, regionSize));
-            Stream<BPos> positions = StreamSupport.stream(spiralIterator.spliterator(), false)
+            Stream<Pair<CPos, Integer>> positions = StreamSupport.stream(spiralIterator.spliterator(), false)
                     .map(cPos -> structure.getInRegion(biomeSource.getWorldSeed(), cPos.getX(), cPos.getZ(), chunkRand))
                     .filter(Objects::nonNull)
                     .filter(cPos -> (structure.canSpawn(cPos, biomeSource)) && (terrainGenerator == null || structure.canGenerate(cPos, terrainGenerator)))
-                    .map(cPos -> cPos.toBlockPos().add(9, 0, 9));
+                    .filter(cPos -> structureGenerator.generate(terrainGenerator, cPos, chunkRand))
+                    .map(cPos -> new Pair<>(cPos, ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), structureGenerator, chunkRand, false).stream()
+                            .mapToInt(chest -> chest.getCount(item)).sum()))
+                    .filter(pair -> pair.getSecond() > 0);
 
-            BPos lootPos = positions.filter(bPos -> {
-                if (!structureGenerator.generate(terrainGenerator, bPos.toChunkPos(), chunkRand)) {
-                    return false;
-                }
-                List<ChestContent> loot = ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), structureGenerator, chunkRand, false);
-                for (ChestContent chest : loot) {
-                    if (chest.getCount(item) >= 1) {
-                        return true;
-                    }
-                }
-                return false;
-            }).findAny().orElse(null);
-            if (lootPos != null) {
-                return lootPos;
-            }
+            return positions
+                    .takeWhile(pair -> itemsFound.addAndGet(pair.getSecond()) <= amount)
+                    .map(Pair::getFirst)
+                    .map(cPos -> cPos.toBlockPos().add(9, 0, 9))
+                    .collect(Collectors.toSet());
         }
         return null;
     }
