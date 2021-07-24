@@ -1,4 +1,4 @@
-{  
+{
     "commands.exceptions.dimensionNotSupported": "Dimension \"%s\" wird nicht unterstützt.",
     "commands.exceptions.versionNotFound": "Version \"%s\" konnte nicht gefunden werden.",
     "commands.exceptions.unknownConfig": "Unbekannte Konfiguration \"%s\".",
@@ -31,18 +31,18 @@
     "command.highlight.block.noneFound": "Kein %s zum hervorheben konnte gefunden werden.",
     "command.highlight.block.success": "%d %s wurde hervorgehoben.",
 
-    "command.locate.biome.noneFound": "Konnte %s innerhalb 6400 Blöcken nicht finden.",
+    "command.locate.biome.noneFound": "Konnte %s innerhalb von 6400 Blöcken nicht finden.",
     "command.locate.biome.success.0": "%s gefunden bei ",
     "command.locate.biome.success.1": "Klicke um die Koordinaten von %s zu kopieren.",
-    "command.locate.feature.structure.noneFound": "Konnte %s innerhalb 6400 Blöcken nicht finden.",
+    "command.locate.feature.structure.noneFound": "Konnte %s innerhalb von 6400 Blöcken nicht finden.",
     "command.locate.feature.structure.success.0": "%s gefunden bei ",
     "command.locate.feature.structure.success.1": "Klicke um die Koordinaten von %s zu kopieren.",
-    "command.locate.feature.slimeChunk.noneFound": "Konnte Slime Chunks innerhalb 6400 Blöcken nicht finden.",
+    "command.locate.feature.slimeChunk.noneFound": "Konnte Slime Chunks innerhalb von 6400 Blöcken nicht finden.",
     "command.locate.feature.slimeChunk.success.0": "Slime Chunk gefunden bei ",
     "command.locate.feature.slimeChunk.success.1": "Klicke um die Koordinaten von diesem Slime Chunk zu kopieren.",
     "command.locate.feature.slimeChunk.success.2": " (Chunk ",
     "command.locate.feature.slimeChunk.success.3": "Klicke um die Chunk Koordinaten von diesem Slime Chunk zu kopieren.",
-    "command.locate.loot.noneFound": "Konnte %s innerhalb 6400 Blöcken nicht finden.",
+    "command.locate.loot.noneFound": "Konnte %s innerhalb von 6400 Blöcken nicht finden.",
     "command.locate.loot.success.0": "%d %s gefunden bei ",
     "command.locate.loot.success.1": "Klicke um die Koordinaten von %s zu kopieren.",
 
