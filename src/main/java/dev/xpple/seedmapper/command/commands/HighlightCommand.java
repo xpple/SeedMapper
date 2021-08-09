@@ -29,6 +29,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
@@ -46,9 +48,11 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                         .then(argument("block", word())
                                 .suggests((context, builder) -> suggestMatching(blocks, builder))
                                 .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))
-                                .then(argument("version", word())
-                                        .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getString(ctx, "version"))))));
+                                .then(argument("range", integer(0))
+                                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getInteger(ctx, "range")))
+                                        .then(argument("version", word())
+                                                .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
+                                                .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getInteger(ctx, "range"), getString(ctx, "version")))))));
     }
 
     @Override
@@ -57,10 +61,14 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
     }
 
     private static int highlightBlock(CustomClientCommandSource source, String blockString) throws CommandSyntaxException {
-        return highlightBlock(source, blockString, CLIENT.getGame().getVersion().getName());
+        return highlightBlock(source, blockString, 160); // 10 chunks
     }
 
-    private static int highlightBlock(CustomClientCommandSource source, String blockString, String version) throws CommandSyntaxException {
+    private static int highlightBlock(CustomClientCommandSource source, String blockString, int range) throws CommandSyntaxException {
+        return highlightBlock(source, blockString, range, CLIENT.getGame().getVersion().getName());
+    }
+
+    private static int highlightBlock(CustomClientCommandSource source, String blockString, int range, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -86,7 +94,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         final Set<Box> boxes = new HashSet<>();
         BlockPos center = new BlockPos(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
-        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(10, 10), (x, y, z) -> new CPos(x, z));
+        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new BPos(range, 0, range).toChunkPos(), (x, y, z) -> new CPos(x, z));
         StreamSupport.stream(spiralIterator.spliterator(), false)
                 .map(cPos -> {
                     Biome biome = biomeSource.getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);

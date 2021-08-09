@@ -27,7 +27,7 @@ Locates a given feature, biome or loot item closest to the player. Depending on 
 this process can take at most 30 seconds.
 
 ### Highlight
-Usage: `/seedmapper:highlight block <block> <version>`
+Usage: `/seedmapper:highlight block <block> <range> <version>`
 
 Highlights a given block in a 10 chunk radius. This highlight uses the seed to determine the locations of these blocks, 
 which means very few locations may not be valid (especially around caves).
