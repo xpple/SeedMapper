@@ -16,7 +16,7 @@
   "command.config.toggleAutomate": "Aktifkan \"otomatis\" menjadi %s.",
   "command.config.setSeed": "Set \"benih\" menjadi %s.",
   "command.config.getSeed": "\"benih\" saat ini diatur ke %s.",
-  "command.config.getSeed.null": "\"benih\" adalah null",
+  "command.config.getSeed.null": "\"benih\" adalah null.",
   "command.config.addSeed.success": "Benih ditambahkan untuk peladen saat ini.",
   "command.config.addSeed.alreadyAdded": "Benih untuk peladen ini sudah ditambahkan.",
   "command.config.removeSeed.success": "Berhasil menghapus benih untuk peladen saat ini.",
