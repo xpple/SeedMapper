@@ -2003,7 +2003,7 @@ public class SimpleBlockMap {
                     .build()
             ).put(MCVersion.v1_17, ImmutableMap.<String, Integer>builder()
                     .put(AIR.getName(), AIR_ID)
-                    .put(CAVE_AIR.getName(), STONE_ID)
+                    .put(CAVE_AIR.getName(), AIR_ID)
                     .put(VOID_AIR.getName(), AIR_ID)
                     //.put(BEDROCK, 7)
                     .put(BEDROCK.getName(), STONE_ID)
