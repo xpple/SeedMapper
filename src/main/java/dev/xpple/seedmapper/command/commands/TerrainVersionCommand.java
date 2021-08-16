@@ -76,7 +76,6 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                     try {
                         blocksForChunk = CacheUtil.getBlocksForChunk(new CPos(chunkPos.x, chunkPos.z), generator);
                     } catch (ExecutionException e) {
-                        // error
                         return;
                     }
                     for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
@@ -97,7 +96,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                                 if (terrainBlockName.equals(seedBlockName)) {
                                     continue;
                                 }
-                                if (map.get(terrainBlockName) == map.get(seedBlockName)) {
+                                if (map.sameUngeneration(terrainBlockName, seedBlockName)) {
                                     continue;
                                 }
                                 newBlocks++;

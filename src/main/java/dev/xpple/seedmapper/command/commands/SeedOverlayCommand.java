@@ -107,7 +107,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                     if (terrainBlockName.equals(seedBlockName)) {
                         continue;
                     }
-                    if (map.get(terrainBlockName) == map.get(seedBlockName)) {
+                    if (map.sameUngeneration(terrainBlockName, seedBlockName)) {
                         continue;
                     }
                     boxes.add(new Box(mutable));

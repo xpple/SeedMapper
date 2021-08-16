@@ -5,6 +5,7 @@ import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.mcutils.block.Blocks;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -1721,17 +1722,26 @@ public class SimpleBlockMap {
         this.map = versionedBiomeMap.getOrDefault(this.mcVersion, versionedBiomeMap.get(MCVersion.v1_17)).get(biome);
     }
 
-    public int get(String block) {
+    private Integer get(String block) {
         Integer biomeBlock = this.map.get(block);
         if (biomeBlock == null) {
             if (this.dimension == Dimension.OVERWORLD) {
-                return overworld.getOrDefault(this.mcVersion, overworld.get(MCVersion.v1_17)).getOrDefault(block, -1);
+                return overworld.getOrDefault(this.mcVersion, overworld.get(MCVersion.v1_17)).get(block);
             } else if (this.dimension == Dimension.NETHER) {
-                return nether.getOrDefault(this.mcVersion, nether.get(MCVersion.v1_17)).getOrDefault(block, -1);
+                return nether.getOrDefault(this.mcVersion, nether.get(MCVersion.v1_17)).get(block);
             } else {
-                return end.getOrDefault(this.mcVersion, end.get(MCVersion.v1_17)).getOrDefault(block, -1);
+                return end.getOrDefault(this.mcVersion, end.get(MCVersion.v1_17)).get(block);
             }
         }
         return biomeBlock;
+    }
+
+    public boolean sameUngeneration(String terrainBlock, String seedBlock) {
+        Integer terrainMapping = get(terrainBlock);
+        if (terrainMapping == null) {
+            return false;
+        }
+        Integer seedMapping = get(seedBlock);
+        return terrainMapping.equals(seedMapping);
     }
 }
