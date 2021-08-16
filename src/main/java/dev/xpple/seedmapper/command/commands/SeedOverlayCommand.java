@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.util.CacheUtil;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
@@ -13,19 +14,20 @@ import kaptainwutax.biomeutils.biome.Biomes;
 import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
+import kaptainwutax.mcutils.util.pos.BPos;
+import kaptainwutax.mcutils.util.pos.CPos;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.minecraft.block.BlockState;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.WorldChunk;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -78,27 +80,37 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
         final ChunkPos chunkPos = chunk.getPos();
 
-        Map<Box, Integer> boxes = new HashMap<>();
+        Set<Box> boxes = new HashSet<>();
         int blocks = 0;
+
+        Map<BPos, Block> blocksForChunk;
+        try {
+            blocksForChunk = CacheUtil.getBlocksForChunk(new CPos(chunkPos.x, chunkPos.z), generator);
+        } catch (ExecutionException e) {
+            throw CACHE_FAILED_EXCEPTION.create();
+        }
         for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
             mutable.setX(x);
             for (int z = chunkPos.getStartZ(); z <= chunkPos.getEndZ(); z++) {
                 mutable.setZ(z);
-                final Block[] column = generator.getColumnAt(x, z);
                 final Biome biome = biomeSource.getBiome(x, 0, z);
                 map.setBiome(biome);
-                for (int y = 0; y < column.length; y++) {
+                for (int y = 0; y < 255; y++) {
                     mutable.setY(y);
-                    final BlockState blockState = chunk.getBlockState(mutable);
-                    if (Config.getIgnoredBlocks().contains(blockState.getBlock())) {
+                    net.minecraft.block.Block terrainBlock = chunk.getBlockState(mutable).getBlock();
+                    String terrainBlockName = Registry.BLOCK.getId(terrainBlock).getPath();
+                    if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
                         continue;
                     }
-                    int terrainBlockInt = map.get(blockState.getBlock());
-                    int seedBlockInt = column[y].getId();
-                    if (seedBlockInt == terrainBlockInt) {
+                    kaptainwutax.mcutils.block.Block seedBlock = blocksForChunk.get(new BPos(x, y, z));
+                    String seedBlockName = seedBlock.getName();
+                    if (terrainBlockName.equals(seedBlockName)) {
                         continue;
                     }
-                    boxes.put(new Box(mutable), seedBlockInt);
+                    if (map.get(terrainBlockName) == map.get(seedBlockName)) {
+                        continue;
+                    }
+                    boxes.add(new Box(mutable));
                     Chat.print("", chain(
                             highlight(new TranslatableText("command.seedoverlay.feedback.0")),
                             copy(
@@ -106,7 +118,11 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                                             accent("x: " + x + ", y: " + y + ", z: " + z),
                                             chain(
                                                     base(new TranslatableText("command.seedoverlay.feedback.1")),
-                                                    highlight(chunk.getBlockState(mutable).getBlock().getName())
+                                                    highlight(terrainBlockName),
+                                                    base(" ("),
+                                                    base(new TranslatableText("command.seedoverlay.expected")),
+                                                    highlight(seedBlockName),
+                                                    base(")")
                                             )
                                     ),
                                     String.format("%d %d %d", x, y ,z)
@@ -118,24 +134,8 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                 }
             }
         }
-        for (Map.Entry<Box, Integer> entry : boxes.entrySet()) {
-            int colour = switch (entry.getValue()) {
-                // stone
-                case 1 -> 0xFFAAAAAA;
-                // bedrock
-                case 7 -> 0xFF313131;
-                // water
-                case 9 -> 0xFF213F7C;
-                // lava
-                case 11 -> 0xFFC6400B;
-                // netherrack
-                case 87 -> 0xFF501514;
-                // end_stone
-                case 121 -> 0xFFF5F8BB;
-                // air
-                default -> 0xFFFFFFFF;
-            };
-            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, entry.getKey(), entry.getKey(), colour, 30 * 20);
+        for (Box box : boxes) {
+            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, 0XFFFB8919, 30 * 20);
         }
         if (blocks > 0) {
             Chat.print("", chain(

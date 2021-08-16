@@ -7,19 +7,16 @@ import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
-import net.minecraft.block.Block;
+import kaptainwutax.mcutils.block.Block;
+import kaptainwutax.mcutils.block.Blocks;
 import net.minecraft.text.TranslatableText;
-
-import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
 import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
-import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.block;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 import static net.minecraft.command.CommandSource.suggestMatching;
@@ -53,12 +50,13 @@ public class ConfigCommand extends ClientCommand {
                                         .executes(ctx -> removeSeed(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "key"))))))
                 .then(literal("ignored")
                         .then(literal("add")
-                                .then(argument("block", block())
-                                        .executes(ctx -> addBlock(CustomClientCommandSource.of(ctx.getSource()), ctx.getArgument("block", Block.class)))))
+                                .then(argument("block", word())
+                                        .suggests((context, builder) -> suggestMatching(Blocks.LATEST_REGISTRY.values().stream().map(Block::getName), builder))
+                                        .executes(ctx -> addBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))))
                         .then(literal("remove")
-                                .then(argument("block", block())
-                                        .suggests((context, builder) -> suggestMatching(Config.getIgnoredBlocks().stream().map(block -> block.getName().getString()), builder))
-                                        .executes(ctx -> removeBlock(CustomClientCommandSource.of(ctx.getSource()), ctx.getArgument("block", Block.class)))))
+                                .then(argument("block", word())
+                                        .suggests((context, builder) -> suggestMatching(Config.getIgnoredBlocks(), builder))
+                                        .executes(ctx -> removeBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))))
                         .then(literal("list")
                                 .executes(ctx -> listBlocks(CustomClientCommandSource.of(ctx.getSource())))));
     }
@@ -134,20 +132,20 @@ public class ConfigCommand extends ClientCommand {
     /**
      * If blocks are added to this list, they will be ignored in the overlay process.
     */
-    private int addBlock(CustomClientCommandSource source, Block block) {
+    private int addBlock(CustomClientCommandSource source, String block) {
         if (Config.addBlock(block)) {
-            Chat.print("", new TranslatableText("command.config.addBlock.success", block.getName()));
+            Chat.print("", new TranslatableText("command.config.addBlock.success", block));
         } else {
-            Chat.print("", new TranslatableText("command.config.addBlock.alreadyIgnored", block.getName()));
+            Chat.print("", new TranslatableText("command.config.addBlock.alreadyIgnored", block));
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private int removeBlock(CustomClientCommandSource source, Block block) {
+    private int removeBlock(CustomClientCommandSource source, String block) {
         if (Config.removeBlock(block)) {
-            Chat.print("", new TranslatableText("command.config.removeBlock.success", block.getName()));
+            Chat.print("", new TranslatableText("command.config.removeBlock.success", block));
         } else {
-            Chat.print("", new TranslatableText("command.config.removeBlock.notIgnored", block.getName()));
+            Chat.print("", new TranslatableText("command.config.removeBlock.notIgnored", block));
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -156,7 +154,7 @@ public class ConfigCommand extends ClientCommand {
         if (Config.getIgnoredBlocks().isEmpty()) {
             Chat.print("", new TranslatableText("command.config.listBlocks.empty"));
         } else {
-            Chat.print("", new TranslatableText("command.config.listBlocks", Config.getIgnoredBlocks().stream().map(block -> block.getName().getString()).collect(Collectors.joining(", "))));
+            Chat.print("", new TranslatableText("command.config.listBlocks", String.join(", ", Config.getIgnoredBlocks())));
         }
         return Command.SINGLE_SUCCESS;
     }

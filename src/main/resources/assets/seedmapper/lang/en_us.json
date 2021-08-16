@@ -8,6 +8,7 @@
   "commands.exceptions.structureNotFound": "Structure \"%s\" was not found.",
   "commands.exceptions.lootItemNotFound": "Loot item \"%s\" was not found.",
   "commands.exceptions.blockNotFound": "Block \"%s\" was not found.",
+  "commands.exceptions.cacheFailed": "Could not load cache.",
 
   "arguments.exceptions.tooFewArguments": "Too few arguments.",
 
@@ -48,6 +49,7 @@
 
   "command.seedoverlay.feedback.0": "Block at ",
   "command.seedoverlay.feedback.1": "Click to copy coordinates of ",
+  "command.seedoverlay.expected": "expected ",
   "command.seedoverlay.feedback.2": " doesn't match!",
   "command.seedoverlay.feedback.3": "A total of ",
   "command.seedoverlay.feedback.4": " blocks didn't match.",

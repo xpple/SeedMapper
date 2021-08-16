@@ -30,7 +30,7 @@ public class Config {
     private static final JsonParser parser = new JsonParser();
     private static JsonObject root = null;
 
-    private static final Set<Block> ignoredBlocks = new HashSet<>();
+    private static final Set<String> ignoredBlocks = new HashSet<>();
     private static final Map<String, Long> seeds = new HashMap<>();
 
     public static void init() {
@@ -46,7 +46,7 @@ public class Config {
                 }
                 if (root.has("ignoredBlocks")) {
                     for (JsonElement element : root.getAsJsonArray("ignoredBlocks")) {
-                        ignoredBlocks.add(Registry.BLOCK.get(new Identifier(element.getAsString())));
+                        ignoredBlocks.add(element.getAsString());
                     }
                 } else {
                     root.add("ignoredBlocks", new JsonArray());
@@ -73,7 +73,7 @@ public class Config {
             seeds.forEach((jsonSeeds::addProperty));
             root.add("seeds", jsonSeeds);
             JsonArray jsonIgnoredBlocks = new JsonArray();
-            ignoredBlocks.forEach(block -> jsonIgnoredBlocks.add(Registry.BLOCK.getId(block).getPath()));
+            ignoredBlocks.forEach(jsonIgnoredBlocks::add);
             root.add("ignoredBlocks", jsonIgnoredBlocks);
             final BufferedWriter writer = Files.newBufferedWriter(configPath);
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(root));
@@ -131,7 +131,7 @@ public class Config {
         return seeds;
     }
 
-    public static boolean addBlock(Block block) {
+    public static boolean addBlock(String block) {
         if (ignoredBlocks.contains(block)) {
             return false;
         }
@@ -140,7 +140,7 @@ public class Config {
         return true;
     }
 
-    public static boolean removeBlock(Block block) {
+    public static boolean removeBlock(String block) {
         if (ignoredBlocks.contains(block)) {
             ignoredBlocks.remove(block);
             save();
@@ -149,7 +149,7 @@ public class Config {
         return false;
     }
 
-    public static Set<Block> getIgnoredBlocks() {
+    public static Set<String> getIgnoredBlocks() {
         return ignoredBlocks;
     }
 

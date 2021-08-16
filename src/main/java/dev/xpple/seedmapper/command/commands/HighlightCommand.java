@@ -5,15 +5,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.util.CacheUtil;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.maps.SimpleOreMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
-import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.featureutils.decorator.ore.OreDecorator;
-import kaptainwutax.mcutils.block.Block;
-import kaptainwutax.mcutils.rand.ChunkRand;
-import kaptainwutax.mcutils.rand.seed.WorldSeed;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.util.data.SpiralIterator;
 import kaptainwutax.mcutils.util.pos.BPos;
@@ -25,7 +22,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -97,34 +98,21 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new BPos(range, 0, range).toChunkPos(), (x, y, z) -> new CPos(x, z));
         StreamSupport.stream(spiralIterator.spliterator(), false)
                 .map(cPos -> {
-                    Biome biome = biomeSource.getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);
-
-                    final Map<BPos, Block> generatedOres = new HashMap<>();
-                    SimpleOreMap.getForVersion(mcVersion).values().stream()
-                            .filter(oreDecorator -> oreDecorator.isValidDimension(dimension))
-                            .sorted(Comparator.comparingInt(oreDecorator -> oreDecorator.getSalt(biome)))
-                            .forEachOrdered(oreDecorator -> {
-                                if (!oreDecorator.canSpawn(cPos.getX(), cPos.getZ(), biomeSource)) {
-                                    return;
-                                }
-                                oreDecorator.generate(WorldSeed.toStructureSeed(seed), cPos.getX(), cPos.getZ(), biome, new ChunkRand(), terrainGenerator).positions
-                                        .forEach(bPos -> {
-                                            if (generatedOres.containsKey(bPos)) {
-                                                if (!oreDecorator.getReplaceBlocks(biome).contains(generatedOres.get(bPos))) {
-                                                    return;
-                                                }
-                                            }
-                                            generatedOres.put(bPos, oreDecorator.getOreBlock(biome));
-                                        });
-                            });
-                    return generatedOres.entrySet().stream()
-                            .filter(entry -> entry.getValue().getName().equals(blockString))
-                            .filter(entry -> entry.getKey().getY() > 0)
-                            .map(Map.Entry::getKey)
-                            .collect(Collectors.toSet());
+                    try {
+                        return CacheUtil.getOresForChunk(cPos, terrainGenerator);
+                    } catch (ExecutionException e) {
+                        return null;
+                    }
                 })
-                .limit(50)
-                .forEach(set -> set.forEach(pos -> boxes.add(new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1))));
+                .filter(Objects::nonNull)
+                .flatMap(map -> map.entrySet().stream())
+                .filter(entry -> entry.getValue().getName().equals(blockString))
+                .filter(entry -> entry.getKey().getY() > 0)
+                .limit(10000) // too many renders may cause lag
+                .forEach(entry -> {
+                    BPos bPos = entry.getKey();
+                    boxes.add(new Box(bPos.getX(), bPos.getY(), bPos.getZ(), bPos.getX() + 1, bPos.getY() + 1, bPos.getZ() + 1));
+                });
 
         int colour = switch (blockString) {
             case "diamond_ore" -> 0x00E1FF;
@@ -140,7 +128,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             default -> 0x00FF00;
         };
         boxes.forEach(box -> {
-            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, 60 * 5 * 20); // 5 minutes
+            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, 60 * 2 * 20); // 2 minutes
         });
 
         if (boxes.isEmpty()) {

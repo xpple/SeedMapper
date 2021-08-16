@@ -5,22 +5,29 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.util.CacheUtil;
 import dev.xpple.seedmapper.util.chat.Chat;
+import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.biome.Biomes;
 import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
+import kaptainwutax.mcutils.util.pos.BPos;
+import kaptainwutax.mcutils.util.pos.CPos;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -65,18 +72,32 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                     final ChunkPos chunkPos = chunk.getPos();
 
                     int newBlocks = 0;
+                    Map<BPos, Block> blocksForChunk;
+                    try {
+                        blocksForChunk = CacheUtil.getBlocksForChunk(new CPos(chunkPos.x, chunkPos.z), generator);
+                    } catch (ExecutionException e) {
+                        // error
+                        return;
+                    }
                     for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
                         mutable.setX(x);
                         for (int z = chunkPos.getStartZ(); z <= chunkPos.getEndZ(); z++) {
                             mutable.setZ(z);
-                            final Block[] column = generator.getColumnAt(x, z);
                             final Biome biome = biomeSource.getBiome(x, 0, z);
                             map.setBiome(biome);
-                            for (int y = 0; y < column.length; y++) {
+                            for (int y = 0; y < 255; y++) {
                                 mutable.setY(y);
-                                int seedBlockInt = column[y].getId();
-                                int terrainBlockInt = map.get(chunk.getBlockState(mutable).getBlock());
-                                if (seedBlockInt == terrainBlockInt) {
+                                net.minecraft.block.Block terrainBlock = chunk.getBlockState(mutable).getBlock();
+                                String terrainBlockName = Registry.BLOCK.getId(terrainBlock).getPath();
+                                if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
+                                    continue;
+                                }
+                                kaptainwutax.mcutils.block.Block seedBlock = blocksForChunk.get(new BPos(x, y, z));
+                                String seedBlockName = seedBlock.getName();
+                                if (terrainBlockName.equals(seedBlockName)) {
+                                    continue;
+                                }
+                                if (map.get(terrainBlockName) == map.get(seedBlockName)) {
                                     continue;
                                 }
                                 newBlocks++;
