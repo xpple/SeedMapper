@@ -5,7 +5,6 @@ import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.mcutils.block.Blocks;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -1659,7 +1658,6 @@ public class SimpleBlockMap {
                     .put(BEDROCK.getName(), STONE_ID)
                     .put(WATER.getName(), STONE_ID)
                     .put(LAVA.getName(), STONE_ID)
-                    .put(GRANITE.getName(), STONE_ID) // TODO: 16-8-2021 remove when SEED is updated
                     .put(DRIPSTONE_BLOCK.getName(), STONE_ID)
                     .put(POINTED_DRIPSTONE.getName(), AIR_ID)
                     .put(GLOW_LICHEN.getName(), STONE_ID)
