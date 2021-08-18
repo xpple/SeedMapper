@@ -11,6 +11,9 @@
 
   "arguments.exceptions.tooFewArguments": "Too few arguments.",
 
+  "command.clearscreen.empty": "Couldn't clear any renders.",
+  "command.clearscreen.success": "Cleared %d renders.",
+
   "command.config.setAutomate": "Set \"automate\" to %s.",
   "command.config.getAutomate": "\"automate\" is set to %s.",
   "command.config.toggleAutomate": "Toggled \"automate\" to %s.",
