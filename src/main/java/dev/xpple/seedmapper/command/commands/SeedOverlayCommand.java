@@ -86,16 +86,9 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         Set<Box> boxes = new HashSet<>();
         int blocks = 0;
 
-        // TODO: 17-8-2021 simplify when SEED is updated
         CPos centerChunk = new CPos(chunkPos.x, chunkPos.z);
-        Map<BPos, Block> blocksForChunk;
-        try {
-            blocksForChunk = CacheUtil.getBlocksForChunk(centerChunk, generator);
-        } catch (ExecutionException e) {
-            throw CACHE_FAILED_EXCEPTION.create();
-        }
         SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(1, 1), (x, y, z) -> new CPos(x, z));
-        blocksForChunk.putAll(StreamSupport.stream(spiralIterator.spliterator(), false)
+        Map<BPos, Block> blocksForChunk = StreamSupport.stream(spiralIterator.spliterator(), false)
                 .map(cPos -> {
                     try {
                         return CacheUtil.getBlocksForChunk(cPos, generator);
@@ -104,8 +97,8 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                     }
                 })
                 .filter(Objects::nonNull)
-                .flatMap(blockMap -> blockMap.entrySet().stream()) // TODO: 17-8-2021 figure out duplicate handling (below)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> replacement)));
+                .flatMap(blockMap -> blockMap.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
             mutable.setX(x);
             for (int z = chunkPos.getStartZ(); z <= chunkPos.getEndZ(); z++) {

@@ -19,8 +19,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class CacheUtil {
+
+    private static final Map<BPos, Block> oresForWorld = new HashMap<>();
 
     private static final LoadingCache<Pair<CPos, TerrainGenerator>, Map<BPos, Block>> oresForChunk = CacheBuilder.newBuilder()
             .build(new CacheLoader<>() {
@@ -31,7 +34,6 @@ public class CacheUtil {
                     final Biome biome = terrainGenerator.getBiomeSource().getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);
                     final MCVersion mcVersion = key.getSecond().getVersion();
 
-                    final Map<BPos, Block> generatedOres = new HashMap<>();
                     SimpleOreMap.getForVersion(mcVersion).values().stream()
                             .filter(oreDecorator -> oreDecorator.isValidDimension(terrainGenerator.getDimension()))
                             .sorted(Comparator.comparingInt(oreDecorator -> oreDecorator.getSalt(biome)))
@@ -41,22 +43,26 @@ public class CacheUtil {
                                 }
                                 oreDecorator.generate(WorldSeed.toStructureSeed(terrainGenerator.getWorldSeed()), cPos.getX(), cPos.getZ(), biome, new ChunkRand(), terrainGenerator).positions
                                         .forEach(bPos -> {
-                                            Block block = generatedOres.get(bPos);
+                                            Block block = oresForWorld.get(bPos);
                                             if (block != null) {
                                                 if (!oreDecorator.getReplaceBlocks(biome).contains(block)) {
                                                     return;
                                                 }
                                             }
                                             if (block != null && block.equals(Blocks.DEEPSLATE)) {
-                                                generatedOres.put(bPos, toDeepslateVariant(oreDecorator.getOreBlock(biome)));
+                                                oresForWorld.put(bPos, toDeepslateVariant(oreDecorator.getOreBlock(biome)));
                                             } else {
-                                                generatedOres.put(bPos, oreDecorator.getOreBlock(biome));
+                                                oresForWorld.put(bPos, oreDecorator.getOreBlock(biome));
                                             }
                                         });
                             });
-                    return generatedOres;
+                    return oresForWorld.entrySet().stream()
+                            .filter(entry -> entry.getKey().toChunkPos().equals(cPos))
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 }
             });
+
+    private static final Map<BPos, Block> blocksForWorld = new HashMap<>();
 
     private static final LoadingCache<Pair<CPos, TerrainGenerator>, Map<BPos, Block>> blocksForChunk = CacheBuilder.newBuilder()
             .build(new CacheLoader<>() {
@@ -70,17 +76,20 @@ public class CacheUtil {
                     final int cPosBeginZ = cPos.getZ() << 4;
                     final int cPosEndZ = cPosBeginZ + 16;
 
-                    final Map<BPos, Block> generatedBlocks = new HashMap<>();
                     for (int x = cPosBeginX; x < cPosEndX; x++) {
                         for (int z = cPosBeginZ; z < cPosEndZ; z++) {
                             final Block[] column = terrainGenerator.getBiomeColumnAt(x, z);
-                            for (int y = 0; y < column.length; y++) {
-                                generatedBlocks.put(new BPos(x, y, z), column[y]);
+                            final int length = column.length;
+                            for (int y = 0; y < 255; y++) {
+                                blocksForWorld.put(new BPos(x, y, z), y >= length ? Blocks.AIR : column[y]);
                             }
                         }
                     }
-                    generatedBlocks.putAll(getOresForChunk(cPos, terrainGenerator));
-                    return generatedBlocks;
+                    blocksForWorld.putAll(getOresForChunk(cPos, terrainGenerator));
+                    return blocksForWorld.entrySet().stream()
+                            .filter(entry -> entry.getKey().toChunkPos().equals(cPos))
+                            .peek(System.out::println)
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 }
             });
 

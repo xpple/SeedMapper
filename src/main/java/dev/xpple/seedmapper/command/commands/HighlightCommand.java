@@ -95,7 +95,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         final Set<Box> boxes = new HashSet<>();
         BlockPos center = new BlockPos(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
-        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new BPos(range, 0, range).toChunkPos(), (x, y, z) -> new CPos(x, z));
+        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(range, range), (x, y, z) -> new CPos(x, z));
         StreamSupport.stream(spiralIterator.spliterator(), false)
                 .map(cPos -> {
                     try {
