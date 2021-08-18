@@ -140,7 +140,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             default -> 0x00FF00;
         };
         boxes.forEach(box -> {
-            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, 60 * 5 * 20); // 5 minutes
+            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, 60 * 2 * 20); // 2 minutes
         });
 
         if (boxes.isEmpty()) {
