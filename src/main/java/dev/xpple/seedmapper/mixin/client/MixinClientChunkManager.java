@@ -34,7 +34,6 @@ import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 
@@ -43,19 +42,24 @@ public class MixinClientChunkManager implements SharedHelpers.Exceptions {
 
     @Inject(method = "loadChunkFromPacket", at = @At("RETURN"))
     private void onLoadChunk(int x, int z, BiomeArray biomes, PacketByteBuf buf, NbtCompound nbt, BitSet bitSet, CallbackInfoReturnable<WorldChunk> cir) throws CommandSyntaxException {
+        String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+        Dimension dimension = Dimension.fromString(dimensionPath);
+        if (dimension == null) {
+            return;
+        }
+        MCVersion mcVersion = MCVersion.fromString(CLIENT.getGame().getVersion().getName());
+        JsonElement element = Config.get("seed");
+        if (element instanceof JsonNull) {
+            return;
+        }
+        BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, element.getAsLong());
+        TerrainGenerator terrainGenerator = TerrainGenerator.of(dimension, biomeSource);
+        CPos cPos = new CPos(x, z);
+        if (CacheUtil.isNotCached(mcVersion, cPos)) {
+            CacheUtil.generateBlocksAt(cPos, terrainGenerator);
+        }
+
         if (Config.isEnabled("automate")) {
-            String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
-            Dimension dimension = Dimension.fromString(dimensionPath);
-            if (dimension == null) {
-                return;
-            }
-            MCVersion mcVersion = MCVersion.fromString(CLIENT.getGame().getVersion().getName());
-            JsonElement element = Config.get("seed");
-            if (element instanceof JsonNull) {
-                return;
-            }
-            BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, element.getAsLong());
-            TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
             SimpleBlockMap map = new SimpleBlockMap(dimension);
 
             BlockPos.Mutable mutable = new BlockPos.Mutable();
@@ -64,12 +68,7 @@ public class MixinClientChunkManager implements SharedHelpers.Exceptions {
             final ChunkPos chunkPos = chunk.getPos();
 
             Set<Box> boxes = new HashSet<>();
-            Map<BPos, Block> blocksForChunk;
-            try {
-                blocksForChunk = CacheUtil.getBlocksForChunk(new CPos(chunkPos.x, chunkPos.z), generator);
-            } catch (ExecutionException e) {
-                throw CACHE_FAILED_EXCEPTION.create();
-            }
+            Map<BPos, Block> blocksForWorld = CacheUtil.getBlocksForWorld(mcVersion);
             for (int _x = chunkPos.getStartX(); _x <= chunkPos.getEndX(); _x++) {
                 mutable.setX(_x);
                 for (int _z = chunkPos.getStartZ(); _z <= chunkPos.getEndZ(); _z++) {
@@ -83,7 +82,7 @@ public class MixinClientChunkManager implements SharedHelpers.Exceptions {
                         if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
                             continue;
                         }
-                        kaptainwutax.mcutils.block.Block seedBlock = blocksForChunk.get(new BPos(x, y, z));
+                        kaptainwutax.mcutils.block.Block seedBlock = blocksForWorld.get(new BPos(x, y, z));
                         String seedBlockName = seedBlock.getName();
                         if (terrainBlockName.equals(seedBlockName)) {
                             continue;

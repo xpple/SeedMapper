@@ -14,7 +14,6 @@ import kaptainwutax.biomeutils.biome.Biomes;
 import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
-import kaptainwutax.mcutils.util.data.SpiralIterator;
 import kaptainwutax.mcutils.util.pos.BPos;
 import kaptainwutax.mcutils.util.pos.CPos;
 import kaptainwutax.mcutils.version.MCVersion;
@@ -28,9 +27,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -76,7 +72,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         MCVersion mcVersion = SharedHelpers.getMCVersion(version);
 
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
-        TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
+        TerrainGenerator terrainGenerator = TerrainGenerator.of(dimension, biomeSource);
         final SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
         BlockPos.Mutable mutable = new BlockPos.Mutable();
         final BlockPos center = new BlockPos(source.getPosition());
@@ -86,19 +82,11 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         Set<Box> boxes = new HashSet<>();
         int blocks = 0;
 
-        CPos centerChunk = new CPos(chunkPos.x, chunkPos.z);
-        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(1, 1), (x, y, z) -> new CPos(x, z));
-        Map<BPos, Block> blocksForChunk = StreamSupport.stream(spiralIterator.spliterator(), false)
-                .map(cPos -> {
-                    try {
-                        return CacheUtil.getBlocksForChunk(cPos, generator);
-                    } catch (ExecutionException e) {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .flatMap(blockMap -> blockMap.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        CPos cPos = new CPos(chunkPos.x, chunkPos.z);
+        if (CacheUtil.isNotCached(mcVersion, cPos)) {
+            CacheUtil.generateBlocksAt(cPos, terrainGenerator);
+        }
+        Map<BPos, Block> blocksForWorld = CacheUtil.getBlocksForWorld(mcVersion);
         for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
             mutable.setX(x);
             for (int z = chunkPos.getStartZ(); z <= chunkPos.getEndZ(); z++) {
@@ -112,7 +100,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                     if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
                         continue;
                     }
-                    kaptainwutax.mcutils.block.Block seedBlock = blocksForChunk.get(new BPos(x, y, z));
+                    kaptainwutax.mcutils.block.Block seedBlock = blocksForWorld.get(new BPos(x, y, z));
                     String seedBlockName = seedBlock.getName();
                     if (terrainBlockName.equals(seedBlockName)) {
                         continue;

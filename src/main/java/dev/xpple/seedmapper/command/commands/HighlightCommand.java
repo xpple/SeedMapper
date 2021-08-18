@@ -12,7 +12,7 @@ import dev.xpple.seedmapper.util.render.RenderQueue;
 import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.featureutils.decorator.ore.OreDecorator;
 import kaptainwutax.mcutils.state.Dimension;
-import kaptainwutax.mcutils.util.data.SpiralIterator;
+import kaptainwutax.mcutils.util.math.DistanceMetric;
 import kaptainwutax.mcutils.util.pos.BPos;
 import kaptainwutax.mcutils.util.pos.CPos;
 import kaptainwutax.mcutils.version.MCVersion;
@@ -24,11 +24,8 @@ import net.minecraft.util.math.Box;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
@@ -95,19 +92,13 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         final Set<Box> boxes = new HashSet<>();
         BlockPos center = new BlockPos(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
-        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(range, range), (x, y, z) -> new CPos(x, z));
-        StreamSupport.stream(spiralIterator.spliterator(), false)
-                .map(cPos -> {
-                    try {
-                        return CacheUtil.getOresForChunk(cPos, terrainGenerator);
-                    } catch (ExecutionException e) {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .flatMap(map -> map.entrySet().stream())
+        if (CacheUtil.isNotCached(mcVersion, centerChunk)) {
+            CacheUtil.generateBlocksAt(centerChunk, terrainGenerator);
+        }
+        CacheUtil.getBlocksForWorld(mcVersion).entrySet().stream()
                 .filter(entry -> entry.getValue().getName().equals(blockString))
                 .filter(entry -> entry.getKey().getY() > 0)
+                .filter(entry -> entry.getKey().distanceTo(centerChunk, DistanceMetric.CHEBYSHEV) <= range)
                 .limit(10000) // too many renders may cause lag
                 .forEach(entry -> {
                     BPos bPos = entry.getKey();

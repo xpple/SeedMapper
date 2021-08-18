@@ -27,7 +27,6 @@ import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -63,7 +62,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                 .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2))
                 .forEach(mcVersion -> {
                     BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
-                    TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
+                    TerrainGenerator terrainGenerator = TerrainGenerator.of(dimension, biomeSource);
                     SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
 
                     BlockPos.Mutable mutable = new BlockPos.Mutable();
@@ -72,12 +71,11 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                     final ChunkPos chunkPos = chunk.getPos();
 
                     int newBlocks = 0;
-                    Map<BPos, Block> blocksForChunk;
-                    try {
-                        blocksForChunk = CacheUtil.getBlocksForChunk(new CPos(chunkPos.x, chunkPos.z), generator);
-                    } catch (ExecutionException e) {
-                        return;
+                    CPos cPos = new CPos(chunkPos.x, chunkPos.z);
+                    if (CacheUtil.isNotCached(mcVersion, cPos)) {
+                        CacheUtil.generateBlocksAt(cPos, terrainGenerator);
                     }
+                    Map<BPos, Block> blocksForWorld = CacheUtil.getBlocksForWorld(mcVersion);
                     for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
                         mutable.setX(x);
                         for (int z = chunkPos.getStartZ(); z <= chunkPos.getEndZ(); z++) {
@@ -91,7 +89,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                                 if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
                                     continue;
                                 }
-                                kaptainwutax.mcutils.block.Block seedBlock = blocksForChunk.get(new BPos(x, y, z));
+                                kaptainwutax.mcutils.block.Block seedBlock = blocksForWorld.get(new BPos(x, y, z));
                                 String seedBlockName = seedBlock.getName();
                                 if (terrainBlockName.equals(seedBlockName)) {
                                     continue;
