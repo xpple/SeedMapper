@@ -4,6 +4,7 @@ import dev.xpple.seedmapper.util.render.RenderQueue;
 import dev.xpple.seedmapper.util.render.Shape;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
@@ -14,6 +15,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
+
+import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 
 @Mixin(WorldRenderer.class)
 public class MixinWorldRenderer {
@@ -30,6 +33,9 @@ public class MixinWorldRenderer {
         Vec3d cameraPos = camera.getPos();
         shapeMap.values().forEach(shape -> {
             Vec3d pos = shape.getPos();
+            if (!CLIENT.world.getChunkManager().isChunkLoaded(MathHelper.floor(pos.x) >> 4, MathHelper.floor(pos.z) >> 4)) {
+                return;
+            }
             matrices.push();
             matrices.translate(pos.x - cameraPos.x, pos.y - cameraPos.y, pos.z - cameraPos.z);
             shape.render(matrices, this.bufferBuilders.getOutlineVertexConsumers(), tickDelta);
