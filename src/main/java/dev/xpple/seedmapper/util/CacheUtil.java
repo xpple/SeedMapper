@@ -88,7 +88,6 @@ public class CacheUtil {
                     blocksForWorld.putAll(getOresForChunk(cPos, terrainGenerator));
                     return blocksForWorld.entrySet().stream()
                             .filter(entry -> entry.getKey().toChunkPos().equals(cPos))
-                            .peek(System.out::println)
                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 }
             });
