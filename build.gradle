@@ -43,7 +43,16 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	extraLibs('com.github.hube12:SEED:master-SNAPSHOT')
+	extraLibs('com.github.kaptainwutax:MathUtils:5531c4a87b0f1bb85d1dab2bdd18ce375400626a') {transitive = false}
+	extraLibs('com.github.kaptainwutax:SeedUtils:b6a383113ce5d8d09a59e91b28ff064fb97c0709') {transitive = false}
+	extraLibs('com.github.kaptainwutax:MCUtils:1bc39b7c89498c8a045c6944f18465238f9bb4cc') {transitive = false}
+	extraLibs('com.github.kaptainwutax:NoiseUtils:2cf64e1d2e7e674fbf5b7247f16e8dc56ae2a31c') {transitive = false}
+	extraLibs('com.github.kaptainwutax:BiomeUtils:166f1757be3e1e036f0b25f9c063df3f863a1c49') {transitive = false}
+	extraLibs('com.github.kaptainwutax:TerrainUtils:605c46b94a5126df55bd347b82f277af443909c9') {transitive = false}
+	extraLibs('com.github.kaptainwutax:FeatureUtils:58bf7a94026ffc5c691605c953ef0b25a26ca471') {transitive = false}
+
+	extraLibs('com.github.kaptainwutax:ChunkRandomReversal:3fc82aab792d811fb296dcc28fe7177ac80c31f0') {transitive = false}
+	extraLibs('com.github.kaptainwutax:LattiCG:ec805b20bda95ead23216ab249a5ef5b8587e9e9') {transitive = false}
 	configurations.implementation.extendsFrom(configurations.extraLibs)
 }
 

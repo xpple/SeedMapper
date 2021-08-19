@@ -144,9 +144,6 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static BPos locateBiome(Predicate<Biome> predicate, BPos center, int radius, int increment, BiomeSource biomeSource) {
-        if (predicate.test(biomeSource.getBiome(center))) {
-            return center;
-        }
         SpiralIterator<BPos> spiralIterator = new SpiralIterator<>(center, new BPos(radius, 0, radius), increment, BPos::new);
         return StreamSupport.stream(spiralIterator.spliterator(), false)
                 .filter(bPos -> predicate.test(biomeSource.getBiome(bPos)))
