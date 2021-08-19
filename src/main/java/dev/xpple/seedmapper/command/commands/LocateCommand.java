@@ -165,13 +165,8 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
         MCVersion mcVersion = SharedHelpers.getMCVersion(version);
 
-        Structure<?, ?> desiredFeature = null;
-        for (Structure<?, ?> structure : SimpleStructureMap.getForVersion(mcVersion).values()) {
-            if (structure.getName().equals(structureName)) {
-                desiredFeature = structure;
-                break;
-            }
-        }
+        final Structure<?, ?> desiredFeature = SimpleStructureMap.getForVersion(mcVersion).values().stream().filter(structure -> structure.getName().equals(structureName)).findAny().orElse(null);
+
         if (desiredFeature == null) {
             throw STRUCTURE_NOT_FOUND_EXCEPTION.create(structureName);
         }
