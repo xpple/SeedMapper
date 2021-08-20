@@ -25,8 +25,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -79,7 +79,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
         final ChunkPos chunkPos = chunk.getPos();
 
-        Map<Box, Integer> boxes = new HashMap<>();
+        Set<Box> boxes = new HashSet<>();
         int blocks = 0;
         for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
             mutable.setX(x);
@@ -99,7 +99,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                     if (seedBlockInt == terrainBlockInt) {
                         continue;
                     }
-                    boxes.put(new Box(mutable), seedBlockInt);
+                    boxes.add(new Box(mutable));
                     Chat.print("", chain(
                             highlight(new TranslatableText("command.seedoverlay.feedback.0")),
                             copy(
@@ -119,25 +119,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                 }
             }
         }
-        for (Map.Entry<Box, Integer> entry : boxes.entrySet()) {
-            int colour = switch (entry.getValue()) {
-                // stone
-                case 1 -> 0xFFAAAAAA;
-                // bedrock
-                case 7 -> 0xFF313131;
-                // water
-                case 9 -> 0xFF213F7C;
-                // lava
-                case 11 -> 0xFFC6400B;
-                // netherrack
-                case 87 -> 0xFF501514;
-                // end_stone
-                case 121 -> 0xFFF5F8BB;
-                // air
-                default -> 0xFFFFFFFF;
-            };
-            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, entry.getKey(), entry.getKey(), colour, 30 * 20);
-        }
+        boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, 0XFFFB8919, 30 * 20)); // 30 seconds
         if (blocks > 0) {
             Chat.print("", chain(
                     highlight(new TranslatableText("command.seedoverlay.feedback.3")),
