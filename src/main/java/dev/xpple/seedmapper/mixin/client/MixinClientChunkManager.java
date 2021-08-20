@@ -18,6 +18,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
@@ -68,7 +69,7 @@ public class MixinClientChunkManager {
                         mutable.setY(y);
                         final BlockState blockState = chunk.getBlockState(mutable);
                         int terrainBlockInt = map.get(blockState.getBlock());
-                        if (Config.getIgnoredBlocks().contains(blockState.getBlock())) {
+                        if (Config.getIgnoredBlocks().contains(Registry.BLOCK.getId(blockState.getBlock()).getPath())) {
                             continue;
                         }
                         int seedBlockInt = column[y].getId();

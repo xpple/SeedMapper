@@ -21,6 +21,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Arrays;
@@ -90,7 +91,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                 for (int y = 0; y < column.length; y++) {
                     mutable.setY(y);
                     final BlockState blockState = chunk.getBlockState(mutable);
-                    if (Config.getIgnoredBlocks().contains(blockState.getBlock())) {
+                    if (Config.getIgnoredBlocks().contains(Registry.BLOCK.getId(blockState.getBlock()).getPath())) {
                         continue;
                     }
                     int terrainBlockInt = map.get(blockState.getBlock());
