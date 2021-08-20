@@ -1,12 +1,17 @@
+Always use the latest (stable) version!
 # SeedMapper
-In-game Minecraft mod that allows you to compare natural terrain to your current terrain. For questions please go to my 
-[Discord](https://discord.xpple.dev/).
+In-game Minecraft Fabric mod that allows you to do various things with the world seed. For reference, have a look at the 
+[features](#features) this mod has. Keep in mind though, this mod requires you to have access to the seed. If the seed 
+is not known, you may crack it using [SeedCrackerX](https://github.com/19MisterX98/SeedcrackerX/) by 19MisterX98. For 
+questions and support please head to my [Discord](https://discord.xpple.dev/).
 
 ## Disclaimer
-This mod does not yet support terrain generation of Minecraft version 1.10.2 and below. Support for these versions will be added later.
+This mod does not yet support terrain generation of Minecraft version 1.10.2 and below. Support for these versions will 
+be added later. A complete compatibility chart can be seen in the release description.
 
 ## Features
 Before using any of these commands, make sure the seed has been configured using `/seedmapper:config seed set <seed>`.
+
 ### SeedOverlay
 Usage: `/seedmapper:seedoverlay [<version>]`
 
@@ -21,15 +26,15 @@ Determines the Minecraft version the terrain has most likely been generated in. 
 SeedOverlay principle.
 
 ### Locate
-Usage: `/seedmapper:locate (biome <biome> <version>)|(feature (structure <structure> <version>)|(slimechunk <version>))|(loot <item> <version>)`
+Usage: `/seedmapper:locate (biome <biome> [<version>])|(feature (structure <structure> [<version>])|(slimechunk [<version>]))|(loot <item> [<version>])`
 
 Locates a given feature, biome or loot item closest to the player. Depending on the rarity of the biome or loot item, 
 this process can take at most 30 seconds.
 
 ### Highlight
-Usage: `/seedmapper:highlight block <block> <range> <version>`
+Usage: `/seedmapper:highlight block <block> [<range>] [<version>]`
 
-Highlights a given block in a 10 chunk radius. This highlight uses the seed to determine the locations of these blocks, 
+Highlights a given block in a radius. This highlight uses the seed to determine the locations of these blocks, 
 which means very few locations may not be valid (especially around caves).
 
 ### Source
