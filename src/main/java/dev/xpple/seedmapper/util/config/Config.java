@@ -47,7 +47,13 @@ public class Config {
                 } else {
                     root.add("ignoredBlocks", new JsonArray());
                 }
-                toggle("automate", false);
+                if (root.has("automate")) {
+                    toggle("automate", false);
+                } else {
+                    JsonObject automate = new JsonObject();
+                    automate.addProperty("enabled", false);
+                    root.add("automate", automate);
+                }
             } else {
                 root = new JsonObject();
                 JsonObject automate = new JsonObject();
@@ -64,16 +70,14 @@ public class Config {
     }
 
     public static void save() {
-        try {
+        try (final BufferedWriter writer = Files.newBufferedWriter(configPath)) {
             JsonObject jsonSeeds = new JsonObject();
-            seeds.forEach((jsonSeeds::addProperty));
+            seeds.forEach(jsonSeeds::addProperty);
             root.add("seeds", jsonSeeds);
             JsonArray jsonIgnoredBlocks = new JsonArray();
             ignoredBlocks.forEach(jsonIgnoredBlocks::add);
             root.add("ignoredBlocks", jsonIgnoredBlocks);
-            final BufferedWriter writer = Files.newBufferedWriter(configPath);
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(root));
-            writer.close();
         } catch (IOException e) {
             LOGGER.error("Could not save config file. Your client may crash due to this.");
         }
