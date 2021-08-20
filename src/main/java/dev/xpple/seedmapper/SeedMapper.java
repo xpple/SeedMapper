@@ -27,7 +27,6 @@ public class SeedMapper implements ClientModInitializer {
         MOD_PATH.toFile().mkdirs();
 
         Config.init();
-        registerCommands(ClientCommandManager.DISPATCHER);
     }
 
     public static void onTerminateClient() {

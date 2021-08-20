@@ -24,7 +24,7 @@ import static net.minecraft.command.CommandSource.suggestMatching;
 public class ConfigCommand extends ClientCommand {
 
     @Override
-    protected void register() {
+    protected void build() {
         argumentBuilder
                 .then(literal("automate")
                         .then(literal("set")

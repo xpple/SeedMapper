@@ -29,7 +29,7 @@ import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 public class TerrainVersionCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void register() {
+    protected void build() {
         argumentBuilder
                 .executes(ctx -> execute(CustomClientCommandSource.of(ctx.getSource())));
     }

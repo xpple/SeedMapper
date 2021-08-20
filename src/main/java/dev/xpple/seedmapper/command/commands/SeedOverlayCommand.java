@@ -38,7 +38,7 @@ import static net.minecraft.command.CommandSource.suggestMatching;
 public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void register() {
+    protected void build() {
         argumentBuilder
                 .then(argument("version", word())
                         .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2)).map(mcVersion -> mcVersion.name), builder))

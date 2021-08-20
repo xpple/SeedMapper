@@ -41,7 +41,7 @@ import static net.minecraft.command.CommandSource.suggestMatching;
 public class HighlightCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void register() {
+    protected void build() {
         final String[] blocks = new String[]{"ancient_debris", "andesite", "blackstone",/* "clay",*/ "coal_ore", "copper_ore", "deepslate", "diamond_ore", "diorite", "dirt", "emerald_ore", "gold_ore", "granite",/* "gravel",*/ "iron_ore", "lapis_ore", "magma_block", "nether_gold_ore", "quartz_ore", "redstone_ore",/* "sand",*/ "soulsand", "tuff"};
         argumentBuilder
                 .then(literal("block")

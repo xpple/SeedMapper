@@ -27,7 +27,7 @@ import static net.minecraft.command.argument.Vec3ArgumentType.vec3;
 
 public class SourceCommand extends ClientCommand {
     @Override
-    protected void register() {
+    protected void build() {
         LiteralCommandNode<FabricClientCommandSource> root = DISPATCHER.register(literal("source"));
         argumentBuilder
                 .then(literal("run")

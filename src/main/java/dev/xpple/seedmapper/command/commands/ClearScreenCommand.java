@@ -13,7 +13,7 @@ import java.util.Map;
 public class ClearScreenCommand extends ClientCommand {
 
     @Override
-    protected void register() {
+    protected void build() {
         argumentBuilder
                 .executes(ctx -> setAutomate(CustomClientCommandSource.of(ctx.getSource())));
     }
