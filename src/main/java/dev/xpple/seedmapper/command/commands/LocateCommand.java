@@ -289,13 +289,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
         SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
-        for (CPos next : spiralIterator) {
-            SlimeChunk.Data data = slimeChunk.at(next.getX(), next.getZ(), true);
-            if (data.testStart(seed, rand)) {
-                return next;
-            }
-        }
-        return null;
+        return StreamSupport.stream(spiralIterator.spliterator(), false)
+                .filter(cPos -> {
+                    SlimeChunk.Data data = slimeChunk.at(cPos.getX(), cPos.getZ(), true);
+                    return data.testStart(seed, rand);
+                })
+                .findAny().orElse(null);
     }
 
     private static int locateLoot(CustomClientCommandSource source, String itemString) throws CommandSyntaxException {
