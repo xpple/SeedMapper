@@ -68,7 +68,7 @@ public class Config {
             } else {
                 String standardJson = """
                         {
-                          "seed": 0,
+                          "seed": null,
                           "seeds": {},
                           "ignoredBlocks": [],
                           "automate": {
@@ -101,7 +101,7 @@ public class Config {
                 jsonColors.add(block, rgbArray);
             });
             root.add("colors", jsonColors);
-            writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(root));
+            writer.write(new GsonBuilder().setPrettyPrinting().serializeNulls().create().toJson(root));
         } catch (IOException e) {
             LOGGER.error("Could not save config file. Your client may crash due to this.");
         }
