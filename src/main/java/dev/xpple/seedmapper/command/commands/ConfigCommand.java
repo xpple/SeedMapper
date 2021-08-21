@@ -10,13 +10,13 @@ import dev.xpple.seedmapper.util.config.Config;
 import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.block.Blocks;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
@@ -220,7 +220,7 @@ public class ConfigCommand extends ClientCommand {
                         return new LiteralText(entry.getKey()).formatted(Arrays.stream(Formatting.values())
                                 .filter(f -> Objects.equals(f.getColorValue(), finalRgb))
                                 .findFirst().orElse(Formatting.STRIKETHROUGH));
-                    }).toArray(MutableText[]::new)),
+                    }).collect(Collectors.toList())),
                     highlight(".")
             ));
         }
