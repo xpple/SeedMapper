@@ -28,6 +28,7 @@ public class Config {
 
     private static final Set<String> ignoredBlocks = new HashSet<>();
     private static final Map<String, Long> seeds = new HashMap<>();
+    private static final Map<String, short[]> colors = new HashMap<>();
 
     public static void init() {
         try {
@@ -48,28 +49,42 @@ public class Config {
                     root.add("ignoredBlocks", new JsonArray());
                 }
                 if (root.has("automate")) {
-                    toggle("automate", false);
+                    JsonObject automate = root.getAsJsonObject("automate");
+                    automate.addProperty("enabled", false);
                 } else {
                     JsonObject automate = new JsonObject();
                     automate.addProperty("enabled", false);
                     root.add("automate", automate);
                 }
+                if (root.has("colors")) {
+                    for (Map.Entry<String, JsonElement> element : root.getAsJsonObject("colors").entrySet()) {
+                        JsonArray rgbArray = element.getValue().getAsJsonArray();
+                        colors.put(element.getKey(), new short[]{rgbArray.get(0).getAsShort(), rgbArray.get(1).getAsShort(), rgbArray.get(2).getAsShort()});
+                    }
+                } else {
+                    JsonObject colors = new JsonObject();
+                    root.add("colors", colors);
+                }
             } else {
-                root = new JsonObject();
-                JsonObject automate = new JsonObject();
-                automate.addProperty("enabled", false);
-                root.add("automate", automate);
-                root.add("seeds", new JsonObject());
-                root.add("seed", null);
-                root.add("ignoredBlocks", new JsonArray());
-                save();
+                String standardJson = """
+                        {
+                          "seed": 0,
+                          "seeds": {},
+                          "ignoredBlocks": [],
+                          "automate": {
+                            "enabled": false
+                          },
+                          "colors": {}
+                        }""";
+                root = parser.parse(standardJson).getAsJsonObject();
             }
+            save();
         } catch (IOException e) {
             LOGGER.error("Could not load config file. Your client may crash due to this.");
         }
     }
 
-    public static void save() {
+    private static void save() {
         try (final BufferedWriter writer = Files.newBufferedWriter(configPath)) {
             JsonObject jsonSeeds = new JsonObject();
             seeds.forEach(jsonSeeds::addProperty);
@@ -77,6 +92,15 @@ public class Config {
             JsonArray jsonIgnoredBlocks = new JsonArray();
             ignoredBlocks.forEach(jsonIgnoredBlocks::add);
             root.add("ignoredBlocks", jsonIgnoredBlocks);
+            JsonObject jsonColors = new JsonObject();
+            colors.forEach((block, shorts) -> {
+                JsonArray rgbArray = new JsonArray();
+                rgbArray.add(shorts[0]);
+                rgbArray.add(shorts[1]);
+                rgbArray.add(shorts[2]);
+                jsonColors.add(block, rgbArray);
+            });
+            root.add("colors", jsonColors);
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(root));
         } catch (IOException e) {
             LOGGER.error("Could not save config file. Your client may crash due to this.");
@@ -151,6 +175,28 @@ public class Config {
 
     public static Set<String> getIgnoredBlocks() {
         return ignoredBlocks;
+    }
+
+    public static boolean addColor(String key, short[] color) {
+        if (colors.containsKey(key)) {
+            return false;
+        }
+        colors.put(key, color);
+        save();
+        return true;
+    }
+
+    public static boolean removeColor(String key) {
+        if (colors.containsKey(key)) {
+            colors.remove(key);
+            save();
+            return true;
+        }
+        return false;
+    }
+
+    public static Map<String, short[]> getColors() {
+        return colors;
     }
 
     public static void set(String key, String value) {

@@ -11,11 +11,9 @@ import dev.xpple.seedmapper.util.render.RenderQueue;
 import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.biome.Biomes;
 import kaptainwutax.biomeutils.source.BiomeSource;
-import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.minecraft.block.BlockState;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -25,8 +23,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -79,27 +77,26 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
         final ChunkPos chunkPos = chunk.getPos();
 
-        Set<Box> boxes = new HashSet<>();
+        Map<Box, String> boxes = new HashMap<>();
         int blocks = 0;
         for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
             mutable.setX(x);
             for (int z = chunkPos.getStartZ(); z <= chunkPos.getEndZ(); z++) {
                 mutable.setZ(z);
-                final Block[] column = generator.getColumnAt(x, z);
+                final var column = generator.getColumnAt(x, z);
                 final Biome biome = biomeSource.getBiome(x, 0, z);
                 map.setBiome(biome);
                 for (int y = 0; y < column.length; y++) {
                     mutable.setY(y);
-                    final BlockState blockState = chunk.getBlockState(mutable);
-                    if (Config.getIgnoredBlocks().contains(Registry.BLOCK.getId(blockState.getBlock()).getPath())) {
+                    final var terrainBlock = chunk.getBlockState(mutable).getBlock();
+                    String terrainBlockName = Registry.BLOCK.getId(terrainBlock).getPath();
+                    if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
                         continue;
                     }
-                    int terrainBlockInt = map.get(blockState.getBlock());
-                    int seedBlockInt = column[y].getId();
-                    if (seedBlockInt == terrainBlockInt) {
+                    if (map.get(terrainBlock) == column[y].getId()) {
                         continue;
                     }
-                    boxes.add(new Box(mutable));
+                    boxes.put(new Box(mutable), terrainBlockName);
                     Chat.print("", chain(
                             highlight(new TranslatableText("command.seedoverlay.feedback.0")),
                             copy(
@@ -107,7 +104,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                                             accent("x: " + x + ", y: " + y + ", z: " + z),
                                             chain(
                                                     base(new TranslatableText("command.seedoverlay.feedback.1")),
-                                                    highlight(chunk.getBlockState(mutable).getBlock().getName())
+                                                    highlight(terrainBlockName)
                                             )
                                     ),
                                     String.format("%d %d %d", x, y ,z)
@@ -119,7 +116,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                 }
             }
         }
-        boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, 0XFFFB8919, 30 * 20)); // 30 seconds
+        boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Config.getColors().get(value),  30 * 20));
         if (blocks > 0) {
             Chat.print("", chain(
                     highlight(new TranslatableText("command.seedoverlay.feedback.3")),

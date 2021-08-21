@@ -30,6 +30,12 @@
   "command.config.removeBlock.notIgnored": "%s was never ignored.",
   "command.config.listBlocks": "Currently ignoring: %s.",
   "command.config.listBlocks.empty": "Currently not ignoring any blocks.",
+  "command.config.addColor.success": "Now overlaying %s in ",
+  "command.config.addColor.alreadyAdded": "Already overlaying %s with a custom color.",
+  "command.config.removeColor.success": "No longer overlaying %s with a custom color.",
+  "command.config.removeColor.notAdded": "%s was never overlayed with a custom color.",
+  "command.config.listColors": "Currently overlaying with a custom color: %s",
+  "command.config.listColors.empty": "Currently not overlaying any blocks with a custom color.",
 
   "command.highlight.block.noneFound": "No %s could be highlighted.",
   "command.highlight.block.success": "Highlighted %d %s.",

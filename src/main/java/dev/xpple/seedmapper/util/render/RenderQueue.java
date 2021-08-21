@@ -1,6 +1,7 @@
 package dev.xpple.seedmapper.util.render;
 
 import net.minecraft.util.math.Box;
+
 import java.util.*;
 
 public class RenderQueue {
@@ -14,6 +15,18 @@ public class RenderQueue {
 
     public static void addCuboid(Layer layer, Object key, Box cuboid, int color, int life) {
         add(layer, key, new Cuboid(cuboid, color), life);
+    }
+
+    public static void addCuboid(Layer layer, Object key, Box cuboid, short[] rgbArray, int life) {
+        if (rgbArray == null) {
+            addCuboid(layer, key, cuboid, 0xFB8919, life);
+        } else {
+            int rgb;
+            rgb = rgbArray[0];
+            rgb = (rgb << 8) + rgbArray[1];
+            rgb = (rgb << 8) + rgbArray[2];
+            addCuboid(layer, key, cuboid, rgb, life);
+        }
     }
 
     private static void doAdd(AddQueueEntry entry) {

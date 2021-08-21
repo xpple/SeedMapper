@@ -2,16 +2,14 @@ package dev.xpple.seedmapper.mixin.client;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
-import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.config.Config;
+import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import kaptainwutax.biomeutils.biome.Biome;
 import kaptainwutax.biomeutils.source.BiomeSource;
-import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.state.Dimension;
 import kaptainwutax.mcutils.version.MCVersion;
 import kaptainwutax.terrainutils.TerrainGenerator;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -27,8 +25,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.BitSet;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 
@@ -57,31 +55,29 @@ public class MixinClientChunkManager {
             final WorldChunk chunk = cir.getReturnValue();
             final ChunkPos chunkPos = chunk.getPos();
 
-            Set<Box> boxes = new HashSet<>();
+            Map<Box, String> boxes = new HashMap<>();
             for (int _x = chunkPos.getStartX(); _x <= chunkPos.getEndX(); _x++) {
                 mutable.setX(_x);
                 for (int _z = chunkPos.getStartZ(); _z <= chunkPos.getEndZ(); _z++) {
                     mutable.setZ(_z);
-                    final Block[] column = generator.getColumnAt(_x, _z);
+                    final var column = generator.getColumnAt(_x, _z);
                     final Biome biome = biomeSource.getBiome(_x, 0, _z);
                     map.setBiome(biome);
                     for (int y = 0; y < column.length; y++) {
                         mutable.setY(y);
-                        final BlockState blockState = chunk.getBlockState(mutable);
-                        int terrainBlockInt = map.get(blockState.getBlock());
-                        if (Config.getIgnoredBlocks().contains(Registry.BLOCK.getId(blockState.getBlock()).getPath())) {
+                        final var terrainBlock = chunk.getBlockState(mutable).getBlock();
+                        String terrainBlockName = Registry.BLOCK.getId(terrainBlock).getPath();
+                        if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
                             continue;
                         }
-                        int seedBlockInt = column[y].getId();
-                        if (seedBlockInt != terrainBlockInt) {
-                            boxes.add(new Box(mutable));
+                        if (map.get(terrainBlock) == column[y].getId()) {
+                            continue;
                         }
+                        boxes.put(new Box(mutable), terrainBlockName);
                     }
                 }
             }
-            for (Box box : boxes) {
-                RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, 0XFFFB8919, 30 * 20);
-            }
+            boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Config.getColors().get(value),  30 * 20));
         }
     }
 }

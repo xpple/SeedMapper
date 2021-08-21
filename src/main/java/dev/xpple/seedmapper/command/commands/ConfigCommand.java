@@ -9,7 +9,14 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
 import kaptainwutax.mcutils.block.Block;
 import kaptainwutax.mcutils.block.Blocks;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
@@ -17,9 +24,11 @@ import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
+import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 import static net.minecraft.command.CommandSource.suggestMatching;
+import static net.minecraft.command.argument.ColorArgumentType.color;
 
 public class ConfigCommand extends ClientCommand {
 
@@ -58,7 +67,19 @@ public class ConfigCommand extends ClientCommand {
                                         .suggests((context, builder) -> suggestMatching(Config.getIgnoredBlocks(), builder))
                                         .executes(ctx -> removeBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))))
                         .then(literal("list")
-                                .executes(ctx -> listBlocks(CustomClientCommandSource.of(ctx.getSource())))));
+                                .executes(ctx -> listBlocks(CustomClientCommandSource.of(ctx.getSource())))))
+                .then(literal("colors")
+                        .then(literal("add")
+                                .then(argument("block", word())
+                                        .suggests((context, builder) -> suggestMatching(Blocks.LATEST_REGISTRY.values().stream().map(Block::getName), builder))
+                                        .then(argument("color", color())
+                                                .executes(ctx -> addColor(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), ctx.getArgument("color", Formatting.class))))))
+                        .then(literal("remove")
+                                .then(argument("block", word())
+                                        .suggests((context, builder) -> suggestMatching(Config.getColors().keySet().stream(), builder))
+                                        .executes(ctx -> removeColor(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))))
+                        .then(literal("list")
+                                .executes(ctx -> listColors(CustomClientCommandSource.of(ctx.getSource())))));
     }
 
     @Override
@@ -155,6 +176,53 @@ public class ConfigCommand extends ClientCommand {
             Chat.print("", new TranslatableText("command.config.listBlocks.empty"));
         } else {
             Chat.print("", new TranslatableText("command.config.listBlocks", String.join(", ", Config.getIgnoredBlocks())));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    /**
+     * If blocks are added to this map, they will be overlayed with a custom color in the overlay process.
+     */
+    private int addColor(CustomClientCommandSource source, String block, Formatting color) {
+        final int colorValue = color.getColorValue();
+        short[] rgbArray = new short[]{(short) ((colorValue >> 16) & 0xFF), (short) ((colorValue >> 8) & 0xFF), (short) (colorValue & 0xFF)};
+        if (Config.addColor(block, rgbArray)) {
+            Chat.print("", new TranslatableText("command.config.addColor.success", block).append(new LiteralText(color.getName()).formatted(color)).append("."));
+        } else {
+            Chat.print("", new TranslatableText("command.config.addColor.alreadyAdded", block));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int removeColor(CustomClientCommandSource source, String block) {
+        if (Config.removeColor(block)) {
+            Chat.print("", new TranslatableText("command.config.removeColor.success", block));
+        } else {
+            Chat.print("", new TranslatableText("command.config.removeColor.notAdded", block));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int listColors(CustomClientCommandSource source) {
+        Map<String, short[]> map = Config.getColors();
+        if (map.isEmpty()) {
+            Chat.print("", new TranslatableText("command.config.listColors.empty"));
+        } else {
+            Chat.print("", chain(
+                    new TranslatableText("command.config.listColors"),
+                    join(highlight(", "), map.entrySet().stream().map(entry -> {
+                        final short[] rgbArray = entry.getValue();
+                        int rgb;
+                        rgb = rgbArray[0];
+                        rgb = (rgb << 8) + rgbArray[1];
+                        rgb = (rgb << 8) + rgbArray[2];
+                        final Integer finalRgb = rgb;
+                        return new LiteralText(entry.getKey()).formatted(Arrays.stream(Formatting.values())
+                                .filter(f -> Objects.equals(f.getColorValue(), finalRgb))
+                                .findFirst().orElse(Formatting.STRIKETHROUGH));
+                    }).toArray(MutableText[]::new)),
+                    highlight(".")
+            ));
         }
         return Command.SINGLE_SUCCESS;
     }
