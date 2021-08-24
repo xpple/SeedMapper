@@ -14,6 +14,20 @@ minecraft {
 	accessWidener = file('src/main/resources/seedmapper.aw')
 }
 
+def static getenv(path = ".env") {
+	def env = [:]
+
+	def file = new File(path)
+	if (file.exists()) {
+		file.eachLine { line ->
+			def (name, value) = line.tokenize("=")
+			env[name.trim()] = value.trim()
+		}
+	}
+
+	return env
+}
+
 repositories {
 	// Add repositories to retrieve artifacts from in here.
 	// You should only use this when depending on other mods because
@@ -23,6 +37,14 @@ repositories {
 	mavenCentral()
 	maven {
 		url 'https://jitpack.io'
+	}
+	maven {
+		url 'https://maven.pkg.github.com/xpple/clientarguments'
+		credentials {
+			def envs = getenv()
+			username = project.findProperty("gpr.user") ?:envs["USERNAME"]?: System.getenv("USERNAME")
+			password = project.findProperty("gpr.key") ?:envs["TOKEN"]?: System.getenv("TOKEN")
+		}
 	}
 }
 
@@ -42,6 +64,9 @@ dependencies {
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
+
+	modImplementation 'dev.xpple:clientarguments:b1.1'
+	include 'dev.xpple:clientarguments:b1.1'
 
 	extraLibs('com.github.kaptainwutax:MathUtils:5531c4a87b0f1bb85d1dab2bdd18ce375400626a') {transitive = false}
 	extraLibs('com.github.kaptainwutax:SeedUtils:b6a383113ce5d8d09a59e91b28ff064fb97c0709') {transitive = false}
