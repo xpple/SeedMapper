@@ -14,20 +14,6 @@ minecraft {
 	accessWidener = file('src/main/resources/seedmapper.aw')
 }
 
-def static getenv(path = ".env") {
-	def env = [:]
-
-	def file = new File(path)
-	if (file.exists()) {
-		file.eachLine { line ->
-			def (name, value) = line.tokenize("=")
-			env[name.trim()] = value.trim()
-		}
-	}
-
-	return env
-}
-
 repositories {
 	// Add repositories to retrieve artifacts from in here.
 	// You should only use this when depending on other mods because
@@ -41,9 +27,8 @@ repositories {
 	maven {
 		url 'https://maven.pkg.github.com/xpple/clientarguments'
 		credentials {
-			def envs = getenv()
-			username = project.findProperty("gpr.user") ?:envs["USERNAME"]?: System.getenv("USERNAME")
-			password = project.findProperty("gpr.key") ?:envs["TOKEN"]?: System.getenv("TOKEN")
+			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+			password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
 		}
 	}
 }
