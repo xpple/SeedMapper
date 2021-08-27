@@ -24,7 +24,7 @@ import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CColorArgumentType.color;
-import static dev.xpple.clientarguments.arguments.CColorArgumentType.getColor;
+import static dev.xpple.clientarguments.arguments.CColorArgumentType.getCColor;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
@@ -74,7 +74,7 @@ public class ConfigCommand extends ClientCommand {
                                 .then(argument("block", word())
                                         .suggests((context, builder) -> suggestMatching(Blocks.LATEST_REGISTRY.values().stream().map(Block::getName), builder))
                                         .then(argument("color", color())
-                                                .executes(ctx -> addColor(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getColor(ctx, "color"))))))
+                                                .executes(ctx -> addColor(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getCColor(ctx, "color"))))))
                         .then(literal("remove")
                                 .then(argument("block", word())
                                         .suggests((context, builder) -> suggestMatching(Config.getColors().keySet().stream(), builder))

@@ -9,12 +9,12 @@ import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.util.Identifier;
 
 import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.dimension;
-import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.getDimensionArgument;
+import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.getCDimensionArgument;
 import static dev.xpple.clientarguments.arguments.CEntityArgumentType.entity;
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.getEntity;
-import static dev.xpple.clientarguments.arguments.CRotationArgumentType.getRotation;
+import static dev.xpple.clientarguments.arguments.CEntityArgumentType.getCEntity;
+import static dev.xpple.clientarguments.arguments.CRotationArgumentType.getCRotation;
 import static dev.xpple.clientarguments.arguments.CRotationArgumentType.rotation;
-import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.getVec3;
+import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.getCVec3;
 import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.vec3;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
@@ -27,17 +27,17 @@ public class SourceCommand extends ClientCommand {
                         .redirect(DISPATCHER.getRoot(), CommandContext::getSource))
                 .then(literal("as")
                         .then(argument("entity", entity())
-                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withEntity(getEntity(ctx, "entity")))))
+                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withEntity(getCEntity(ctx, "entity")))))
                 .then(literal("positioned")
                         .then(argument("pos", vec3())
-                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withPosition(getVec3(ctx, "pos")))))
+                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withPosition(getCVec3(ctx, "pos")))))
                 .then(literal("rotated")
                         .then(argument("rot", rotation())
-                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withRotation(getRotation(ctx, "rot").toAbsoluteRotation(ctx.getSource())))))
+                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withRotation(getCRotation(ctx, "rot").toAbsoluteRotation(ctx.getSource())))))
                 .then(literal("in")
                         .then(argument("dimension", dimension())
                                 .redirect(root, ctx -> {
-                                    CDimensionArgumentType.DimensionArgument dimensionArgument = getDimensionArgument(ctx, "dimension");
+                                    CDimensionArgumentType.DimensionArgument dimensionArgument = getCDimensionArgument(ctx, "dimension");
                                     return CustomClientCommandSource.of(ctx.getSource()).withMeta("dimension", new Identifier(dimensionArgument.getName()));
                                 })));
     }

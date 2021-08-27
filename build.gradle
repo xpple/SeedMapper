@@ -25,11 +25,7 @@ repositories {
 		url 'https://jitpack.io'
 	}
 	maven {
-		url 'https://maven.pkg.github.com/xpple/clientarguments'
-		credentials {
-			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-			password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
-		}
+		url 'https://maven.xpple.dev/maven2/'
 	}
 }
 
@@ -50,8 +46,8 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	modImplementation 'dev.xpple:clientarguments:b1.1'
-	include 'dev.xpple:clientarguments:b1.1'
+	modImplementation 'dev.xpple:clientarguments:b1.1.2'
+	include 'dev.xpple:clientarguments:b1.1.2'
 
 	extraLibs('com.github.kaptainwutax:MathUtils:5531c4a87b0f1bb85d1dab2bdd18ce375400626a') {transitive = false}
 	extraLibs('com.github.kaptainwutax:SeedUtils:b6a383113ce5d8d09a59e91b28ff064fb97c0709') {transitive = false}
