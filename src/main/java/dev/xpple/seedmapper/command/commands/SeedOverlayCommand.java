@@ -38,9 +38,6 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
     @Override
     protected void build() {
         argumentBuilder
-                .then(argument("version", word())
-                        .suggests((ctx, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2)).map(mcVersion -> mcVersion.name), builder))
-                        .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "version"))))
                 .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource())));
     }
 
@@ -55,10 +52,6 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
     }
 
     private static int seedOverlay(CustomClientCommandSource source) throws CommandSyntaxException {
-        return seedOverlay(source, CLIENT.getGame().getVersion().getName());
-    }
-
-    private static int seedOverlay(CustomClientCommandSource source, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -67,7 +60,12 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
             dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
         }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion = SharedHelpers.getMCVersion(version);
+        MCVersion mcVersion;
+        if (source.getMeta("version") == null) {
+            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
+        } else {
+            mcVersion = (MCVersion) source.getMeta("version");
+        }
 
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
         TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);

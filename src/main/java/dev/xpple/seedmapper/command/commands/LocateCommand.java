@@ -59,32 +59,20 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 .then(literal("biome")
                         .then(argument("biome", word())
                                 .suggests((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.BIOME_KEY).getIds().stream().map(Identifier::getPath), builder))
-                                .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "biome")))
-                                .then(argument("version", word())
-                                        .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "biome"), getString(ctx, "version"))))))
+                                .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "biome")))))
                 .then(literal("feature")
                         .then(literal("structure")
                                 .then(argument("structure", word())
                                         .suggests((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.STRUCTURE_FEATURE_KEY).getIds().stream().map(Identifier::getPath), builder))
-                                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure")))
-                                        .then(argument("version", word())
-                                                .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                                .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure"), getString(ctx, "version"))))))
+                                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure")))))
                         .then(literal("slimechunk")
-                                .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))
-                                .then(argument("version", word())
-                                        .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                        .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "version"))))))
+                                .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
                 .then(literal("loot")
                         .then(argument("item", string())
                                 .suggests((context, builder) -> suggestMatching(lootableItems, builder))
                                 .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "item")))
                                 .then(argument("amount", integer(1))
-                                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "item"), getInteger(ctx, "amount")))
-                                        .then(argument("version", word())
-                                                .suggests((context, builder) -> suggestMatching(Arrays.stream(MCVersion.values()).map(mcVersion -> mcVersion.name), builder))
-                                                .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "item"), getInteger(ctx, "amount"), getString(ctx, "version")))))));
+                                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "item"), getInteger(ctx, "amount"))))));
     }
 
     @Override
@@ -93,10 +81,6 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateBiome(CustomClientCommandSource source, String biomeName) throws CommandSyntaxException {
-        return locateBiome(source, biomeName, CLIENT.getGame().getVersion().getName());
-    }
-
-    private static int locateBiome(CustomClientCommandSource source, String biomeName, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -105,7 +89,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
         }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion = SharedHelpers.getMCVersion(version);
+        MCVersion mcVersion;
+        if (source.getMeta("version") == null) {
+            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
+        } else {
+            mcVersion = (MCVersion) source.getMeta("version");
+        }
 
         Biome desiredBiome = null;
         for (Biome biome : Biomes.REGISTRY.values()) {
@@ -150,11 +139,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 .findAny().orElse(null);
     }
 
-    private static int locateStructure(CustomClientCommandSource source, String structure) throws CommandSyntaxException {
-        return locateStructure(source, structure, CLIENT.getGame().getVersion().getName());
-    }
-
-    private static int locateStructure(CustomClientCommandSource source, String structureName, String version) throws CommandSyntaxException {
+    private static int locateStructure(CustomClientCommandSource source, String structureName) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -163,7 +148,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
         }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion = SharedHelpers.getMCVersion(version);
+        MCVersion mcVersion;
+        if (source.getMeta("version") == null) {
+            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
+        } else {
+            mcVersion = (MCVersion) source.getMeta("version");
+        }
 
         final Structure<?, ?> desiredFeature = SimpleStructureMap.getForVersion(mcVersion).values().stream().filter(structure -> structure.getName().equals(structureName)).findAny().orElse(null);
 
@@ -238,10 +228,6 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
-        return locateSlimeChunk(source, CLIENT.getGame().getVersion().getName());
-    }
-
-    private static int locateSlimeChunk(CustomClientCommandSource source, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -250,7 +236,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
         }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion = SharedHelpers.getMCVersion(version);
+        MCVersion mcVersion;
+        if (source.getMeta("version") == null) {
+            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
+        } else {
+            mcVersion = (MCVersion) source.getMeta("version");
+        }
 
         BlockPos center = new BlockPos(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
@@ -302,10 +293,6 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateLoot(CustomClientCommandSource source, String itemString, int amount) throws CommandSyntaxException {
-        return locateLoot(source, itemString, amount, CLIENT.getGame().getVersion().getName());
-    }
-
-    private static int locateLoot(CustomClientCommandSource source, String itemString, int amount, String version) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -314,7 +301,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
         }
         Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion = SharedHelpers.getMCVersion(version);
+        MCVersion mcVersion;
+        if (source.getMeta("version") == null) {
+            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
+        } else {
+            mcVersion = (MCVersion) source.getMeta("version");
+        }
 
         final Item desiredItem = Items.getItems().values().stream().filter(item -> item.getName().equals(itemString)).findAny().orElse(null);
 

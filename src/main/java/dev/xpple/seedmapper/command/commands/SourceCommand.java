@@ -5,6 +5,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.xpple.clientarguments.arguments.CDimensionArgumentType;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
+import kaptainwutax.mcutils.version.MCVersion;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.util.Identifier;
 
@@ -16,9 +17,12 @@ import static dev.xpple.clientarguments.arguments.CRotationArgumentType.getCRota
 import static dev.xpple.clientarguments.arguments.CRotationArgumentType.rotation;
 import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.getCVec3;
 import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.vec3;
+import static dev.xpple.seedmapper.command.arguments.MCVersionArgumentType.getMcVersion;
+import static dev.xpple.seedmapper.command.arguments.MCVersionArgumentType.mcVersion;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class SourceCommand extends ClientCommand {
+
     @Override
     protected void build() {
         LiteralCommandNode<FabricClientCommandSource> root = DISPATCHER.register(literal("source"));
@@ -39,7 +43,10 @@ public class SourceCommand extends ClientCommand {
                                 .redirect(root, ctx -> {
                                     CDimensionArgumentType.DimensionArgument dimensionArgument = getCDimensionArgument(ctx, "dimension");
                                     return CustomClientCommandSource.of(ctx.getSource()).withMeta("dimension", new Identifier(dimensionArgument.getName()));
-                                })));
+                                })))
+                .then(literal("versioned")
+                        .then(argument("version", mcVersion().all())
+                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("version", getMcVersion(ctx, "version")))));
     }
 
     @Override
