@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
@@ -31,9 +32,11 @@ public class MixinWorldRenderer {
         }
 
         Vec3d cameraPos = camera.getPos();
-        shapeMap.values().forEach(shape -> {
+        Map<Object, Shape> tempMap = new HashMap<>(shapeMap);
+        tempMap.values().forEach(shape -> {
             Vec3d pos = shape.getPos();
             if (!CLIENT.world.getChunkManager().isChunkLoaded(MathHelper.floor(pos.x) >> 4, MathHelper.floor(pos.z) >> 4)) {
+                shapeMap.remove(shape);
                 return;
             }
             matrices.push();

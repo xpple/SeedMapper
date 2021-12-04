@@ -137,9 +137,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             case "ancient_debris" -> 0x964B19;
             default -> 0x00FF00;
         };
-        boxes.forEach(box -> {
-            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, 60 * 2 * 20); // 2 minutes
-        });
+        boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, -1));
 
         if (boxes.isEmpty()) {
             Chat.print("", new TranslatableText("command.highlight.block.noneFound", blockString));
