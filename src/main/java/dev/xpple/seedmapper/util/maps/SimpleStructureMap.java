@@ -1,7 +1,7 @@
 package dev.xpple.seedmapper.util.maps;
 
-import kaptainwutax.featureutils.structure.*;
-import kaptainwutax.mcutils.version.MCVersion;
+import com.seedfinding.mccore.version.MCVersion;
+import com.seedfinding.mcfeature.structure.*;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -2,31 +2,31 @@ package dev.xpple.seedmapper.mixin.client;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
+import com.seedfinding.mcbiome.biome.Biome;
+import com.seedfinding.mcbiome.source.BiomeSource;
+import com.seedfinding.mccore.state.Dimension;
+import com.seedfinding.mccore.version.MCVersion;
+import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
-import kaptainwutax.biomeutils.biome.Biome;
-import kaptainwutax.biomeutils.source.BiomeSource;
-import kaptainwutax.mcutils.state.Dimension;
-import kaptainwutax.mcutils.version.MCVersion;
-import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.ChunkData;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 
@@ -34,7 +34,7 @@ import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 public class MixinClientChunkManager {
 
     @Inject(method = "loadChunkFromPacket", at = @At("RETURN"))
-    private void onLoadChunk(int x, int z, BiomeArray biomes, PacketByteBuf buf, NbtCompound nbt, BitSet bitSet, CallbackInfoReturnable<WorldChunk> cir) {
+    private void onLoadChunk(int x, int z, PacketByteBuf buf, NbtCompound nbt, Consumer<ChunkData.BlockEntityVisitor> consumer, CallbackInfoReturnable<WorldChunk> cir) {
         if (Config.isEnabled("automate")) {
             String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
             Dimension dimension = Dimension.fromString(dimensionPath);

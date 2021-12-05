@@ -1,15 +1,15 @@
 package dev.xpple.seedmapper.util.maps;
 
 import com.google.common.collect.ImmutableMap;
-import kaptainwutax.biomeutils.biome.Biome;
-import kaptainwutax.mcutils.block.Blocks;
-import kaptainwutax.mcutils.state.Dimension;
-import kaptainwutax.mcutils.version.MCVersion;
+import com.seedfinding.mcbiome.biome.Biome;
+import com.seedfinding.mccore.block.Blocks;
+import com.seedfinding.mccore.state.Dimension;
+import com.seedfinding.mccore.version.MCVersion;
 import net.minecraft.block.Block;
 
 import java.util.Map;
 
-import static kaptainwutax.biomeutils.biome.Biomes.*;
+import static com.seedfinding.mcbiome.biome.Biomes.*;
 import static net.minecraft.block.Blocks.*;
 
 /**

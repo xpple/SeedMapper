@@ -5,9 +5,9 @@ import com.google.gson.JsonNull;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.seedfinding.mccore.state.Dimension;
+import com.seedfinding.mccore.version.MCVersion;
 import dev.xpple.seedmapper.util.config.Config;
-import kaptainwutax.mcutils.state.Dimension;
-import kaptainwutax.mcutils.version.MCVersion;
 import net.minecraft.text.TranslatableText;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;

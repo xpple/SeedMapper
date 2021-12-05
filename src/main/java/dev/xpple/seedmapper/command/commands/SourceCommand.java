@@ -5,7 +5,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.xpple.clientarguments.arguments.CDimensionArgumentType;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
-import kaptainwutax.mcutils.version.MCVersion;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.util.Identifier;
 
