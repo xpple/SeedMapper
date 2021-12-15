@@ -49,18 +49,18 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	modImplementation 'dev.xpple:clientarguments:b1.1.3'
-	include 'dev.xpple:clientarguments:b1.1.3'
+	modImplementation 'dev.xpple:clientarguments:b1.1.4'
+	include 'dev.xpple:clientarguments:b1.1.4'
 
-	extraLibs('com.seedfinding:mc_math:LATEST') {transitive = false}
-	extraLibs('com.seedfinding:mc_seed:LATEST') {transitive = false}
-	extraLibs('com.seedfinding:mc_core:LATEST') {transitive = false}
-	extraLibs('com.seedfinding:mc_noise:LATEST') {transitive = false}
-	extraLibs('com.seedfinding:mc_biome:LATEST') {transitive = false}
-	extraLibs('com.seedfinding:mc_terrain:LATEST') {transitive = false}
-	extraLibs('com.seedfinding:mc_feature:LATEST') {transitive = false}
+	extraLibs('com.seedfinding:mc_math:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_seed:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_core:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_noise:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_biome:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_terrain:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_feature:1.0.0') {transitive = false}
 
-	extraLibs('com.seedfinding:mc_reversal:LATEST') {transitive = false}
+	extraLibs('com.seedfinding:mc_reversal:1.0.0') {transitive = false}
 	configurations.implementation.extendsFrom(configurations.extraLibs)
 }
 
