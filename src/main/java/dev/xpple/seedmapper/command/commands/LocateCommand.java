@@ -17,7 +17,6 @@ import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.Feature;
 import com.seedfinding.mcfeature.loot.ILoot;
 import com.seedfinding.mcfeature.loot.item.Item;
-import com.seedfinding.mcfeature.loot.item.Items;
 import com.seedfinding.mcfeature.misc.SlimeChunk;
 import com.seedfinding.mcfeature.structure.*;
 import com.seedfinding.mcfeature.structure.generator.Generator;
@@ -45,8 +44,11 @@ import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
+import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.enchantedItem;
+import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.getEnchantedItem;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
@@ -56,7 +58,6 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
     @Override
     protected void build() {
-        String[] lootableItems = new String[]{"diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings", "diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings"};
         argumentBuilder
                 .then(literal("biome")
                         .then(argument("biome", word())
@@ -70,11 +71,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                         .then(literal("slimechunk")
                                 .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
                 .then(literal("loot")
-                        .then(argument("item", string())
-                                .suggests((context, builder) -> suggestMatching(lootableItems, builder))
-                                .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "item")))
-                                .then(argument("amount", integer(1))
-                                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "item"), getInteger(ctx, "amount"))))));
+                        .then(argument("amount", integer(1))
+                                .then(argument("item", enchantedItem().loot())
+                                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getEnchantedItem(ctx, "item"))))));
     }
 
     @Override
@@ -288,11 +287,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 .findAny().orElse(null);
     }
 
-    private static int locateLoot(CustomClientCommandSource source, String itemString) throws CommandSyntaxException {
-        return locateLoot(source, itemString, 1);
-    }
-
-    private static int locateLoot(CustomClientCommandSource source, String itemString, int amount) throws CommandSyntaxException {
+    private static int locateLoot(CustomClientCommandSource source, int amount, Pair<String, Predicate<Item>> item) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -308,9 +303,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             mcVersion = (MCVersion) source.getMeta("version");
         }
 
-        final Item desiredItem = Items.getItems().values().stream()
-                .filter(item -> item.getName().equals(itemString))
-                .findAny().orElseThrow(() -> LOOT_ITEM_NOT_FOUND_EXCEPTION.create(itemString));
+        String itemString = item.getFirst();
 
         Set<RegionStructure<?, ?>> lootableStructures = SimpleStructureMap.getForVersion(mcVersion).values().stream()
                 .filter(structure -> structure instanceof ILoot)
@@ -322,17 +315,17 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BlockPos center = new BlockPos(source.getPosition());
 
-        Set<BPos> lootPositions = locateLoot(item -> item.getName().equals(desiredItem.getName()), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
+        Set<BPos> lootPositions = locateLoot(item.getSecond(), i -> i.getName().equals(itemString), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
         if (lootPositions == null || lootPositions.isEmpty()) {
-            Chat.print("", new TranslatableText("command.locate.loot.noneFound", desiredItem.getName()));
+            Chat.print("", new TranslatableText("command.locate.loot.noneFound", itemString));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.loot.success.0", amount, desiredItem.getName())),
+                    highlight(new TranslatableText("command.locate.loot.success.0", amount, itemString)),
                     join(highlight(", "), lootPositions.stream().map(bPos ->
                             copy(
                                     hover(
                                             accent("x: " + bPos.getX() + ", z: " + bPos.getZ()),
-                                            base(new TranslatableText("command.locate.loot.success.1", desiredItem.getName()))
+                                            base(new TranslatableText("command.locate.loot.success.1", itemString))
                                     ),
                                     String.format("%d ~ %d", bPos.getX(), bPos.getZ())
                             )
@@ -343,7 +336,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         return Command.SINGLE_SUCCESS;
     }
 
-    private static Set<BPos> locateLoot(Predicate<Item> item, int amount, BPos center, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
+    private static Set<BPos> locateLoot(Predicate<Item> item, Predicate<Item> nameEquals, int amount, BPos center, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
         AtomicInteger itemsFound = new AtomicInteger(0);
         AtomicBoolean initial = new AtomicBoolean(true);
         for (RegionStructure<?, ?> structure : structures) {
@@ -357,7 +350,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 continue;
             }
             Generator structureGenerator = factory.create(biomeSource.getVersion());
-            if (structureGenerator.getPossibleLootItems().stream().noneMatch(item)) {
+            if (structureGenerator.getPossibleLootItems().stream().noneMatch(nameEquals)) {
                 continue;
             }
 

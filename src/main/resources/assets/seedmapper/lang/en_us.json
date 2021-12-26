@@ -6,8 +6,14 @@
   "commands.exceptions.invalidDimension": "Invalid dimension.",
   "commands.exceptions.biomeNotFound": "Biome \"%s\" was not found.",
   "commands.exceptions.structureNotFound": "Structure \"%s\" was not found.",
+  "commands.exceptions.lootNotFound": "Item \"%s\" was not found.",
   "commands.exceptions.lootItemNotFound": "Loot item \"%s\" was not found.",
   "commands.exceptions.blockNotFound": "Block \"%s\" was not found.",
+  "commands.exceptions.expectedWithOrWithout": "Expected \"with\" or \"without\".",
+  "commands.exceptions.unknownEnchantment": "Unknown enchantment \"%s\".",
+  "commands.exceptions.levelOutOfBounds": "Level out of bounds.",
+  "commands.exceptions.incompatibleEnchantment": "Incompatible enchantment.",
+  "commands.exceptions.incompleteArgument": "Incomplete argument.",
 
   "arguments.exceptions.tooFewArguments": "Too few arguments.",
 
