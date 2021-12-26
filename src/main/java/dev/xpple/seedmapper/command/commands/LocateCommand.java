@@ -27,6 +27,8 @@ import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
+import dev.xpple.seedmapper.util.features.NetherRuinedPortal;
+import dev.xpple.seedmapper.util.features.OverworldRuinedPortal;
 import dev.xpple.seedmapper.util.maps.SimpleStructureMap;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -35,10 +37,10 @@ import net.minecraft.util.registry.Registry;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
@@ -63,7 +65,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 .then(literal("feature")
                         .then(literal("structure")
                                 .then(argument("structure", word())
-                                        .suggests((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.STRUCTURE_FEATURE_KEY).getIds().stream().map(Identifier::getPath), builder))
+                                        .suggests((context, builder) -> suggestMatching(SimpleStructureMap.REGISTRY.keySet(), builder))
                                         .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure")))))
                         .then(literal("slimechunk")
                                 .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
@@ -155,11 +157,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             mcVersion = (MCVersion) source.getMeta("version");
         }
 
-        final Structure<?, ?> desiredFeature = SimpleStructureMap.getForVersion(mcVersion).values().stream().filter(structure -> structure.getName().equals(structureName)).findAny().orElse(null);
-
-        if (desiredFeature == null) {
-            throw STRUCTURE_NOT_FOUND_EXCEPTION.create(structureName);
-        }
+        final Structure<?, ?> desiredFeature = SimpleStructureMap.getForVersion(mcVersion).values().stream()
+                .filter(structure -> structure.getName().equals(structureName))
+                .findAny().orElseThrow(() -> STRUCTURE_NOT_FOUND_EXCEPTION.create(structureName));
 
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
         if (!desiredFeature.isValidDimension(biomeSource.getDimension())) {
@@ -308,11 +308,10 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             mcVersion = (MCVersion) source.getMeta("version");
         }
 
-        final Item desiredItem = Items.getItems().values().stream().filter(item -> item.getName().equals(itemString)).findAny().orElse(null);
+        final Item desiredItem = Items.getItems().values().stream()
+                .filter(item -> item.getName().equals(itemString))
+                .findAny().orElseThrow(() -> LOOT_ITEM_NOT_FOUND_EXCEPTION.create(itemString));
 
-        if (desiredItem == null) {
-            throw LOOT_ITEM_NOT_FOUND_EXCEPTION.create(itemString);
-        }
         Set<RegionStructure<?, ?>> lootableStructures = SimpleStructureMap.getForVersion(mcVersion).values().stream()
                 .filter(structure -> structure instanceof ILoot)
                 .filter(structure -> structure.isValidDimension(dimension))
@@ -346,10 +345,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
     private static Set<BPos> locateLoot(Predicate<Item> item, int amount, BPos center, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
         AtomicInteger itemsFound = new AtomicInteger(0);
+        AtomicBoolean initial = new AtomicBoolean(true);
         for (RegionStructure<?, ?> structure : structures) {
             Generator.GeneratorFactory<?> factory;
-            if (structure.getName().equals("endcity")) {
-                factory = Generators.get(EndCity.class);
+            if (structure instanceof OverworldRuinedPortal || structure instanceof NetherRuinedPortal) {
+                factory = Generators.get(RuinedPortal.class);
             } else {
                 factory = Generators.get(structure.getClass());
             }
@@ -366,17 +366,15 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
             final int border = 30_000_000;
             SpiralIterator<RPos> spiralIterator = new SpiralIterator<>(center.toRegionPos(regionSize), new BPos(-border, 0, -border).toRegionPos(regionSize), new BPos(border, 0, border).toRegionPos(regionSize), 1, (x, y, z) -> new RPos(x, z, regionSize));
-            Stream<Pair<CPos, Integer>> positions = StreamSupport.stream(spiralIterator.spliterator(), false)
+            return StreamSupport.stream(spiralIterator.spliterator(), false)
                     .map(cPos -> structure.getInRegion(biomeSource.getWorldSeed(), cPos.getX(), cPos.getZ(), chunkRand))
                     .filter(Objects::nonNull)
                     .filter(cPos -> (structure.canSpawn(cPos, biomeSource)) && (terrainGenerator == null || structure.canGenerate(cPos, terrainGenerator)))
                     .filter(cPos -> structureGenerator.generate(terrainGenerator, cPos, chunkRand))
                     .map(cPos -> new Pair<>(cPos, ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), structureGenerator, chunkRand, false).stream()
                             .mapToInt(chest -> chest.getCount(item)).sum()))
-                    .filter(pair -> pair.getSecond() > 0);
-
-            return positions
-                    .takeWhile(pair -> itemsFound.addAndGet(pair.getSecond()) <= amount)
+                    .filter(pair -> pair.getSecond() > 0)
+                    .takeWhile(pair -> itemsFound.addAndGet(pair.getSecond()) < amount || initial.getAndSet(false))
                     .map(Pair::getFirst)
                     .map(cPos -> cPos.toBlockPos().add(9, 0, 9))
                     .collect(Collectors.toSet());
