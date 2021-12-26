@@ -351,7 +351,6 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             }
             Generator structureGenerator = factory.create(biomeSource.getVersion());
             if (structureGenerator.getPossibleLootItems().stream().noneMatch(nameEquals)) {
-                System.out.println("s");
                 continue;
             }
 
