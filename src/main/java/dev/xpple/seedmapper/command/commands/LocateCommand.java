@@ -2,31 +2,34 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.seedfinding.mcbiome.biome.Biome;
+import com.seedfinding.mcbiome.biome.Biomes;
+import com.seedfinding.mcbiome.source.BiomeSource;
+import com.seedfinding.mccore.rand.ChunkRand;
+import com.seedfinding.mccore.rand.seed.WorldSeed;
+import com.seedfinding.mccore.state.Dimension;
+import com.seedfinding.mccore.util.data.Pair;
+import com.seedfinding.mccore.util.data.SpiralIterator;
+import com.seedfinding.mccore.util.pos.BPos;
+import com.seedfinding.mccore.util.pos.CPos;
+import com.seedfinding.mccore.util.pos.RPos;
+import com.seedfinding.mccore.version.MCVersion;
+import com.seedfinding.mcfeature.Feature;
+import com.seedfinding.mcfeature.loot.ILoot;
+import com.seedfinding.mcfeature.loot.item.Item;
+import com.seedfinding.mcfeature.loot.item.Items;
+import com.seedfinding.mcfeature.misc.SlimeChunk;
+import com.seedfinding.mcfeature.structure.*;
+import com.seedfinding.mcfeature.structure.generator.Generator;
+import com.seedfinding.mcfeature.structure.generator.Generators;
+import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
+import dev.xpple.seedmapper.util.features.NetherRuinedPortal;
+import dev.xpple.seedmapper.util.features.OverworldRuinedPortal;
 import dev.xpple.seedmapper.util.maps.SimpleStructureMap;
-import kaptainwutax.biomeutils.biome.Biome;
-import kaptainwutax.biomeutils.biome.Biomes;
-import kaptainwutax.biomeutils.source.BiomeSource;
-import kaptainwutax.featureutils.Feature;
-import kaptainwutax.featureutils.loot.ILoot;
-import kaptainwutax.featureutils.loot.item.Item;
-import kaptainwutax.featureutils.misc.SlimeChunk;
-import kaptainwutax.featureutils.structure.*;
-import kaptainwutax.featureutils.structure.generator.Generator;
-import kaptainwutax.featureutils.structure.generator.Generators;
-import kaptainwutax.mcutils.rand.ChunkRand;
-import kaptainwutax.mcutils.rand.seed.WorldSeed;
-import kaptainwutax.mcutils.state.Dimension;
-import kaptainwutax.mcutils.util.data.Pair;
-import kaptainwutax.mcutils.util.data.SpiralIterator;
-import kaptainwutax.mcutils.util.pos.BPos;
-import kaptainwutax.mcutils.util.pos.CPos;
-import kaptainwutax.mcutils.util.pos.RPos;
-import kaptainwutax.mcutils.version.MCVersion;
-import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -34,10 +37,10 @@ import net.minecraft.util.registry.Registry;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
@@ -64,7 +67,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 .then(literal("feature")
                         .then(literal("structure")
                                 .then(argument("structure", word())
-                                        .suggests((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.STRUCTURE_FEATURE_KEY).getIds().stream().map(Identifier::getPath), builder))
+                                        .suggests((context, builder) -> suggestMatching(SimpleStructureMap.REGISTRY.keySet(), builder))
                                         .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure")))))
                         .then(literal("slimechunk")
                                 .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
@@ -154,11 +157,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             mcVersion = (MCVersion) source.getMeta("version");
         }
 
-        final Structure<?, ?> desiredFeature = SimpleStructureMap.getForVersion(mcVersion).values().stream().filter(structure -> structure.getName().equals(structureName)).findAny().orElse(null);
-
-        if (desiredFeature == null) {
-            throw STRUCTURE_NOT_FOUND_EXCEPTION.create(structureName);
-        }
+        final Structure<?, ?> desiredFeature = SimpleStructureMap.getForVersion(mcVersion).values().stream()
+                .filter(structure -> structure.getName().equals(structureName))
+                .findAny().orElseThrow(() -> STRUCTURE_NOT_FOUND_EXCEPTION.create(structureName));
 
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
         if (!desiredFeature.isValidDimension(biomeSource.getDimension())) {
@@ -338,10 +339,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
     private static Set<BPos> locateLoot(Predicate<Item> item, Predicate<Item> nameEquals, int amount, BPos center, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
         AtomicInteger itemsFound = new AtomicInteger(0);
+        AtomicBoolean initial = new AtomicBoolean(true);
         for (RegionStructure<?, ?> structure : structures) {
             Generator.GeneratorFactory<?> factory;
-            if (structure.getName().equals("endcity")) {
-                factory = Generators.get(EndCity.class);
+            if (structure instanceof OverworldRuinedPortal || structure instanceof NetherRuinedPortal) {
+                factory = Generators.get(RuinedPortal.class);
             } else {
                 factory = Generators.get(structure.getClass());
             }
@@ -367,7 +369,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                     .map(cPos -> new Pair<>(cPos, ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), structureGenerator, chunkRand, false).stream()
                             .mapToInt(chest -> chest.getCount(item)).sum()))
                     .filter(pair -> pair.getSecond() > 0)
-                    .takeWhile(pair -> itemsFound.addAndGet(pair.getSecond()) <= amount)
+                    .takeWhile(pair -> itemsFound.addAndGet(pair.getSecond()) < amount || initial.getAndSet(false))
                     .map(Pair::getFirst)
                     .map(cPos -> cPos.toBlockPos().add(9, 0, 9))
                     .collect(Collectors.toSet());

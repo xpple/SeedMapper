@@ -1,9 +1,9 @@
 package dev.xpple.seedmapper.util.maps;
 
-import kaptainwutax.featureutils.decorator.ore.OreDecorator;
-import kaptainwutax.featureutils.decorator.ore.nether.*;
-import kaptainwutax.featureutils.decorator.ore.overworld.*;
-import kaptainwutax.mcutils.version.MCVersion;
+import com.seedfinding.mccore.version.MCVersion;
+import com.seedfinding.mcfeature.decorator.ore.OreDecorator;
+import com.seedfinding.mcfeature.decorator.ore.nether.*;
+import com.seedfinding.mcfeature.decorator.ore.overworld.*;
 
 import java.util.HashMap;
 import java.util.Map;

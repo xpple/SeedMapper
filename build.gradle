@@ -1,10 +1,10 @@
 plugins {
-	id 'fabric-loom' version '0.8-SNAPSHOT'
+	id 'fabric-loom' version '0.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -27,6 +27,9 @@ repositories {
 	maven {
 		url 'https://maven.xpple.dev/maven2/'
 	}
+	maven {
+		url 'https://nexus.seedfinding.com/repository/maven-seedfinding'
+	}
 }
 
 configurations {
@@ -46,19 +49,18 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	modImplementation 'dev.xpple:clientarguments:b1.1.2'
-	include 'dev.xpple:clientarguments:b1.1.2'
+	modImplementation 'dev.xpple:clientarguments:b1.1.4'
+	include 'dev.xpple:clientarguments:b1.1.4'
 
-	extraLibs('com.github.kaptainwutax:MathUtils:5531c4a87b0f1bb85d1dab2bdd18ce375400626a') {transitive = false}
-	extraLibs('com.github.kaptainwutax:SeedUtils:b6a383113ce5d8d09a59e91b28ff064fb97c0709') {transitive = false}
-	extraLibs('com.github.kaptainwutax:MCUtils:1bc39b7c89498c8a045c6944f18465238f9bb4cc') {transitive = false}
-	extraLibs('com.github.kaptainwutax:NoiseUtils:2cf64e1d2e7e674fbf5b7247f16e8dc56ae2a31c') {transitive = false}
-	extraLibs('com.github.kaptainwutax:BiomeUtils:166f1757be3e1e036f0b25f9c063df3f863a1c49') {transitive = false}
-	extraLibs('com.github.kaptainwutax:TerrainUtils:605c46b94a5126df55bd347b82f277af443909c9') {transitive = false}
-	extraLibs('com.github.kaptainwutax:FeatureUtils:58bf7a94026ffc5c691605c953ef0b25a26ca471') {transitive = false}
+	extraLibs('com.seedfinding:mc_math:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_seed:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_core:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_noise:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_biome:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_terrain:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_feature:1.0.0') {transitive = false}
 
-	extraLibs('com.github.kaptainwutax:ChunkRandomReversal:3fc82aab792d811fb296dcc28fe7177ac80c31f0') {transitive = false}
-	extraLibs('com.github.kaptainwutax:LattiCG:ec805b20bda95ead23216ab249a5ef5b8587e9e9') {transitive = false}
+	extraLibs('com.seedfinding:mc_reversal:1.0.0') {transitive = false}
 	configurations.implementation.extendsFrom(configurations.extraLibs)
 }
 
@@ -77,8 +79,7 @@ tasks.withType(JavaCompile).configureEach {
 	// If Javadoc is generated, this must be specified in that task too.
 	it.options.encoding = "UTF-8"
 
-	// Minecraft 1.17 (21w19a) upwards uses Java 16.
-	it.options.release = 16
+	it.options.release = 17
 }
 
 java {
@@ -106,13 +107,7 @@ tasks.withType(Jar) {
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+			from components.java
 		}
 	}
 

@@ -5,7 +5,6 @@ import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.commands.*;
 import dev.xpple.seedmapper.util.config.Config;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;

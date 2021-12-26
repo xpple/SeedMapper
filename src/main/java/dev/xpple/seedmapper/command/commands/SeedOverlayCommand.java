@@ -1,6 +1,12 @@
 package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.seedfinding.mcbiome.biome.Biome;
+import com.seedfinding.mcbiome.biome.Biomes;
+import com.seedfinding.mcbiome.source.BiomeSource;
+import com.seedfinding.mccore.state.Dimension;
+import com.seedfinding.mccore.version.MCVersion;
+import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
@@ -8,12 +14,6 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
-import kaptainwutax.biomeutils.biome.Biome;
-import kaptainwutax.biomeutils.biome.Biomes;
-import kaptainwutax.biomeutils.source.BiomeSource;
-import kaptainwutax.mcutils.state.Dimension;
-import kaptainwutax.mcutils.version.MCVersion;
-import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -22,16 +22,11 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.WorldChunk;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
-import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.Exceptions {
 

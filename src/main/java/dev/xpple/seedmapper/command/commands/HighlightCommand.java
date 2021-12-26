@@ -2,24 +2,24 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.seedfinding.mcbiome.biome.Biome;
+import com.seedfinding.mcbiome.source.BiomeSource;
+import com.seedfinding.mccore.block.Block;
+import com.seedfinding.mccore.rand.ChunkRand;
+import com.seedfinding.mccore.rand.seed.WorldSeed;
+import com.seedfinding.mccore.state.Dimension;
+import com.seedfinding.mccore.util.data.SpiralIterator;
+import com.seedfinding.mccore.util.pos.BPos;
+import com.seedfinding.mccore.util.pos.CPos;
+import com.seedfinding.mccore.version.MCVersion;
+import com.seedfinding.mcfeature.decorator.ore.OreDecorator;
+import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.maps.SimpleOreMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
-import kaptainwutax.biomeutils.biome.Biome;
-import kaptainwutax.biomeutils.source.BiomeSource;
-import kaptainwutax.featureutils.decorator.ore.OreDecorator;
-import kaptainwutax.mcutils.block.Block;
-import kaptainwutax.mcutils.rand.ChunkRand;
-import kaptainwutax.mcutils.rand.seed.WorldSeed;
-import kaptainwutax.mcutils.state.Dimension;
-import kaptainwutax.mcutils.util.data.SpiralIterator;
-import kaptainwutax.mcutils.util.pos.BPos;
-import kaptainwutax.mcutils.util.pos.CPos;
-import kaptainwutax.mcutils.version.MCVersion;
-import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -137,9 +137,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             case "ancient_debris" -> 0x964B19;
             default -> 0x00FF00;
         };
-        boxes.forEach(box -> {
-            RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, 60 * 2 * 20); // 2 minutes
-        });
+        boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, -1));
 
         if (boxes.isEmpty()) {
             Chat.print("", new TranslatableText("command.highlight.block.noneFound", blockString));
