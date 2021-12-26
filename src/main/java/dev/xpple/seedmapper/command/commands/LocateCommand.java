@@ -17,7 +17,6 @@ import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.Feature;
 import com.seedfinding.mcfeature.loot.ILoot;
 import com.seedfinding.mcfeature.loot.item.Item;
-import com.seedfinding.mcfeature.loot.item.Items;
 import com.seedfinding.mcfeature.misc.SlimeChunk;
 import com.seedfinding.mcfeature.structure.*;
 import com.seedfinding.mcfeature.structure.generator.Generator;
