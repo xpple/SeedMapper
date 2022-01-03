@@ -30,6 +30,9 @@ repositories {
 	maven {
 		url 'https://nexus.seedfinding.com/repository/maven-seedfinding'
 	}
+	maven {
+		url 'https://nexus.seedfinding.com/repository/maven-seedfinding-snapshots'
+	}
 }
 
 configurations {
@@ -54,7 +57,7 @@ dependencies {
 
 	extraLibs('com.seedfinding:mc_math:1.0.0') {transitive = false}
 	extraLibs('com.seedfinding:mc_seed:1.0.0') {transitive = false}
-	extraLibs('com.seedfinding:mc_core:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_core:88b246597e0147e37b38d1b33e9526e6c3eb1469') {transitive = false}
 	extraLibs('com.seedfinding:mc_noise:1.0.0') {transitive = false}
 	extraLibs('com.seedfinding:mc_biome:1.0.0') {transitive = false}
 	extraLibs('com.seedfinding:mc_terrain:1.0.0') {transitive = false}
