@@ -53,7 +53,7 @@ public class SimpleStructureMap {
     }
 
     @FunctionalInterface
-    interface StructureFactory<T extends Structure<?, ?>> {
+    public interface StructureFactory<T extends Structure<?, ?>> {
         T create(MCVersion version);
     }
 }

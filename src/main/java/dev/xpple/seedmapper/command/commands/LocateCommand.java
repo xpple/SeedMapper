@@ -3,7 +3,6 @@ package dev.xpple.seedmapper.command.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.seedfinding.mcbiome.biome.Biome;
-import com.seedfinding.mcbiome.biome.Biomes;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.rand.ChunkRand;
 import com.seedfinding.mccore.rand.seed.WorldSeed;
@@ -32,7 +31,6 @@ import dev.xpple.seedmapper.util.maps.SimpleStructureMap;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 
 import java.util.Objects;
 import java.util.Set;
@@ -44,15 +42,16 @@ import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
+import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.biome;
+import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.getBiome;
 import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.enchantedItem;
 import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.getEnchantedItem;
+import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.getStructureFactory;
+import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.structureFactory;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
-import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class LocateCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
@@ -60,14 +59,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     protected void build() {
         argumentBuilder
                 .then(literal("biome")
-                        .then(argument("biome", word())
-                                .suggests((context, builder) -> suggestMatching(context.getSource().getRegistryManager().get(Registry.BIOME_KEY).getIds().stream().map(Identifier::getPath), builder))
-                                .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "biome")))))
+                        .then(argument("biome", biome())
+                                .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome")))))
                 .then(literal("feature")
                         .then(literal("structure")
-                                .then(argument("structure", word())
-                                        .suggests((context, builder) -> suggestMatching(SimpleStructureMap.REGISTRY.keySet(), builder))
-                                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "structure")))))
+                                .then(argument("structure", structureFactory())
+                                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructureFactory(ctx, "structure")))))
                         .then(literal("slimechunk")
                                 .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
                 .then(literal("loot")
@@ -81,7 +78,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         return "locate";
     }
 
-    private static int locateBiome(CustomClientCommandSource source, String biomeName) throws CommandSyntaxException {
+    private static int locateBiome(CustomClientCommandSource source, Biome biome) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -97,33 +94,23 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             mcVersion = (MCVersion) source.getMeta("version");
         }
 
-        Biome desiredBiome = null;
-        for (Biome biome : Biomes.REGISTRY.values()) {
-            if (biome.getName().equals(biomeName)) {
-                desiredBiome = biome;
-                break;
-            }
-        }
-        if (desiredBiome == null) {
-            throw BIOME_NOT_FOUND_EXCEPTION.create(biomeName);
-        }
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
-        if (desiredBiome.getDimension() != biomeSource.getDimension()) {
+        if (biome.getDimension() != biomeSource.getDimension()) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
         BlockPos center = new BlockPos(source.getPosition());
-        BPos biomePos = locateBiome(desiredBiome::equals, new BPos(center.getX(), 0, center.getZ()), 6400, 8, biomeSource);
+        BPos biomePos = locateBiome(biome::equals, new BPos(center.getX(), 0, center.getZ()), 6400, 8, biomeSource);
 
         if (biomePos == null) {
-            Chat.print("", new TranslatableText("command.locate.biome.noneFound", biomeName));
+            Chat.print("", new TranslatableText("command.locate.biome.noneFound", biome.getName()));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.biome.success.0", biomeName)),
+                    highlight(new TranslatableText("command.locate.biome.success.0", biome.getName())),
                     copy(
                             hover(
                                     accent("x: " + biomePos.getX() + ", z: " + biomePos.getZ()),
-                                    base(new TranslatableText("command.locate.biome.success.1", biomeName))
+                                    base(new TranslatableText("command.locate.biome.success.1", biome.getName()))
                             ),
                             String.format("%d ~ %d", biomePos.getX(), biomePos.getZ())
                     ),
@@ -140,7 +127,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 .findAny().orElse(null);
     }
 
-    private static int locateStructure(CustomClientCommandSource source, String structureName) throws CommandSyntaxException {
+    private static int locateStructure(CustomClientCommandSource source, SimpleStructureMap.StructureFactory<?> structureFactory) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -156,27 +143,25 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             mcVersion = (MCVersion) source.getMeta("version");
         }
 
-        final Structure<?, ?> desiredFeature = SimpleStructureMap.getForVersion(mcVersion).values().stream()
-                .filter(structure -> structure.getName().equals(structureName))
-                .findAny().orElseThrow(() -> STRUCTURE_NOT_FOUND_EXCEPTION.create(structureName));
+        final Structure<?, ?> structure = structureFactory.create(mcVersion);
 
         BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
-        if (!desiredFeature.isValidDimension(biomeSource.getDimension())) {
+        if (!structure.isValidDimension(biomeSource.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
         BlockPos center = new BlockPos(source.getPosition());
-        BPos structurePos = locateStructure(desiredFeature, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
+        BPos structurePos = locateStructure(structure, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
-            Chat.print("", new TranslatableText("command.locate.feature.structure.noneFound", structureName));
+            Chat.print("", new TranslatableText("command.locate.feature.structure.noneFound", structure.getName()));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.feature.structure.success.0", structureName)),
+                    highlight(new TranslatableText("command.locate.feature.structure.success.0", structure.getName())),
                     copy(
                             hover(
                                     accent("x: " + structurePos.getX() + ", z: " + structurePos.getZ()),
-                                    base(new TranslatableText("command.locate.feature.structure.success.1", structureName))
+                                    base(new TranslatableText("command.locate.feature.structure.success.1", structure.getName()))
                             ),
                             String.format("%d ~ %d", structurePos.getX(), structurePos.getZ())
                     ),
