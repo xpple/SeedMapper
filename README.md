@@ -27,7 +27,7 @@ Determines the Minecraft version the terrain has most likely been generated in. 
 SeedOverlay principle.
 
 ### Locate
-Usage: `/seedmapper:locate (biome <biome>)|(feature (structure <structure>)|(slimechunk))|(loot <item>)`
+Usage: `/seedmapper:locate (biome <biome>)|(feature (structure <structure>)|(slimechunk))|(loot <amount> <item> [with|without] [<enchantment>] [<level>|*])`
 
 Locates a given feature, biome or loot item closest to the player. Depending on the rarity of the biome or loot item, 
 this process can take at most 30 seconds.
