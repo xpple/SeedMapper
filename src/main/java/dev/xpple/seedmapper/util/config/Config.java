@@ -23,7 +23,6 @@ public class Config {
     private static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     private static final Path configPath = Paths.get(MOD_PATH + File.separator + "config.json");
 
-    private static final JsonParser parser = new JsonParser();
     private static JsonObject root = null;
 
     private static final Set<String> ignoredBlocks = new HashSet<>();
@@ -33,7 +32,7 @@ public class Config {
     public static void init() {
         try {
             if (configPath.toFile().exists() && configPath.toFile().isFile()) {
-                root = parser.parse(Files.newBufferedReader(configPath)).getAsJsonObject();
+                root = JsonParser.parseReader(Files.newBufferedReader(configPath)).getAsJsonObject();
                 if (root.has("seeds")) {
                     for (Map.Entry<String, JsonElement> element : root.getAsJsonObject("seeds").entrySet()) {
                         seeds.put(element.getKey(), element.getValue().getAsLong());
@@ -76,7 +75,7 @@ public class Config {
                           },
                           "colors": {}
                         }""";
-                root = parser.parse(standardJson).getAsJsonObject();
+                root = JsonParser.parseString(standardJson).getAsJsonObject();
             }
             save();
         } catch (IOException e) {
