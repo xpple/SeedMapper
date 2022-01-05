@@ -15,7 +15,7 @@ public class ClearScreenCommand extends ClientCommand {
     @Override
     protected void build() {
         argumentBuilder
-                .executes(ctx -> setAutomate(CustomClientCommandSource.of(ctx.getSource())));
+                .executes(ctx -> clearScreen(CustomClientCommandSource.of(ctx.getSource())));
     }
 
     @Override
@@ -28,7 +28,7 @@ public class ClearScreenCommand extends ClientCommand {
         return "clear";
     }
 
-    private int setAutomate(CustomClientCommandSource source) {
+    private int clearScreen(CustomClientCommandSource source) {
         Map<Object, Shape> shapeMap = RenderQueue.queue.get(RenderQueue.Layer.ON_TOP);
         final int size = shapeMap.size();
         shapeMap.clear();
