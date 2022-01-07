@@ -4,7 +4,7 @@ import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.structure.RuinedPortal;
 
-public class NetherRuinedPortal extends RuinedPortal {
+class NetherRuinedPortal extends RuinedPortal {
 
     public NetherRuinedPortal(MCVersion version) {
         super(Dimension.NETHER, version);

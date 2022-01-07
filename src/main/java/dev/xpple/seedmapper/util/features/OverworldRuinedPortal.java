@@ -4,7 +4,7 @@ import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.structure.RuinedPortal;
 
-public class OverworldRuinedPortal extends RuinedPortal {
+class OverworldRuinedPortal extends RuinedPortal {
 
     public OverworldRuinedPortal(MCVersion version) {
         super(Dimension.OVERWORLD, version);

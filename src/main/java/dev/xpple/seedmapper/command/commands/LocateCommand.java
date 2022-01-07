@@ -27,8 +27,6 @@ import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
-import dev.xpple.seedmapper.util.features.NetherRuinedPortal;
-import dev.xpple.seedmapper.util.features.OverworldRuinedPortal;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -327,7 +325,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         AtomicBoolean initial = new AtomicBoolean(true);
         for (RegionStructure<?, ?> structure : structures) {
             Generator.GeneratorFactory<?> factory;
-            if (structure instanceof OverworldRuinedPortal || structure instanceof NetherRuinedPortal) {
+            if (structure instanceof RuinedPortal) {
                 factory = Generators.get(RuinedPortal.class);
             } else {
                 factory = Generators.get(structure.getClass());
