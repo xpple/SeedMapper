@@ -25,9 +25,10 @@ import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
+import dev.xpple.seedmapper.util.features.FeatureFactory;
+import dev.xpple.seedmapper.util.features.Features;
 import dev.xpple.seedmapper.util.features.NetherRuinedPortal;
 import dev.xpple.seedmapper.util.features.OverworldRuinedPortal;
-import dev.xpple.seedmapper.util.maps.SimpleStructureMap;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -127,7 +128,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 .findAny().orElse(null);
     }
 
-    private static int locateStructure(CustomClientCommandSource source, SimpleStructureMap.StructureFactory<?> structureFactory) throws CommandSyntaxException {
+    private static int locateStructure(CustomClientCommandSource source, FeatureFactory<? extends Structure<?, ?>> structureFactory) throws CommandSyntaxException {
         long seed = SharedHelpers.getSeed();
         String dimensionPath;
         if (source.getMeta("dimension") == null) {
@@ -290,7 +291,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         String itemString = item.getFirst();
 
-        Set<RegionStructure<?, ?>> lootableStructures = SimpleStructureMap.getForVersion(mcVersion).values().stream()
+        Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(mcVersion).stream()
                 .filter(structure -> structure instanceof ILoot)
                 .filter(structure -> structure.isValidDimension(dimension))
                 .map(structure -> (RegionStructure<?, ?>) structure)

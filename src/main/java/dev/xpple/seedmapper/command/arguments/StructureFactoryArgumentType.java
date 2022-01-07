@@ -6,8 +6,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.seedfinding.mcfeature.structure.Structure;
 import dev.xpple.seedmapper.command.SharedHelpers;
-import dev.xpple.seedmapper.util.maps.SimpleStructureMap;
+import dev.xpple.seedmapper.util.features.FeatureFactory;
+import dev.xpple.seedmapper.util.features.Features;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
 
@@ -15,7 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class StructureFactoryArgumentType implements ArgumentType<SimpleStructureMap.StructureFactory<?>>, SharedHelpers.Exceptions {
+public class StructureFactoryArgumentType implements ArgumentType<FeatureFactory<? extends Structure<?, ?>>>, SharedHelpers.Exceptions {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("desert_temple", "bastion", "end_city");
 
@@ -23,15 +25,16 @@ public class StructureFactoryArgumentType implements ArgumentType<SimpleStructur
         return new StructureFactoryArgumentType();
     }
 
-    public static SimpleStructureMap.StructureFactory<?> getStructureFactory(CommandContext<FabricClientCommandSource> context, String name) {
-        return context.getArgument(name, SimpleStructureMap.StructureFactory.class);
+    @SuppressWarnings("unchecked")
+    public static FeatureFactory<? extends Structure<?, ?>> getStructureFactory(CommandContext<FabricClientCommandSource> context, String name) {
+        return context.getArgument(name, FeatureFactory.class);
     }
 
     @Override
-    public SimpleStructureMap.StructureFactory<?> parse(StringReader reader) throws CommandSyntaxException {
+    public FeatureFactory<? extends Structure<?, ?>> parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
         String structureString = reader.readUnquotedString();
-        SimpleStructureMap.StructureFactory<?> factory = SimpleStructureMap.REGISTRY.get(structureString);
+        FeatureFactory<? extends Structure<?, ?>> factory = Features.STRUCTURE_REGISTRY.get(structureString);
         if (factory == null) {
             reader.setCursor(cursor);
             throw STRUCTURE_NOT_FOUND_EXCEPTION.create(structureString);
@@ -41,7 +44,7 @@ public class StructureFactoryArgumentType implements ArgumentType<SimpleStructur
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(SimpleStructureMap.REGISTRY.keySet(), builder);
+        return CommandSource.suggestMatching(Features.STRUCTURE_REGISTRY.keySet(), builder);
     }
 
     @Override

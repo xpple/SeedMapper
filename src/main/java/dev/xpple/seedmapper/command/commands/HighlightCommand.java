@@ -18,7 +18,7 @@ import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
-import dev.xpple.seedmapper.util.maps.SimpleOreMap;
+import dev.xpple.seedmapper.util.features.Features;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -77,7 +77,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             mcVersion = (MCVersion) source.getMeta("version");
         }
 
-        final Set<OreDecorator<?, ?>> oreDecorators = SimpleOreMap.getForVersion(mcVersion).values().stream()
+        final Set<OreDecorator<?, ?>> oreDecorators = Features.getOresForVersion(mcVersion).stream()
                 .filter(oreDecorator -> oreDecorator.isValidDimension(dimension))
                 .filter(oreDecorator -> oreDecorator.getDefaultOreBlock().getName().equals(blockString))
                 .collect(Collectors.toSet());
@@ -98,7 +98,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                     Biome biome = biomeSource.getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);
 
                     final Map<BPos, Block> generatedOres = new HashMap<>();
-                    SimpleOreMap.getForVersion(mcVersion).values().stream()
+                    Features.getOresForVersion(mcVersion).stream()
                             .filter(oreDecorator -> oreDecorator.isValidDimension(dimension))
                             .sorted(Comparator.comparingInt(oreDecorator -> oreDecorator.getSalt(biome)))
                             .forEachOrdered(oreDecorator -> {
