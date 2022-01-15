@@ -1,6 +1,9 @@
 package dev.xpple.seedmapper.util.features;
 
 import com.seedfinding.mccore.version.MCVersion;
+import com.seedfinding.mcfeature.decorator.Decorator;
+import com.seedfinding.mcfeature.decorator.DesertWell;
+import com.seedfinding.mcfeature.decorator.EndGateway;
 import com.seedfinding.mcfeature.decorator.ore.OreDecorator;
 import com.seedfinding.mcfeature.decorator.ore.nether.*;
 import com.seedfinding.mcfeature.decorator.ore.overworld.*;
@@ -14,6 +17,7 @@ import java.util.Set;
 public class Features {
     public static Map<String, FeatureFactory<? extends Structure<?, ?>>> STRUCTURE_REGISTRY = new HashMap<>();
     public static Map<String, FeatureFactory<? extends OreDecorator<?, ?>>> ORE_REGISTRY = new HashMap<>();
+    public static Map<String, FeatureFactory<? extends Decorator<?, ?>>> DECORATOR_REGISTRY = new HashMap<>();
 
     static {
         STRUCTURE_REGISTRY.put("bastion_remnant", BastionRemnant::new);
@@ -62,6 +66,9 @@ public class Features {
         ORE_REGISTRY.put("redstone_ore", RedstoneOre::new);
         //ORE_REGISTRY.put("sand_disk", SandDisk::new);
         ORE_REGISTRY.put("tuff_ore", TuffOre::new);
+
+        DECORATOR_REGISTRY.put("desert_well", DesertWell::new);
+        DECORATOR_REGISTRY.put("end_gateway", EndGateway::new);
     }
 
     public static Set<? extends Structure<?, ?>> getStructuresForVersion(MCVersion version) {
@@ -85,6 +92,20 @@ public class Features {
                 OreDecorator<?, ?> oreDecorator = factory.create(version);
                 if (oreDecorator.getConfig() != null) {
                     result.add(oreDecorator);
+                }
+            } catch (NullPointerException ignored) {
+            }
+        }
+        return result;
+    }
+
+    public static Set<? extends Decorator<?, ?>> getDecoratorsForVersion(MCVersion version) {
+        Set<Decorator<?, ?>> result = new HashSet<>();
+        for (FeatureFactory<? extends Decorator<?, ?>> factory : DECORATOR_REGISTRY.values()) {
+            try {
+                Decorator<?, ?> decorator = factory.create(version);
+                if (decorator.getConfig() != null) {
+                    result.add(decorator);
                 }
             } catch (NullPointerException ignored) {
             }

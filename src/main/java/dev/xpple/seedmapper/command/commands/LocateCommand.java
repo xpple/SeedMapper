@@ -14,6 +14,9 @@ import com.seedfinding.mccore.util.pos.CPos;
 import com.seedfinding.mccore.util.pos.RPos;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.Feature;
+import com.seedfinding.mcfeature.decorator.Decorator;
+import com.seedfinding.mcfeature.decorator.DesertWell;
+import com.seedfinding.mcfeature.decorator.EndGateway;
 import com.seedfinding.mcfeature.loot.ILoot;
 import com.seedfinding.mcfeature.loot.item.Item;
 import com.seedfinding.mcfeature.misc.SlimeChunk;
@@ -44,6 +47,8 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.biome;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.getBiome;
+import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentType.decoratorFactory;
+import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentType.getDecoratorFactory;
 import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.enchantedItem;
 import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.getEnchantedItem;
 import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.getStructureFactory;
@@ -64,6 +69,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                         .then(literal("structure")
                                 .then(argument("structure", structureFactory())
                                         .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructureFactory(ctx, "structure")))))
+                        .then(literal("decorator")
+                                .then(argument("decorator", decoratorFactory())
+                                        .executes(ctx -> locateDecorator(CustomClientCommandSource.of(ctx.getSource()), getDecoratorFactory(ctx, "decorator")))))
                         .then(literal("slimechunk")
                                 .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
                 .then(literal("loot")
@@ -205,6 +213,79 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                             return data.testStart(source.getWorldSeed(), chunkRand) && data.testBiome(source) && data.testGenerate(terrainGenerator);
                         })
                         .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
+            }
+        }
+        return null;
+    }
+
+    private static int locateDecorator(CustomClientCommandSource source, FeatureFactory<? extends Decorator<?, ?>> decoratorFactory) throws CommandSyntaxException {
+        long seed = SharedHelpers.getSeed();
+        String dimensionPath;
+        if (source.getMeta("dimension") == null) {
+            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
+        } else {
+            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
+        }
+        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
+        MCVersion mcVersion;
+        if (source.getMeta("version") == null) {
+            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
+        } else {
+            mcVersion = (MCVersion) source.getMeta("version");
+        }
+
+        final Decorator<?, ?> decorator = decoratorFactory.create(mcVersion);
+
+        BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
+        if (!decorator.isValidDimension(biomeSource.getDimension())) {
+            throw INVALID_DIMENSION_EXCEPTION.create();
+        }
+
+        BlockPos center = new BlockPos(source.getPosition());
+        BPos decoratorPos = locateDecorator(decorator, new BPos(center.getX(), center.getY(), center.getZ()).toChunkPos(), 6400, biomeSource, new ChunkRand());
+
+        if (decoratorPos == null) {
+            Chat.print("", new TranslatableText("command.locate.feature.decorator.noneFound", decorator.getName()));
+        } else {
+            Chat.print("", chain(
+                    highlight(new TranslatableText("command.locate.feature.decorator.success.0", decorator.getName())),
+                    copy(
+                            hover(
+                                    accent("x: " + decoratorPos.getX() + ", z: " + decoratorPos.getZ()),
+                                    base(new TranslatableText("command.locate.feature.decorator.success.1", decorator.getName()))
+                            ),
+                            String.format("%d ~ %d", decoratorPos.getX(), decoratorPos.getZ())
+                    ),
+                    highlight(".")
+            ));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static BPos locateDecorator(Decorator<?, ?> decorator, CPos center, int radius, BiomeSource source, ChunkRand chunkRand) {
+        long structureSeed = WorldSeed.toStructureSeed(source.getWorldSeed());
+        if (decorator instanceof DesertWell desertWell) {
+            SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(center, new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
+            return StreamSupport.stream(spiralIterator.spliterator(), false)
+                    .filter(cPos -> {
+                        int chunkX = cPos.getX();
+                        int chunkZ = cPos.getZ();
+                        DesertWell.Data data = desertWell.getData(structureSeed, chunkX, chunkZ, chunkRand);
+                        return data != null && desertWell.canSpawn(chunkX, chunkZ, source);
+                    })
+                    .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
+        } else if (decorator instanceof EndGateway endGateway) {
+            SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(center, new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
+            for (CPos cPos : spiralIterator) {
+                int chunkX = cPos.getX();
+                int chunkZ = cPos.getZ();
+                EndGateway.Data data = endGateway.getData(structureSeed, chunkX, chunkZ, chunkRand);
+                if (data == null) {
+                    continue;
+                }
+                if (endGateway.canSpawn(chunkX, chunkZ, source)) {
+                    return new BPos(data.blockX, 0, data.blockZ);
+                }
             }
         }
         return null;
