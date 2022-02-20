@@ -63,7 +63,7 @@ dependencies {
 	extraLibs('com.seedfinding:mc_terrain:1.0.0') {transitive = false}
 	extraLibs('com.seedfinding:mc_feature:1.0.0') {transitive = false}
 
-	extraLibs('com.seedfinding:mc_reversal:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_reversal:2.0.0') {transitive = false}
 	configurations.implementation.extendsFrom(configurations.extraLibs)
 }
 
