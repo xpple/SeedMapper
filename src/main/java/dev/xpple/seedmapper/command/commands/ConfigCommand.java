@@ -114,7 +114,14 @@ public class ConfigCommand extends ClientCommand {
      */
     private int setSeed(CustomClientCommandSource source, long seed) {
         Config.set("seed", seed);
-        Chat.print("", new TranslatableText("command.config.setSeed", seed));
+        Chat.print("", new TranslatableText("command.config.setSeed", hover(
+            format(copy(
+                text(String.valueOf(seed)),
+                String.valueOf(seed)
+            ), Formatting.GREEN),
+            new TranslatableText("chat.copy.click")
+        )));
+
         return Command.SINGLE_SUCCESS;
     }
 
@@ -123,7 +130,13 @@ public class ConfigCommand extends ClientCommand {
         if (element instanceof JsonNull) {
             Chat.print("", new TranslatableText("command.config.getSeed.null"));
         } else {
-            Chat.print("", new TranslatableText("command.config.getSeed", element.getAsLong()));
+            Chat.print("", new TranslatableText("command.config.getSeed", hover(
+                format(copy(
+                    text(element.getAsString()),
+                    element.getAsString()
+                ), Formatting.GREEN),
+                new TranslatableText("chat.copy.click")
+            )));
         }
         return Command.SINGLE_SUCCESS;
     }
