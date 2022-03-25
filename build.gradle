@@ -22,9 +22,6 @@ repositories {
 	// for more information about repositories.
 	mavenCentral()
 	maven {
-		url 'https://jitpack.io'
-	}
-	maven {
 		url 'https://maven.xpple.dev/maven2/'
 	}
 	maven {
@@ -52,18 +49,18 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	modImplementation 'dev.xpple:clientarguments:b1.1.4'
-	include 'dev.xpple:clientarguments:b1.1.4'
+	modImplementation 'dev.xpple:clientarguments:1.3.0'
+	include 'dev.xpple:clientarguments:1.3.0'
 
-	extraLibs('com.seedfinding:mc_math:1.0.0') {transitive = false}
-	extraLibs('com.seedfinding:mc_seed:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_math:d73ac7cc644c67628ade0effd7136e11eb00bb76') {transitive = false}
+	extraLibs('com.seedfinding:mc_seed:5518e3ba3ee567fb0b51c15958967f70a6a19e02') {transitive = false}
 	extraLibs('com.seedfinding:mc_core:88b246597e0147e37b38d1b33e9526e6c3eb1469') {transitive = false}
-	extraLibs('com.seedfinding:mc_noise:1.0.0') {transitive = false}
-	extraLibs('com.seedfinding:mc_biome:1.0.0') {transitive = false}
-	extraLibs('com.seedfinding:mc_terrain:1.0.0') {transitive = false}
-	extraLibs('com.seedfinding:mc_feature:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_noise:a6ab8e6c688491829f8d2adf845392da22ef8e9c') {transitive = false}
+	extraLibs('com.seedfinding:mc_biome:533cdb5ed955ff1c3106f9901aea6aa5b08fd781') {transitive = false}
+	extraLibs('com.seedfinding:mc_terrain:9e937ddb838e28e79423c287fa18b1ce66f061d7') {transitive = false}
+	extraLibs('com.seedfinding:mc_feature:c29fd1fcd746e14c1bcdb127da3113ba273db1fd') {transitive = false}
 
-	extraLibs('com.seedfinding:mc_reversal:1.0.0') {transitive = false}
+	extraLibs('com.seedfinding:mc_reversal:2191ad5833ff40f92e381dc7d56528fb6485ecbb') {transitive = false}
 	configurations.implementation.extendsFrom(configurations.extraLibs)
 }
 
