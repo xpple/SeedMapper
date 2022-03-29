@@ -201,7 +201,7 @@ public class ConfigCommand extends ClientCommand {
         final int colorValue = color.getColorValue();
         short[] rgbArray = new short[]{(short) ((colorValue >> 16) & 0xFF), (short) ((colorValue >> 8) & 0xFF), (short) (colorValue & 0xFF)};
         if (Config.addColor(block, rgbArray)) {
-            Chat.print("", new TranslatableText("command.config.addColor.success", block).append(new LiteralText(color.getName()).formatted(color)).append("."));
+            Chat.print("", new TranslatableText("command.config.addColor.success", block).append(" ").append(new LiteralText(color.getName()).formatted(color)).append("."));
         } else {
             Chat.print("", new TranslatableText("command.config.addColor.alreadyAdded", block));
         }

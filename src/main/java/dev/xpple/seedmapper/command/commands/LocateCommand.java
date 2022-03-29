@@ -113,11 +113,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             Chat.print("", new TranslatableText("command.locate.biome.noneFound", biome.getName()));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.biome.success.0", biome.getName())),
+                    highlight(new TranslatableText("command.locate.biome.foundAt", biome.getName())),
+                    highlight(" "),
                     copy(
                             hover(
                                     accent("x: " + biomePos.getX() + ", z: " + biomePos.getZ()),
-                                    base(new TranslatableText("command.locate.biome.success.1", biome.getName()))
+                                    base(new TranslatableText("command.locate.biome.copy", biome.getName()))
                             ),
                             String.format("%d ~ %d", biomePos.getX(), biomePos.getZ())
                     ),
@@ -164,11 +165,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             Chat.print("", new TranslatableText("command.locate.feature.structure.noneFound", structure.getName()));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.feature.structure.success.0", structure.getName())),
+                    highlight(new TranslatableText("command.locate.feature.structure.foundAt", structure.getName())),
+                    highlight(" "),
                     copy(
                             hover(
                                     accent("x: " + structurePos.getX() + ", z: " + structurePos.getZ()),
-                                    base(new TranslatableText("command.locate.feature.structure.success.1", structure.getName()))
+                                    base(new TranslatableText("command.locate.feature.structure.copy", structure.getName()))
                             ),
                             String.format("%d ~ %d", structurePos.getX(), structurePos.getZ())
                     ),
@@ -248,11 +250,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             Chat.print("", new TranslatableText("command.locate.feature.decorator.noneFound", decorator.getName()));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.feature.decorator.success.0", decorator.getName())),
+                    highlight(new TranslatableText("command.locate.feature.decorator.foundAt", decorator.getName())),
+                    highlight(" "),
                     copy(
                             hover(
                                     accent("x: " + decoratorPos.getX() + ", z: " + decoratorPos.getZ()),
-                                    base(new TranslatableText("command.locate.feature.decorator.success.1", decorator.getName()))
+                                    base(new TranslatableText("command.locate.feature.decorator.copy", decorator.getName()))
                             ),
                             String.format("%d ~ %d", decoratorPos.getX(), decoratorPos.getZ())
                     ),
@@ -317,19 +320,22 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             int x = (slimeChunkPos.getX() << 4) + 9;
             int z = (slimeChunkPos.getZ() << 4) + 9;
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.feature.slimeChunk.success.0")),
+                    highlight(new TranslatableText("command.locate.feature.slimeChunk.foundAt")),
+                    highlight(" "),
                     copy(
                             hover(
                                     accent("x: " + x + ", z: " + z),
-                                    base(new TranslatableText("command.locate.feature.slimeChunk.success.1"))
+                                    base(new TranslatableText("command.locate.feature.slimeChunk.copy"))
                             ),
                             String.format("%d ~ %d", x, z)
                     ),
-                    highlight(new TranslatableText("command.locate.feature.slimeChunk.success.2")),
+                    highlight(" ("),
+                    highlight(new TranslatableText("command.locate.feature.slimeChunk.chunk")),
+                    highlight(" "),
                     copy(
                             hover(
                                     accent(slimeChunkPos.getX() + " " + slimeChunkPos.getZ()),
-                                    base(new TranslatableText("command.locate.feature.slimeChunk.success.3"))
+                                    base(new TranslatableText("command.locate.feature.slimeChunk.copyChunk"))
                             ),
                             String.format("%d %d", slimeChunkPos.getX(), slimeChunkPos.getZ())
                     ),
@@ -385,12 +391,13 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             Chat.print("", new TranslatableText("command.locate.loot.noneFound", itemString));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.loot.success.0", amount, itemString)),
+                    highlight(new TranslatableText("command.locate.loot.foundAt", amount, itemString)),
+                    highlight(" "),
                     join(highlight(", "), lootPositions.stream().map(bPos ->
                             copy(
                                     hover(
                                             accent("x: " + bPos.getX() + ", z: " + bPos.getZ()),
-                                            base(new TranslatableText("command.locate.loot.success.1", itemString))
+                                            base(new TranslatableText("command.locate.loot.copy", itemString))
                                     ),
                                     String.format("%d ~ %d", bPos.getX(), bPos.getZ())
                             )
