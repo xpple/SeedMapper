@@ -17,13 +17,17 @@ public abstract class ClientCommand {
         if (this.alias() == null) {
             return;
         }
-        this.argumentBuilder = literal(this.alias());
+        this.argumentBuilder = literal(this.getAliasLiteral());
         this.build();
         ClientCommandManager.DISPATCHER.register(this.argumentBuilder);
     }
 
     private String getRootLiteral() {
         return MOD_ID + ":" + this.rootLiteral();
+    }
+
+    private String getAliasLiteral() {
+        return MOD_ID + ":" + this.alias();
     }
 
     protected abstract void build();
