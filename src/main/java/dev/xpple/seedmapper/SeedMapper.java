@@ -1,11 +1,8 @@
 package dev.xpple.seedmapper;
 
-import com.mojang.brigadier.CommandDispatcher;
-import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.commands.*;
 import dev.xpple.seedmapper.util.config.Config;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 
@@ -26,19 +23,21 @@ public class SeedMapper implements ClientModInitializer {
         MOD_PATH.toFile().mkdirs();
 
         Config.init();
+
+        registerCommands();
     }
 
     public static void onTerminateClient() {
         //
     }
 
-    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        ClientCommand.instantiate(new SeedOverlayCommand(), dispatcher);
-        ClientCommand.instantiate(new TerrainVersionCommand(), dispatcher);
-        ClientCommand.instantiate(new ConfigCommand(), dispatcher);
-        ClientCommand.instantiate(new LocateCommand(), dispatcher);
-        ClientCommand.instantiate(new HighlightCommand(), dispatcher);
-        ClientCommand.instantiate(new SourceCommand(), dispatcher);
-        ClientCommand.instantiate(new ClearScreenCommand(), dispatcher);
+    private static void registerCommands() {
+        new SeedOverlayCommand().instantiate();
+        new TerrainVersionCommand().instantiate();
+        new ConfigCommand().instantiate();
+        new LocateCommand().instantiate();
+        new HighlightCommand().instantiate();
+        new SourceCommand().instantiate();
+        new ClearScreenCommand().instantiate();
     }
 }
