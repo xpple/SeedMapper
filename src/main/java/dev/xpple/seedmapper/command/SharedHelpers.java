@@ -8,7 +8,9 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import dev.xpple.seedmapper.util.config.Config;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 
@@ -25,6 +27,24 @@ public final class SharedHelpers {
         DynamicCommandExceptionType ITEM_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.itemNotFound", arg));
         DynamicCommandExceptionType LOOT_ITEM_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.lootItemNotFound", arg));
         DynamicCommandExceptionType BLOCK_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.blockNotFound", arg));
+    }
+
+    public long seed;
+    public Dimension dimension;
+    public MCVersion mcVersion;
+
+    public SharedHelpers(FabricClientCommandSource source) throws CommandSyntaxException {
+        this.seed = getSeed();
+        if (source.getMeta("dimension") == null) {
+            this.dimension = getDimension(source.getWorld().getRegistryKey().getValue().getPath());
+        } else {
+            this.dimension = getDimension(((Identifier) source.getMeta("dimension")).getPath());
+        }
+        if (source.getMeta("version") == null) {
+            this.mcVersion = getMCVersion(CLIENT.getGame().getVersion().getName());
+        } else {
+            this.mcVersion = (MCVersion) source.getMeta("version");
+        }
     }
 
     public static long getSeed() throws CommandSyntaxException {

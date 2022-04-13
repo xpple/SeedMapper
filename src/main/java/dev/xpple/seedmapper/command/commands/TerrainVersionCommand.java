@@ -6,7 +6,6 @@ import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.biome.Biomes;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.block.Block;
-import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
@@ -15,7 +14,6 @@ import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
@@ -40,14 +38,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
     }
 
     private int execute(CustomClientCommandSource source) throws CommandSyntaxException {
-        long seed = SharedHelpers.getSeed();
-        String dimensionPath;
-        if (source.getMeta("dimension") == null) {
-            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
-        } else {
-            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
-        }
-        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
+        SharedHelpers helpers = new SharedHelpers(source);
 
         final AtomicInteger blocks = new AtomicInteger(Integer.MAX_VALUE);
         final AtomicReference<String> version = new AtomicReference<>();
@@ -55,9 +46,9 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
         Arrays.stream(MCVersion.values())
                 .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2))
                 .forEach(mcVersion -> {
-                    BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
-                    TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
-                    SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
+                    BiomeSource biomeSource = BiomeSource.of(helpers.dimension, mcVersion, helpers.seed);
+                    TerrainGenerator generator = TerrainGenerator.of(helpers.dimension, biomeSource);
+                    SimpleBlockMap map = new SimpleBlockMap(mcVersion, helpers.dimension, Biomes.PLAINS);
 
                     BlockPos.Mutable mutable = new BlockPos.Mutable();
                     final BlockPos center = new BlockPos(source.getPosition());

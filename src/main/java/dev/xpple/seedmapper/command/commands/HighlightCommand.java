@@ -7,11 +7,9 @@ import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.block.Block;
 import com.seedfinding.mccore.rand.ChunkRand;
 import com.seedfinding.mccore.rand.seed.WorldSeed;
-import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.util.data.SpiralIterator;
 import com.seedfinding.mccore.util.pos.BPos;
 import com.seedfinding.mccore.util.pos.CPos;
-import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.decorator.ore.OreDecorator;
 import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
@@ -21,7 +19,6 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.features.Features;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
@@ -33,7 +30,6 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
-import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 import static net.minecraft.command.CommandSource.suggestMatching;
@@ -62,23 +58,10 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
     }
 
     private static int highlightBlock(CustomClientCommandSource source, String blockString, int range) throws CommandSyntaxException {
-        long seed = SharedHelpers.getSeed();
-        String dimensionPath;
-        if (source.getMeta("dimension") == null) {
-            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
-        } else {
-            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
-        }
-        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion;
-        if (source.getMeta("version") == null) {
-            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
-        } else {
-            mcVersion = (MCVersion) source.getMeta("version");
-        }
+        SharedHelpers helpers = new SharedHelpers(source);
 
-        final Set<OreDecorator<?, ?>> oreDecorators = Features.getOresForVersion(mcVersion).stream()
-                .filter(oreDecorator -> oreDecorator.isValidDimension(dimension))
+        final Set<OreDecorator<?, ?>> oreDecorators = Features.getOresForVersion(helpers.mcVersion).stream()
+                .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension))
                 .filter(oreDecorator -> oreDecorator.getDefaultOreBlock().getName().equals(blockString))
                 .collect(Collectors.toSet());
 
@@ -86,7 +69,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             throw BLOCK_NOT_FOUND_EXCEPTION.create(blockString);
         }
 
-        BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
         TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
 
         final Set<Box> boxes = new HashSet<>();
@@ -98,14 +81,14 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                     Biome biome = biomeSource.getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);
 
                     final Map<BPos, Block> generatedOres = new HashMap<>();
-                    Features.getOresForVersion(mcVersion).stream()
-                            .filter(oreDecorator -> oreDecorator.isValidDimension(dimension))
+                    Features.getOresForVersion(helpers.mcVersion).stream()
+                            .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension))
                             .sorted(Comparator.comparingInt(oreDecorator -> oreDecorator.getSalt(biome)))
                             .forEachOrdered(oreDecorator -> {
                                 if (!oreDecorator.canSpawn(cPos.getX(), cPos.getZ(), biomeSource)) {
                                     return;
                                 }
-                                oreDecorator.generate(WorldSeed.toStructureSeed(seed), cPos.getX(), cPos.getZ(), biome, new ChunkRand(), terrainGenerator).positions
+                                oreDecorator.generate(WorldSeed.toStructureSeed(helpers.seed), cPos.getX(), cPos.getZ(), biome, new ChunkRand(), terrainGenerator).positions
                                         .forEach(bPos -> {
                                             if (generatedOres.containsKey(bPos)) {
                                                 if (!oreDecorator.getReplaceBlocks(biome).contains(generatedOres.get(bPos))) {

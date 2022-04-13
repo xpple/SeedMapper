@@ -12,7 +12,6 @@ import com.seedfinding.mccore.util.data.SpiralIterator;
 import com.seedfinding.mccore.util.pos.BPos;
 import com.seedfinding.mccore.util.pos.CPos;
 import com.seedfinding.mccore.util.pos.RPos;
-import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.Feature;
 import com.seedfinding.mcfeature.decorator.Decorator;
 import com.seedfinding.mcfeature.decorator.DesertWell;
@@ -31,7 +30,6 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Objects;
@@ -44,7 +42,6 @@ import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.biome;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.getBiome;
 import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentType.decoratorFactory;
@@ -86,22 +83,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateBiome(CustomClientCommandSource source, Biome biome) throws CommandSyntaxException {
-        long seed = SharedHelpers.getSeed();
-        String dimensionPath;
-        if (source.getMeta("dimension") == null) {
-            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
-        } else {
-            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
-        }
-        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion;
-        if (source.getMeta("version") == null) {
-            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
-        } else {
-            mcVersion = (MCVersion) source.getMeta("version");
-        }
+        SharedHelpers helpers = new SharedHelpers(source);
 
-        BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
         if (biome.getDimension() != biomeSource.getDimension()) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -136,24 +120,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateStructure(CustomClientCommandSource source, FeatureFactory<? extends Structure<?, ?>> structureFactory) throws CommandSyntaxException {
-        long seed = SharedHelpers.getSeed();
-        String dimensionPath;
-        if (source.getMeta("dimension") == null) {
-            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
-        } else {
-            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
-        }
-        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion;
-        if (source.getMeta("version") == null) {
-            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
-        } else {
-            mcVersion = (MCVersion) source.getMeta("version");
-        }
+        SharedHelpers helpers = new SharedHelpers(source);
 
-        final Structure<?, ?> structure = structureFactory.create(mcVersion);
+        final Structure<?, ?> structure = structureFactory.create(helpers.mcVersion);
 
-        BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
         if (!structure.isValidDimension(biomeSource.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -221,24 +192,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateDecorator(CustomClientCommandSource source, FeatureFactory<? extends Decorator<?, ?>> decoratorFactory) throws CommandSyntaxException {
-        long seed = SharedHelpers.getSeed();
-        String dimensionPath;
-        if (source.getMeta("dimension") == null) {
-            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
-        } else {
-            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
-        }
-        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion;
-        if (source.getMeta("version") == null) {
-            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
-        } else {
-            mcVersion = (MCVersion) source.getMeta("version");
-        }
+        SharedHelpers helpers = new SharedHelpers(source);
 
-        final Decorator<?, ?> decorator = decoratorFactory.create(mcVersion);
+        final Decorator<?, ?> decorator = decoratorFactory.create(helpers.mcVersion);
 
-        BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
         if (!decorator.isValidDimension(biomeSource.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -295,25 +253,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
-        long seed = SharedHelpers.getSeed();
-        String dimensionPath;
-        if (source.getMeta("dimension") == null) {
-            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
-        } else {
-            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
-        }
-        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion;
-        if (source.getMeta("version") == null) {
-            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
-        } else {
-            mcVersion = (MCVersion) source.getMeta("version");
-        }
+        SharedHelpers helpers = new SharedHelpers(source);
 
         BlockPos center = new BlockPos(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
 
-        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(mcVersion), centerChunk, 6400, seed, new ChunkRand(), dimension);
+        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(helpers.mcVersion), centerChunk, 6400, helpers.seed, new ChunkRand(), helpers.dimension);
         if (slimeChunkPos == null) {
             Chat.print("", new TranslatableText("command.locate.feature.slimeChunk.noneFound"));
         } else {
@@ -359,30 +304,17 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateLoot(CustomClientCommandSource source, int amount, Pair<String, Predicate<Item>> item) throws CommandSyntaxException {
-        long seed = SharedHelpers.getSeed();
-        String dimensionPath;
-        if (source.getMeta("dimension") == null) {
-            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
-        } else {
-            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
-        }
-        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion;
-        if (source.getMeta("version") == null) {
-            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
-        } else {
-            mcVersion = (MCVersion) source.getMeta("version");
-        }
+        SharedHelpers helpers = new SharedHelpers(source);
 
         String itemString = item.getFirst();
 
-        Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(mcVersion).stream()
+        Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(helpers.mcVersion).stream()
                 .filter(structure -> structure instanceof ILoot)
-                .filter(structure -> structure.isValidDimension(dimension))
+                .filter(structure -> structure.isValidDimension(helpers.dimension))
                 .map(structure -> (RegionStructure<?, ?>) structure)
                 .collect(Collectors.toSet());
 
-        BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
 
         BlockPos center = new BlockPos(source.getPosition());
 

@@ -4,8 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.biome.Biomes;
 import com.seedfinding.mcbiome.source.BiomeSource;
-import com.seedfinding.mccore.state.Dimension;
-import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
@@ -15,7 +13,6 @@ import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
@@ -25,7 +22,6 @@ import net.minecraft.world.chunk.WorldChunk;
 import java.util.HashMap;
 import java.util.Map;
 
-import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 
 public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.Exceptions {
@@ -47,24 +43,11 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
     }
 
     private static int seedOverlay(CustomClientCommandSource source) throws CommandSyntaxException {
-        long seed = SharedHelpers.getSeed();
-        String dimensionPath;
-        if (source.getMeta("dimension") == null) {
-            dimensionPath = source.getWorld().getRegistryKey().getValue().getPath();
-        } else {
-            dimensionPath = ((Identifier) source.getMeta("dimension")).getPath();
-        }
-        Dimension dimension = SharedHelpers.getDimension(dimensionPath);
-        MCVersion mcVersion;
-        if (source.getMeta("version") == null) {
-            mcVersion = SharedHelpers.getMCVersion(CLIENT.getGame().getVersion().getName());
-        } else {
-            mcVersion = (MCVersion) source.getMeta("version");
-        }
+        SharedHelpers helpers = new SharedHelpers(source);
 
-        BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
-        TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
-        final SimpleBlockMap map = new SimpleBlockMap(mcVersion, dimension, Biomes.PLAINS);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        TerrainGenerator generator = TerrainGenerator.of(helpers.dimension, biomeSource);
+        final SimpleBlockMap map = new SimpleBlockMap(helpers.mcVersion, helpers.dimension, Biomes.PLAINS);
         BlockPos.Mutable mutable = new BlockPos.Mutable();
         final BlockPos center = new BlockPos(source.getPosition());
         final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
