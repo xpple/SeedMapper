@@ -14,6 +14,7 @@ public class SeedMapper implements ClientModInitializer {
 
     public static final String MOD_ID = "seedmapper";
     public static final String MOD_NAME = "SeedMapper";
+    public static final String MOD_PREFIX = "sm";
     public static final Path MOD_PATH = Paths.get(FabricLoader.getInstance().getConfigDir() + File.separator + MOD_ID);
     public static final MinecraftClient CLIENT = MinecraftClient.getInstance();
 

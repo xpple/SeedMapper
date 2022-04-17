@@ -4,7 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 
-import static dev.xpple.seedmapper.SeedMapper.MOD_ID;
+import static dev.xpple.seedmapper.SeedMapper.MOD_PREFIX;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 
 public abstract class ClientCommand {
@@ -23,11 +23,11 @@ public abstract class ClientCommand {
     }
 
     private String getRootLiteral() {
-        return MOD_ID + ":" + this.rootLiteral();
+        return MOD_PREFIX + ":" + this.rootLiteral();
     }
 
     private String getAliasLiteral() {
-        return MOD_ID + ":" + this.alias();
+        return MOD_PREFIX + ":" + this.alias();
     }
 
     protected abstract void build();
