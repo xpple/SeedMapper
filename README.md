@@ -11,35 +11,35 @@ be added later. A complete compatibility chart can be seen in the release descri
 remains compatible with previously supported Minecraft versions.
 
 ## Features
-Before using any of these commands, make sure the seed has been configured using `/seedmapper:config seed set <seed>`.
+Before using any of these commands, make sure the seed has been configured using `/sm:config seed set <seed>`.
 
 ### SeedOverlay
-Usage: `/seedmapper:seedoverlay`
+Usage: `/sm:seedoverlay`
 
 Shows an overlay of blocks that don't match the seed's default terrain. Based on the biome, certain blocks are 
 "ungenerated". For example, sand will match in a desert, but not in a forest. The combination of terrain comparison and 
 ungeneration makes for a great overlay.
 
 ### TerrainVersion
-Usage: `/seedmapper:terrainversion`
+Usage: `/sm:terrainversion`
 
 Determines the Minecraft version the terrain has most likely been generated in. This command internally used the 
 SeedOverlay principle.
 
 ### Locate
-Usage: `/seedmapper:locate (biome <biome>)|(feature (structure <structure>)|(slimechunk))|(loot <amount> <item> [with|without] [<enchantment>] [<level>|*])`
+Usage: `/sm:locate (biome <biome>)|(feature (structure <structure>)|(slimechunk))|(loot <amount> <item> [with|without] [<enchantment>] [<level>|*])`
 
 Locates a given feature, biome or loot item closest to the player. Depending on the rarity of the biome or loot item, 
 this process can take at most 30 seconds.
 
 ### Highlight
-Usage: `/seedmapper:highlight block <block> [<range>]`
+Usage: `/sm:highlight block <block> [<range>]`
 
 Highlights a given block in a radius. This highlight uses the seed to determine the locations of these blocks, 
 which means very few locations may not be valid (especially around caves).
 
 ### Source
-Usage: `/seedmapper:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotation>)|(in <dimension>)|(versioned <version>)`
+Usage: `/sm:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotation>)|(in <dimension>)|(versioned <version>)`
 
 Executes a given command from a modified source. For example, modifying the source's position will execute the command 
 as if from that position.
