@@ -24,7 +24,7 @@ public class SourceCommand extends ClientCommand {
 
     @Override
     protected void build() {
-        LiteralCommandNode<FabricClientCommandSource> root = DISPATCHER.register(literal("source"));
+        LiteralCommandNode<FabricClientCommandSource> root = DISPATCHER.register(argumentBuilder);
         argumentBuilder
                 .then(literal("run")
                         .redirect(DISPATCHER.getRoot(), CommandContext::getSource))
