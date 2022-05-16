@@ -74,7 +74,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                             }
                         }
                     }
-                    if (newBlocks < blocks.get()) {
+                    if (newBlocks <= blocks.get()) {
                         blocks.set(newBlocks);
                         version.set(mcVersion.name);
                     }
