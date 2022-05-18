@@ -17,6 +17,12 @@
 
   "arguments.exceptions.tooFewArguments": "Too few arguments.",
 
+  "command.checkSeed.using": "SeedMapper is using the seed %d from",
+  "command.checkSeed.fromSeeds": "the \"seeds\" config",
+  "command.checkSeed.fromDatabase": "the online database",
+  "command.checkSeed.fromSeed": "the \"seed\" config",
+  "command.checkSeed.none": "SeedMapper couldn't find a seed to use.",
+
   "command.clearscreen.empty": "Couldn't clear any renders.",
   "command.clearscreen.success": "Cleared %d renders.",
 

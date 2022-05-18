@@ -2,6 +2,7 @@ package dev.xpple.seedmapper;
 
 import dev.xpple.seedmapper.command.commands.*;
 import dev.xpple.seedmapper.util.config.Config;
+import dev.xpple.seedmapper.util.database.DatabaseHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -24,6 +25,7 @@ public class SeedMapper implements ClientModInitializer {
         MOD_PATH.toFile().mkdirs();
 
         Config.init();
+        DatabaseHelper.fetchSeeds();
 
         registerCommands();
     }
@@ -40,5 +42,6 @@ public class SeedMapper implements ClientModInitializer {
         new HighlightCommand().instantiate();
         new SourceCommand().instantiate();
         new ClearScreenCommand().instantiate();
+        new CheckSeedCommand().instantiate();
     }
 }

@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import dev.xpple.seedmapper.util.config.Config;
+import dev.xpple.seedmapper.util.database.DatabaseHelper;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -47,19 +48,22 @@ public final class SharedHelpers {
         }
     }
 
+    // TODO: 18/05/2022 await poll seed priority
     public static long getSeed() throws CommandSyntaxException {
-        long seed;
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        if (Config.getSeeds().containsKey(key)) {
-            seed = Config.getSeeds().get(key);
-        } else {
-            JsonElement element = Config.get("seed");
-            if (element instanceof JsonNull) {
-                throw Exceptions.NULL_POINTER_EXCEPTION.create("seed");
-            }
-            seed = element.getAsLong();
+        Long seed = Config.getSeeds().get(key);
+        if (seed != null) {
+            return seed;
         }
-        return seed;
+        seed = DatabaseHelper.getSeed(key);
+        if (seed != null) {
+            return seed;
+        }
+        JsonElement element = Config.get("seed");
+        if (element instanceof JsonNull) {
+            throw Exceptions.NULL_POINTER_EXCEPTION.create("seed");
+        }
+        return element.getAsLong();
     }
 
     public static Dimension getDimension(String dimensionPath) throws CommandSyntaxException {

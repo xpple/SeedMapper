@@ -7,6 +7,7 @@ import com.seedfinding.mccore.block.Block;
 import com.seedfinding.mccore.block.Blocks;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
+import dev.xpple.seedmapper.util.TextUtil;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
 import net.minecraft.text.LiteralText;
@@ -114,13 +115,7 @@ public class ConfigCommand extends ClientCommand {
      */
     private int setSeed(CustomClientCommandSource source, long seed) {
         Config.set("seed", seed);
-        Chat.print("", new TranslatableText("command.config.setSeed", hover(
-            format(copy(
-                text(String.valueOf(seed)),
-                String.valueOf(seed)
-            ), Formatting.GREEN),
-            new TranslatableText("chat.copy.click")
-        )));
+        Chat.print("", new TranslatableText("command.config.setSeed", TextUtil.formatSeed(seed)));
 
         return Command.SINGLE_SUCCESS;
     }
@@ -130,13 +125,7 @@ public class ConfigCommand extends ClientCommand {
         if (element instanceof JsonNull) {
             Chat.print("", new TranslatableText("command.config.getSeed.null"));
         } else {
-            Chat.print("", new TranslatableText("command.config.getSeed", hover(
-                format(copy(
-                    text(element.getAsString()),
-                    element.getAsString()
-                ), Formatting.GREEN),
-                new TranslatableText("chat.copy.click")
-            )));
+            Chat.print("", new TranslatableText("command.config.getSeed", TextUtil.formatSeed(element.getAsLong())));
         }
         return Command.SINGLE_SUCCESS;
     }

@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.util;
 
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.Direction;
 
 import java.text.NumberFormat;
@@ -9,7 +10,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static dev.xpple.seedmapper.util.chat.ChatBuilder.base;
+import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static dev.xpple.seedmapper.util.chat.ChatBuilder.accent;
 
 public class TextUtil {
 
@@ -92,5 +94,15 @@ public class TextUtil {
 
     public static String formatAxisDirection(Direction.AxisDirection axisDirection) {
         return axisDirection.equals(Direction.AxisDirection.POSITIVE) ? "+" : "-";
+    }
+
+    public static MutableText formatSeed(long seed) {
+        return copy(
+                hover(
+                        accent(String.valueOf(seed)),
+                        base(new TranslatableText("chat.copy.click"))
+                ),
+                String.valueOf(seed)
+        );
     }
 }
