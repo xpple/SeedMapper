@@ -6,7 +6,7 @@ is not known, you could crack it using [SeedCrackerX](https://github.com/19Miste
 questions and support please head to my [Discord](https://discord.xpple.dev/).
 
 ## Disclaimer
-This mod does not yet support terrain generation of Minecraft version 1.18 and all versions below 1.10.2. Support for these versions will 
+This mod does not yet support terrain generation of Minecraft versions above 1.17.1 and all versions below 1.10.2. Support for these versions will 
 be added later. A complete compatibility chart can be seen in the release description. Note that the latest release of SeedMapper always 
 remains compatible with previously supported Minecraft versions.
 
@@ -39,7 +39,7 @@ Highlights a given block in a radius. This highlight uses the seed to determine 
 which means very few locations may not be valid (especially around caves).
 
 ### Source
-Usage: `/sm:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotation>)|(in <dimension>)|(versioned <version>)`
+Usage: `/sm:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotation>)|(in <dimension>)|(versioned <version>)|(seeded <seed>)`
 
 Executes a given command from a modified source. For example, modifying the source's position will execute the command 
 as if from that position.
