@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.command.commands;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.biome.Biomes;
@@ -12,7 +13,8 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
@@ -27,7 +29,7 @@ import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void build() {
+    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         argumentBuilder
                 .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource())));
     }
@@ -74,19 +76,19 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                     }
                     boxes.put(new Box(mutable), terrainBlockName);
                     Chat.print("", chain(
-                            highlight(new TranslatableText("command.seedoverlay.feedback.0")),
+                            highlight(Text.translatable("command.seedoverlay.feedback.0")),
                             copy(
                                     hover(
                                             accent("x: " + x + ", y: " + y + ", z: " + z),
                                             chain(
-                                                    base(new TranslatableText("command.seedoverlay.feedback.1")),
+                                                    base(Text.translatable("command.seedoverlay.feedback.1")),
                                                     highlight(terrainBlockName)
                                             )
                                     ),
                                     String.format("%d %d %d", x, y ,z)
 
                             ),
-                            highlight(new TranslatableText("command.seedoverlay.feedback.2"))
+                            highlight(Text.translatable("command.seedoverlay.feedback.2"))
                     ));
                     blocks++;
                 }
@@ -95,12 +97,12 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Config.getColors().get(value),  30 * 20));
         if (blocks > 0) {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.seedoverlay.feedback.3")),
+                    highlight(Text.translatable("command.seedoverlay.feedback.3")),
                     accent(String.valueOf(blocks)),
-                    highlight(new TranslatableText("command.seedoverlay.feedback.4"))
+                    highlight(Text.translatable("command.seedoverlay.feedback.4"))
             ));
         } else {
-            Chat.print("", highlight(new TranslatableText("command.seedoverlay.feedback.5")));
+            Chat.print("", highlight(Text.translatable("command.seedoverlay.feedback.5")));
         }
         return blocks;
     }

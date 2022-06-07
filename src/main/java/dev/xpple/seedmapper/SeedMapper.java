@@ -1,11 +1,16 @@
 package dev.xpple.seedmapper;
 
+import com.mojang.brigadier.CommandDispatcher;
+import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.commands.*;
 import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.database.DatabaseHelper;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.command.CommandRegistryAccess;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -27,21 +32,21 @@ public class SeedMapper implements ClientModInitializer {
         Config.init();
         DatabaseHelper.fetchSeeds();
 
-        registerCommands();
+        ClientCommandRegistrationCallback.EVENT.register(SeedMapper::registerCommands);
     }
 
     public static void onTerminateClient() {
         //
     }
 
-    private static void registerCommands() {
-        new SeedOverlayCommand().instantiate();
-        new TerrainVersionCommand().instantiate();
-        new ConfigCommand().instantiate();
-        new LocateCommand().instantiate();
-        new HighlightCommand().instantiate();
-        new SourceCommand().instantiate();
-        new ClearScreenCommand().instantiate();
-        new CheckSeedCommand().instantiate();
+    private static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        ClientCommand.instantiate(new SeedOverlayCommand(), dispatcher);
+        ClientCommand.instantiate(new TerrainVersionCommand(), dispatcher);
+        ClientCommand.instantiate(new ConfigCommand(), dispatcher);
+        ClientCommand.instantiate(new LocateCommand(), dispatcher);
+        ClientCommand.instantiate(new HighlightCommand(), dispatcher);
+        ClientCommand.instantiate(new SourceCommand(), dispatcher);
+        ClientCommand.instantiate(new ClearScreenCommand(), dispatcher);
+        ClientCommand.instantiate(new CheckSeedCommand(), dispatcher);
     }
 }

@@ -1,25 +1,25 @@
 package dev.xpple.seedmapper.command;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import static dev.xpple.seedmapper.SeedMapper.MOD_PREFIX;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public abstract class ClientCommand {
 
     protected LiteralArgumentBuilder<FabricClientCommandSource> argumentBuilder = literal(this.getRootLiteral());
 
-    public void instantiate() {
-        this.build();
-        ClientCommandManager.DISPATCHER.register(this.argumentBuilder);
-        if (this.alias() == null) {
+    public static void instantiate(ClientCommand command, CommandDispatcher<FabricClientCommandSource> dispatcher) {
+        command.build(dispatcher);
+        dispatcher.register(command.argumentBuilder);
+        if (command.alias() == null) {
             return;
         }
-        this.argumentBuilder = literal(this.getAliasLiteral());
-        this.build();
-        ClientCommandManager.DISPATCHER.register(this.argumentBuilder);
+        command.argumentBuilder = literal(command.getAliasLiteral());
+        command.build(dispatcher);
+        dispatcher.register(command.argumentBuilder);
     }
 
     private String getRootLiteral() {
@@ -30,7 +30,7 @@ public abstract class ClientCommand {
         return MOD_PREFIX + ":" + this.alias();
     }
 
-    protected abstract void build();
+    protected abstract void build(CommandDispatcher<FabricClientCommandSource> dispatcher);
 
     protected abstract String rootLiteral();
 

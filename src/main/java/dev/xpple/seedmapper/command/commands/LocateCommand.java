@@ -1,6 +1,7 @@
 package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
@@ -29,7 +30,8 @@ import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Objects;
@@ -51,13 +53,13 @@ import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgum
 import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.getStructureFactory;
 import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.structureFactory;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class LocateCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void build() {
+    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         argumentBuilder
                 .then(literal("biome")
                         .then(argument("biome", biome())
@@ -94,15 +96,15 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         BPos biomePos = locateBiome(biome::equals, new BPos(center.getX(), 0, center.getZ()), 6400, 8, biomeSource);
 
         if (biomePos == null) {
-            Chat.print("", new TranslatableText("command.locate.biome.noneFound", biome.getName()));
+            Chat.print("", Text.translatable("command.locate.biome.noneFound", biome.getName()));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.biome.foundAt", biome.getName())),
+                    highlight(Text.translatable("command.locate.biome.foundAt", biome.getName())),
                     highlight(" "),
                     copy(
                             hover(
                                     accent("x: " + biomePos.getX() + ", z: " + biomePos.getZ()),
-                                    base(new TranslatableText("command.locate.biome.copy", biome.getName()))
+                                    base(Text.translatable("command.locate.biome.copy", biome.getName()))
                             ),
                             String.format("%d ~ %d", biomePos.getX(), biomePos.getZ())
                     ),
@@ -133,15 +135,15 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         BPos structurePos = locateStructure(structure, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
-            Chat.print("", new TranslatableText("command.locate.feature.structure.noneFound", structure.getName()));
+            Chat.print("", Text.translatable("command.locate.feature.structure.noneFound", structure.getName()));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.feature.structure.foundAt", structure.getName())),
+                    highlight(Text.translatable("command.locate.feature.structure.foundAt", structure.getName())),
                     highlight(" "),
                     copy(
                             hover(
                                     accent("x: " + structurePos.getX() + ", z: " + structurePos.getZ()),
-                                    base(new TranslatableText("command.locate.feature.structure.copy", structure.getName()))
+                                    base(Text.translatable("command.locate.feature.structure.copy", structure.getName()))
                             ),
                             String.format("%d ~ %d", structurePos.getX(), structurePos.getZ())
                     ),
@@ -205,15 +207,15 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         BPos decoratorPos = locateDecorator(decorator, new BPos(center.getX(), center.getY(), center.getZ()).toChunkPos(), 6400, biomeSource, new ChunkRand());
 
         if (decoratorPos == null) {
-            Chat.print("", new TranslatableText("command.locate.feature.decorator.noneFound", decorator.getName()));
+            Chat.print("", Text.translatable("command.locate.feature.decorator.noneFound", decorator.getName()));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.feature.decorator.foundAt", decorator.getName())),
+                    highlight(Text.translatable("command.locate.feature.decorator.foundAt", decorator.getName())),
                     highlight(" "),
                     copy(
                             hover(
                                     accent("x: " + decoratorPos.getX() + ", z: " + decoratorPos.getZ()),
-                                    base(new TranslatableText("command.locate.feature.decorator.copy", decorator.getName()))
+                                    base(Text.translatable("command.locate.feature.decorator.copy", decorator.getName()))
                             ),
                             String.format("%d ~ %d", decoratorPos.getX(), decoratorPos.getZ())
                     ),
@@ -260,27 +262,27 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(helpers.mcVersion), centerChunk, 6400, helpers.seed, new ChunkRand(), helpers.dimension);
         if (slimeChunkPos == null) {
-            Chat.print("", new TranslatableText("command.locate.feature.slimeChunk.noneFound"));
+            Chat.print("", Text.translatable("command.locate.feature.slimeChunk.noneFound"));
         } else {
             int x = (slimeChunkPos.getX() << 4) + 9;
             int z = (slimeChunkPos.getZ() << 4) + 9;
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.feature.slimeChunk.foundAt")),
+                    highlight(Text.translatable("command.locate.feature.slimeChunk.foundAt")),
                     highlight(" "),
                     copy(
                             hover(
                                     accent("x: " + x + ", z: " + z),
-                                    base(new TranslatableText("command.locate.feature.slimeChunk.copy"))
+                                    base(Text.translatable("command.locate.feature.slimeChunk.copy"))
                             ),
                             String.format("%d ~ %d", x, z)
                     ),
                     highlight(" ("),
-                    highlight(new TranslatableText("command.locate.feature.slimeChunk.chunk")),
+                    highlight(Text.translatable("command.locate.feature.slimeChunk.chunk")),
                     highlight(" "),
                     copy(
                             hover(
                                     accent(slimeChunkPos.getX() + " " + slimeChunkPos.getZ()),
-                                    base(new TranslatableText("command.locate.feature.slimeChunk.copyChunk"))
+                                    base(Text.translatable("command.locate.feature.slimeChunk.copyChunk"))
                             ),
                             String.format("%d %d", slimeChunkPos.getX(), slimeChunkPos.getZ())
                     ),
@@ -320,16 +322,16 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         Set<BPos> lootPositions = locateLoot(item.getSecond(), i -> i.getName().equals(itemString), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
         if (lootPositions == null || lootPositions.isEmpty()) {
-            Chat.print("", new TranslatableText("command.locate.loot.noneFound", itemString));
+            Chat.print("", Text.translatable("command.locate.loot.noneFound", itemString));
         } else {
             Chat.print("", chain(
-                    highlight(new TranslatableText("command.locate.loot.foundAt", amount, itemString)),
+                    highlight(Text.translatable("command.locate.loot.foundAt", amount, itemString)),
                     highlight(" "),
                     join(highlight(", "), lootPositions.stream().map(bPos ->
                             copy(
                                     hover(
                                             accent("x: " + bPos.getX() + ", z: " + bPos.getZ()),
-                                            base(new TranslatableText("command.locate.loot.copy", itemString))
+                                            base(Text.translatable("command.locate.loot.copy", itemString))
                                     ),
                                     String.format("%d ~ %d", bPos.getX(), bPos.getZ())
                             )

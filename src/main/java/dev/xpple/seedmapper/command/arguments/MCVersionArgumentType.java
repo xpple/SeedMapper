@@ -9,9 +9,9 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.seedfinding.mccore.version.MCVersion;
 import dev.xpple.seedmapper.command.SharedHelpers;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,7 +22,7 @@ public class MCVersionArgumentType implements ArgumentType<MCVersion>, SharedHel
 
     private static final Collection<String> EXAMPLES = Arrays.asList("1.17.1", "1.15", "b1.6.4");
 
-    private static final SimpleCommandExceptionType DISALLOWED_VERSION_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.exceptions.disallowedVersion"));
+    private static final SimpleCommandExceptionType DISALLOWED_VERSION_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.disallowedVersion"));
 
     private MCVersion equalOrNewerThan = MCVersion.oldest();
     private boolean releaseOnly = true;

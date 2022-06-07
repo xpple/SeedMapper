@@ -21,6 +21,7 @@
   "command.checkSeed.fromSeeds": "the \"seeds\" config",
   "command.checkSeed.fromDatabase": "the online database",
   "command.checkSeed.fromSeed": "the \"seed\" config",
+  "command.checkSeed.fromSource": "the /sm:source command",
   "command.checkSeed.none": "SeedMapper couldn't find a seed to use.",
 
   "command.clearscreen.empty": "Couldn't clear any renders.",

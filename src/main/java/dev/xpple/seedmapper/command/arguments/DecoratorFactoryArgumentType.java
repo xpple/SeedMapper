@@ -10,7 +10,7 @@ import com.seedfinding.mcfeature.decorator.Decorator;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
 
 import java.util.Arrays;

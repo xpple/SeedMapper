@@ -4,8 +4,8 @@ import dev.xpple.seedmapper.util.TextUtil;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.HoverEvent.Action;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.*;
@@ -59,7 +59,7 @@ public class ChatBuilder {
     }
 
     public static MutableText text(String string) {
-        return new LiteralText(string);
+        return Text.literal(string);
     }
 
     public static MutableText highlight(String string) {

@@ -9,8 +9,8 @@ import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.database.DatabaseHelper;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
@@ -18,16 +18,16 @@ import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 public final class SharedHelpers {
 
     public interface Exceptions {
-        DynamicCommandExceptionType NULL_POINTER_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.nullPointerException", arg));
-        DynamicCommandExceptionType DIMENSION_NOT_SUPPORTED_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.dimensionNotSupported", arg));
-        DynamicCommandExceptionType VERSION_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.versionNotFound", arg));
-        SimpleCommandExceptionType INVALID_DIMENSION_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.exceptions.invalidDimension"));
-        DynamicCommandExceptionType BIOME_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.biomeNotFound", arg));
-        DynamicCommandExceptionType STRUCTURE_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.structureNotFound", arg));
-        DynamicCommandExceptionType DECORATOR_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.decoratorNotFound", arg));
-        DynamicCommandExceptionType ITEM_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.itemNotFound", arg));
-        DynamicCommandExceptionType LOOT_ITEM_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.lootItemNotFound", arg));
-        DynamicCommandExceptionType BLOCK_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.blockNotFound", arg));
+        DynamicCommandExceptionType NULL_POINTER_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.nullPointerException", arg));
+        DynamicCommandExceptionType DIMENSION_NOT_SUPPORTED_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.dimensionNotSupported", arg));
+        DynamicCommandExceptionType VERSION_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.versionNotFound", arg));
+        SimpleCommandExceptionType INVALID_DIMENSION_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.invalidDimension"));
+        DynamicCommandExceptionType BIOME_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.biomeNotFound", arg));
+        DynamicCommandExceptionType STRUCTURE_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.structureNotFound", arg));
+        DynamicCommandExceptionType DECORATOR_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.decoratorNotFound", arg));
+        DynamicCommandExceptionType ITEM_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.itemNotFound", arg));
+        DynamicCommandExceptionType LOOT_ITEM_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.lootItemNotFound", arg));
+        DynamicCommandExceptionType BLOCK_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.blockNotFound", arg));
     }
 
     public long seed;
@@ -35,7 +35,7 @@ public final class SharedHelpers {
     public MCVersion mcVersion;
 
     public SharedHelpers(FabricClientCommandSource source) throws CommandSyntaxException {
-        this.seed = getSeed();
+        this.seed = getSeed(source);
         if (source.getMeta("dimension") == null) {
             this.dimension = getDimension(source.getWorld().getRegistryKey().getValue().getPath());
         } else {
@@ -48,10 +48,13 @@ public final class SharedHelpers {
         }
     }
 
-    // TODO: 18/05/2022 await poll seed priority
-    public static long getSeed() throws CommandSyntaxException {
+    public static long getSeed(FabricClientCommandSource source) throws CommandSyntaxException {
+        Long seed = (Long) source.getMeta("seed");
+        if (seed != null) {
+            return seed;
+        }
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        Long seed = Config.getSeeds().get(key);
+        seed = Config.getSeeds().get(key);
         if (seed != null) {
             return seed;
         }

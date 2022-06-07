@@ -1,19 +1,21 @@
 package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import dev.xpple.seedmapper.util.render.Shape;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 
 import java.util.Map;
 
 public class ClearScreenCommand extends ClientCommand {
 
     @Override
-    protected void build() {
+    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         argumentBuilder
                 .executes(ctx -> clearScreen(CustomClientCommandSource.of(ctx.getSource())));
     }
@@ -33,9 +35,9 @@ public class ClearScreenCommand extends ClientCommand {
         final int size = shapeMap.size();
         shapeMap.clear();
         if (size == 0) {
-            Chat.print("", new TranslatableText("command.clearscreen.empty"));
+            Chat.print("", Text.translatable("command.clearscreen.empty"));
         } else {
-            Chat.print("", new TranslatableText("command.clearscreen.success", size));
+            Chat.print("", Text.translatable("command.clearscreen.success", size));
         }
         return Command.SINGLE_SUCCESS;
     }

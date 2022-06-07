@@ -1,6 +1,7 @@
 package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.biome.Biomes;
@@ -13,7 +14,8 @@ import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
@@ -27,7 +29,7 @@ import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
 public class TerrainVersionCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void build() {
+    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         argumentBuilder
                 .executes(ctx -> execute(CustomClientCommandSource.of(ctx.getSource())));
     }
@@ -82,7 +84,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
         if (version.get().startsWith("1")) {
             Chat.print("", chain(
                     accent(version.get()),
-                    highlight(new TranslatableText("command.terrainversion.feedback"))
+                    highlight(Text.translatable("command.terrainversion.feedback"))
             ));
         } else {
             Chat.print("", highlight(version.get()));

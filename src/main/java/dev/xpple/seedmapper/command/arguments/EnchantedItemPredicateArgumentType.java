@@ -16,9 +16,9 @@ import com.seedfinding.mcfeature.loot.enchantment.Enchantments;
 import com.seedfinding.mcfeature.loot.item.Item;
 import com.seedfinding.mcfeature.loot.item.Items;
 import dev.xpple.seedmapper.command.SharedHelpers;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,11 +34,11 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
     private static final Stream<String> items = Items.getItems().values().stream().map(Item::getName);
     private static final String[] lootableItems = new String[]{"diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings", "diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings"};
 
-    private static final SimpleCommandExceptionType EXPECTED_WITH_OR_WITHOUT_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.exceptions.expectedWithOrWithout"));
-    private static final DynamicCommandExceptionType UNKNOWN_ENCHANTMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.exceptions.unknownEnchantment", arg));
-    private static final SimpleCommandExceptionType LEVEL_OUT_OF_BOUNDS_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.exceptions.levelOutOfBounds"));
-    private static final SimpleCommandExceptionType INCOMPATIBLE_ENCHANTMENT_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.exceptions.incompatibleEnchantment"));
-    private static final SimpleCommandExceptionType INCOMPLETE_ARGUMENT_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.exceptions.incompleteArgument"));
+    private static final SimpleCommandExceptionType EXPECTED_WITH_OR_WITHOUT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.expectedWithOrWithout"));
+    private static final DynamicCommandExceptionType UNKNOWN_ENCHANTMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.unknownEnchantment", arg));
+    private static final SimpleCommandExceptionType LEVEL_OUT_OF_BOUNDS_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.levelOutOfBounds"));
+    private static final SimpleCommandExceptionType INCOMPATIBLE_ENCHANTMENT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.incompatibleEnchantment"));
+    private static final SimpleCommandExceptionType INCOMPLETE_ARGUMENT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.incompleteArgument"));
 
     private boolean lootOnly = false;
 

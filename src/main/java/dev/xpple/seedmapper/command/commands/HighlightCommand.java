@@ -1,6 +1,7 @@
 package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
@@ -18,7 +19,8 @@ import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.features.Features;
 import dev.xpple.seedmapper.util.render.RenderQueue;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
@@ -30,14 +32,14 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class HighlightCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void build() {
+    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         final String[] blocks = new String[]{"ancient_debris", "andesite", "blackstone",/* "clay",*/ "coal_ore", "copper_ore", "deepslate", "diamond_ore", "diorite", "dirt", "emerald_ore", "gold_ore", "granite",/* "gravel",*/ "iron_ore", "lapis_ore", "magma_block", "nether_gold_ore", "quartz_ore", "redstone_ore",/* "sand",*/ "soulsand", "tuff"};
         argumentBuilder
                 .then(literal("block")
@@ -123,9 +125,9 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, -1));
 
         if (boxes.isEmpty()) {
-            Chat.print("", new TranslatableText("command.highlight.block.noneFound", blockString));
+            Chat.print("", Text.translatable("command.highlight.block.noneFound", blockString));
         } else {
-            Chat.print("", new TranslatableText("command.highlight.block.success", boxes.size(), blockString));
+            Chat.print("", Text.translatable("command.highlight.block.success", boxes.size(), blockString));
         }
         return Command.SINGLE_SUCCESS;
     }
