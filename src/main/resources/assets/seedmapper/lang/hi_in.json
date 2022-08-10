@@ -35,7 +35,7 @@
   "command.config.getSeed.null": "\"seed\" is null.",
   "command.config.addSeed.success": "वर्तमान सर्वर के लिए सीड जोड़ा गया।",
   "command.config.addSeed.alreadyAdded": "इस सर्वर के लिए सीड पहले से ही जोड़ा जा चूका है।",
-  "command.config.removeSeed.success": "वर्तमान सर्वर का सीड हटा गया।",
+  "command.config.removeSeed.success": "वर्तमान सर्वर का सीड हटाया गया।",
   "command.config.removeSeed.notAdded": "इस सर्वर के लिए सीड नहीं जोड़ा गया है।",
   "command.config.addBlock.success": "%s को नज़रअंदाज़ कर रहा है।",
   "command.config.addBlock.alreadyIgnored": "%s को पहले से ही नज़रअंदाज़ कर रहा है।",
