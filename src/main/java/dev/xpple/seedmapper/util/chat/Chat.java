@@ -1,6 +1,7 @@
 package dev.xpple.seedmapper.util.chat;
 
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.SeedMapper.MOD_NAME;
@@ -50,9 +51,9 @@ public class Chat {
         error("Error", texts);
     }
 
-    public static void send(String text) {
+    public static void send(String text, Text preview) {
         if (CLIENT.player != null) {
-            CLIENT.player.sendChatMessage(text);
+            CLIENT.player.sendChatMessage(text, preview);
         }
     }
 }

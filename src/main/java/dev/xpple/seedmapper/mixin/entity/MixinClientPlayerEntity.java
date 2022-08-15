@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.mixin.entity;
 
 import dev.xpple.seedmapper.util.chat.ChatBuilder;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -11,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinClientPlayerEntity {
 
     @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
-    private void sendChatMessage(String message, CallbackInfo ci) {
+    private void sendChatMessage(String message, Text preview, CallbackInfo ci) {
         if (!message.startsWith("/")) {
             return;
         }
