@@ -9,7 +9,7 @@
   "commands.exceptions.lootNotFound": "आइटम \"%s\" नही मिला",
   "commands.exceptions.lootItemNotFound": "लूट आइटम \"%s\" नही मिला।",
   "commands.exceptions.blockNotFound": "ब्लॉक \"%s\" नही मिला।",
-  "commands.exceptions.expectedWithOrWithout": "Expected \"with\" or \"without\".",
+  "commands.exceptions.expectedWithOrWithout": "प्रत्याशित था \"with\" या \"without\".",
   "commands.exceptions.unknownEnchantment": "अज्ञात एनचेंटमेन्ट \"%s\".",
   "commands.exceptions.levelOutOfBounds": "स्तर सीमा से बाहर",
   "commands.exceptions.incompatibleEnchantment": "असंगत एनचेंटमेन्ट।",
