@@ -18,16 +18,16 @@
   "arguments.exceptions.tooFewArguments": "बहुत कम आर्गुमेंट।",
 
   "command.checkSeed.using": "SeedMapper सीड %d को यहाँ से उपयोग कर रहा है",
-  "command.checkSeed.fromSeeds": "the \"seeds\" config",
+  "command.checkSeed.fromSeeds": "\"seeds\" कॉन्फिग",
   "command.checkSeed.fromDatabase": "ऑनलाइन डेटाबेस",
   "command.checkSeed.fromSeed": "the \"seed\" config",
-  "command.checkSeed.fromSource": "the /sm:source command",
+  "command.checkSeed.fromSource": "/sm:source कमांड",
   "command.checkSeed.none": "SeedMapper उपयोग करने के लिए सीड नहीं खोज सका।",
 
   "command.clearscreen.empty": "कोई रेंडर हटा नहीं सका।",
   "command.clearscreen.success": "%d रेंडर हटा दिए गए।",
 
-  "command.config.setAutomate": "सेट \"automate\" to %s.",
+  "command.config.setAutomate": "\"automate\" को सेट किया %s.",
   "command.config.getAutomate": "\"automate\" को सेट कर दिया है %s.",
   "command.config.toggleAutomate": "\"automate\" को टॉगल कर दिया %s.",
   "command.config.setSeed": "सीड \"seed\" सेट किया %d.",
@@ -72,7 +72,7 @@
   "command.locate.loot.copy": "%s के निर्देशांक कॉपी करने के लिए क्लिक कीजिये।",
 
   "command.seedoverlay.feedback.0": "पर ब्लॉक ",
-  "command.seedoverlay.feedback.1": "के निर्देशांक कॉपी करने के लिए क्लिक कीजिये ",
+  "command.seedoverlay.feedback.1": "निर्देशांक कॉपी करने के लिए क्लिक कीजिये ",
   "command.seedoverlay.feedback.2": " मेल नहीं खाता!",
   "command.seedoverlay.feedback.3": "कुल ",
   "command.seedoverlay.feedback.4": " ब्लॉक मेल नहीं खाते!",
