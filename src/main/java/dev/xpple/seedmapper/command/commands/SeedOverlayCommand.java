@@ -14,11 +14,11 @@ import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.HashMap;
@@ -67,7 +67,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                 for (int y = 0; y < column.length; y++) {
                     mutable.setY(y);
                     final var terrainBlock = chunk.getBlockState(mutable).getBlock();
-                    String terrainBlockName = Registry.BLOCK.getId(terrainBlock).getPath();
+                    String terrainBlockName = Registries.BLOCK.getId(terrainBlock).getPath();
                     if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
                         continue;
                     }
