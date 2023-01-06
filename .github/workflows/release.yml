@@ -13,6 +13,8 @@ jobs:
               uses: actions/checkout@v2
               with:
                   ref: ${{ github.event.pull_request.head.sha }}
+            - name: Make gradle wrapper executable
+              run: chmod +x ./gradlew
             - name: Build jar
               run: ./gradlew remapJar
             - name: Hash jar
