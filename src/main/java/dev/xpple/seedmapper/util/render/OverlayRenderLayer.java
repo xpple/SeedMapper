@@ -18,7 +18,7 @@ public class OverlayRenderLayer extends RenderLayer {
     public static RenderLayer getOverlay() {
         if (OVERLAY == null) {
             MultiPhaseParameters parameters = MultiPhaseParameters.builder()
-                    .shader(LINES_SHADER)
+                    .program(LINES_PROGRAM)
                     .transparency(TRANSLUCENT_TRANSPARENCY)
                     .target(OUTLINE_TARGET)
                     .writeMaskState(COLOR_MASK)

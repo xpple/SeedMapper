@@ -31,9 +31,9 @@
   "accessWidener": "seedmapper.aw",
 
   "depends": {
-    "fabricloader": ">=0.7.4",
+    "fabricloader": ">=0.14.0",
     "fabric": ">=0.37.1",
-    "minecraft": "1.19.2"
+    "minecraft": "1.19.3"
   },
   "suggests": {
     "clientcommands": "clientcommands"

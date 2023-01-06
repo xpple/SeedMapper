@@ -14,10 +14,10 @@ import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.ChunkData;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -66,7 +66,7 @@ public class MixinClientChunkManager {
                     for (int y = 0; y < column.length; y++) {
                         mutable.setY(y);
                         final var terrainBlock = chunk.getBlockState(mutable).getBlock();
-                        String terrainBlockName = Registry.BLOCK.getId(terrainBlock).getPath();
+                        String terrainBlockName = Registries.BLOCK.getId(terrainBlock).getPath();
                         if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
                             continue;
                         }

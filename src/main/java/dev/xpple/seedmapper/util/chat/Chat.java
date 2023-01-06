@@ -51,9 +51,9 @@ public class Chat {
         error("Error", texts);
     }
 
-    public static void send(String text, Text preview) {
+    public static void send(String text) {
         if (CLIENT.player != null) {
-            CLIENT.player.sendChatMessage(text, preview);
+            CLIENT.player.sendMessage(Text.of(text));
         }
     }
 }
