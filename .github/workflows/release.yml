@@ -10,11 +10,11 @@ jobs:
         container: openjdk:17
         steps:
             - name: Checkout latest commit
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   ref: ${{ github.event.pull_request.head.sha }}
-            - name: Make gradle wrapper executable
-              run: chmod +x ./gradlew
+            - name: Setup Gradle
+              uses: gradle/gradle-build-action@v2
             - name: Build jar
               run: ./gradlew remapJar
             - name: Hash jar
