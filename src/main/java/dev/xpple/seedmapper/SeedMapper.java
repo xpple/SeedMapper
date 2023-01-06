@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.commands.*;
 import dev.xpple.seedmapper.util.config.Config;
-import dev.xpple.seedmapper.util.database.DatabaseHelper;
+import dev.xpple.seedmapper.util.DatabaseHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;

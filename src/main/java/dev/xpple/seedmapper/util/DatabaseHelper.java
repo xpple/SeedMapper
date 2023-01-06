@@ -1,4 +1,4 @@
-package dev.xpple.seedmapper.util.database;
+package dev.xpple.seedmapper.util;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-// backup https://pastes.dev/zRqTJMJcLr
 public class DatabaseHelper {
     private static final String url = "https://script.google.com/macros/s/AKfycbxvJa3GPh2B_atqbxFdlpInPw4XGKk1jR7lHqALx1durf0X-VXi6bG4zi7Jg-FCU3DfFg/exec";
     private static final HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();

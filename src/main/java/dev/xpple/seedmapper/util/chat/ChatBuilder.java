@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.util.chat;
 
+import dev.xpple.seedmapper.util.RunnableClickEventActionHelper;
 import dev.xpple.seedmapper.util.TextUtil;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -8,9 +9,9 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.util.*;
-
-import static dev.xpple.seedmapper.SeedMapper.MOD_ID;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ChatBuilder {
 
@@ -20,15 +21,6 @@ public class ChatBuilder {
     public static Formatting DARK = Formatting.DARK_GRAY;
     public static Formatting WARN = Formatting.YELLOW;
     public static Formatting ERROR = Formatting.RED;
-
-    private static int runnableCount = 0;
-    public static String runnableCommandPrefix = "/" + MOD_ID + "::internal::chatrun::" + new Random().ints(48, 122 + 1) // 0 to z
-            .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-            .limit(10)
-            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-            .toString() + " ";
-
-    public static Map<String, Runnable> runnables = new HashMap<>();
 
     public static MutableText chain(MutableText... texts) {
         return chain(Arrays.asList(texts));
@@ -122,12 +114,12 @@ public class ChatBuilder {
         return apply(text, () -> text.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))));
     }
 
+    public static MutableText page(MutableText text, String page) {
+        return apply(text, () -> text.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, page))));
+    }
+
     public static MutableText run(MutableText text, Runnable runnable) {
-        int count = ++runnableCount;
-
-        runnables.put(String.valueOf(count), runnable);
-
-        return command(text, runnableCommandPrefix + count);
+        return page(text, RunnableClickEventActionHelper.registerCode(runnable));
     }
 
     public static MutableText suggest(MutableText text, String command) {

@@ -7,7 +7,8 @@
   ],
   "client": [
     "MixinMinecraftClient",
-    "MixinClientChunkManager"
+    "MixinClientChunkManager",
+    "MixinScreen"
   ],
   "injectors": {
     "defaultRequire": 1

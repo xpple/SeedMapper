@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import dev.xpple.seedmapper.util.config.Config;
-import dev.xpple.seedmapper.util.database.DatabaseHelper;
+import dev.xpple.seedmapper.util.DatabaseHelper;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
