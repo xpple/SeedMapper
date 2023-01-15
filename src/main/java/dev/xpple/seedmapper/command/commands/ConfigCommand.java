@@ -29,7 +29,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class ConfigCommand extends ClientCommand {
 
-    private static final Map<Class<?>, Pair<Supplier<? extends ArgumentType<?>>, BiFunction<CommandContext<FabricClientCommandSource>, String, Object>>> arguments = ImmutableMap.<Class<?>, Pair<Supplier<? extends ArgumentType<?>>, BiFunction<CommandContext<FabricClientCommandSource>, String, Object>>>builder()
+    private static final Map<Class<?>, Pair<Supplier<? extends ArgumentType<?>>, BiFunction<CommandContext<FabricClientCommandSource>, String, ?>>> arguments = ImmutableMap.<Class<?>, Pair<Supplier<? extends ArgumentType<?>>, BiFunction<CommandContext<FabricClientCommandSource>, String, ?>>>builder()
             .put(boolean.class, new Pair<>(BoolArgumentType::bool, BoolArgumentType::getBool))
             .put(Boolean.class, new Pair<>(BoolArgumentType::bool, BoolArgumentType::getBool))
             .put(double.class, new Pair<>(DoubleArgumentType::doubleArg, DoubleArgumentType::getDouble))
@@ -90,7 +90,7 @@ public class ConfigCommand extends ClientCommand {
                 return;
             }
             RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand = argument("key", keyPair.getLeft().get());
-            Function<CommandContext<FabricClientCommandSource>, Object> getKey = ctx -> keyPair.getRight().apply(ctx, "key");
+            Function<CommandContext<FabricClientCommandSource>, ?> getKey = ctx -> keyPair.getRight().apply(ctx, "key");
             Type valueType = types[1];
             var valuePair = arguments.get((Class<?>) valueType);
             if (valuePair == null) {
