@@ -1,42 +1,48 @@
 package dev.xpple.seedmapper.command.commands;
 
-import com.google.common.base.Joiner;
+import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
+import dev.xpple.seedmapper.command.arguments.BlockArgumentType;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Configs;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.text.Text;
+import net.minecraft.util.Pair;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
-import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
-import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
-import static com.mojang.brigadier.arguments.DoubleArgumentType.getDouble;
-import static com.mojang.brigadier.arguments.FloatArgumentType.floatArg;
-import static com.mojang.brigadier.arguments.FloatArgumentType.getFloat;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
-import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
-import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.block;
-import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.getBlock;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class ConfigCommand extends ClientCommand {
+
+    private static final Map<Class<?>, Pair<Supplier<? extends ArgumentType<?>>, BiFunction<CommandContext<FabricClientCommandSource>, String, Object>>> arguments = ImmutableMap.<Class<?>, Pair<Supplier<? extends ArgumentType<?>>, BiFunction<CommandContext<FabricClientCommandSource>, String, Object>>>builder()
+            .put(boolean.class, new Pair<>(BoolArgumentType::bool, BoolArgumentType::getBool))
+            .put(Boolean.class, new Pair<>(BoolArgumentType::bool, BoolArgumentType::getBool))
+            .put(double.class, new Pair<>(DoubleArgumentType::doubleArg, DoubleArgumentType::getDouble))
+            .put(Double.class, new Pair<>(DoubleArgumentType::doubleArg, DoubleArgumentType::getDouble))
+            .put(float.class, new Pair<>(FloatArgumentType::floatArg, FloatArgumentType::getFloat))
+            .put(Float.class, new Pair<>(FloatArgumentType::floatArg, FloatArgumentType::getFloat))
+            .put(int.class, new Pair<>(IntegerArgumentType::integer, IntegerArgumentType::getInteger))
+            .put(Integer.class, new Pair<>(IntegerArgumentType::integer, IntegerArgumentType::getInteger))
+            .put(long.class, new Pair<>(LongArgumentType::longArg, LongArgumentType::getLong))
+            .put(Long.class, new Pair<>(LongArgumentType::longArg, LongArgumentType::getLong))
+            .put(String.class, new Pair<>(StringArgumentType::string, StringArgumentType::getString))
+            .put(Block.class, new Pair<>(BlockArgumentType::block, BlockArgumentType::getBlock))
+            .build();
 
     @Override
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -48,29 +54,15 @@ public class ConfigCommand extends ClientCommand {
             literal.then(literal("get").executes(ctx -> get(CustomClientCommandSource.of(ctx.getSource()), config)));
         }
         Configs.getSetters().forEach(config -> {
-            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand;
             Class<?> type = Configs.getType(config);
-            if (type == boolean.class || type == Boolean.class) {
-                subCommand = argument("value", bool()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getBool(ctx, "value")));
-            } else if (type == double.class || type == Double.class) {
-                subCommand = argument("value", doubleArg()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getDouble(ctx, "value")));
-            } else if (type == float.class || type == Float.class) {
-                subCommand = argument("value", floatArg()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getFloat(ctx, "value")));
-            } else if (type == int.class || type == Integer.class) {
-                subCommand = argument("value", integer()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getInteger(ctx, "value")));
-            } else if (type == long.class || type == Long.class) {
-                subCommand = argument("value", longArg()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getLong(ctx, "value")));
-            } else if (type == String.class) {
-                subCommand = argument("value", greedyString()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getString(ctx, "value")));
-            } else if (type == Block.class) {
-                subCommand = argument("value", block()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getBlock(ctx, "value")));
-            } else {
+            var pair = arguments.get(type);
+            if (pair == null) {
                 return;
             }
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand = argument("value", pair.getLeft().get()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, pair.getRight().apply(ctx, "value")));
             literals.get(config).then(literal("set").then(subCommand));
         });
         Configs.getAdders().forEach(config -> {
-            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand;
             Type[] types = Configs.getParameterTypes(config);
             Type type;
             if (types.length == 1) {
@@ -80,80 +72,34 @@ public class ConfigCommand extends ClientCommand {
             } else {
                 return;
             }
-            if (type == boolean.class || type == Boolean.class) {
-                subCommand = argument("value", bool()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getBool(ctx, "value")));
-            } else if (type == double.class || type == Double.class) {
-                subCommand = argument("value", doubleArg()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getDouble(ctx, "value")));
-            } else if (type == float.class || type == Float.class) {
-                subCommand = argument("value", floatArg()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getFloat(ctx, "value")));
-            } else if (type == int.class || type == Integer.class) {
-                subCommand = argument("value", integer()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getInteger(ctx, "value")));
-            } else if (type == long.class || type == Long.class) {
-                subCommand = argument("value", longArg()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getLong(ctx, "value")));
-            } else if (type == String.class) {
-                subCommand = argument("value", greedyString()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getString(ctx, "value")));
-            } else if (type == Block.class) {
-                subCommand = argument("value", block()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getBlock(ctx, "value")));
-            } else {
+            var pair = arguments.get((Class<?>) type);
+            if (pair == null) {
                 return;
             }
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand = argument("value", pair.getLeft().get()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, pair.getRight().apply(ctx, "value")));
             literals.get(config).then(literal("add").then(subCommand));
         });
         Configs.getPutters().forEach(config -> {
-            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand;
             Type[] types = Configs.getParameterTypes(config);
             if (types.length != 2) {
                 return;
             }
             Type keyType = types[0];
-            Function<CommandContext<FabricClientCommandSource>, Object> getKey;
-            if (keyType == boolean.class || keyType == Boolean.class) {
-                subCommand = argument("key", bool());
-                getKey = ctx -> getBool(ctx, "key");
-            } else if (keyType == double.class || keyType == Double.class) {
-                subCommand = argument("key", doubleArg());
-                getKey = ctx -> getDouble(ctx, "key");
-            } else if (keyType == float.class || keyType == Float.class) {
-                subCommand = argument("key", floatArg());
-                getKey = ctx -> getFloat(ctx, "key");
-            } else if (keyType == int.class || keyType == Integer.class) {
-                subCommand = argument("key", integer());
-                getKey = ctx -> getInteger(ctx, "key");
-            } else if (keyType == long.class || keyType == Long.class) {
-                subCommand = argument("key", longArg());
-                getKey = ctx -> getLong(ctx, "key");
-            } else if (keyType == String.class) {
-                subCommand = argument("key", string());
-                getKey = ctx -> getString(ctx, "key");
-            } else if (keyType == Block.class) {
-                subCommand = argument("key", block());
-                getKey = ctx -> getBlock(ctx, "key");
-            } else {
+            var keyPair = arguments.get((Class<?>) keyType);
+            if (keyPair == null) {
                 return;
             }
-            RequiredArgumentBuilder<FabricClientCommandSource, ?> subSubCommand;
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand = argument("key", keyPair.getLeft().get());
+            Function<CommandContext<FabricClientCommandSource>, Object> getKey = ctx -> keyPair.getRight().apply(ctx, "key");
             Type valueType = types[1];
-            if (valueType == boolean.class || valueType == Boolean.class) {
-                subSubCommand = argument("value", bool()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getBool(ctx, "value")));
-            } else if (valueType == double.class || valueType == Double.class) {
-                subSubCommand = argument("value", doubleArg()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getDouble(ctx, "value")));
-            } else if (valueType == float.class || valueType == Float.class) {
-                subSubCommand = argument("value", floatArg()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getFloat(ctx, "value")));
-            } else if (valueType == int.class || valueType == Integer.class) {
-                subSubCommand = argument("value", integer()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getInteger(ctx, "value")));
-            } else if (valueType == long.class || valueType == Long.class) {
-                subSubCommand = argument("value", longArg()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getLong(ctx, "value")));
-            } else if (valueType == String.class) {
-                subSubCommand = argument("value", greedyString()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getString(ctx, "value")));
-            } else if (valueType == Block.class) {
-                subSubCommand = argument("value", block()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getBlock(ctx, "value")));
-            } else {
+            var valuePair = arguments.get((Class<?>) valueType);
+            if (valuePair == null) {
                 return;
             }
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subSubCommand = argument("value", valuePair.getLeft().get()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), valuePair.getRight().apply(ctx, "value")));
             literals.get(config).then(literal("put").then(subCommand.then(subSubCommand)));
         });
         Configs.getRemovers().forEach(config -> {
-            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand;
             Type[] types = Configs.getParameterTypes(config);
             Type type;
             if (types.length == 1) {
@@ -163,23 +109,11 @@ public class ConfigCommand extends ClientCommand {
             } else {
                 return;
             }
-            if (type == boolean.class || type == Boolean.class) {
-                subCommand = argument("value", bool()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getBool(ctx, "value")));
-            } else if (type == double.class || type == Double.class) {
-                subCommand = argument("value", doubleArg()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getDouble(ctx, "value")));
-            } else if (type == float.class || type == Float.class) {
-                subCommand = argument("value", floatArg()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getFloat(ctx, "value")));
-            } else if (type == int.class || type == Integer.class) {
-                subCommand = argument("value", integer()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getInteger(ctx, "value")));
-            } else if (type == long.class || type == Long.class) {
-                subCommand = argument("value", longArg()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getLong(ctx, "value")));
-            } else if (type == String.class) {
-                subCommand = argument("value", greedyString()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getString(ctx, "value")));
-            } else if (type == Block.class) {
-                subCommand = argument("value", block()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getBlock(ctx, "value")));
-            } else {
+            var pair = arguments.get((Class<?>) type);
+            if (pair == null) {
                 return;
             }
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand = argument("value", pair.getLeft().get()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, pair.getRight().apply(ctx, "value")));
             literals.get(config).then(literal("remove").then(subCommand));
         });
         literals.forEach((config, literal) -> argumentBuilder.then(literal));
