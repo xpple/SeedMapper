@@ -1,88 +1,188 @@
 package dev.xpple.seedmapper.command.commands;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
+import com.google.common.base.Joiner;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.seedfinding.mccore.block.Block;
-import com.seedfinding.mccore.block.Blocks;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
-import dev.xpple.seedmapper.util.TextUtil;
 import dev.xpple.seedmapper.util.chat.Chat;
-import dev.xpple.seedmapper.util.config.Config;
+import dev.xpple.seedmapper.util.config.Configs;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.block.Block;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
-import java.util.Arrays;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
+import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
+import static com.mojang.brigadier.arguments.DoubleArgumentType.getDouble;
+import static com.mojang.brigadier.arguments.FloatArgumentType.floatArg;
+import static com.mojang.brigadier.arguments.FloatArgumentType.getFloat;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CColorArgumentType.color;
-import static dev.xpple.clientarguments.arguments.CColorArgumentType.getCColor;
-import static dev.xpple.seedmapper.SeedMapper.CLIENT;
-import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.block;
+import static dev.xpple.seedmapper.command.arguments.BlockArgumentType.getBlock;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class ConfigCommand extends ClientCommand {
 
     @Override
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        argumentBuilder
-                .then(literal("automate")
-                        .then(literal("set")
-                                .then(argument("bool", bool())
-                                        .executes(ctx -> setAutomate(CustomClientCommandSource.of(ctx.getSource()), getBool(ctx, "bool")))))
-                        .then(literal("get")
-                                .executes(ctx -> getAutomate(CustomClientCommandSource.of(ctx.getSource()))))
-                        .then(literal("toggle")
-                                .executes(ctx -> toggleAutomate(CustomClientCommandSource.of(ctx.getSource())))))
-                .then(literal("seed")
-                        .then(literal("set")
-                                .then(argument("seed", longArg())
-                                        .executes(ctx -> setSeed(CustomClientCommandSource.of(ctx.getSource()), getLong(ctx, "seed")))))
-                        .then(literal("get")
-                                .executes(ctx -> getSeed(CustomClientCommandSource.of(ctx.getSource())))))
-                .then(literal("seeds")
-                        .then(literal("add")
-                                .then(argument("seed", longArg())
-                                        .executes(ctx -> addSeed(CustomClientCommandSource.of(ctx.getSource()), getLong(ctx, "seed")))))
-                        .then(literal("remove")
-                                .then(argument("key", greedyString())
-                                        .suggests((context, builder) -> suggestMatching(Config.getSeeds().keySet().stream(), builder))
-                                        .executes(ctx -> removeSeed(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "key"))))))
-                .then(literal("ignored")
-                        .then(literal("add")
-                                .then(argument("block", word())
-                                        .suggests((context, builder) -> suggestMatching(Blocks.LATEST_REGISTRY.values().stream().map(Block::getName), builder))
-                                        .executes(ctx -> addBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))))
-                        .then(literal("remove")
-                                .then(argument("block", word())
-                                        .suggests((context, builder) -> suggestMatching(Config.getIgnoredBlocks(), builder))
-                                        .executes(ctx -> removeBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))))
-                        .then(literal("list")
-                                .executes(ctx -> listBlocks(CustomClientCommandSource.of(ctx.getSource())))))
-                .then(literal("colors")
-                        .then(literal("add")
-                                .then(argument("block", word())
-                                        .suggests((context, builder) -> suggestMatching(Blocks.LATEST_REGISTRY.values().stream().map(Block::getName), builder))
-                                        .then(argument("color", color())
-                                                .executes(ctx -> addColor(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getCColor(ctx, "color"))))))
-                        .then(literal("remove")
-                                .then(argument("block", word())
-                                        .suggests((context, builder) -> suggestMatching(Config.getColors().keySet().stream(), builder))
-                                        .executes(ctx -> removeColor(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))))
-                        .then(literal("list")
-                                .executes(ctx -> listColors(CustomClientCommandSource.of(ctx.getSource())))));
+        Map<String, LiteralArgumentBuilder<FabricClientCommandSource>> literals = new HashMap<>();
+        for (String config : Configs.getConfigs()) {
+            LiteralArgumentBuilder<FabricClientCommandSource> literal = literal(config);
+            literals.put(config, literal);
+
+            literal.then(literal("get").executes(ctx -> get(CustomClientCommandSource.of(ctx.getSource()), config)));
+        }
+        Configs.getSetters().forEach(config -> {
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand;
+            Class<?> type = Configs.getType(config);
+            if (type == boolean.class || type == Boolean.class) {
+                subCommand = argument("value", bool()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getBool(ctx, "value")));
+            } else if (type == double.class || type == Double.class) {
+                subCommand = argument("value", doubleArg()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getDouble(ctx, "value")));
+            } else if (type == float.class || type == Float.class) {
+                subCommand = argument("value", floatArg()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getFloat(ctx, "value")));
+            } else if (type == int.class || type == Integer.class) {
+                subCommand = argument("value", integer()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getInteger(ctx, "value")));
+            } else if (type == long.class || type == Long.class) {
+                subCommand = argument("value", longArg()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getLong(ctx, "value")));
+            } else if (type == String.class) {
+                subCommand = argument("value", greedyString()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getString(ctx, "value")));
+            } else if (type == Block.class) {
+                subCommand = argument("value", block()).executes(ctx -> set(CustomClientCommandSource.of(ctx.getSource()), config, getBlock(ctx, "value")));
+            } else {
+                return;
+            }
+            literals.get(config).then(literal("set").then(subCommand));
+        });
+        Configs.getAdders().forEach(config -> {
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand;
+            Type[] types = Configs.getParameterTypes(config);
+            Type type;
+            if (types.length == 1) {
+                type = types[0];
+            } else if (types.length == 2) {
+                type = types[1];
+            } else {
+                return;
+            }
+            if (type == boolean.class || type == Boolean.class) {
+                subCommand = argument("value", bool()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getBool(ctx, "value")));
+            } else if (type == double.class || type == Double.class) {
+                subCommand = argument("value", doubleArg()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getDouble(ctx, "value")));
+            } else if (type == float.class || type == Float.class) {
+                subCommand = argument("value", floatArg()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getFloat(ctx, "value")));
+            } else if (type == int.class || type == Integer.class) {
+                subCommand = argument("value", integer()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getInteger(ctx, "value")));
+            } else if (type == long.class || type == Long.class) {
+                subCommand = argument("value", longArg()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getLong(ctx, "value")));
+            } else if (type == String.class) {
+                subCommand = argument("value", greedyString()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getString(ctx, "value")));
+            } else if (type == Block.class) {
+                subCommand = argument("value", block()).executes(ctx -> add(CustomClientCommandSource.of(ctx.getSource()), config, getBlock(ctx, "value")));
+            } else {
+                return;
+            }
+            literals.get(config).then(literal("add").then(subCommand));
+        });
+        Configs.getPutters().forEach(config -> {
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand;
+            Type[] types = Configs.getParameterTypes(config);
+            if (types.length != 2) {
+                return;
+            }
+            Type keyType = types[0];
+            Function<CommandContext<FabricClientCommandSource>, Object> getKey;
+            if (keyType == boolean.class || keyType == Boolean.class) {
+                subCommand = argument("key", bool());
+                getKey = ctx -> getBool(ctx, "key");
+            } else if (keyType == double.class || keyType == Double.class) {
+                subCommand = argument("key", doubleArg());
+                getKey = ctx -> getDouble(ctx, "key");
+            } else if (keyType == float.class || keyType == Float.class) {
+                subCommand = argument("key", floatArg());
+                getKey = ctx -> getFloat(ctx, "key");
+            } else if (keyType == int.class || keyType == Integer.class) {
+                subCommand = argument("key", integer());
+                getKey = ctx -> getInteger(ctx, "key");
+            } else if (keyType == long.class || keyType == Long.class) {
+                subCommand = argument("key", longArg());
+                getKey = ctx -> getLong(ctx, "key");
+            } else if (keyType == String.class) {
+                subCommand = argument("key", string());
+                getKey = ctx -> getString(ctx, "key");
+            } else if (keyType == Block.class) {
+                subCommand = argument("key", block());
+                getKey = ctx -> getBlock(ctx, "key");
+            } else {
+                return;
+            }
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subSubCommand;
+            Type valueType = types[1];
+            if (valueType == boolean.class || valueType == Boolean.class) {
+                subSubCommand = argument("value", bool()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getBool(ctx, "value")));
+            } else if (valueType == double.class || valueType == Double.class) {
+                subSubCommand = argument("value", doubleArg()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getDouble(ctx, "value")));
+            } else if (valueType == float.class || valueType == Float.class) {
+                subSubCommand = argument("value", floatArg()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getFloat(ctx, "value")));
+            } else if (valueType == int.class || valueType == Integer.class) {
+                subSubCommand = argument("value", integer()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getInteger(ctx, "value")));
+            } else if (valueType == long.class || valueType == Long.class) {
+                subSubCommand = argument("value", longArg()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getLong(ctx, "value")));
+            } else if (valueType == String.class) {
+                subSubCommand = argument("value", greedyString()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getString(ctx, "value")));
+            } else if (valueType == Block.class) {
+                subSubCommand = argument("value", block()).executes(ctx -> put(CustomClientCommandSource.of(ctx.getSource()), config, getKey.apply(ctx), getBlock(ctx, "value")));
+            } else {
+                return;
+            }
+            literals.get(config).then(literal("put").then(subCommand.then(subSubCommand)));
+        });
+        Configs.getRemovers().forEach(config -> {
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> subCommand;
+            Type[] types = Configs.getParameterTypes(config);
+            Type type;
+            if (types.length == 1) {
+                type = types[0];
+            } else if (types.length == 2) {
+                type = types[1];
+            } else {
+                return;
+            }
+            if (type == boolean.class || type == Boolean.class) {
+                subCommand = argument("value", bool()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getBool(ctx, "value")));
+            } else if (type == double.class || type == Double.class) {
+                subCommand = argument("value", doubleArg()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getDouble(ctx, "value")));
+            } else if (type == float.class || type == Float.class) {
+                subCommand = argument("value", floatArg()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getFloat(ctx, "value")));
+            } else if (type == int.class || type == Integer.class) {
+                subCommand = argument("value", integer()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getInteger(ctx, "value")));
+            } else if (type == long.class || type == Long.class) {
+                subCommand = argument("value", longArg()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getLong(ctx, "value")));
+            } else if (type == String.class) {
+                subCommand = argument("value", greedyString()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getString(ctx, "value")));
+            } else if (type == Block.class) {
+                subCommand = argument("value", block()).executes(ctx -> remove(CustomClientCommandSource.of(ctx.getSource()), config, getBlock(ctx, "value")));
+            } else {
+                return;
+            }
+            literals.get(config).then(literal("remove").then(subCommand));
+        });
+        literals.forEach((config, literal) -> argumentBuilder.then(literal));
     }
 
     @Override
@@ -90,144 +190,33 @@ public class ConfigCommand extends ClientCommand {
         return "config";
     }
 
-    /**
-     * If automation is set to true, new chunks will automatically be compared.
-     */
-    private int setAutomate(CustomClientCommandSource source, boolean value) {
-        Config.toggle("automate", value);
-        Chat.print("", Text.translatable("command.config.setAutomate", value));
+    private static int get(CustomClientCommandSource source, String config) {
+        String value = Configs.toString(config);
+        Chat.print("", Text.translatable("command.config.get", config, value));
         return Command.SINGLE_SUCCESS;
     }
 
-    private int getAutomate(CustomClientCommandSource source) {
-        Chat.print("", Text.translatable("command.config.getAutomate", Config.isEnabled("automate")));
+    private static int set(CustomClientCommandSource source, String config, Object value) {
+        Configs.set(config, value);
+        Chat.print("", Text.translatable("command.config.set", config, value));
         return Command.SINGLE_SUCCESS;
     }
 
-    private int toggleAutomate(CustomClientCommandSource source) {
-        boolean old = Config.isEnabled("automate");
-        Config.toggle("automate", !old);
-        Chat.print("", Text.translatable("command.config.toggleAutomate", !old));
+    private static int add(CustomClientCommandSource source, String config, Object value) {
+        Configs.add(config, value);
+        Chat.print("", Text.translatable("command.config.add", value, config));
         return Command.SINGLE_SUCCESS;
     }
 
-    /**
-     * The seed that will be used for the comparison.
-     */
-    private int setSeed(CustomClientCommandSource source, long seed) {
-        Config.set("seed", seed);
-        Chat.print("", Text.translatable("command.config.setSeed", TextUtil.formatSeed(seed)));
-
+    private static int put(CustomClientCommandSource source, String config, Object key, Object value) {
+        Configs.put(config, key, value);
+        Chat.print("", Text.translatable("command.config.put", key, value, config));
         return Command.SINGLE_SUCCESS;
     }
 
-    private int getSeed(CustomClientCommandSource source) {
-        JsonElement element = Config.get("seed");
-        if (element instanceof JsonNull) {
-            Chat.print("", Text.translatable("command.config.getSeed.null"));
-        } else {
-            Chat.print("", Text.translatable("command.config.getSeed", TextUtil.formatSeed(element.getAsLong())));
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    /**
-     * If seeds are added to this list, they will be used if the server matches the key.
-     * <code>CLIENT.getNetworkHandler().getConnection().getAddress().toString()</code> will be used to compare the key.
-     */
-    private int addSeed(CustomClientCommandSource source, long seed) {
-        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        if (Config.addSeed(key, seed)) {
-            Chat.print("", Text.translatable("command.config.addSeed.success"));
-        } else {
-            Chat.print("", Text.translatable("command.config.addSeed.alreadyAdded"));
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private int removeSeed(CustomClientCommandSource source, String key) {
-        if (Config.removeSeed(key)) {
-            Chat.print("", Text.translatable("command.config.removeSeed.success"));
-        } else {
-            Chat.print("", Text.translatable("command.config.removeSeed.notAdded"));
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    /**
-     * If blocks are added to this list, they will be ignored in the overlay process.
-     */
-    private int addBlock(CustomClientCommandSource source, String block) {
-        if (Config.addBlock(block)) {
-            Chat.print("", Text.translatable("command.config.addBlock.success", block));
-        } else {
-            Chat.print("", Text.translatable("command.config.addBlock.alreadyIgnored", block));
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private int removeBlock(CustomClientCommandSource source, String block) {
-        if (Config.removeBlock(block)) {
-            Chat.print("", Text.translatable("command.config.removeBlock.success", block));
-        } else {
-            Chat.print("", Text.translatable("command.config.removeBlock.notIgnored", block));
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private int listBlocks(CustomClientCommandSource source) {
-        if (Config.getIgnoredBlocks().isEmpty()) {
-            Chat.print("", Text.translatable("command.config.listBlocks.empty"));
-        } else {
-            Chat.print("", Text.translatable("command.config.listBlocks", String.join(", ", Config.getIgnoredBlocks())));
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    /**
-     * If blocks are added to this map, they will be overlayed with a custom color in the overlay process.
-     */
-    private int addColor(CustomClientCommandSource source, String block, Formatting color) {
-        final int colorValue = color.getColorValue();
-        short[] rgbArray = new short[]{(short) ((colorValue >> 16) & 0xFF), (short) ((colorValue >> 8) & 0xFF), (short) (colorValue & 0xFF)};
-        if (Config.addColor(block, rgbArray)) {
-            Chat.print("", Text.translatable("command.config.addColor.success", block).append(" ").append(Text.literal(color.getName()).formatted(color)).append("."));
-        } else {
-            Chat.print("", Text.translatable("command.config.addColor.alreadyAdded", block));
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private int removeColor(CustomClientCommandSource source, String block) {
-        if (Config.removeColor(block)) {
-            Chat.print("", Text.translatable("command.config.removeColor.success", block));
-        } else {
-            Chat.print("", Text.translatable("command.config.removeColor.notAdded", block));
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private int listColors(CustomClientCommandSource source) {
-        Map<String, short[]> map = Config.getColors();
-        if (map.isEmpty()) {
-            Chat.print("", Text.translatable("command.config.listColors.empty"));
-        } else {
-            Chat.print("", chain(
-                    Text.translatable("command.config.listColors"),
-                    join(highlight(", "), map.entrySet().stream().map(entry -> {
-                        final short[] rgbArray = entry.getValue();
-                        int rgb;
-                        rgb = rgbArray[0];
-                        rgb = (rgb << 8) + rgbArray[1];
-                        rgb = (rgb << 8) + rgbArray[2];
-                        final Integer finalRgb = rgb;
-                        return Text.literal(entry.getKey()).formatted(Arrays.stream(Formatting.values())
-                                .filter(f -> Objects.equals(f.getColorValue(), finalRgb))
-                                .findFirst().orElse(Formatting.STRIKETHROUGH));
-                    }).collect(Collectors.toList())),
-                    highlight(".")
-            ));
-        }
+    private static int remove(CustomClientCommandSource source, String config, Object value) {
+        Configs.remove(config, value);
+        Chat.print("", Text.translatable("command.config.remove", value, config));
         return Command.SINGLE_SUCCESS;
     }
 }

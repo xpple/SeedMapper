@@ -10,10 +10,11 @@ import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.chat.Chat;
-import dev.xpple.seedmapper.util.config.Config;
+import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.block.Block;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -55,7 +56,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
         final ChunkPos chunkPos = chunk.getPos();
 
-        Map<Box, String> boxes = new HashMap<>();
+        Map<Box, Block> boxes = new HashMap<>();
         int blocks = 0;
         for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
             mutable.setX(x);
@@ -67,14 +68,14 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                 for (int y = 0; y < column.length; y++) {
                     mutable.setY(y);
                     final var terrainBlock = chunk.getBlockState(mutable).getBlock();
-                    String terrainBlockName = Registries.BLOCK.getId(terrainBlock).getPath();
-                    if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
+                    if (Configs.IgnoredBlocks.contains(terrainBlock)) {
                         continue;
                     }
                     if (map.get(terrainBlock) == column[y].getId()) {
                         continue;
                     }
-                    boxes.put(new Box(mutable), terrainBlockName);
+                    boxes.put(new Box(mutable), terrainBlock);
+                    String terrainBlockName = Registries.BLOCK.getId(terrainBlock).getPath();
                     Chat.print("", chain(
                             highlight(Text.translatable("command.seedoverlay.feedback.0")),
                             copy(
@@ -94,7 +95,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                 }
             }
         }
-        boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Config.getColors().get(value),  30 * 20));
+        boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Configs.BlockColours.get(value),  30 * 20));
         if (blocks > 0) {
             Chat.print("", chain(
                     highlight(Text.translatable("command.seedoverlay.feedback.3")),

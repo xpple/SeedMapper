@@ -1,15 +1,14 @@
 package dev.xpple.seedmapper.mixin.client;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcterrain.TerrainGenerator;
-import dev.xpple.seedmapper.util.config.Config;
+import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
+import net.minecraft.block.Block;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -35,18 +34,21 @@ public class MixinClientChunkManager {
 
     @Inject(method = "loadChunkFromPacket", at = @At("RETURN"))
     private void onLoadChunk(int x, int z, PacketByteBuf buf, NbtCompound nbt, Consumer<ChunkData.BlockEntityVisitor> consumer, CallbackInfoReturnable<WorldChunk> cir) {
-        if (Config.isEnabled("automate")) {
+        if (Configs.AutoOverlay) {
             String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
             Dimension dimension = Dimension.fromString(dimensionPath);
             if (dimension == null) {
                 return;
             }
             MCVersion mcVersion = MCVersion.fromString(CLIENT.getGame().getVersion().getName());
-            JsonElement element = Config.get("seed");
-            if (element instanceof JsonNull) {
+            if (mcVersion == null) {
                 return;
             }
-            BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, element.getAsLong());
+            Long seed = Configs.Seed;
+            if (seed == null) {
+                return;
+            }
+            BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
             TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
             SimpleBlockMap map = new SimpleBlockMap(dimension);
 
@@ -55,7 +57,7 @@ public class MixinClientChunkManager {
             final WorldChunk chunk = cir.getReturnValue();
             final ChunkPos chunkPos = chunk.getPos();
 
-            Map<Box, String> boxes = new HashMap<>();
+            Map<Box, Block> boxes = new HashMap<>();
             for (int _x = chunkPos.getStartX(); _x <= chunkPos.getEndX(); _x++) {
                 mutable.setX(_x);
                 for (int _z = chunkPos.getStartZ(); _z <= chunkPos.getEndZ(); _z++) {
@@ -66,18 +68,17 @@ public class MixinClientChunkManager {
                     for (int y = 0; y < column.length; y++) {
                         mutable.setY(y);
                         final var terrainBlock = chunk.getBlockState(mutable).getBlock();
-                        String terrainBlockName = Registries.BLOCK.getId(terrainBlock).getPath();
-                        if (Config.getIgnoredBlocks().contains(terrainBlockName)) {
+                        if (Configs.IgnoredBlocks.contains(terrainBlock)) {
                             continue;
                         }
                         if (map.get(terrainBlock) == column[y].getId()) {
                             continue;
                         }
-                        boxes.put(new Box(mutable), terrainBlockName);
+                        boxes.put(new Box(mutable), terrainBlock);
                     }
                 }
             }
-            boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Config.getColors().get(value),  30 * 20));
+            boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Configs.BlockColours.get(value),  30 * 20));
         }
     }
 }

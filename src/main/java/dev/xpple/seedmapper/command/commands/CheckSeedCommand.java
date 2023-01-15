@@ -1,15 +1,13 @@
 package dev.xpple.seedmapper.command.commands;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
+import dev.xpple.seedmapper.util.DatabaseHelper;
 import dev.xpple.seedmapper.util.TextUtil;
 import dev.xpple.seedmapper.util.chat.Chat;
-import dev.xpple.seedmapper.util.config.Config;
-import dev.xpple.seedmapper.util.DatabaseHelper;
+import dev.xpple.seedmapper.util.config.Configs;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
@@ -55,13 +53,13 @@ public class CheckSeedCommand extends ClientCommand {
             return Command.SINGLE_SUCCESS;
         }
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        seed = Config.getSeeds().get(key);
+        seed = Configs.SavedSeeds.get(key);
         if (seed != null) {
             Chat.print("", chain(
                     Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                     highlight(" "),
                     format(
-                            Text.translatable("command.checkSeed.fromSeeds"),
+                            Text.translatable("command.checkSeed.fromSavedSeeds"),
                             Formatting.UNDERLINE
                     ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, Paths.get(MOD_PATH + File.separator + "config.json").toAbsolutePath().toString()))),
                     highlight(".")
@@ -81,9 +79,8 @@ public class CheckSeedCommand extends ClientCommand {
             ));
             return Command.SINGLE_SUCCESS;
         }
-        JsonElement element = Config.get("seed");
-        if (!(element instanceof JsonNull)) {
-            seed = element.getAsLong();
+        seed = Configs.Seed;
+        if (seed != null) {
             Chat.print("", chain(
                     Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                     highlight(" "),

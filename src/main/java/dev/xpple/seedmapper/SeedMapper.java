@@ -3,8 +3,8 @@ package dev.xpple.seedmapper;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.commands.*;
-import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.DatabaseHelper;
+import dev.xpple.seedmapper.util.config.ConfigHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -29,7 +29,7 @@ public class SeedMapper implements ClientModInitializer {
         //noinspection ResultOfMethodCallIgnored
         MOD_PATH.toFile().mkdirs();
 
-        Config.init();
+        ConfigHelper.init();
         DatabaseHelper.fetchSeeds();
 
         ClientCommandRegistrationCallback.EVENT.register(SeedMapper::registerCommands);

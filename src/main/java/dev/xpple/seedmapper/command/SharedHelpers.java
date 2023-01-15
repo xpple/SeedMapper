@@ -1,14 +1,12 @@
 package dev.xpple.seedmapper.command;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
-import dev.xpple.seedmapper.util.config.Config;
 import dev.xpple.seedmapper.util.DatabaseHelper;
+import dev.xpple.seedmapper.util.config.Configs;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -54,7 +52,7 @@ public final class SharedHelpers {
             return seed;
         }
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        seed = Config.getSeeds().get(key);
+        seed = Configs.SavedSeeds.get(key);
         if (seed != null) {
             return seed;
         }
@@ -62,11 +60,11 @@ public final class SharedHelpers {
         if (seed != null) {
             return seed;
         }
-        JsonElement element = Config.get("seed");
-        if (element instanceof JsonNull) {
-            throw Exceptions.NULL_POINTER_EXCEPTION.create("seed");
+        seed = Configs.Seed;
+        if (seed != null) {
+            return seed;
         }
-        return element.getAsLong();
+        throw Exceptions.NULL_POINTER_EXCEPTION.create("Seed");
     }
 
     public static Dimension getDimension(String dimensionPath) throws CommandSyntaxException {
