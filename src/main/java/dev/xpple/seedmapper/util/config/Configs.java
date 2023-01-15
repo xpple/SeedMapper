@@ -1,7 +1,6 @@
 package dev.xpple.seedmapper.util.config;
 
 import com.google.common.base.Joiner;
-import com.google.common.primitives.Primitives;
 import net.minecraft.block.Block;
 
 import java.lang.annotation.ElementType;
@@ -157,8 +156,8 @@ public class Configs {
             Class<?> type = field.getType();
             if (type.isAssignableFrom(List.class)) {
                 String adder = annotation.adder();
+                //noinspection StatementWithEmptyBody
                 if (adder.equals("none")) {
-                    // do nothing
                 } else if (adder.isEmpty()) {
                     Method add;
                     try {
@@ -189,8 +188,8 @@ public class Configs {
                     });
                 }
                 String remover = annotation.remover();
+                //noinspection StatementWithEmptyBody
                 if (remover.equals("none")) {
-                    // do nothing
                 } else if (remover.isEmpty()) {
                     Method remove;
                     try {
@@ -222,8 +221,8 @@ public class Configs {
                 }
             } else if (type.isAssignableFrom(Map.class)) {
                 String adder = annotation.adder();
+                //noinspection StatementWithEmptyBody
                 if (adder.equals("none")) {
-                    // do nothing
                 } else if (!adder.isEmpty()) {
                     Method adderMethod;
                     try {
@@ -240,8 +239,8 @@ public class Configs {
                     });
                 }
                 String putter = annotation.putter();
+                //noinspection StatementWithEmptyBody
                 if (putter.equals("none")) {
-                    // do nothing
                 } else if (putter.isEmpty()) {
                     Method put;
                     try {
@@ -272,8 +271,8 @@ public class Configs {
                     });
                 }
                 String remover = annotation.remover();
+                //noinspection StatementWithEmptyBody
                 if (remover.equals("none")) {
-                    // do nothing
                 } else if (remover.isEmpty()) {
                     Method remove;
                     try {
