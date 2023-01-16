@@ -41,7 +41,7 @@ public class CheckSeedCommand extends ClientCommand {
     private int checkSeed(CustomClientCommandSource source) {
         Long seed = (Long) source.getMeta("seed");
         if (seed != null) {
-            Chat.print("", chain(
+            Chat.print(chain(
                     Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                     highlight(" "),
                     format(
@@ -55,7 +55,7 @@ public class CheckSeedCommand extends ClientCommand {
         String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
         seed = Configs.SavedSeeds.get(key);
         if (seed != null) {
-            Chat.print("", chain(
+            Chat.print(chain(
                     Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                     highlight(" "),
                     format(
@@ -68,7 +68,7 @@ public class CheckSeedCommand extends ClientCommand {
         }
         seed = DatabaseHelper.getSeed(key);
         if (seed != null) {
-            Chat.print("", chain(
+            Chat.print(chain(
                     Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                     highlight(" "),
                     format(
@@ -81,7 +81,7 @@ public class CheckSeedCommand extends ClientCommand {
         }
         seed = Configs.Seed;
         if (seed != null) {
-            Chat.print("", chain(
+            Chat.print(chain(
                     Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                     highlight(" "),
                     format(
@@ -92,7 +92,7 @@ public class CheckSeedCommand extends ClientCommand {
             ));
             return Command.SINGLE_SUCCESS;
         }
-        Chat.print("", Text.translatable("command.checkSeed.none"));
+        Chat.print(Text.translatable("command.checkSeed.none"));
         return Command.SINGLE_SUCCESS;
     }
 }

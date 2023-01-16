@@ -17,12 +17,8 @@ public class Chat {
         CLIENT.inGameHud.setOverlayMessage(ChatBuilder.chain(texts), false);
     }
 
-    public static void print(String prefix, MutableText... texts) {
-        toChat(dark("["), accent(MOD_NAME), dark("] "), base(prefix), ChatBuilder.chain(texts));
-    }
-
     public static void print(MutableText... texts) {
-        print("Log", texts);
+        toChat(dark("["), accent(MOD_NAME), dark("] "), ChatBuilder.chain(texts));
     }
 
     public static void announce(String prefix, MutableText... texts) {

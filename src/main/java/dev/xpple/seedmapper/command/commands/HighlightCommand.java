@@ -125,9 +125,9 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, -1));
 
         if (boxes.isEmpty()) {
-            Chat.print("", Text.translatable("command.highlight.block.noneFound", blockString));
+            Chat.print(Text.translatable("command.highlight.block.noneFound", blockString));
         } else {
-            Chat.print("", Text.translatable("command.highlight.block.success", boxes.size(), blockString));
+            Chat.print(Text.translatable("command.highlight.block.success", boxes.size(), blockString));
         }
         return Command.SINGLE_SUCCESS;
     }

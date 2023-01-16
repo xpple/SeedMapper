@@ -96,9 +96,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         BPos biomePos = locateBiome(biome::equals, new BPos(center.getX(), 0, center.getZ()), 6400, 8, biomeSource);
 
         if (biomePos == null) {
-            Chat.print("", Text.translatable("command.locate.biome.noneFound", biome.getName()));
+            Chat.print(Text.translatable("command.locate.biome.noneFound", biome.getName()));
         } else {
-            Chat.print("", chain(
+            Chat.print(chain(
                     highlight(Text.translatable("command.locate.biome.foundAt", biome.getName())),
                     highlight(" "),
                     copy(
@@ -135,9 +135,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         BPos structurePos = locateStructure(structure, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
-            Chat.print("", Text.translatable("command.locate.feature.structure.noneFound", structure.getName()));
+            Chat.print(Text.translatable("command.locate.feature.structure.noneFound", structure.getName()));
         } else {
-            Chat.print("", chain(
+            Chat.print(chain(
                     highlight(Text.translatable("command.locate.feature.structure.foundAt", structure.getName())),
                     highlight(" "),
                     copy(
@@ -207,9 +207,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         BPos decoratorPos = locateDecorator(decorator, new BPos(center.getX(), center.getY(), center.getZ()).toChunkPos(), 6400, biomeSource, new ChunkRand());
 
         if (decoratorPos == null) {
-            Chat.print("", Text.translatable("command.locate.feature.decorator.noneFound", decorator.getName()));
+            Chat.print(Text.translatable("command.locate.feature.decorator.noneFound", decorator.getName()));
         } else {
-            Chat.print("", chain(
+            Chat.print(chain(
                     highlight(Text.translatable("command.locate.feature.decorator.foundAt", decorator.getName())),
                     highlight(" "),
                     copy(
@@ -262,11 +262,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(helpers.mcVersion), centerChunk, 6400, helpers.seed, new ChunkRand(), helpers.dimension);
         if (slimeChunkPos == null) {
-            Chat.print("", Text.translatable("command.locate.feature.slimeChunk.noneFound"));
+            Chat.print(Text.translatable("command.locate.feature.slimeChunk.noneFound"));
         } else {
             int x = (slimeChunkPos.getX() << 4) + 9;
             int z = (slimeChunkPos.getZ() << 4) + 9;
-            Chat.print("", chain(
+            Chat.print(chain(
                     highlight(Text.translatable("command.locate.feature.slimeChunk.foundAt")),
                     highlight(" "),
                     copy(
@@ -322,9 +322,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         Set<BPos> lootPositions = locateLoot(item.getSecond(), i -> i.getName().equals(itemString), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
         if (lootPositions == null || lootPositions.isEmpty()) {
-            Chat.print("", Text.translatable("command.locate.loot.noneFound", itemString));
+            Chat.print(Text.translatable("command.locate.loot.noneFound", itemString));
         } else {
-            Chat.print("", chain(
+            Chat.print(chain(
                     highlight(Text.translatable("command.locate.loot.foundAt", amount, itemString)),
                     highlight(" "),
                     join(highlight(", "), lootPositions.stream().map(bPos ->

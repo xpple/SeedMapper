@@ -126,31 +126,31 @@ public class ConfigCommand extends ClientCommand {
 
     private static int get(CustomClientCommandSource source, String config) {
         String value = Configs.toString(config);
-        Chat.print("", Text.translatable("command.config.get", config, value));
+        Chat.print(Text.translatable("command.config.get", config, value));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int set(CustomClientCommandSource source, String config, Object value) {
         Configs.set(config, value);
-        Chat.print("", Text.translatable("command.config.set", config, value));
+        Chat.print(Text.translatable("command.config.set", config, value));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int add(CustomClientCommandSource source, String config, Object value) {
         Configs.add(config, value);
-        Chat.print("", Text.translatable("command.config.add", value, config));
+        Chat.print(Text.translatable("command.config.add", value, config));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int put(CustomClientCommandSource source, String config, Object key, Object value) {
         Configs.put(config, key, value);
-        Chat.print("", Text.translatable("command.config.put", key, value, config));
+        Chat.print(Text.translatable("command.config.put", key, value, config));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int remove(CustomClientCommandSource source, String config, Object value) {
         Configs.remove(config, value);
-        Chat.print("", Text.translatable("command.config.remove", value, config));
+        Chat.print(Text.translatable("command.config.remove", value, config));
         return Command.SINGLE_SUCCESS;
     }
 }

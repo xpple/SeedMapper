@@ -35,9 +35,9 @@ public class ClearScreenCommand extends ClientCommand {
         final int size = shapeMap.size();
         shapeMap.clear();
         if (size == 0) {
-            Chat.print("", Text.translatable("command.clearscreen.empty"));
+            Chat.print(Text.translatable("command.clearscreen.empty"));
         } else {
-            Chat.print("", Text.translatable("command.clearscreen.success", size));
+            Chat.print(Text.translatable("command.clearscreen.success", size));
         }
         return Command.SINGLE_SUCCESS;
     }

@@ -82,12 +82,12 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                     }
                 });
         if (version.get().startsWith("1")) {
-            Chat.print("", chain(
+            Chat.print(chain(
                     accent(version.get()),
                     highlight(Text.translatable("command.terrainversion.feedback"))
             ));
         } else {
-            Chat.print("", highlight(version.get()));
+            Chat.print(highlight(version.get()));
         }
         return Command.SINGLE_SUCCESS;
     }
