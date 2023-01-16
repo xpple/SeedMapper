@@ -11,8 +11,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -34,7 +34,7 @@ public class Configs {
     }
 
     @Config
-    public static final List<Block> IgnoredBlocks = ConfigHelper.initIgnoredBlocks();
+    public static final Set<Block> IgnoredBlocks = ConfigHelper.initIgnoredBlocks();
 
     @Config
     public static boolean AutoOverlay = ConfigHelper.initAutoOverlay();
@@ -57,8 +57,8 @@ public class Configs {
     public static String toString(String config) {
         Object value = get(config);
         String toString;
-        if (value instanceof List<?> list) {
-            toString = "[" + Joiner.on(", ").join(list) + "]";
+        if (value instanceof Collection<?> collection) {
+            toString = "[" + Joiner.on(", ").join(collection) + "]";
         } else if (value instanceof Map<?, ?> map) {
             toString = "{" + Joiner.on(", ").withKeyValueSeparator("=").join(map) + "}";
         } else {
@@ -154,14 +154,14 @@ public class Configs {
             configs.put(fieldName, field);
             Config annotation = field.getAnnotation(Config.class);
             Class<?> type = field.getType();
-            if (type.isAssignableFrom(List.class)) {
+            if (Collection.class.isAssignableFrom(type)) {
                 String adder = annotation.adder();
                 //noinspection StatementWithEmptyBody
                 if (adder.equals("none")) {
                 } else if (adder.isEmpty()) {
                     Method add;
                     try {
-                        add = List.class.getDeclaredMethod("add", Object.class);
+                        add = Collection.class.getDeclaredMethod("add", Object.class);
                     } catch (ReflectiveOperationException e) {
                         throw new AssertionError(e);
                     }
@@ -193,7 +193,7 @@ public class Configs {
                 } else if (remover.isEmpty()) {
                     Method remove;
                     try {
-                        remove = List.class.getDeclaredMethod("remove", Object.class);
+                        remove = Collection.class.getDeclaredMethod("remove", Object.class);
                     } catch (ReflectiveOperationException e) {
                         throw new AssertionError(e);
                     }
@@ -219,7 +219,7 @@ public class Configs {
                         }
                     });
                 }
-            } else if (type.isAssignableFrom(Map.class)) {
+            } else if (Map.class.isAssignableFrom(type)) {
                 String adder = annotation.adder();
                 //noinspection StatementWithEmptyBody
                 if (adder.equals("none")) {

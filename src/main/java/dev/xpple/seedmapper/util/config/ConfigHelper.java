@@ -12,10 +12,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static dev.xpple.seedmapper.SeedMapper.MOD_ID;
 import static dev.xpple.seedmapper.SeedMapper.MOD_PATH;
@@ -81,12 +81,12 @@ public class ConfigHelper {
         return new HashMap<>();
     }
 
-    static List<Block> initIgnoredBlocks() {
+    static Set<Block> initIgnoredBlocks() {
         if (root.has("IgnoredBlocks")) {
-            return gson.fromJson(root.getAsJsonArray("IgnoredBlocks"), new TypeToken<List<Block>>() {}.getType());
+            return gson.fromJson(root.getAsJsonArray("IgnoredBlocks"), new TypeToken<Set<Block>>() {}.getType());
         }
         root.add("IgnoredBlocks", new JsonArray());
-        return new ArrayList<>();
+        return new HashSet<>();
     }
 
     static boolean initAutoOverlay() {
