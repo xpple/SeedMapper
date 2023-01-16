@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.command.commands;
 
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -10,6 +11,7 @@ import com.seedfinding.mccore.rand.seed.WorldSeed;
 import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.util.data.Pair;
 import com.seedfinding.mccore.util.data.SpiralIterator;
+import com.seedfinding.mccore.util.data.Triplet;
 import com.seedfinding.mccore.util.pos.BPos;
 import com.seedfinding.mccore.util.pos.CPos;
 import com.seedfinding.mccore.util.pos.RPos;
@@ -17,6 +19,7 @@ import com.seedfinding.mcfeature.Feature;
 import com.seedfinding.mcfeature.decorator.Decorator;
 import com.seedfinding.mcfeature.decorator.DesertWell;
 import com.seedfinding.mcfeature.decorator.EndGateway;
+import com.seedfinding.mcfeature.loot.ChestContent;
 import com.seedfinding.mcfeature.loot.ILoot;
 import com.seedfinding.mcfeature.loot.item.Item;
 import com.seedfinding.mcfeature.misc.SlimeChunk;
@@ -34,10 +37,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -320,7 +320,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BlockPos center = new BlockPos(source.getPosition());
 
-        Set<BPos> lootPositions = locateLoot(item.getSecond(), i -> i.getName().equals(itemString), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
+        List<BPos> lootPositions = locateLoot(item.getSecond(), i -> i.getName().equals(itemString), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
         if (lootPositions == null || lootPositions.isEmpty()) {
             Chat.print(Text.translatable("command.locate.loot.noneFound", itemString));
         } else {
@@ -342,9 +342,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         return Command.SINGLE_SUCCESS;
     }
 
-    private static Set<BPos> locateLoot(Predicate<Item> item, Predicate<Item> nameEquals, int amount, BPos center, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
-        AtomicInteger itemsFound = new AtomicInteger(0);
-        AtomicBoolean initial = new AtomicBoolean(true);
+    private static List<BPos> locateLoot(Predicate<Item> item, Predicate<Item> nameEquals, int amount, BPos center, ChunkRand chunkRand, BiomeSource biomeSource, Set<RegionStructure<?, ?>> structures) {
+        TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
+
+        int itemsFound = 0;
+        List<BPos> positions = new ArrayList<>();
+        List<Triplet<? extends RegionStructure<?, ?>, Generator, Iterator<RPos>>> structureInfo = new ArrayList<>();
         for (RegionStructure<?, ?> structure : structures) {
             Generator.GeneratorFactory<?> factory;
             if (structure instanceof RuinedPortal) {
@@ -362,21 +365,44 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
             int chunkInRegion = structure.getSpacing();
             int regionSize = chunkInRegion * 16;
-            TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
             final int border = 30_000_000;
-            SpiralIterator<RPos> spiralIterator = new SpiralIterator<>(center.toRegionPos(regionSize), new BPos(-border, 0, -border).toRegionPos(regionSize), new BPos(border, 0, border).toRegionPos(regionSize), 1, (x, y, z) -> new RPos(x, z, regionSize));
-            return StreamSupport.stream(spiralIterator.spliterator(), false)
-                .map(cPos -> structure.getInRegion(biomeSource.getWorldSeed(), cPos.getX(), cPos.getZ(), chunkRand))
-                .filter(Objects::nonNull)
-                .filter(cPos -> (structure.canSpawn(cPos, biomeSource)) && (terrainGenerator == null || structure.canGenerate(cPos, terrainGenerator)))
-                .filter(cPos -> structureGenerator.generate(terrainGenerator, cPos, chunkRand))
-                .map(cPos -> new Pair<>(cPos, ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), structureGenerator, chunkRand, false).stream()
-                    .mapToInt(chest -> chest.getCount(item)).sum()))
-                .filter(pair -> pair.getSecond() > 0)
-                .takeWhile(pair -> itemsFound.addAndGet(pair.getSecond()) < amount || initial.getAndSet(false))
-                .map(Pair::getFirst)
-                .map(cPos -> cPos.toBlockPos().add(9, 0, 9))
-                .collect(Collectors.toSet());
+            Iterator<RPos> iterator = new SpiralIterator<>(center.toRegionPos(regionSize), new BPos(-border, 0, -border).toRegionPos(regionSize), new BPos(border, 0, border).toRegionPos(regionSize), 1, (x, y, z) -> new RPos(x, z, regionSize)).iterator();
+            structureInfo.add(new Triplet<>(structure, structureGenerator, iterator));
+        }
+
+        Iterable<Triplet<? extends RegionStructure<?, ?>, Generator, Iterator<RPos>>> cycle = Iterables.cycle(structureInfo);
+        cycle: for (Triplet<? extends RegionStructure<?, ?>, Generator, Iterator<RPos>> info : cycle) {
+            RegionStructure<?, ?> structure = info.getFirst();
+            Generator generator = info.getSecond();
+            Iterator<RPos> iterator = info.getThird();
+
+            while (iterator.hasNext()) {
+                RPos rPos = iterator.next();
+                CPos cPos = structure.getInRegion(biomeSource.getWorldSeed(), rPos.getX(), rPos.getZ(), chunkRand);
+                if (cPos == null) {
+                    continue;
+                }
+                if (!structure.canSpawn(cPos, biomeSource)) {
+                    continue;
+                }
+                if (terrainGenerator != null && !structure.canGenerate(cPos, terrainGenerator)) {
+                    continue;
+                }
+                if (!generator.generate(terrainGenerator, cPos, chunkRand)) {
+                    continue;
+                }
+                List<ChestContent> loot = ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), generator, chunkRand, false);
+                int matchedItems = loot.stream().mapToInt(chest -> chest.getCount(item)).sum();
+                if (matchedItems == 0) {
+                    continue;
+                }
+                itemsFound += matchedItems;
+                positions.add(cPos.toBlockPos().add(9, 0, 9));
+                if (itemsFound >= amount) {
+                    return positions;
+                }
+                continue cycle;
+            }
         }
         return null;
     }
