@@ -27,11 +27,11 @@
   "command.clearscreen.empty": "Couldn't clear any renders.",
   "command.clearscreen.success": "Cleared %d renders.",
 
-  "command.config.get": "%s is currently set to %s",
-  "command.config.set": "%s has been set to %s",
-  "command.config.add": "%s has been added to %s",
-  "command.config.put": "The mapping %s=%s has been added to %s",
-  "command.config.remove": "%s has been removed from %s",
+  "command.config.get": "%s is currently set to %s.",
+  "command.config.set": "%s has been set to %s.",
+  "command.config.add": "%s has been added to %s.",
+  "command.config.put": "The mapping %s=%s has been added to %s.",
+  "command.config.remove": "%s has been removed from %s.",
 
   "command.highlight.block.noneFound": "No %s could be highlighted.",
   "command.highlight.block.success": "Highlighted %d %s.",
