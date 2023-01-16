@@ -25,7 +25,7 @@ public class CheckSeedCommand extends ClientCommand {
     @Override
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         argumentBuilder
-                .executes(ctx -> checkSeed(CustomClientCommandSource.of(ctx.getSource())));
+            .executes(ctx -> checkSeed(CustomClientCommandSource.of(ctx.getSource())));
     }
 
     @Override
@@ -42,13 +42,13 @@ public class CheckSeedCommand extends ClientCommand {
         Long seed = (Long) source.getMeta("seed");
         if (seed != null) {
             Chat.print(chain(
-                    Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
-                    highlight(" "),
-                    format(
-                            Text.translatable("command.checkSeed.fromSource"),
-                            Formatting.UNDERLINE
-                    ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/sm:source seeded %s run", source.getMeta("seed"))))),
-                    highlight(".")
+                Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
+                highlight(" "),
+                format(
+                    Text.translatable("command.checkSeed.fromSource"),
+                    Formatting.UNDERLINE
+                ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/sm:source seeded %s run", source.getMeta("seed"))))),
+                highlight(".")
             ));
             return Command.SINGLE_SUCCESS;
         }
@@ -56,39 +56,39 @@ public class CheckSeedCommand extends ClientCommand {
         seed = Configs.SavedSeeds.get(key);
         if (seed != null) {
             Chat.print(chain(
-                    Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
-                    highlight(" "),
-                    format(
-                            Text.translatable("command.checkSeed.fromSavedSeeds"),
-                            Formatting.UNDERLINE
-                    ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, Paths.get(MOD_PATH + File.separator + "config.json").toAbsolutePath().toString()))),
-                    highlight(".")
+                Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
+                highlight(" "),
+                format(
+                    Text.translatable("command.checkSeed.fromSavedSeeds"),
+                    Formatting.UNDERLINE
+                ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, Paths.get(MOD_PATH + File.separator + "config.json").toAbsolutePath().toString()))),
+                highlight(".")
             ));
             return Command.SINGLE_SUCCESS;
         }
         seed = DatabaseHelper.getSeed(key);
         if (seed != null) {
             Chat.print(chain(
-                    Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
-                    highlight(" "),
-                    format(
-                            Text.translatable("command.checkSeed.fromDatabase"),
-                            Formatting.UNDERLINE
-                    ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://docs.google.com/spreadsheets/d/1tuQiE-0leW88em9OHbZnH-RFNhVqgoHhIt9WQbeqqWw"))),
-                    highlight(".")
+                Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
+                highlight(" "),
+                format(
+                    Text.translatable("command.checkSeed.fromDatabase"),
+                    Formatting.UNDERLINE
+                ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://docs.google.com/spreadsheets/d/1tuQiE-0leW88em9OHbZnH-RFNhVqgoHhIt9WQbeqqWw"))),
+                highlight(".")
             ));
             return Command.SINGLE_SUCCESS;
         }
         seed = Configs.Seed;
         if (seed != null) {
             Chat.print(chain(
-                    Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
-                    highlight(" "),
-                    format(
-                            Text.translatable("command.checkSeed.fromSeed"),
-                            Formatting.UNDERLINE
-                    ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, Paths.get(MOD_PATH + File.separator + "config.json").toAbsolutePath().toString()))),
-                    highlight(".")
+                Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
+                highlight(" "),
+                format(
+                    Text.translatable("command.checkSeed.fromSeed"),
+                    Formatting.UNDERLINE
+                ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, Paths.get(MOD_PATH + File.separator + "config.json").toAbsolutePath().toString()))),
+                highlight(".")
             ));
             return Command.SINGLE_SUCCESS;
         }

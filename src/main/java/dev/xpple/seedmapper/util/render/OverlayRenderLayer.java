@@ -18,14 +18,14 @@ public class OverlayRenderLayer extends RenderLayer {
     public static RenderLayer getOverlay() {
         if (OVERLAY == null) {
             MultiPhaseParameters parameters = MultiPhaseParameters.builder()
-                    .program(LINES_PROGRAM)
-                    .transparency(TRANSLUCENT_TRANSPARENCY)
-                    .target(OUTLINE_TARGET)
-                    .writeMaskState(COLOR_MASK)
-                    .cull(DISABLE_CULLING)
-                    .layering(VIEW_OFFSET_Z_LAYERING)
-                    .lineWidth(new LineWidth(OptionalDouble.of(2.0F)))
-                    .build(false);
+                .program(LINES_PROGRAM)
+                .transparency(TRANSLUCENT_TRANSPARENCY)
+                .target(OUTLINE_TARGET)
+                .writeMaskState(COLOR_MASK)
+                .cull(DISABLE_CULLING)
+                .layering(VIEW_OFFSET_Z_LAYERING)
+                .lineWidth(new LineWidth(OptionalDouble.of(2.0F)))
+                .build(false);
 
             OVERLAY = RenderLayerAccessor.of("overlay", VertexFormats.LINES, VertexFormat.DrawMode.LINES, 256, false, false, parameters);
         }

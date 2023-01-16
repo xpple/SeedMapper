@@ -42,12 +42,12 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         final String[] blocks = new String[]{"ancient_debris", "andesite", "blackstone",/* "clay",*/ "coal_ore", "copper_ore", "deepslate", "diamond_ore", "diorite", "dirt", "emerald_ore", "gold_ore", "granite",/* "gravel",*/ "iron_ore", "lapis_ore", "magma_block", "nether_gold_ore", "quartz_ore", "redstone_ore",/* "sand",*/ "soulsand", "tuff"};
         argumentBuilder
-                .then(literal("block")
-                        .then(argument("block", word())
-                                .suggests((context, builder) -> suggestMatching(blocks, builder))
-                                .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))
-                                .then(argument("range", integer(0))
-                                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getInteger(ctx, "range"))))));
+            .then(literal("block")
+                .then(argument("block", word())
+                    .suggests((context, builder) -> suggestMatching(blocks, builder))
+                    .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))
+                    .then(argument("range", integer(0))
+                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getInteger(ctx, "range"))))));
     }
 
     @Override
@@ -63,9 +63,9 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         SharedHelpers helpers = new SharedHelpers(source);
 
         final Set<OreDecorator<?, ?>> oreDecorators = Features.getOresForVersion(helpers.mcVersion).stream()
-                .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension))
-                .filter(oreDecorator -> oreDecorator.getDefaultOreBlock().getName().equals(blockString))
-                .collect(Collectors.toSet());
+            .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension))
+            .filter(oreDecorator -> oreDecorator.getDefaultOreBlock().getName().equals(blockString))
+            .collect(Collectors.toSet());
 
         if (oreDecorators.isEmpty()) {
             throw BLOCK_NOT_FOUND_EXCEPTION.create(blockString);
@@ -79,35 +79,35 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
         SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(range, range), (x, y, z) -> new CPos(x, z));
         StreamSupport.stream(spiralIterator.spliterator(), false)
-                .map(cPos -> {
-                    Biome biome = biomeSource.getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);
+            .map(cPos -> {
+                Biome biome = biomeSource.getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);
 
-                    final Map<BPos, Block> generatedOres = new HashMap<>();
-                    Features.getOresForVersion(helpers.mcVersion).stream()
-                            .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension))
-                            .sorted(Comparator.comparingInt(oreDecorator -> oreDecorator.getSalt(biome)))
-                            .forEachOrdered(oreDecorator -> {
-                                if (!oreDecorator.canSpawn(cPos.getX(), cPos.getZ(), biomeSource)) {
-                                    return;
+                final Map<BPos, Block> generatedOres = new HashMap<>();
+                Features.getOresForVersion(helpers.mcVersion).stream()
+                    .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension))
+                    .sorted(Comparator.comparingInt(oreDecorator -> oreDecorator.getSalt(biome)))
+                    .forEachOrdered(oreDecorator -> {
+                        if (!oreDecorator.canSpawn(cPos.getX(), cPos.getZ(), biomeSource)) {
+                            return;
+                        }
+                        oreDecorator.generate(WorldSeed.toStructureSeed(helpers.seed), cPos.getX(), cPos.getZ(), biome, new ChunkRand(), terrainGenerator).positions
+                            .forEach(bPos -> {
+                                if (generatedOres.containsKey(bPos)) {
+                                    if (!oreDecorator.getReplaceBlocks(biome).contains(generatedOres.get(bPos))) {
+                                        return;
+                                    }
                                 }
-                                oreDecorator.generate(WorldSeed.toStructureSeed(helpers.seed), cPos.getX(), cPos.getZ(), biome, new ChunkRand(), terrainGenerator).positions
-                                        .forEach(bPos -> {
-                                            if (generatedOres.containsKey(bPos)) {
-                                                if (!oreDecorator.getReplaceBlocks(biome).contains(generatedOres.get(bPos))) {
-                                                    return;
-                                                }
-                                            }
-                                            generatedOres.put(bPos, oreDecorator.getOreBlock(biome));
-                                        });
+                                generatedOres.put(bPos, oreDecorator.getOreBlock(biome));
                             });
-                    return generatedOres.entrySet().stream()
-                            .filter(entry -> entry.getValue().getName().equals(blockString))
-                            .filter(entry -> entry.getKey().getY() > 0)
-                            .map(Map.Entry::getKey)
-                            .collect(Collectors.toSet());
-                })
-                .limit(50)
-                .forEach(set -> set.forEach(pos -> boxes.add(new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1))));
+                    });
+                return generatedOres.entrySet().stream()
+                    .filter(entry -> entry.getValue().getName().equals(blockString))
+                    .filter(entry -> entry.getKey().getY() > 0)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
+            })
+            .limit(50)
+            .forEach(set -> set.forEach(pos -> boxes.add(new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1))));
 
         int colour = switch (blockString) {
             case "diamond_ore" -> 0x00E1FF;

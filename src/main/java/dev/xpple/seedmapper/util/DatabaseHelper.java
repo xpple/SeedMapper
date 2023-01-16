@@ -26,15 +26,15 @@ public class DatabaseHelper {
 
     public static void fetchSeeds() {
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                .timeout(Duration.ofSeconds(DURATION))
-                .GET()
-                .build();
+            .timeout(Duration.ofSeconds(DURATION))
+            .GET()
+            .build();
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
-                .thenAccept(response -> MinecraftClient.getInstance().send(() -> {
-                    JsonArray rows = JsonParser.parseString(response).getAsJsonArray();
-                    parseRows(rows);
-                }));
+            .thenApply(HttpResponse::body)
+            .thenAccept(response -> MinecraftClient.getInstance().send(() -> {
+                JsonArray rows = JsonParser.parseString(response).getAsJsonArray();
+                parseRows(rows);
+            }));
     }
 
     private static void parseRows(JsonArray rows) {

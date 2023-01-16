@@ -32,7 +32,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
     @Override
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         argumentBuilder
-                .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource())));
+            .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource())));
     }
 
     @Override
@@ -77,19 +77,19 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                     boxes.put(new Box(mutable), terrainBlock);
                     String terrainBlockName = Registries.BLOCK.getId(terrainBlock).getPath();
                     Chat.print(chain(
-                            highlight(Text.translatable("command.seedoverlay.feedback.0")),
-                            copy(
-                                    hover(
-                                            accent("x: " + x + ", y: " + y + ", z: " + z),
-                                            chain(
-                                                    base(Text.translatable("command.seedoverlay.feedback.1")),
-                                                    highlight(terrainBlockName)
-                                            )
-                                    ),
-                                    String.format("%d %d %d", x, y ,z)
-
+                        highlight(Text.translatable("command.seedoverlay.feedback.0")),
+                        copy(
+                            hover(
+                                accent("x: " + x + ", y: " + y + ", z: " + z),
+                                chain(
+                                    base(Text.translatable("command.seedoverlay.feedback.1")),
+                                    highlight(terrainBlockName)
+                                )
                             ),
-                            highlight(Text.translatable("command.seedoverlay.feedback.2"))
+                            String.format("%d %d %d", x, y ,z)
+
+                        ),
+                        highlight(Text.translatable("command.seedoverlay.feedback.2"))
                     ));
                     blocks++;
                 }
@@ -98,9 +98,9 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Configs.BlockColours.get(value),  30 * 20));
         if (blocks > 0) {
             Chat.print(chain(
-                    highlight(Text.translatable("command.seedoverlay.feedback.3")),
-                    accent(String.valueOf(blocks)),
-                    highlight(Text.translatable("command.seedoverlay.feedback.4"))
+                highlight(Text.translatable("command.seedoverlay.feedback.3")),
+                accent(String.valueOf(blocks)),
+                highlight(Text.translatable("command.seedoverlay.feedback.4"))
             ));
         } else {
             Chat.print(highlight(Text.translatable("command.seedoverlay.feedback.5")));

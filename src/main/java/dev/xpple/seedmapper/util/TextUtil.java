@@ -45,8 +45,8 @@ public class TextUtil {
             int index = count.getAndIncrement();
 
             output
-                    .append(text)
-                    .append(base(index == list.size() - 1 ? "" : index == list.size() - 2 ? " and " : ", "));
+                .append(text)
+                .append(base(index == list.size() - 1 ? "" : index == list.size() - 2 ? " and " : ", "));
         });
 
         return output;
@@ -58,15 +58,16 @@ public class TextUtil {
     }
 
     public static String random(int length) {
+        // 0 to z
         int leftLimit = 48;
         int rightLimit = 122;
         Random random = new Random();
 
         return random.ints(leftLimit, rightLimit + 1)
-                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-                .limit(length)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
+            .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+            .limit(length)
+            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
     }
 
     public static String stackTraceToString(Throwable e) {
@@ -96,11 +97,11 @@ public class TextUtil {
 
     public static MutableText formatSeed(long seed) {
         return copy(
-                hover(
-                        accent(String.valueOf(seed)),
-                        base(Text.translatable("chat.copy.click"))
-                ),
-                String.valueOf(seed)
+            hover(
+                accent(String.valueOf(seed)),
+                base(Text.translatable("chat.copy.click"))
+            ),
+            String.valueOf(seed)
         );
     }
 }

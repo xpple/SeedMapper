@@ -30,8 +30,7 @@ public class Chat {
     }
 
     public static void warn(String prefix, MutableText... texts) {
-        toChat(dark("["), accent(MOD_NAME), dark("] "), ChatBuilder.warn(prefix),
-                ChatBuilder.chain(texts));
+        toChat(dark("["), accent(MOD_NAME), dark("] "), ChatBuilder.warn(prefix), ChatBuilder.chain(texts));
     }
 
     public static void warn(MutableText... texts) {
@@ -39,8 +38,7 @@ public class Chat {
     }
 
     public static void error(String prefix, MutableText... texts) {
-        toChat(dark("["), accent(MOD_NAME), dark("] "), ChatBuilder.error(prefix), accent(" > "),
-                ChatBuilder.chain(texts));
+        toChat(dark("["), accent(MOD_NAME), dark("] "), ChatBuilder.error(prefix), accent(" > "), ChatBuilder.chain(texts));
     }
 
     public static void error(MutableText... texts) {

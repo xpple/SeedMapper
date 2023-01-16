@@ -30,19 +30,19 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 public class ConfigCommand extends ClientCommand {
 
     private static final Map<Class<?>, Pair<Supplier<? extends ArgumentType<?>>, BiFunction<CommandContext<FabricClientCommandSource>, String, ?>>> arguments = ImmutableMap.<Class<?>, Pair<Supplier<? extends ArgumentType<?>>, BiFunction<CommandContext<FabricClientCommandSource>, String, ?>>>builder()
-            .put(boolean.class, new Pair<>(BoolArgumentType::bool, BoolArgumentType::getBool))
-            .put(Boolean.class, new Pair<>(BoolArgumentType::bool, BoolArgumentType::getBool))
-            .put(double.class, new Pair<>(DoubleArgumentType::doubleArg, DoubleArgumentType::getDouble))
-            .put(Double.class, new Pair<>(DoubleArgumentType::doubleArg, DoubleArgumentType::getDouble))
-            .put(float.class, new Pair<>(FloatArgumentType::floatArg, FloatArgumentType::getFloat))
-            .put(Float.class, new Pair<>(FloatArgumentType::floatArg, FloatArgumentType::getFloat))
-            .put(int.class, new Pair<>(IntegerArgumentType::integer, IntegerArgumentType::getInteger))
-            .put(Integer.class, new Pair<>(IntegerArgumentType::integer, IntegerArgumentType::getInteger))
-            .put(long.class, new Pair<>(LongArgumentType::longArg, LongArgumentType::getLong))
-            .put(Long.class, new Pair<>(LongArgumentType::longArg, LongArgumentType::getLong))
-            .put(String.class, new Pair<>(StringArgumentType::string, StringArgumentType::getString))
-            .put(Block.class, new Pair<>(BlockArgumentType::block, BlockArgumentType::getBlock))
-            .build();
+        .put(boolean.class, new Pair<>(BoolArgumentType::bool, BoolArgumentType::getBool))
+        .put(Boolean.class, new Pair<>(BoolArgumentType::bool, BoolArgumentType::getBool))
+        .put(double.class, new Pair<>(DoubleArgumentType::doubleArg, DoubleArgumentType::getDouble))
+        .put(Double.class, new Pair<>(DoubleArgumentType::doubleArg, DoubleArgumentType::getDouble))
+        .put(float.class, new Pair<>(FloatArgumentType::floatArg, FloatArgumentType::getFloat))
+        .put(Float.class, new Pair<>(FloatArgumentType::floatArg, FloatArgumentType::getFloat))
+        .put(int.class, new Pair<>(IntegerArgumentType::integer, IntegerArgumentType::getInteger))
+        .put(Integer.class, new Pair<>(IntegerArgumentType::integer, IntegerArgumentType::getInteger))
+        .put(long.class, new Pair<>(LongArgumentType::longArg, LongArgumentType::getLong))
+        .put(Long.class, new Pair<>(LongArgumentType::longArg, LongArgumentType::getLong))
+        .put(String.class, new Pair<>(StringArgumentType::string, StringArgumentType::getString))
+        .put(Block.class, new Pair<>(BlockArgumentType::block, BlockArgumentType::getBlock))
+        .build();
 
     @Override
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {

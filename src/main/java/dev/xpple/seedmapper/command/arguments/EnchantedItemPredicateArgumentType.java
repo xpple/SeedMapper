@@ -119,7 +119,7 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
                     int level = enchantmentInstance.getLevel();
                     if (level < 0) {
                         return includeEnchantment == i.getEnchantments().stream()
-                                .anyMatch(pair -> pair.getFirst().equals(enchantmentString));
+                            .anyMatch(pair -> pair.getFirst().equals(enchantmentString));
                     }
                     Pair<String, Integer> pair = new Pair<>(enchantmentString, level);
                     return includeEnchantment == i.getEnchantments().contains(pair);
@@ -143,11 +143,11 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
 
             String itemString = this.reader.readUnquotedString();
             Item item = Items.getItems().values().stream()
-                    .filter(i -> i.getName().equals(itemString))
-                    .findAny().orElseThrow(() -> {
-                        this.reader.setCursor(cursor);
-                        return ITEM_NOT_FOUND_EXCEPTION.create(itemString);
-                    });
+                .filter(i -> i.getName().equals(itemString))
+                .findAny().orElseThrow(() -> {
+                    this.reader.setCursor(cursor);
+                    return ITEM_NOT_FOUND_EXCEPTION.create(itemString);
+                });
             if (lootOnly && Arrays.stream(lootableItems).noneMatch(i -> i.equals(item.getName()))) {
                 this.reader.setCursor(cursor);
                 throw LOOT_ITEM_NOT_FOUND_EXCEPTION.create(itemString);
@@ -179,7 +179,7 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
             this.suggestor = builder -> {
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
                 Stream<String> enchantmentStrings = Enchantments.getFor(MCVersion.latest()).stream()
-                        .map(Enchantment::getName);
+                    .map(Enchantment::getName);
                 CommandSource.suggestMatching(enchantmentStrings, newBuilder);
                 builder.add(newBuilder);
             };
@@ -203,11 +203,11 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
             int cursor = this.reader.getCursor();
             String enchantmentString = this.reader.readUnquotedString();
             return Enchantments.getFor(MCVersion.latest()).stream()
-                    .filter(e -> e.getName().equals(enchantmentString))
-                    .findAny().orElseThrow(() -> {
-                        this.reader.setCursor(cursor);
-                        return UNKNOWN_ENCHANTMENT_EXCEPTION.create(enchantmentString);
-                    });
+                .filter(e -> e.getName().equals(enchantmentString))
+                .findAny().orElseThrow(() -> {
+                    this.reader.setCursor(cursor);
+                    return UNKNOWN_ENCHANTMENT_EXCEPTION.create(enchantmentString);
+                });
         }
 
         private int parseLevel(Enchantment enchantment) throws CommandSyntaxException {

@@ -66,9 +66,9 @@ public class MCVersionArgumentType implements ArgumentType<MCVersion>, SharedHel
     @Override
     public CompletableFuture<Suggestions> listSuggestions(CommandContext context, SuggestionsBuilder builder) {
         Stream<String> versions = Arrays.stream(MCVersion.values())
-                .filter(mcVersion -> !this.releaseOnly || mcVersion.isNewerOrEqualTo(MCVersion.v1_0))
-                .filter(mcVersion -> mcVersion.isNewerOrEqualTo(this.equalOrNewerThan))
-                .map(mcVersion -> mcVersion.name);
+            .filter(mcVersion -> !this.releaseOnly || mcVersion.isNewerOrEqualTo(MCVersion.v1_0))
+            .filter(mcVersion -> mcVersion.isNewerOrEqualTo(this.equalOrNewerThan))
+            .map(mcVersion -> mcVersion.name);
         return CommandSource.suggestMatching(versions, builder);
     }
 

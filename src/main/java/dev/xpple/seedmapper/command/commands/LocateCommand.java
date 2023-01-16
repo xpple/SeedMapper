@@ -61,22 +61,22 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     @Override
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         argumentBuilder
-                .then(literal("biome")
-                        .then(argument("biome", biome())
-                                .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome")))))
-                .then(literal("feature")
-                        .then(literal("structure")
-                                .then(argument("structure", structureFactory())
-                                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructureFactory(ctx, "structure")))))
-                        .then(literal("decorator")
-                                .then(argument("decorator", decoratorFactory())
-                                        .executes(ctx -> locateDecorator(CustomClientCommandSource.of(ctx.getSource()), getDecoratorFactory(ctx, "decorator")))))
-                        .then(literal("slimechunk")
-                                .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
-                .then(literal("loot")
-                        .then(argument("amount", integer(1))
-                                .then(argument("item", enchantedItem().loot())
-                                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getEnchantedItem(ctx, "item"))))));
+            .then(literal("biome")
+                .then(argument("biome", biome())
+                    .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome")))))
+            .then(literal("feature")
+                .then(literal("structure")
+                    .then(argument("structure", structureFactory())
+                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructureFactory(ctx, "structure")))))
+                .then(literal("decorator")
+                    .then(argument("decorator", decoratorFactory())
+                        .executes(ctx -> locateDecorator(CustomClientCommandSource.of(ctx.getSource()), getDecoratorFactory(ctx, "decorator")))))
+                .then(literal("slimechunk")
+                    .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
+            .then(literal("loot")
+                .then(argument("amount", integer(1))
+                    .then(argument("item", enchantedItem().loot())
+                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getEnchantedItem(ctx, "item"))))));
     }
 
     @Override
@@ -99,16 +99,16 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             Chat.print(Text.translatable("command.locate.biome.noneFound", biome.getName()));
         } else {
             Chat.print(chain(
-                    highlight(Text.translatable("command.locate.biome.foundAt", biome.getName())),
-                    highlight(" "),
-                    copy(
-                            hover(
-                                    accent("x: " + biomePos.getX() + ", z: " + biomePos.getZ()),
-                                    base(Text.translatable("command.locate.biome.copy", biome.getName()))
-                            ),
-                            String.format("%d ~ %d", biomePos.getX(), biomePos.getZ())
+                highlight(Text.translatable("command.locate.biome.foundAt", biome.getName())),
+                highlight(" "),
+                copy(
+                    hover(
+                        accent("x: " + biomePos.getX() + ", z: " + biomePos.getZ()),
+                        base(Text.translatable("command.locate.biome.copy", biome.getName()))
                     ),
-                    highlight(".")
+                    String.format("%d ~ %d", biomePos.getX(), biomePos.getZ())
+                ),
+                highlight(".")
             ));
         }
         return Command.SINGLE_SUCCESS;
@@ -117,8 +117,8 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static BPos locateBiome(Predicate<Biome> predicate, BPos center, int radius, int increment, BiomeSource biomeSource) {
         SpiralIterator<BPos> spiralIterator = new SpiralIterator<>(center, new BPos(radius, 0, radius), increment, BPos::new);
         return StreamSupport.stream(spiralIterator.spliterator(), false)
-                .filter(bPos -> predicate.test(biomeSource.getBiome(bPos)))
-                .findAny().orElse(null);
+            .filter(bPos -> predicate.test(biomeSource.getBiome(bPos)))
+            .findAny().orElse(null);
     }
 
     private static int locateStructure(CustomClientCommandSource source, FeatureFactory<? extends Structure<?, ?>> structureFactory) throws CommandSyntaxException {
@@ -138,16 +138,16 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             Chat.print(Text.translatable("command.locate.feature.structure.noneFound", structure.getName()));
         } else {
             Chat.print(chain(
-                    highlight(Text.translatable("command.locate.feature.structure.foundAt", structure.getName())),
-                    highlight(" "),
-                    copy(
-                            hover(
-                                    accent("x: " + structurePos.getX() + ", z: " + structurePos.getZ()),
-                                    base(Text.translatable("command.locate.feature.structure.copy", structure.getName()))
-                            ),
-                            String.format("%d ~ %d", structurePos.getX(), structurePos.getZ())
+                highlight(Text.translatable("command.locate.feature.structure.foundAt", structure.getName())),
+                highlight(" "),
+                copy(
+                    hover(
+                        accent("x: " + structurePos.getX() + ", z: " + structurePos.getZ()),
+                        base(Text.translatable("command.locate.feature.structure.copy", structure.getName()))
                     ),
-                    highlight(".")
+                    String.format("%d ~ %d", structurePos.getX(), structurePos.getZ())
+                ),
+                highlight(".")
             ));
         }
         return Command.SINGLE_SUCCESS;
@@ -161,10 +161,10 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             final int border = 30_000_000;
             SpiralIterator<RPos> spiralIterator = new SpiralIterator<>(center.toRegionPos(regionSize), new BPos(-border, 0, -border).toRegionPos(regionSize), new BPos(border, 0, border).toRegionPos(regionSize), 1, (x, y, z) -> new RPos(x, z, regionSize));
             return StreamSupport.stream(spiralIterator.spliterator(), false)
-                    .map(rPos -> regionStructure.getInRegion(source.getWorldSeed(), rPos.getX(), rPos.getZ(), chunkRand))
-                    .filter(Objects::nonNull)
-                    .filter(cPos -> (regionStructure.canSpawn(cPos, source)) && (terrainGenerator == null || regionStructure.canGenerate(cPos, terrainGenerator)))
-                    .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
+                .map(rPos -> regionStructure.getInRegion(source.getWorldSeed(), rPos.getX(), rPos.getZ(), chunkRand))
+                .filter(Objects::nonNull)
+                .filter(cPos -> (regionStructure.canSpawn(cPos, source)) && (terrainGenerator == null || regionStructure.canGenerate(cPos, terrainGenerator)))
+                .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
         } else {
             if (structure instanceof Stronghold strongholdStructure) {
                 CPos currentChunkPos = center.toChunkPos();
@@ -183,11 +183,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(new CPos(center.getX() >> 4, center.getZ() >> 4), new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
 
                 return StreamSupport.stream(spiralIterator.spliterator(), false)
-                        .filter(cPos -> {
-                            Feature.Data<Mineshaft> data = mineshaft.at(cPos.getX(), cPos.getZ());
-                            return data.testStart(source.getWorldSeed(), chunkRand) && data.testBiome(source) && data.testGenerate(terrainGenerator);
-                        })
-                        .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
+                    .filter(cPos -> {
+                        Feature.Data<Mineshaft> data = mineshaft.at(cPos.getX(), cPos.getZ());
+                        return data.testStart(source.getWorldSeed(), chunkRand) && data.testBiome(source) && data.testGenerate(terrainGenerator);
+                    })
+                    .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
             }
         }
         return null;
@@ -210,16 +210,16 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             Chat.print(Text.translatable("command.locate.feature.decorator.noneFound", decorator.getName()));
         } else {
             Chat.print(chain(
-                    highlight(Text.translatable("command.locate.feature.decorator.foundAt", decorator.getName())),
-                    highlight(" "),
-                    copy(
-                            hover(
-                                    accent("x: " + decoratorPos.getX() + ", z: " + decoratorPos.getZ()),
-                                    base(Text.translatable("command.locate.feature.decorator.copy", decorator.getName()))
-                            ),
-                            String.format("%d ~ %d", decoratorPos.getX(), decoratorPos.getZ())
+                highlight(Text.translatable("command.locate.feature.decorator.foundAt", decorator.getName())),
+                highlight(" "),
+                copy(
+                    hover(
+                        accent("x: " + decoratorPos.getX() + ", z: " + decoratorPos.getZ()),
+                        base(Text.translatable("command.locate.feature.decorator.copy", decorator.getName()))
                     ),
-                    highlight(".")
+                    String.format("%d ~ %d", decoratorPos.getX(), decoratorPos.getZ())
+                ),
+                highlight(".")
             ));
         }
         return Command.SINGLE_SUCCESS;
@@ -230,13 +230,13 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         if (decorator instanceof DesertWell desertWell) {
             SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(center, new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
             return StreamSupport.stream(spiralIterator.spliterator(), false)
-                    .filter(cPos -> {
-                        int chunkX = cPos.getX();
-                        int chunkZ = cPos.getZ();
-                        DesertWell.Data data = desertWell.getData(structureSeed, chunkX, chunkZ, chunkRand);
-                        return data != null && desertWell.canSpawn(chunkX, chunkZ, source);
-                    })
-                    .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
+                .filter(cPos -> {
+                    int chunkX = cPos.getX();
+                    int chunkZ = cPos.getZ();
+                    DesertWell.Data data = desertWell.getData(structureSeed, chunkX, chunkZ, chunkRand);
+                    return data != null && desertWell.canSpawn(chunkX, chunkZ, source);
+                })
+                .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
         } else if (decorator instanceof EndGateway endGateway) {
             SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(center, new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
             for (CPos cPos : spiralIterator) {
@@ -267,26 +267,26 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             int x = (slimeChunkPos.getX() << 4) + 9;
             int z = (slimeChunkPos.getZ() << 4) + 9;
             Chat.print(chain(
-                    highlight(Text.translatable("command.locate.feature.slimeChunk.foundAt")),
-                    highlight(" "),
-                    copy(
-                            hover(
-                                    accent("x: " + x + ", z: " + z),
-                                    base(Text.translatable("command.locate.feature.slimeChunk.copy"))
-                            ),
-                            String.format("%d ~ %d", x, z)
+                highlight(Text.translatable("command.locate.feature.slimeChunk.foundAt")),
+                highlight(" "),
+                copy(
+                    hover(
+                        accent("x: " + x + ", z: " + z),
+                        base(Text.translatable("command.locate.feature.slimeChunk.copy"))
                     ),
-                    highlight(" ("),
-                    highlight(Text.translatable("command.locate.feature.slimeChunk.chunk")),
-                    highlight(" "),
-                    copy(
-                            hover(
-                                    accent(slimeChunkPos.getX() + " " + slimeChunkPos.getZ()),
-                                    base(Text.translatable("command.locate.feature.slimeChunk.copyChunk"))
-                            ),
-                            String.format("%d %d", slimeChunkPos.getX(), slimeChunkPos.getZ())
+                    String.format("%d ~ %d", x, z)
+                ),
+                highlight(" ("),
+                highlight(Text.translatable("command.locate.feature.slimeChunk.chunk")),
+                highlight(" "),
+                copy(
+                    hover(
+                        accent(slimeChunkPos.getX() + " " + slimeChunkPos.getZ()),
+                        base(Text.translatable("command.locate.feature.slimeChunk.copyChunk"))
                     ),
-                    highlight(").")
+                    String.format("%d %d", slimeChunkPos.getX(), slimeChunkPos.getZ())
+                ),
+                highlight(").")
             ));
         }
         return Command.SINGLE_SUCCESS;
@@ -298,11 +298,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         }
         SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
         return StreamSupport.stream(spiralIterator.spliterator(), false)
-                .filter(cPos -> {
-                    SlimeChunk.Data data = slimeChunk.at(cPos.getX(), cPos.getZ(), true);
-                    return data.testStart(seed, rand);
-                })
-                .findAny().orElse(null);
+            .filter(cPos -> {
+                SlimeChunk.Data data = slimeChunk.at(cPos.getX(), cPos.getZ(), true);
+                return data.testStart(seed, rand);
+            })
+            .findAny().orElse(null);
     }
 
     private static int locateLoot(CustomClientCommandSource source, int amount, Pair<String, Predicate<Item>> item) throws CommandSyntaxException {
@@ -311,10 +311,10 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         String itemString = item.getFirst();
 
         Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(helpers.mcVersion).stream()
-                .filter(structure -> structure instanceof ILoot)
-                .filter(structure -> structure.isValidDimension(helpers.dimension))
-                .map(structure -> (RegionStructure<?, ?>) structure)
-                .collect(Collectors.toSet());
+            .filter(structure -> structure instanceof ILoot)
+            .filter(structure -> structure.isValidDimension(helpers.dimension))
+            .map(structure -> (RegionStructure<?, ?>) structure)
+            .collect(Collectors.toSet());
 
         BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
 
@@ -325,18 +325,18 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             Chat.print(Text.translatable("command.locate.loot.noneFound", itemString));
         } else {
             Chat.print(chain(
-                    highlight(Text.translatable("command.locate.loot.foundAt", amount, itemString)),
-                    highlight(" "),
-                    join(highlight(", "), lootPositions.stream().map(bPos ->
-                            copy(
-                                    hover(
-                                            accent("x: " + bPos.getX() + ", z: " + bPos.getZ()),
-                                            base(Text.translatable("command.locate.loot.copy", itemString))
-                                    ),
-                                    String.format("%d ~ %d", bPos.getX(), bPos.getZ())
-                            )
-                    ).collect(Collectors.toList())),
-                    highlight(".")
+                highlight(Text.translatable("command.locate.loot.foundAt", amount, itemString)),
+                highlight(" "),
+                join(highlight(", "), lootPositions.stream().map(bPos ->
+                    copy(
+                        hover(
+                            accent("x: " + bPos.getX() + ", z: " + bPos.getZ()),
+                            base(Text.translatable("command.locate.loot.copy", itemString))
+                        ),
+                        String.format("%d ~ %d", bPos.getX(), bPos.getZ())
+                    )
+                ).collect(Collectors.toList())),
+                highlight(".")
             ));
         }
         return Command.SINGLE_SUCCESS;
@@ -366,17 +366,17 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             final int border = 30_000_000;
             SpiralIterator<RPos> spiralIterator = new SpiralIterator<>(center.toRegionPos(regionSize), new BPos(-border, 0, -border).toRegionPos(regionSize), new BPos(border, 0, border).toRegionPos(regionSize), 1, (x, y, z) -> new RPos(x, z, regionSize));
             return StreamSupport.stream(spiralIterator.spliterator(), false)
-                    .map(cPos -> structure.getInRegion(biomeSource.getWorldSeed(), cPos.getX(), cPos.getZ(), chunkRand))
-                    .filter(Objects::nonNull)
-                    .filter(cPos -> (structure.canSpawn(cPos, biomeSource)) && (terrainGenerator == null || structure.canGenerate(cPos, terrainGenerator)))
-                    .filter(cPos -> structureGenerator.generate(terrainGenerator, cPos, chunkRand))
-                    .map(cPos -> new Pair<>(cPos, ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), structureGenerator, chunkRand, false).stream()
-                            .mapToInt(chest -> chest.getCount(item)).sum()))
-                    .filter(pair -> pair.getSecond() > 0)
-                    .takeWhile(pair -> itemsFound.addAndGet(pair.getSecond()) < amount || initial.getAndSet(false))
-                    .map(Pair::getFirst)
-                    .map(cPos -> cPos.toBlockPos().add(9, 0, 9))
-                    .collect(Collectors.toSet());
+                .map(cPos -> structure.getInRegion(biomeSource.getWorldSeed(), cPos.getX(), cPos.getZ(), chunkRand))
+                .filter(Objects::nonNull)
+                .filter(cPos -> (structure.canSpawn(cPos, biomeSource)) && (terrainGenerator == null || structure.canGenerate(cPos, terrainGenerator)))
+                .filter(cPos -> structureGenerator.generate(terrainGenerator, cPos, chunkRand))
+                .map(cPos -> new Pair<>(cPos, ((ILoot) structure).getLoot(WorldSeed.toStructureSeed(biomeSource.getWorldSeed()), structureGenerator, chunkRand, false).stream()
+                    .mapToInt(chest -> chest.getCount(item)).sum()))
+                .filter(pair -> pair.getSecond() > 0)
+                .takeWhile(pair -> itemsFound.addAndGet(pair.getSecond()) < amount || initial.getAndSet(false))
+                .map(Pair::getFirst)
+                .map(cPos -> cPos.toBlockPos().add(9, 0, 9))
+                .collect(Collectors.toSet());
         }
         return null;
     }

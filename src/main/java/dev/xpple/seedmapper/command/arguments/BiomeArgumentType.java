@@ -33,11 +33,11 @@ public class BiomeArgumentType implements ArgumentType<Biome>, SharedHelpers.Exc
         int cursor = reader.getCursor();
         String biomeString = reader.readUnquotedString();
         return Biomes.REGISTRY.values().stream()
-                .filter(b -> b.getName().equals(biomeString))
-                .findAny().orElseThrow(() -> {
-                    reader.setCursor(cursor);
-                    return BIOME_NOT_FOUND_EXCEPTION.create(biomeString);
-                });
+            .filter(b -> b.getName().equals(biomeString))
+            .findAny().orElseThrow(() -> {
+                reader.setCursor(cursor);
+                return BIOME_NOT_FOUND_EXCEPTION.create(biomeString);
+            });
     }
 
     @Override

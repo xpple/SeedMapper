@@ -30,29 +30,29 @@ public class SourceCommand extends ClientCommand {
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         LiteralCommandNode<FabricClientCommandSource> root = dispatcher.register(argumentBuilder);
         argumentBuilder
-                .then(literal("run")
-                        .redirect(dispatcher.getRoot(), CommandContext::getSource))
-                .then(literal("as")
-                        .then(argument("entity", entity())
-                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withEntity(getCEntity(ctx, "entity")))))
-                .then(literal("positioned")
-                        .then(argument("pos", vec3())
-                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withPosition(getCVec3(ctx, "pos")))))
-                .then(literal("rotated")
-                        .then(argument("rot", rotation())
-                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withRotation(getCRotation(ctx, "rot").toAbsoluteRotation(ctx.getSource())))))
-                .then(literal("in")
-                        .then(argument("dimension", dimension())
-                                .redirect(root, ctx -> {
-                                    CDimensionArgumentType.DimensionArgument dimensionArgument = getCDimensionArgument(ctx, "dimension");
-                                    return CustomClientCommandSource.of(ctx.getSource()).withMeta("dimension", new Identifier(dimensionArgument.getName()));
-                                })))
-                .then(literal("versioned")
-                        .then(argument("version", mcVersion().all())
-                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("version", getMcVersion(ctx, "version")))))
-                .then(literal("seeded")
-                        .then(argument("seed", longArg())
-                                .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("seed", getLong(ctx, "seed")))));
+            .then(literal("run")
+                .redirect(dispatcher.getRoot(), CommandContext::getSource))
+            .then(literal("as")
+                .then(argument("entity", entity())
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withEntity(getCEntity(ctx, "entity")))))
+            .then(literal("positioned")
+                .then(argument("pos", vec3())
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withPosition(getCVec3(ctx, "pos")))))
+            .then(literal("rotated")
+                .then(argument("rot", rotation())
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withRotation(getCRotation(ctx, "rot").toAbsoluteRotation(ctx.getSource())))))
+            .then(literal("in")
+                .then(argument("dimension", dimension())
+                    .redirect(root, ctx -> {
+                        CDimensionArgumentType.DimensionArgument dimensionArgument = getCDimensionArgument(ctx, "dimension");
+                        return CustomClientCommandSource.of(ctx.getSource()).withMeta("dimension", new Identifier(dimensionArgument.getName()));
+                    })))
+            .then(literal("versioned")
+                .then(argument("version", mcVersion().all())
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("version", getMcVersion(ctx, "version")))))
+            .then(literal("seeded")
+                .then(argument("seed", longArg())
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("seed", getLong(ctx, "seed")))));
     }
 
     @Override

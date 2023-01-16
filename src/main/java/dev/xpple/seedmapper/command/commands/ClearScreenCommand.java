@@ -17,7 +17,7 @@ public class ClearScreenCommand extends ClientCommand {
     @Override
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         argumentBuilder
-                .executes(ctx -> clearScreen(CustomClientCommandSource.of(ctx.getSource())));
+            .executes(ctx -> clearScreen(CustomClientCommandSource.of(ctx.getSource())));
     }
 
     @Override

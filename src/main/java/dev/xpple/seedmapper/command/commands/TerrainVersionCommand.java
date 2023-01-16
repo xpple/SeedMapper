@@ -31,7 +31,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
     @Override
     protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         argumentBuilder
-                .executes(ctx -> execute(CustomClientCommandSource.of(ctx.getSource())));
+            .executes(ctx -> execute(CustomClientCommandSource.of(ctx.getSource())));
     }
 
     @Override
@@ -46,45 +46,45 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
         final AtomicReference<String> version = new AtomicReference<>();
 
         Arrays.stream(MCVersion.values())
-                .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2))
-                .forEach(mcVersion -> {
-                    BiomeSource biomeSource = BiomeSource.of(helpers.dimension, mcVersion, helpers.seed);
-                    TerrainGenerator generator = TerrainGenerator.of(helpers.dimension, biomeSource);
-                    SimpleBlockMap map = new SimpleBlockMap(mcVersion, helpers.dimension, Biomes.PLAINS);
+            .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2))
+            .forEach(mcVersion -> {
+                BiomeSource biomeSource = BiomeSource.of(helpers.dimension, mcVersion, helpers.seed);
+                TerrainGenerator generator = TerrainGenerator.of(helpers.dimension, biomeSource);
+                SimpleBlockMap map = new SimpleBlockMap(mcVersion, helpers.dimension, Biomes.PLAINS);
 
-                    BlockPos.Mutable mutable = new BlockPos.Mutable();
-                    final BlockPos center = new BlockPos(source.getPosition());
-                    final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
-                    final ChunkPos chunkPos = chunk.getPos();
+                BlockPos.Mutable mutable = new BlockPos.Mutable();
+                final BlockPos center = new BlockPos(source.getPosition());
+                final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
+                final ChunkPos chunkPos = chunk.getPos();
 
-                    int newBlocks = 0;
-                    for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
-                        mutable.setX(x);
-                        for (int z = chunkPos.getStartZ(); z <= chunkPos.getEndZ(); z++) {
-                            mutable.setZ(z);
-                            final Block[] column = generator.getColumnAt(x, z);
-                            final Biome biome = biomeSource.getBiome(x, 0, z);
-                            map.setBiome(biome);
-                            for (int y = 0; y < column.length; y++) {
-                                mutable.setY(y);
-                                int seedBlockInt = column[y].getId();
-                                int terrainBlockInt = map.get(chunk.getBlockState(mutable).getBlock());
-                                if (seedBlockInt == terrainBlockInt) {
-                                    continue;
-                                }
-                                newBlocks++;
+                int newBlocks = 0;
+                for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
+                    mutable.setX(x);
+                    for (int z = chunkPos.getStartZ(); z <= chunkPos.getEndZ(); z++) {
+                        mutable.setZ(z);
+                        final Block[] column = generator.getColumnAt(x, z);
+                        final Biome biome = biomeSource.getBiome(x, 0, z);
+                        map.setBiome(biome);
+                        for (int y = 0; y < column.length; y++) {
+                            mutable.setY(y);
+                            int seedBlockInt = column[y].getId();
+                            int terrainBlockInt = map.get(chunk.getBlockState(mutable).getBlock());
+                            if (seedBlockInt == terrainBlockInt) {
+                                continue;
                             }
+                            newBlocks++;
                         }
                     }
-                    if (newBlocks <= blocks.get()) {
-                        blocks.set(newBlocks);
-                        version.set(mcVersion.name);
-                    }
-                });
+                }
+                if (newBlocks <= blocks.get()) {
+                    blocks.set(newBlocks);
+                    version.set(mcVersion.name);
+                }
+            });
         if (version.get().startsWith("1")) {
             Chat.print(chain(
-                    accent(version.get()),
-                    highlight(Text.translatable("command.terrainversion.feedback"))
+                accent(version.get()),
+                highlight(Text.translatable("command.terrainversion.feedback"))
             ));
         } else {
             Chat.print(highlight(version.get()));
