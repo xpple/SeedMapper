@@ -1,7 +1,6 @@
 {
   "commands.exceptions.dimensionNotSupported": "Dimensi \"%s\" tidak di dukung.",
   "commands.exceptions.versionNotFound": "Versi \"%s\" tidak ditemukan.",
-  "commands.exceptions.unknownConfig": "Konfigurasi \"%s\" tidak diketahui.",
   "commands.exceptions.nullPointerException": "\"%s\" adalah null.",
   "commands.exceptions.invalidDimension": "Dimensi tidak valid.",
   "commands.exceptions.biomeNotFound": "Bioma \"%s\" tidak ditemukan.",

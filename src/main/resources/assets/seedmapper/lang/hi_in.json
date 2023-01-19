@@ -1,7 +1,6 @@
 {
   "commands.exceptions.dimensionNotSupported": "आयाम \"%s\" समर्थित नही है।",
   "commands.exceptions.versionNotFound": "संस्करण \"%s\" नही मिला",
-  "commands.exceptions.unknownConfig": "अज्ञात कॉन्फिग \"%s\".",
   "commands.exceptions.nullPointerException": "\"%s\" null है",
   "commands.exceptions.invalidDimension": "अमान्य आयाम।",
   "commands.exceptions.biomeNotFound": "बायोम \"%s\" नही मिली।",

@@ -1,7 +1,6 @@
 {
   "commands.exceptions.dimensionNotSupported": "Wymiar \"%s\" nie jest wspierany.",
   "commands.exceptions.versionNotFound": "Nie znaleziono wersji \"%s\"",
-  "commands.exceptions.unknownConfig": "Nieznane ustawienie \"%s\".",
   "commands.exceptions.nullPointerException": "\"%s\" jest niezdefiniowany.",
   "commands.exceptions.invalidDimension": "Invalid dimension.",
   "commands.exceptions.biomeNotFound": "Biome \"%s\" was not found.",
