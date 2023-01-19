@@ -42,6 +42,9 @@ public class Configs {
     @Config
     public static final Map<Block, Integer> BlockColours = ConfigHelper.initBlockColours();
 
+    @Config
+    public static SeedResolution SeedResolutionOrder = ConfigHelper.initSeedResolutionOrder();
+
     public static Object get(String config) {
         Field field = configs.get(config);
         if (field == null) {
@@ -54,17 +57,17 @@ public class Configs {
         }
     }
 
-    public static String toString(String config) {
+    public static String asString(String config) {
         Object value = get(config);
-        String toString;
+        String asString;
         if (value instanceof Collection<?> collection) {
-            toString = "[" + Joiner.on(", ").join(collection) + "]";
+            asString = "[" + Joiner.on(", ").join(collection) + "]";
         } else if (value instanceof Map<?, ?> map) {
-            toString = "{" + Joiner.on(", ").withKeyValueSeparator("=").join(map) + "}";
+            asString = "{" + Joiner.on(", ").withKeyValueSeparator("=").join(map) + "}";
         } else {
-            toString = String.valueOf(value);
+            asString = String.valueOf(value);
         }
-        return toString;
+        return asString;
     }
 
     public static void set(String config, Object value) {

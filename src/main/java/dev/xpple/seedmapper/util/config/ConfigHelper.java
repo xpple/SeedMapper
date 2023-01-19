@@ -25,7 +25,10 @@ public class ConfigHelper {
     private static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     private static final Path configPath = Paths.get(MOD_PATH + File.separator + "config.json");
 
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().enableComplexMapKeySerialization().registerTypeHierarchyAdapter(Block.class, new BlockAdapter()).create();
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().enableComplexMapKeySerialization()
+        .registerTypeHierarchyAdapter(Block.class, new BlockAdapter())
+        .registerTypeAdapter(SeedResolution.class, new SeedResolutionAdapter())
+        .create();
 
     private static JsonObject root = null;
 
@@ -40,7 +43,13 @@ public class ConfigHelper {
                           "SavedSeeds": {},
                           "IgnoredBlocks": [],
                           "AutoOverlay": false,
-                          "BlockColours": {}
+                          "BlockColours": {},
+                          "SeedResolutionOrder": [
+                            "CommandSource",
+                            "SavedSeedsConfig",
+                            "OnlineDatabase",
+                            "SeedConfig"
+                          ]
                         }""";
                 root = JsonParser.parseString(standardJson).getAsJsonObject();
             }
@@ -103,5 +112,13 @@ public class ConfigHelper {
         }
         root.add("BlockColours", new JsonObject());
         return new HashMap<>();
+    }
+
+    public static SeedResolution initSeedResolutionOrder() {
+        if (root.has("SeedResolutionOrder")) {
+            return gson.fromJson(root.getAsJsonArray("SeedResolutionOrder"), new TypeToken<SeedResolution>() {}.getType());
+        }
+        root.add("SeedResolutionOrder", gson.toJsonTree(new SeedResolution()));
+        return new SeedResolution();
     }
 }

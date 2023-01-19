@@ -7,6 +7,7 @@ import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import dev.xpple.seedmapper.util.DatabaseHelper;
 import dev.xpple.seedmapper.util.config.Configs;
+import dev.xpple.seedmapper.util.config.SeedResolution;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -47,22 +48,23 @@ public final class SharedHelpers {
     }
 
     public static long getSeed(FabricClientCommandSource source) throws CommandSyntaxException {
-        Long seed = (Long) source.getMeta("seed");
-        if (seed != null) {
-            return seed;
-        }
-        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-        seed = Configs.SavedSeeds.get(key);
-        if (seed != null) {
-            return seed;
-        }
-        seed = DatabaseHelper.getSeed(key);
-        if (seed != null) {
-            return seed;
-        }
-        seed = Configs.Seed;
-        if (seed != null) {
-            return seed;
+        Long seed;
+        for (SeedResolution.Method method : Configs.SeedResolutionOrder) {
+            seed = switch (method) {
+                case COMMAND_SOURCE -> (Long) source.getMeta("seed");
+                case SAVED_SEEDS_CONFIG -> {
+                    String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
+                    yield Configs.SavedSeeds.get(key);
+                }
+                case ONLINE_DATABASE -> {
+                    String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
+                    yield DatabaseHelper.getSeed(key);
+                }
+                case SEED_CONFIG -> Configs.Seed;
+            };
+            if (seed != null) {
+                return seed;
+            }
         }
         throw Exceptions.NULL_POINTER_EXCEPTION.create("Seed");
     }

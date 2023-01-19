@@ -11,8 +11,10 @@ import com.mojang.brigadier.context.CommandContext;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.BlockArgumentType;
+import dev.xpple.seedmapper.command.arguments.SeedResolutionArgumentType;
 import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Configs;
+import dev.xpple.seedmapper.util.config.SeedResolution;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.text.Text;
@@ -42,6 +44,7 @@ public class ConfigCommand extends ClientCommand {
         .put(Long.class, new Pair<>(LongArgumentType::longArg, LongArgumentType::getLong))
         .put(String.class, new Pair<>(StringArgumentType::string, StringArgumentType::getString))
         .put(Block.class, new Pair<>(BlockArgumentType::block, BlockArgumentType::getBlock))
+        .put(SeedResolution.class, new Pair<>(SeedResolutionArgumentType::seedResolution, SeedResolutionArgumentType::getSeedResolution))
         .build();
 
     @Override
@@ -125,7 +128,7 @@ public class ConfigCommand extends ClientCommand {
     }
 
     private static int get(CustomClientCommandSource source, String config) {
-        String value = Configs.toString(config);
+        String value = Configs.asString(config);
         Chat.print(Text.translatable("command.config.get", config, value));
         return Command.SINGLE_SUCCESS;
     }
