@@ -12,6 +12,7 @@ import com.seedfinding.mccore.util.data.SpiralIterator;
 import com.seedfinding.mccore.util.pos.BPos;
 import com.seedfinding.mccore.util.pos.CPos;
 import com.seedfinding.mcfeature.decorator.ore.OreDecorator;
+import com.seedfinding.mcfeature.misc.SlimeChunk;
 import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
@@ -47,7 +48,12 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                     .suggests((context, builder) -> suggestMatching(blocks, builder))
                     .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))
                     .then(argument("range", integer(0))
-                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getInteger(ctx, "range"))))));
+                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getInteger(ctx, "range"))))))
+            .then(literal("feature")
+                .then(literal("slimechunk")
+                    .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))
+                    .then(argument("range", integer(0))
+                        .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "range"))))));
     }
 
     @Override
@@ -79,7 +85,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
         SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(range, range), (x, y, z) -> new CPos(x, z));
         StreamSupport.stream(spiralIterator.spliterator(), false)
-            .map(cPos -> {
+            .flatMap(cPos -> {
                 Biome biome = biomeSource.getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);
 
                 final Map<BPos, Block> generatedOres = new HashMap<>();
@@ -103,11 +109,10 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                 return generatedOres.entrySet().stream()
                     .filter(entry -> entry.getValue().getName().equals(blockString))
                     .filter(entry -> entry.getKey().getY() > 0)
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toSet());
+                    .map(Map.Entry::getKey);
             })
-            .limit(50)
-            .forEach(set -> set.forEach(pos -> boxes.add(new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1))));
+            .limit(500)
+            .forEach(pos -> boxes.add(new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1)));
 
         int colour = switch (blockString) {
             case "diamond_ore" -> 0x00E1FF;
@@ -129,6 +134,37 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         } else {
             Chat.print(Text.translatable("command.highlight.block.success", boxes.size(), blockString));
         }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int highlightSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
+        return highlightSlimeChunk(source, 160); // 10 chunks
+    }
+
+    private static int highlightSlimeChunk(CustomClientCommandSource source, int range) throws CommandSyntaxException {
+        SharedHelpers helpers = new SharedHelpers(source);
+
+        BlockPos center = new BlockPos(source.getPosition());
+        CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
+
+        SlimeChunk slimeChunk = new SlimeChunk(helpers.mcVersion);
+        if (!slimeChunk.isValidDimension(helpers.dimension)) {
+            throw INVALID_DIMENSION_EXCEPTION.create();
+        }
+
+        ChunkRand rand = new ChunkRand();
+        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(range, range), (x, y, z) -> new CPos(x, z));
+        StreamSupport.stream(spiralIterator.spliterator(), false)
+            .filter(cPos -> {
+                SlimeChunk.Data data = slimeChunk.at(cPos.getX(), cPos.getZ(), true);
+                return data.testStart(helpers.seed, rand);
+            })
+            .limit(500)
+            .forEach(cPos -> {
+                BPos bPos = cPos.toBlockPos((int) source.getPosition().y);
+                Box box = new Box(bPos.getX(), bPos.getY(), bPos.getZ(), bPos.getX() + 16, bPos.getY(), bPos.getZ() + 16);
+                RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, 0x00FF00, -1);
+            });
         return Command.SINGLE_SUCCESS;
     }
 }
