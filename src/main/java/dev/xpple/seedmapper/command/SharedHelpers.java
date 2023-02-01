@@ -29,9 +29,9 @@ public final class SharedHelpers {
         DynamicCommandExceptionType BLOCK_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.blockNotFound", arg));
     }
 
-    public long seed;
-    public Dimension dimension;
-    public MCVersion mcVersion;
+    public final long seed;
+    public final Dimension dimension;
+    public final MCVersion mcVersion;
 
     public SharedHelpers(FabricClientCommandSource source) throws CommandSyntaxException {
         this.seed = getSeed(source);
