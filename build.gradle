@@ -50,8 +50,9 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	modImplementation 'dev.xpple:clientarguments:1.4.2'
-	include 'dev.xpple:clientarguments:1.4.2'
+	include modImplementation('dev.xpple:clientarguments:1.4.2')
+
+	include modImplementation('dev.xpple:betterconfig:1.0.2')
 
 	extraLibs('com.seedfinding:mc_math:ffd2edcfcc0d18147549c88cc7d8ec6cf21b5b91') {transitive = false}
 	extraLibs('com.seedfinding:mc_seed:a7543ead9132421b19c4a4d5e17219a8c309d929') {transitive = false}

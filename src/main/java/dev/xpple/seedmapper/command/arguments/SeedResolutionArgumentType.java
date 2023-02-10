@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.xpple.seedmapper.util.config.SeedResolution;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 
@@ -29,7 +28,7 @@ public class SeedResolutionArgumentType implements ArgumentType<SeedResolution> 
         return new SeedResolutionArgumentType();
     }
 
-    public static SeedResolution getSeedResolution(CommandContext<FabricClientCommandSource> context, String name) {
+    public static SeedResolution getSeedResolution(CommandContext<? extends CommandSource> context, String name) {
         return context.getArgument(name, SeedResolution.class);
     }
 

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class SeedResolutionAdapter extends TypeAdapter<SeedResolution> {
+public class SeedResolutionAdapter extends TypeAdapter<SeedResolution> {
     @Override
     public void write(JsonWriter writer, SeedResolution resolution) throws IOException {
         writer.beginArray();

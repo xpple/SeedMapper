@@ -1,16 +1,24 @@
 package dev.xpple.seedmapper;
 
 import com.mojang.brigadier.CommandDispatcher;
+import dev.xpple.betterconfig.api.ModConfigBuilder;
 import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.arguments.BlockArgumentType;
+import dev.xpple.seedmapper.command.arguments.SeedResolutionArgumentType;
 import dev.xpple.seedmapper.command.commands.*;
 import dev.xpple.seedmapper.util.DatabaseHelper;
-import dev.xpple.seedmapper.util.config.ConfigHelper;
+import dev.xpple.seedmapper.util.config.BlockAdapter;
+import dev.xpple.seedmapper.util.config.Configs;
+import dev.xpple.seedmapper.util.config.SeedResolution;
+import dev.xpple.seedmapper.util.config.SeedResolutionAdapter;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.util.Pair;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -29,7 +37,11 @@ public class SeedMapper implements ClientModInitializer {
         //noinspection ResultOfMethodCallIgnored
         MOD_PATH.toFile().mkdirs();
 
-        ConfigHelper.init();
+        new ModConfigBuilder(MOD_ID, Configs.class)
+            .registerTypeHierarchyWithArgument(Block.class, new BlockAdapter(), new Pair<>(BlockArgumentType::block, BlockArgumentType::getBlock))
+            .registerTypeWithArgument(SeedResolution.class, new SeedResolutionAdapter(), new Pair<>(SeedResolutionArgumentType::seedResolution, SeedResolutionArgumentType::getSeedResolution))
+            .build();
+
         DatabaseHelper.fetchSeeds();
 
         ClientCommandRegistrationCallback.EVENT.register(SeedMapper::registerCommands);
@@ -42,7 +54,6 @@ public class SeedMapper implements ClientModInitializer {
     private static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         ClientCommand.instantiate(new SeedOverlayCommand(), dispatcher);
         ClientCommand.instantiate(new TerrainVersionCommand(), dispatcher);
-        ClientCommand.instantiate(new ConfigCommand(), dispatcher);
         ClientCommand.instantiate(new LocateCommand(), dispatcher);
         ClientCommand.instantiate(new HighlightCommand(), dispatcher);
         ClientCommand.instantiate(new SourceCommand(), dispatcher);

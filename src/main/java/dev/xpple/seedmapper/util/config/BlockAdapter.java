@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 
 import java.io.IOException;
 
-class BlockAdapter extends TypeAdapter<Block> {
+public class BlockAdapter extends TypeAdapter<Block> {
     @Override
     public void write(JsonWriter writer, Block block) throws IOException {
         writer.value(Registries.BLOCK.getId(block).getPath());

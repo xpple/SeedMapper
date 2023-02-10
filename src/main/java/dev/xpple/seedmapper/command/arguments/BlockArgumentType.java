@@ -19,13 +19,16 @@ import java.util.concurrent.CompletableFuture;
 
 public class BlockArgumentType implements ArgumentType<Block>, SharedHelpers.Exceptions {
 
-    private static final Collection<String> EXAMPLES = Arrays.asList("stone", "command_block", "emerald_ore");
+    private BlockArgumentType() {
+    }
+
+    private static final Collection<String> EXAMPLES = Arrays.asList("stone", "command_block", "minecraft:emerald_ore");
 
     public static BlockArgumentType block() {
         return new BlockArgumentType();
     }
 
-    public static Block getBlock(CommandContext<FabricClientCommandSource> context, String name) {
+    public static Block getBlock(CommandContext<? extends CommandSource> context, String name) {
         return context.getArgument(name, Block.class);
     }
 
