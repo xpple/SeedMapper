@@ -11,7 +11,7 @@ be added later. A complete compatibility chart can be seen in the release descri
 remains compatible with previously supported Minecraft versions.
 
 ## Features
-Before using any of these commands, make sure the seed has been configured using `/sm:config seed set <seed>`.
+Before using any of these commands, make sure the seed has been configured using `/cconfig SeedMapper Seed set <seed>`.
 
 ### SeedOverlay
 Usage: `/sm:seedoverlay`
