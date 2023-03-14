@@ -59,5 +59,7 @@ public class SeedMapper implements ClientModInitializer {
         ClientCommand.instantiate(new SourceCommand(), dispatcher);
         ClientCommand.instantiate(new ClearScreenCommand(), dispatcher);
         ClientCommand.instantiate(new CheckSeedCommand(), dispatcher);
+
+        ClientCommand.instantiate(new TestCommand(), dispatcher);
     }
 }

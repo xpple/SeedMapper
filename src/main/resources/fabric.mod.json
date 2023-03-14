@@ -23,7 +23,7 @@
     ]
   },
   "mixins": [
-    "seedmapper.mixin.entity.json",
+    "seedmapper.mixin.server.json",
     "seedmapper.mixin.render.json",
     "seedmapper.mixin.client.json"
   ],
