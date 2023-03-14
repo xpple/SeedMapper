@@ -8,12 +8,12 @@ import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
+import net.minecraft.SharedConstants;
 import net.minecraft.block.Block;
 import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.ChunkData;
-import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
@@ -40,7 +40,7 @@ public class MixinClientChunkManager {
             if (dimension == null) {
                 return;
             }
-            MCVersion mcVersion = MCVersion.fromString(CLIENT.getGame().getVersion().getName());
+            MCVersion mcVersion = MCVersion.fromString(SharedConstants.getGameVersion().getName());
             if (mcVersion == null) {
                 return;
             }
