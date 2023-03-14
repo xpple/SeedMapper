@@ -53,7 +53,7 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                 SimpleBlockMap map = new SimpleBlockMap(mcVersion, helpers.dimension, Biomes.PLAINS);
 
                 BlockPos.Mutable mutable = new BlockPos.Mutable();
-                final BlockPos center = new BlockPos(source.getPosition());
+                final BlockPos center = BlockPos.ofFloored(source.getPosition());
                 final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
                 final ChunkPos chunkPos = chunk.getPos();
 

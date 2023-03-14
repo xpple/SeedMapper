@@ -92,7 +92,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
-        BlockPos center = new BlockPos(source.getPosition());
+        BlockPos center = BlockPos.ofFloored(source.getPosition());
         BPos biomePos = locateBiome(biome::equals, new BPos(center.getX(), 0, center.getZ()), 6400, 8, biomeSource);
 
         if (biomePos == null) {
@@ -131,7 +131,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
-        BlockPos center = new BlockPos(source.getPosition());
+        BlockPos center = BlockPos.ofFloored(source.getPosition());
         BPos structurePos = locateStructure(structure, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
@@ -203,7 +203,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
-        BlockPos center = new BlockPos(source.getPosition());
+        BlockPos center = BlockPos.ofFloored(source.getPosition());
         BPos decoratorPos = locateDecorator(decorator, new BPos(center.getX(), center.getY(), center.getZ()).toChunkPos(), 6400, biomeSource, new ChunkRand());
 
         if (decoratorPos == null) {
@@ -257,7 +257,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        BlockPos center = new BlockPos(source.getPosition());
+        BlockPos center = BlockPos.ofFloored(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
 
         CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(helpers.mcVersion), centerChunk, 6400, helpers.seed, new ChunkRand(), helpers.dimension);
@@ -318,7 +318,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
 
-        BlockPos center = new BlockPos(source.getPosition());
+        BlockPos center = BlockPos.ofFloored(source.getPosition());
 
         List<BPos> lootPositions = locateLoot(item.getSecond(), i -> i.getName().equals(itemString), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
         if (lootPositions == null || lootPositions.isEmpty()) {

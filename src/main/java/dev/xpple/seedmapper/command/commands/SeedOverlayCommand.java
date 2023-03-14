@@ -52,7 +52,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         TerrainGenerator generator = TerrainGenerator.of(helpers.dimension, biomeSource);
         final SimpleBlockMap map = new SimpleBlockMap(helpers.mcVersion, helpers.dimension, Biomes.PLAINS);
         BlockPos.Mutable mutable = new BlockPos.Mutable();
-        final BlockPos center = new BlockPos(source.getPosition());
+        final BlockPos center = BlockPos.ofFloored(source.getPosition());
         final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
         final ChunkPos chunkPos = chunk.getPos();
 

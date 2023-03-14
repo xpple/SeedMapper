@@ -81,7 +81,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
 
         final Set<Box> boxes = new HashSet<>();
-        BlockPos center = new BlockPos(source.getPosition());
+        BlockPos center = BlockPos.ofFloored(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
         SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(range, range), (x, y, z) -> new CPos(x, z));
         StreamSupport.stream(spiralIterator.spliterator(), false)
@@ -144,7 +144,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
     private static int highlightSlimeChunk(CustomClientCommandSource source, int range) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        BlockPos center = new BlockPos(source.getPosition());
+        BlockPos center = BlockPos.ofFloored(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
 
         SlimeChunk slimeChunk = new SlimeChunk(helpers.mcVersion);

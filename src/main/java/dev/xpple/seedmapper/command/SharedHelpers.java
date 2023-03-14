@@ -9,6 +9,7 @@ import dev.xpple.seedmapper.util.DatabaseHelper;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.config.SeedResolution;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.SharedConstants;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -41,7 +42,7 @@ public final class SharedHelpers {
             this.dimension = getDimension(((Identifier) source.getMeta("dimension")).getPath());
         }
         if (source.getMeta("version") == null) {
-            this.mcVersion = getMCVersion(CLIENT.getGame().getVersion().getName());
+            this.mcVersion = getMCVersion(SharedConstants.getGameVersion().getName());
         } else {
             this.mcVersion = (MCVersion) source.getMeta("version");
         }
