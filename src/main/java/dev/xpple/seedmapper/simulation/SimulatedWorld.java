@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.simulation;
 
+import com.seedfinding.mccore.state.Dimension;
 import dev.xpple.seedmapper.mixin.server.MinecraftServerAccessor;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -15,8 +16,25 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 
 public class SimulatedWorld extends ServerWorld {
-    public SimulatedWorld(SimulatedServer server, RegistryKey<World> dimension) {
-        super(server, Util.getMainWorkerExecutor(), ((MinecraftServerAccessor) server).getSession(), new UnmodifiableLevelProperties(server.getSaveProperties(), server.getSaveProperties().getMainWorldProperties()), dimension, server.getCombinedDynamicRegistries().getCombinedRegistryManager().get(RegistryKeys.DIMENSION).get(DimensionOptions.OVERWORLD), FakeWorldGenerationProgressListener.INSTANCE, false, BiomeAccess.hashSeed(server.getSaveProperties().getGeneratorOptions().getSeed()), Collections.emptyList(), false);
+
+    public SimulatedWorld(SimulatedServer server, Dimension dimension) {
+        super(server, Util.getMainWorkerExecutor(), ((MinecraftServerAccessor) server).getSession(), new UnmodifiableLevelProperties(server.getSaveProperties(), server.getSaveProperties().getMainWorldProperties()), getWorld(dimension), server.getCombinedDynamicRegistries().getCombinedRegistryManager().get(RegistryKeys.DIMENSION).get(getDimensionOptions(dimension)), FakeWorldGenerationProgressListener.INSTANCE, false, BiomeAccess.hashSeed(server.getSaveProperties().getGeneratorOptions().getSeed()), Collections.emptyList(), false);
+    }
+
+    private static RegistryKey<World> getWorld(Dimension dimension) {
+        return switch (dimension) {
+            case OVERWORLD -> World.OVERWORLD;
+            case NETHER -> World.NETHER;
+            case END -> World.END;
+        };
+    }
+
+    private static RegistryKey<DimensionOptions> getDimensionOptions(Dimension dimension) {
+        return switch (dimension) {
+            case OVERWORLD -> DimensionOptions.OVERWORLD;
+            case NETHER -> DimensionOptions.NETHER;
+            case END -> DimensionOptions.END;
+        };
     }
 
     @Override

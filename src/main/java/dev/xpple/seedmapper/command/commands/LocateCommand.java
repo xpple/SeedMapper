@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.rand.ChunkRand;
@@ -34,6 +35,7 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
@@ -59,8 +61,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 public class LocateCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        argumentBuilder
+    protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        return dispatcher.register(literal(this.getRootLiteral())
             .then(literal("biome")
                 .then(argument("biome", biome())
                     .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome")))))
@@ -76,7 +78,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             .then(literal("loot")
                 .then(argument("amount", integer(1))
                     .then(argument("item", enchantedItem().loot())
-                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getEnchantedItem(ctx, "item"))))));
+                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getEnchantedItem(ctx, "item")))))));
     }
 
     @Override

@@ -52,7 +52,7 @@ dependencies {
 
 	include modImplementation('dev.xpple:clientarguments:1.4.3')
 
-	include modImplementation('dev.xpple:betterconfig:1.0.4')
+	include modImplementation('dev.xpple:betterconfig:1.0.5')
 
 	extraLibs('com.seedfinding:mc_math:ffd2edcfcc0d18147549c88cc7d8ec6cf21b5b91') {transitive = false}
 	extraLibs('com.seedfinding:mc_seed:a2f2ececc89e09785191e585d524eaca2b1f998b') {transitive = false}

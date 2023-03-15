@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.biome.Biomes;
 import com.seedfinding.mcbiome.source.BiomeSource;
@@ -15,6 +16,7 @@ import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.Block;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -26,13 +28,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        argumentBuilder
-            .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource())));
+    protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        return dispatcher.register(literal(this.getRootLiteral())
+            .executes(ctx -> seedOverlay(CustomClientCommandSource.of(ctx.getSource()))));
     }
 
     @Override
