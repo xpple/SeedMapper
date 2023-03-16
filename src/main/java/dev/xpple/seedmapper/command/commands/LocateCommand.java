@@ -89,7 +89,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static int locateBiome(CustomClientCommandSource source, Biome biome) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
         if (biome.getDimension() != biomeSource.getDimension()) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -126,9 +126,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static int locateStructure(CustomClientCommandSource source, FeatureFactory<? extends Structure<?, ?>> structureFactory) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        final Structure<?, ?> structure = structureFactory.create(helpers.mcVersion);
+        final Structure<?, ?> structure = structureFactory.create(helpers.mcVersion());
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
         if (!structure.isValidDimension(biomeSource.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -182,7 +182,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 BPos dimPos = closest.toBlockPos().add(9, 0, 9);
                 return new BPos(dimPos.getX(), 0, dimPos.getZ());
             } else if (structure instanceof Mineshaft mineshaft) {
-                SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(new CPos(center.getX() >> 4, center.getZ() >> 4), new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
+                SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(new CPos(center.getX() >> 4, center.getZ() >> 4), new CPos(radius, radius), CPos.Builder::create);
 
                 return StreamSupport.stream(spiralIterator.spliterator(), false)
                     .filter(cPos -> {
@@ -198,9 +198,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static int locateDecorator(CustomClientCommandSource source, FeatureFactory<? extends Decorator<?, ?>> decoratorFactory) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        final Decorator<?, ?> decorator = decoratorFactory.create(helpers.mcVersion);
+        final Decorator<?, ?> decorator = decoratorFactory.create(helpers.mcVersion());
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
         if (!decorator.isValidDimension(biomeSource.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -230,7 +230,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static BPos locateDecorator(Decorator<?, ?> decorator, CPos center, int radius, BiomeSource source, ChunkRand chunkRand) {
         long structureSeed = WorldSeed.toStructureSeed(source.getWorldSeed());
         if (decorator instanceof DesertWell desertWell) {
-            SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(center, new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
+            SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(center, new CPos(radius, radius), CPos.Builder::create);
             return StreamSupport.stream(spiralIterator.spliterator(), false)
                 .filter(cPos -> {
                     int chunkX = cPos.getX();
@@ -240,7 +240,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 })
                 .findAny().map(cPos -> cPos.toBlockPos().add(9, 0, 9)).orElse(null);
         } else if (decorator instanceof EndGateway endGateway) {
-            SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(center, new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
+            SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(center, new CPos(radius, radius), CPos.Builder::create);
             for (CPos cPos : spiralIterator) {
                 int chunkX = cPos.getX();
                 int chunkZ = cPos.getZ();
@@ -262,7 +262,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         BlockPos center = BlockPos.ofFloored(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
 
-        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(helpers.mcVersion), centerChunk, 6400, helpers.seed, new ChunkRand(), helpers.dimension);
+        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(helpers.mcVersion()), centerChunk, 6400, helpers.seed(), new ChunkRand(), helpers.dimension());
         if (slimeChunkPos == null) {
             Chat.print(Text.translatable("command.locate.feature.slimeChunk.noneFound"));
         } else {
@@ -298,7 +298,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         if (!slimeChunk.isValidDimension(dimension)) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
-        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(radius, radius), (x, y, z) -> new CPos(x, z));
+        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(radius, radius), CPos.Builder::create);
         return StreamSupport.stream(spiralIterator.spliterator(), false)
             .filter(cPos -> {
                 SlimeChunk.Data data = slimeChunk.at(cPos.getX(), cPos.getZ(), true);
@@ -312,13 +312,13 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         String itemString = item.getFirst();
 
-        Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(helpers.mcVersion).stream()
+        Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(helpers.mcVersion()).stream()
             .filter(structure -> structure instanceof ILoot)
-            .filter(structure -> structure.isValidDimension(helpers.dimension))
+            .filter(structure -> structure.isValidDimension(helpers.dimension()))
             .map(structure -> (RegionStructure<?, ?>) structure)
             .collect(Collectors.toSet());
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
 
         BlockPos center = BlockPos.ofFloored(source.getPosition());
 

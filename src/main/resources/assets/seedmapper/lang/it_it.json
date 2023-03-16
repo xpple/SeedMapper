@@ -26,9 +26,6 @@
     "command.clearscreen.empty": "Impossibile cancellare alcun rendering.",
     "command.clearscreen.success": "%d rendering cancellati.",
 
-    "command.highlight.block.noneFound": "Non è stato possibile evidenziare %s.",
-    "command.highlight.block.success": "Evidenziato %d %s.",
-
     "command.locate.biome.noneFound": "Impossibile individuare %s entro 6400 blocchi.",
     "command.locate.biome.foundAt": "%s trovato a",
     "command.locate.biome.copy": "Fai clic per copiare le coordinate di %s.",

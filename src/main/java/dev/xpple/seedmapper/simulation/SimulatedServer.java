@@ -1,7 +1,6 @@
 package dev.xpple.seedmapper.simulation;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.encryption.SignatureVerifier;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.resource.DataConfiguration;
@@ -25,6 +24,7 @@ import net.minecraft.world.level.LevelProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 public class SimulatedServer extends IntegratedServer {
@@ -40,7 +40,9 @@ public class SimulatedServer extends IntegratedServer {
 
         ResourcePackManager resourcePackManager = new ResourcePackManager(new VanillaDataPackProvider());
 
-        LevelInfo levelInfo = new LevelInfo("fake", GameMode.SPECTATOR, false, Difficulty.PEACEFUL, true, new GameRules(), DataConfiguration.SAFE_MODE);
+        GameRules gameRules = createGameRules();
+
+        LevelInfo levelInfo = new LevelInfo("fake", GameMode.SPECTATOR, false, Difficulty.PEACEFUL, true, gameRules, DataConfiguration.SAFE_MODE);
 
         Function<DynamicRegistryManager, DimensionOptionsRegistryHolder> dimensionsRegistrySupplier = WorldPresets::createDemoOptions;
 
@@ -48,12 +50,21 @@ public class SimulatedServer extends IntegratedServer {
 
         SaveLoader saveLoader = createSaveLoader(resourcePackManager, levelInfo, dimensionsRegistrySupplier, generatorOptions);
 
-        ApiServices apiServices = new ApiServices(new FakeMinecraftSessionService(), SignatureVerifier.NOOP, new FakeGameProfileRepository(), null);
+        ApiServices apiServices = new ApiServices(null, null, null, null);
 
-        WorldGenerationProgressListenerFactory factory = r -> FakeWorldGenerationProgressListener.INSTANCE;
+        return new SimulatedServer(null, client, session, resourcePackManager, saveLoader, apiServices, null);
+    }
 
-        return new SimulatedServer(null, client, session, resourcePackManager, saveLoader, apiServices, factory);
-        //return MinecraftServer.startServer(thread -> new SimulatedServer(thread, client, session, resourcePackManager, saveLoader, apiServices, factory));
+    private static GameRules createGameRules() {
+        GameRules gameRules = new GameRules();
+        gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(false, null);
+        gameRules.get(GameRules.DO_FIRE_TICK).set(false, null);
+        gameRules.get(GameRules.DO_MOB_SPAWNING).set(false, null);
+        gameRules.get(GameRules.DO_VINES_SPREAD).set(false, null);
+        gameRules.get(GameRules.DO_WEATHER_CYCLE).set(false, null);
+        gameRules.get(GameRules.GLOBAL_SOUND_EVENTS).set(false, null);
+        gameRules.get(GameRules.RANDOM_TICK_SPEED).set(0, null);
+        return gameRules;
     }
 
     private static SaveLoader createSaveLoader(ResourcePackManager resourcePackManager, LevelInfo levelInfo, Function<DynamicRegistryManager, DimensionOptionsRegistryHolder> dimensionsRegistrySupplier, GeneratorOptions generatorOptions) throws Exception {
@@ -79,5 +90,13 @@ public class SimulatedServer extends IntegratedServer {
     @Override
     public boolean saveAll(boolean suppressLogs, boolean flush, boolean force) {
         return true;
+    }
+
+    @Override
+    public void tick(BooleanSupplier shouldKeepTicking) {
+    }
+
+    @Override
+    public void tickWorlds(BooleanSupplier shouldKeepTicking) {
     }
 }

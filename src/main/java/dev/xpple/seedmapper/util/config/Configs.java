@@ -33,4 +33,7 @@ public class Configs {
 
     @Config
     public static SeedResolution SeedResolutionOrder = new SeedResolution();
+
+    @Config
+    public static boolean UseWorldSimulation = false;
 }

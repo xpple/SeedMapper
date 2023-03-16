@@ -15,12 +15,13 @@ import net.minecraft.util.Identifier;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 
-public final class SharedHelpers {
+public record SharedHelpers(long seed, Dimension dimension, MCVersion mcVersion) {
 
     public interface Exceptions {
         DynamicCommandExceptionType NULL_POINTER_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.nullPointerException", arg));
         DynamicCommandExceptionType DIMENSION_NOT_SUPPORTED_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.dimensionNotSupported", arg));
         DynamicCommandExceptionType VERSION_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.versionNotFound", arg));
+        SimpleCommandExceptionType UNSUPPORTED_VERSION_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.unsupportedVersion"));
         SimpleCommandExceptionType INVALID_DIMENSION_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.invalidDimension"));
         DynamicCommandExceptionType BIOME_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.biomeNotFound", arg));
         DynamicCommandExceptionType STRUCTURE_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.structureNotFound", arg));
@@ -28,24 +29,19 @@ public final class SharedHelpers {
         DynamicCommandExceptionType ITEM_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.itemNotFound", arg));
         DynamicCommandExceptionType LOOT_ITEM_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.lootItemNotFound", arg));
         DynamicCommandExceptionType BLOCK_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.blockNotFound", arg));
+        SimpleCommandExceptionType WORLD_SIMULATION_ERROR_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.worldSimulationError"));
     }
 
-    public final long seed;
-    public final Dimension dimension;
-    public final MCVersion mcVersion;
-
     public SharedHelpers(FabricClientCommandSource source) throws CommandSyntaxException {
-        this.seed = getSeed(source);
-        if (source.getMeta("dimension") == null) {
-            this.dimension = getDimension(source.getWorld().getRegistryKey().getValue().getPath());
-        } else {
-            this.dimension = getDimension(((Identifier) source.getMeta("dimension")).getPath());
-        }
-        if (source.getMeta("version") == null) {
-            this.mcVersion = getMCVersion(SharedConstants.getGameVersion().getName());
-        } else {
-            this.mcVersion = (MCVersion) source.getMeta("version");
-        }
+        this(
+            getSeed(source),
+            source.getMeta("dimension") == null ?
+                getDimension(source.getWorld().getRegistryKey().getValue().getPath()) :
+                getDimension(((Identifier) source.getMeta("dimension")).getPath()),
+            source.getMeta("version") == null ?
+                getMCVersion(SharedConstants.getGameVersion().getName()) :
+                (MCVersion) source.getMeta("version")
+        );
     }
 
     public static long getSeed(FabricClientCommandSource source) throws CommandSyntaxException {

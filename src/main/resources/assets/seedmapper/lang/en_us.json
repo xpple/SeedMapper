@@ -1,6 +1,7 @@
 {
   "commands.exceptions.dimensionNotSupported": "Dimension \"%s\" is not supported.",
   "commands.exceptions.versionNotFound": "Version \"%s\" was not found.",
+  "commands.exceptions.unsupportedVersion": "Only the current version is supported when using world simulation.",
   "commands.exceptions.nullPointerException": "\"%s\" is null.",
   "commands.exceptions.invalidDimension": "Invalid dimension.",
   "commands.exceptions.biomeNotFound": "Biome \"%s\" was not found.",
@@ -14,6 +15,7 @@
   "commands.exceptions.incompatibleEnchantment": "Incompatible enchantment.",
   "commands.exceptions.incompleteArgument": "Incomplete argument.",
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\"",
+  "commands.exceptions.worldSimulationError": "An error occurred whilst simulating a world",
 
   "arguments.exceptions.tooFewArguments": "Too few arguments.",
 
@@ -33,8 +35,8 @@
   "command.config.put": "The mapping %s=%s has been added to %s.",
   "command.config.remove": "%s has been removed from %s.",
 
-  "command.highlight.block.noneFound": "No %s could be highlighted.",
-  "command.highlight.block.success": "Highlighted %d %s.",
+  "command.highlight.block.noneFound": "No blocks could be highlighted.",
+  "command.highlight.block.success": "Highlighted %d blocks.",
 
   "command.locate.biome.noneFound": "Couldn't locate %s within 6400 blocks.",
   "command.locate.biome.foundAt": "%s found at",

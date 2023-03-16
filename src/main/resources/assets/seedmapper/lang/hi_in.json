@@ -25,9 +25,6 @@
   "command.clearscreen.empty": "कोई रेंडर हटा नहीं सका।",
   "command.clearscreen.success": "%d रेंडर हटा दिए गए।",
 
-  "command.highlight.block.noneFound": "कोई %s हाईलाइट नहीं किया जा सकता।",
-  "command.highlight.block.success": "हाईलाइट किया गया %d %s.",
-
   "command.locate.biome.noneFound": "6400 ब्लॉक में %s का पता नहीं लगा सका।",
   "command.locate.biome.foundAt": "%s यहाँ मिला",
   "command.locate.biome.copy": "%s के निर्देशांक कॉपी करने के लिए क्लिक कीजिये।",

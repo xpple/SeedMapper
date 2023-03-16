@@ -19,9 +19,6 @@
   "command.clearscreen.empty": "Couldn't clear any renders.",
   "command.clearscreen.success": "Cleared %d renders.",
 
-  "command.highlight.block.noneFound": "Tidak ada %s yang bisa di sorot.",
-  "command.highlight.block.success": "Menyorot %d %s.",
-
   "command.locate.biome.noneFound": "Tidak bisa mencari %s yang lebih dari 6400 blok.",
   "command.locate.biome.foundAt": "%s ditemukan di",
   "command.locate.biome.copy": "Klik untuk menyalin kordinat dari %s.",

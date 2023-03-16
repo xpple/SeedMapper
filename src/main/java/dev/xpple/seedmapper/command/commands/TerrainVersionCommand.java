@@ -51,9 +51,9 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
         Arrays.stream(MCVersion.values())
             .filter(mcVersion -> mcVersion.isNewerThan(MCVersion.v1_10_2))
             .forEach(mcVersion -> {
-                BiomeSource biomeSource = BiomeSource.of(helpers.dimension, mcVersion, helpers.seed);
-                TerrainGenerator generator = TerrainGenerator.of(helpers.dimension, biomeSource);
-                SimpleBlockMap map = new SimpleBlockMap(mcVersion, helpers.dimension, Biomes.PLAINS);
+                BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), mcVersion, helpers.seed());
+                TerrainGenerator generator = TerrainGenerator.of(helpers.dimension(), biomeSource);
+                SimpleBlockMap map = new SimpleBlockMap(mcVersion, helpers.dimension(), Biomes.PLAINS);
 
                 BlockPos.Mutable mutable = new BlockPos.Mutable();
                 final BlockPos center = BlockPos.ofFloored(source.getPosition());

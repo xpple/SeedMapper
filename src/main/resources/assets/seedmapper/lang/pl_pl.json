@@ -19,9 +19,6 @@
   "command.clearscreen.empty": "Couldn't clear any renders.",
   "command.clearscreen.success": "Cleared %d renders.",
 
-  "command.highlight.block.noneFound": "No %s could be highlighted.",
-  "command.highlight.block.success": "Highlighted %d %s.",
-
   "command.locate.biome.noneFound": "Couldn't locate %s within 6400 blocks.",
   "command.locate.biome.foundAt": "%s found at",
   "command.locate.biome.copy": "Click to copy coordinates of %s.",

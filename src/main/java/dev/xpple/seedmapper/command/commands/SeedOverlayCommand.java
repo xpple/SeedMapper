@@ -51,9 +51,9 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
     private static int seedOverlay(CustomClientCommandSource source) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
-        TerrainGenerator generator = TerrainGenerator.of(helpers.dimension, biomeSource);
-        final SimpleBlockMap map = new SimpleBlockMap(helpers.mcVersion, helpers.dimension, Biomes.PLAINS);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
+        TerrainGenerator generator = TerrainGenerator.of(helpers.dimension(), biomeSource);
+        final SimpleBlockMap map = new SimpleBlockMap(helpers.mcVersion(), helpers.dimension(), Biomes.PLAINS);
         BlockPos.Mutable mutable = new BlockPos.Mutable();
         final BlockPos center = BlockPos.ofFloored(source.getPosition());
         final WorldChunk chunk = source.getWorld().getChunk(center.getX() >> 4, center.getZ() >> 4);
