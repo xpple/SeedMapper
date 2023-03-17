@@ -116,7 +116,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                 startX = ChunkSectionPos.getBlockCoord(cPos.getX());
                 endX = ChunkSectionPos.getOffsetPos(cPos.getX(), 15);
                 startY = chunk.getBottomY();
-                endY = chunk.getHighestNonEmptySectionYOffset();
+                endY = chunk.getTopY();
                 startZ = ChunkSectionPos.getBlockCoord(cPos.getZ());
                 endZ = ChunkSectionPos.getOffsetPos(cPos.getZ(), 15);
 
@@ -137,7 +137,10 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
 
             return boxes;
         } catch (Exception e) {
-            return Collections.emptySet();
+            if (e instanceof CommandSyntaxException commandSyntaxException) {
+                throw commandSyntaxException;
+            }
+            throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
     }
 

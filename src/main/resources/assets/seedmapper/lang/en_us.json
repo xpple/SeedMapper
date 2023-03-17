@@ -15,7 +15,7 @@
   "commands.exceptions.incompatibleEnchantment": "Incompatible enchantment.",
   "commands.exceptions.incompleteArgument": "Incomplete argument.",
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\"",
-  "commands.exceptions.worldSimulationError": "An error occurred whilst simulating a world",
+  "commands.exceptions.worldSimulationError": "An error occurred whilst simulating a world: %s",
 
   "arguments.exceptions.tooFewArguments": "Too few arguments.",
 
