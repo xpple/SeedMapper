@@ -79,6 +79,9 @@ public class CheckSeedCommand extends ClientCommand {
                 case ONLINE_DATABASE -> {
                     String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
                     seed = DatabaseHelper.getSeed(key);
+                    if (seed == null) {
+                        continue;
+                    }
                     Chat.print(chain(
                         Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                         highlight(" "),
