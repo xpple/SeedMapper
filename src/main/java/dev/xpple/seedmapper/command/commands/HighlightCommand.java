@@ -103,8 +103,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
 
         try (SimulatedServer server = SimulatedServer.newServer(helpers.seed())) {
             SimulatedWorld world = new SimulatedWorld(server, helpers.dimension());
-            Vec3d position = source.getPosition();
-            CPos center = new BPos(MathHelper.floor(position.getX()), MathHelper.floor(position.getY()), MathHelper.floor(position.getZ())).toChunkPos();
+            CPos center = SharedHelpers.fromBlockPos(BlockPos.ofFloored(source.getPosition())).toChunkPos();
 
             final Set<Box> boxes = new HashSet<>();
 
@@ -128,7 +127,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                         for (int z = startZ; z <= endZ; z++) {
                             mutable.setZ(z);
                             if (predicate.test(chunk, mutable)) {
-                                boxes.add(new Box(x, y, z, x + 1, y + 1, z + 1));
+                                boxes.add(new Box(mutable));
                             }
                         }
                     }
@@ -198,7 +197,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                     .map(Map.Entry::getKey);
             })
             .limit(500)
-            .forEach(pos -> boxes.add(new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1)));
+            .forEach(pos -> boxes.add(new Box(SharedHelpers.fromBPos(pos))));
         return boxes;
     }
 

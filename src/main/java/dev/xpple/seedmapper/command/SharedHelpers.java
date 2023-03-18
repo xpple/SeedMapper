@@ -14,6 +14,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.Nullable;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 
@@ -46,11 +47,11 @@ public record SharedHelpers(long seed, Dimension dimension, MCVersion mcVersion)
         );
     }
 
-    public static long getSeed(FabricClientCommandSource source) throws CommandSyntaxException {
+    public static long getSeed(@Nullable FabricClientCommandSource source) throws CommandSyntaxException {
         Long seed;
         for (SeedResolution.Method method : Configs.SeedResolutionOrder) {
             seed = switch (method) {
-                case COMMAND_SOURCE -> (Long) source.getMeta("seed");
+                case COMMAND_SOURCE -> source == null ? null : (Long) source.getMeta("seed");
                 case SAVED_SEEDS_CONFIG -> {
                     String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
                     yield Configs.SavedSeeds.get(key);

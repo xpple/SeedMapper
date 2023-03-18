@@ -1,12 +1,14 @@
 package dev.xpple.seedmapper.mixin.client;
 
-import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcterrain.TerrainGenerator;
+import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.command.commands.SeedOverlayCommand;
+import dev.xpple.seedmapper.simulation.SimulatedServer;
+import dev.xpple.seedmapper.simulation.SimulatedWorld;
 import dev.xpple.seedmapper.util.config.Configs;
-import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.Block;
@@ -14,16 +16,14 @@ import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.ChunkData;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -34,9 +34,30 @@ public class MixinClientChunkManager {
 
     @Inject(method = "loadChunkFromPacket", at = @At("RETURN"))
     private void onLoadChunk(int x, int z, PacketByteBuf buf, NbtCompound nbt, Consumer<ChunkData.BlockEntityVisitor> consumer, CallbackInfoReturnable<WorldChunk> cir) {
-        if (Configs.AutoOverlay) {
-            String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
-            Dimension dimension = Dimension.fromString(dimensionPath);
+        if (!Configs.AutoOverlay) {
+            return;
+        }
+
+        Chunk gameChunk = cir.getReturnValue();
+
+        Map<Box, Block> boxes;
+
+        if (Configs.UseWorldSimulation) {
+            if (SimulatedServer.currentInstance == null) {
+                return;
+            }
+            if (SimulatedWorld.currentInstance == null) {
+                return;
+            }
+            boxes = SeedOverlayCommand.overlayUsingWorldSimulation(gameChunk, SimulatedWorld.currentInstance.getChunk(x, z));
+        } else {
+            long seed;
+            try {
+                seed = SharedHelpers.getSeed(null);
+            } catch (Exception e) {
+                return;
+            }
+            Dimension dimension = Dimension.fromString(CLIENT.world.getRegistryKey().getValue().getPath());
             if (dimension == null) {
                 return;
             }
@@ -44,41 +65,12 @@ public class MixinClientChunkManager {
             if (mcVersion == null) {
                 return;
             }
-            Long seed = Configs.Seed;
-            if (seed == null) {
-                return;
-            }
+
             BiomeSource biomeSource = BiomeSource.of(dimension, mcVersion, seed);
-            TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
-            SimpleBlockMap map = new SimpleBlockMap(dimension);
-
-            BlockPos.Mutable mutable = new BlockPos.Mutable();
-
-            final WorldChunk chunk = cir.getReturnValue();
-            final ChunkPos chunkPos = chunk.getPos();
-
-            Map<Box, Block> boxes = new HashMap<>();
-            for (int _x = chunkPos.getStartX(); _x <= chunkPos.getEndX(); _x++) {
-                mutable.setX(_x);
-                for (int _z = chunkPos.getStartZ(); _z <= chunkPos.getEndZ(); _z++) {
-                    mutable.setZ(_z);
-                    final var column = generator.getColumnAt(_x, _z);
-                    final Biome biome = biomeSource.getBiome(_x, 0, _z);
-                    map.setBiome(biome);
-                    for (int y = 0; y < column.length; y++) {
-                        mutable.setY(y);
-                        final var terrainBlock = chunk.getBlockState(mutable).getBlock();
-                        if (Configs.IgnoredBlocks.contains(terrainBlock)) {
-                            continue;
-                        }
-                        if (map.get(terrainBlock) == column[y].getId()) {
-                            continue;
-                        }
-                        boxes.put(new Box(mutable), terrainBlock);
-                    }
-                }
-            }
-            boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Configs.BlockColours.get(value),  30 * 20));
+            TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
+            boxes = SeedOverlayCommand.overlayUsingLibraries(gameChunk, terrainGenerator);
         }
+
+        boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Configs.BlockColours.get(value),  30 * 20));
     }
 }
