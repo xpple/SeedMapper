@@ -11,7 +11,7 @@ be added later. A complete compatibility chart can be seen in the release descri
 remains compatible with previously supported Minecraft versions.
 
 ## Features
-Before using any of these commands, make sure the seed has been configured using `/cconfig SeedMapper Seed set <seed>`.
+Before using any of these commands, make sure the seed has been configured using `/cconfig seedmapper Seed set <seed>`.
 
 ### SeedOverlay
 Usage: `/sm:seedoverlay`
@@ -46,10 +46,10 @@ as if from that position.
 
 ## Installation
 1. Install the [Fabric Loader](https://fabricmc.net/use/)
-1. Download the [Fabric API](https://minecraft.curseforge.com/projects/fabric/) and move it to your mods folder
+2. Download the [Fabric API](https://minecraft.curseforge.com/projects/fabric/) and move it to your mods folder
    - Linux/Windows: `.minecraft/mods`
    - Mac: `minecraft/mods`
-1. Download SeedMapper from the [releases page](https://modrinth.com/mod/seedmapper/versions/) and move it to your mods folder
+3. Download SeedMapper from the [releases page](https://modrinth.com/mod/seedmapper/versions/) and move it to your mods folder
 
 ## Post Scriptum
 When [QuiltMC](https://quiltmc.org/) officially releases this mod will transfer to Quilt, whereby it has to send the list 
