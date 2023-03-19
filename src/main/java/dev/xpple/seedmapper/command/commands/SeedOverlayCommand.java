@@ -104,15 +104,14 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
             throw UNSUPPORTED_VERSION_EXCEPTION.create();
         }
 
-        try (SimulatedServer server = SimulatedServer.newServer(helpers.seed())) {
-            SimulatedWorld world = new SimulatedWorld(server, helpers.dimension());
+        try (SimulatedServer server = SimulateCommand.currentServer == null ? SimulatedServer.newServer(helpers.seed()) : SimulateCommand.currentServer) {
+            SimulatedWorld world = SimulateCommand.currentWorld == null ? new SimulatedWorld(server, helpers.dimension()) : SimulateCommand.currentWorld;
             BlockPos blockPos = BlockPos.ofFloored(source.getPosition());
 
             return overlayUsingWorldSimulation(source.getWorld().getChunk(blockPos), world.getChunk(blockPos));
+        } catch (CommandSyntaxException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof CommandSyntaxException commandSyntaxException) {
-                throw commandSyntaxException;
-            }
             throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
     }

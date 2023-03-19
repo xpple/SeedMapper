@@ -128,18 +128,17 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             throw UNSUPPORTED_VERSION_EXCEPTION.create();
         }
 
-        try (SimulatedServer server = SimulatedServer.newServer(helpers.seed())) {
-            SimulatedWorld world = new SimulatedWorld(server, helpers.dimension());
+        try (SimulatedServer server = SimulateCommand.currentServer == null ? SimulatedServer.newServer(helpers.seed()) : SimulateCommand.currentServer) {
+            SimulatedWorld world = SimulateCommand.currentWorld == null ? new SimulatedWorld(server, helpers.dimension()) : SimulateCommand.currentWorld;
             BlockPos blockPos = BlockPos.ofFloored(source.getPosition());
             Pair<BlockPos, RegistryEntry<Biome>> pair = world.locateBiome(biome, blockPos, 6400, 32, 64);
             if (pair == null) {
                 return Either.left(null);
             }
             return Either.left(pair.getFirst());
+        } catch (CommandSyntaxException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof CommandSyntaxException commandSyntaxException) {
-                throw commandSyntaxException;
-            }
             throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
     }
@@ -185,8 +184,8 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             throw UNSUPPORTED_VERSION_EXCEPTION.create();
         }
 
-        try (SimulatedServer server = SimulatedServer.newServer(helpers.seed())) {
-            SimulatedWorld world = new SimulatedWorld(server, helpers.dimension());
+        try (SimulatedServer server = SimulateCommand.currentServer == null ? SimulatedServer.newServer(helpers.seed()) : SimulateCommand.currentServer) {
+            SimulatedWorld world = SimulateCommand.currentWorld == null ? new SimulatedWorld(server, helpers.dimension()) : SimulateCommand.currentWorld;
             Registry<Structure> registry = world.getRegistryManager().get(RegistryKeys.STRUCTURE);
             Optional<? extends RegistryEntryList.ListBacked<Structure>> structures = structure.getKey().map(key -> registry.getEntry(key).map(RegistryEntryList::of), registry::getEntryList);
             if (structures.isEmpty()) {
@@ -198,10 +197,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 return Either.left(null);
             }
             return Either.left(pair.getFirst());
+        } catch (CommandSyntaxException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof CommandSyntaxException commandSyntaxException) {
-                throw commandSyntaxException;
-            }
             throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
     }
@@ -274,21 +272,20 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             throw UNSUPPORTED_VERSION_EXCEPTION.create();
         }
 
-        try (SimulatedServer server = SimulatedServer.newServer(helpers.seed())) {
-            SimulatedWorld world = new SimulatedWorld(server, helpers.dimension());
+        try (SimulatedServer server = SimulateCommand.currentServer == null ? SimulatedServer.newServer(helpers.seed()) : SimulateCommand.currentServer) {
+            SimulatedWorld world = SimulateCommand.currentWorld == null ? new SimulatedWorld(server, helpers.dimension()) : SimulateCommand.currentWorld;
             BlockPos position = BlockPos.ofFloored(source.getPosition());
             Optional<Pair<RegistryEntry<PointOfInterestType>, BlockPos>> optional = world.getPointOfInterestStorage().getNearestTypeAndPosition(poi, position, 256, PointOfInterestStorage.OccupationStatus.ANY);
             if (optional.isEmpty()) {
-                Chat.print(Text.translatable("command.locate.noneFound", poi.asString()));
+                sendCoordinates((BlockPos) null, poi.asString());
             } else {
                 Pair<RegistryEntry<PointOfInterestType>, BlockPos> pair = optional.get();
                 BlockPos blockPos = pair.getSecond();
                 sendCoordinates(blockPos, poi.asString());
             }
+        } catch (CommandSyntaxException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof CommandSyntaxException commandSyntaxException) {
-                throw commandSyntaxException;
-            }
             throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
 

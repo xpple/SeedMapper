@@ -101,8 +101,8 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             throw UNSUPPORTED_VERSION_EXCEPTION.create();
         }
 
-        try (SimulatedServer server = SimulatedServer.newServer(helpers.seed())) {
-            SimulatedWorld world = new SimulatedWorld(server, helpers.dimension());
+        try (SimulatedServer server = SimulateCommand.currentServer == null ? SimulatedServer.newServer(helpers.seed()) : SimulateCommand.currentServer) {
+            SimulatedWorld world = SimulateCommand.currentWorld == null ? new SimulatedWorld(server, helpers.dimension()) : SimulateCommand.currentWorld;
             CPos center = SharedHelpers.fromBlockPos(BlockPos.ofFloored(source.getPosition())).toChunkPos();
 
             final Set<Box> boxes = new HashSet<>();
@@ -135,10 +135,9 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             });
 
             return boxes;
+        } catch (CommandSyntaxException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof CommandSyntaxException commandSyntaxException) {
-                throw commandSyntaxException;
-            }
             throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
     }
@@ -206,6 +205,10 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
     }
 
     private static int highlightSlimeChunk(CustomClientCommandSource source, int range) throws CommandSyntaxException {
+        if (Configs.UseWorldSimulation) {
+            throw UNSUPPORTED_BY_WORLD_SIMULATION_EXCEPTION.create();
+        }
+
         SharedHelpers helpers = new SharedHelpers(source);
 
         BlockPos center = BlockPos.ofFloored(source.getPosition());

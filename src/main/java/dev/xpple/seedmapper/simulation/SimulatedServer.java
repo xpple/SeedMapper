@@ -29,8 +29,6 @@ import java.util.function.Function;
 
 public class SimulatedServer extends IntegratedServer {
 
-    public static SimulatedServer currentInstance = null;
-
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private SimulatedServer(Thread serverThread, MinecraftClient client, LevelStorage.Session session, ResourcePackManager resourcePackManager, SaveLoader saveLoader, ApiServices apiServices, WorldGenerationProgressListenerFactory worldGenerationProgressListenerFactory) {

@@ -6,8 +6,7 @@ import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.command.commands.SeedOverlayCommand;
-import dev.xpple.seedmapper.simulation.SimulatedServer;
-import dev.xpple.seedmapper.simulation.SimulatedWorld;
+import dev.xpple.seedmapper.command.commands.SimulateCommand;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.minecraft.SharedConstants;
@@ -43,13 +42,7 @@ public class MixinClientChunkManager {
         Map<Box, Block> boxes;
 
         if (Configs.UseWorldSimulation) {
-            if (SimulatedServer.currentInstance == null) {
-                return;
-            }
-            if (SimulatedWorld.currentInstance == null) {
-                return;
-            }
-            boxes = SeedOverlayCommand.overlayUsingWorldSimulation(gameChunk, SimulatedWorld.currentInstance.getChunk(x, z));
+            boxes = SeedOverlayCommand.overlayUsingWorldSimulation(gameChunk, SimulateCommand.currentWorld.getChunk(x, z));
         } else {
             long seed;
             try {

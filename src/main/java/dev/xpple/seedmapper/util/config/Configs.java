@@ -1,11 +1,8 @@
 package dev.xpple.seedmapper.util.config;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.seedfinding.mccore.state.Dimension;
 import dev.xpple.betterconfig.api.Config;
-import dev.xpple.seedmapper.command.SharedHelpers;
-import dev.xpple.seedmapper.simulation.SimulatedServer;
-import dev.xpple.seedmapper.simulation.SimulatedWorld;
+import dev.xpple.seedmapper.command.commands.SimulateCommand;
 import net.minecraft.block.Block;
 
 import java.util.HashMap;
@@ -34,24 +31,13 @@ public class Configs {
     public static boolean AutoOverlay = false;
     public static void setAutoOverlay(boolean autoOverlay) throws CommandSyntaxException {
         AutoOverlay = autoOverlay;
+        if (!Configs.UseWorldSimulation) {
+            return;
+        }
         if (autoOverlay) {
-            long seed = SharedHelpers.getSeed(null);
-            try {
-                SimulatedServer.currentInstance = SimulatedServer.newServer(seed);
-            } catch (Exception e) {
-                if (e instanceof CommandSyntaxException commandSyntaxException) {
-                    throw commandSyntaxException;
-                }
-                throw SharedHelpers.Exceptions.WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
-            }
-            Dimension dimension = Dimension.fromString(CLIENT.world.getRegistryKey().getValue().getPath());
-            if (dimension == null) {
-                return;
-            }
-            SimulatedWorld.currentInstance = new SimulatedWorld(SimulatedServer.currentInstance, dimension);
+            SimulateCommand.start(null);
         } else {
-            SimulatedServer.currentInstance = null;
-            SimulatedWorld.currentInstance = null;
+            SimulateCommand.stop(null);
         }
     }
 
