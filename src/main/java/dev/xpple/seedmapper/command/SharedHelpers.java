@@ -34,6 +34,7 @@ public record SharedHelpers(long seed, Dimension dimension, MCVersion mcVersion)
         DynamicCommandExceptionType BLOCK_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.blockNotFound", arg));
         DynamicCommandExceptionType WORLD_SIMULATION_ERROR_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.worldSimulationError", arg));
         SimpleCommandExceptionType REQUIRES_WORLD_SIMULATION_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.requiresWorldSimulation"));
+        SimpleCommandExceptionType UNSUPPORTED_BY_WORLD_SIMULATION_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.unsupportedByWorldSimulation"));
     }
 
     public SharedHelpers(FabricClientCommandSource source) throws CommandSyntaxException {

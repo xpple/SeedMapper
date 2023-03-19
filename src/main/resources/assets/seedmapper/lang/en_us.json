@@ -17,6 +17,7 @@
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\".",
   "commands.exceptions.worldSimulationError": "An error occurred whilst simulating a world: %s.",
   "commands.exceptions.requiresWorldSimulation": "World simulation needs to be enabled for this feature.",
+  "commands.exceptions.unsupportedByWorldSimulation": "World simulation needs to be disabled for this feature.",
 
   "arguments.exceptions.tooFewArguments": "Too few arguments.",
 

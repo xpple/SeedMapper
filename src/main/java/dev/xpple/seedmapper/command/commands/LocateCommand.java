@@ -298,10 +298,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static int locateDecorator(CustomClientCommandSource source, FeatureFactory<? extends Decorator<?, ?>> decoratorFactory) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        final Decorator<?, ?> decorator = decoratorFactory.create(helpers.mcVersion());
         if (Configs.UseWorldSimulation) {
-            throw DECORATOR_NOT_FOUND_EXCEPTION.create(decorator.getName());
+            throw UNSUPPORTED_BY_WORLD_SIMULATION_EXCEPTION.create();
         }
+
+        final Decorator<?, ?> decorator = decoratorFactory.create(helpers.mcVersion());
 
         BPos decoratorPos = locateDecorator(decorator, source);
 
