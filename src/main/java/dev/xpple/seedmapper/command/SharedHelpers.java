@@ -33,6 +33,7 @@ public record SharedHelpers(long seed, Dimension dimension, MCVersion mcVersion)
         DynamicCommandExceptionType LOOT_ITEM_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.lootItemNotFound", arg));
         DynamicCommandExceptionType BLOCK_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.blockNotFound", arg));
         DynamicCommandExceptionType WORLD_SIMULATION_ERROR_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.worldSimulationError", arg));
+        SimpleCommandExceptionType REQUIRES_WORLD_SIMULATION_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.requiresWorldSimulation"));
     }
 
     public SharedHelpers(FabricClientCommandSource source) throws CommandSyntaxException {

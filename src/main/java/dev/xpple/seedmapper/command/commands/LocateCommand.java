@@ -6,11 +6,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.datafixers.util.Either;
-import com.seedfinding.mcbiome.biome.Biome;
+import com.mojang.datafixers.util.Pair;
+import com.seedfinding.mcbiome.biome.Biomes;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.rand.ChunkRand;
 import com.seedfinding.mccore.rand.seed.WorldSeed;
-import com.seedfinding.mccore.util.data.Pair;
 import com.seedfinding.mccore.util.data.SpiralIterator;
 import com.seedfinding.mccore.util.data.Triplet;
 import com.seedfinding.mccore.util.pos.BPos;
@@ -23,10 +23,14 @@ import com.seedfinding.mcfeature.decorator.EndGateway;
 import com.seedfinding.mcfeature.loot.ChestContent;
 import com.seedfinding.mcfeature.loot.ILoot;
 import com.seedfinding.mcfeature.loot.item.Item;
-import com.seedfinding.mcfeature.structure.*;
+import com.seedfinding.mcfeature.structure.Mineshaft;
+import com.seedfinding.mcfeature.structure.RegionStructure;
+import com.seedfinding.mcfeature.structure.RuinedPortal;
+import com.seedfinding.mcfeature.structure.Stronghold;
 import com.seedfinding.mcfeature.structure.generator.Generator;
 import com.seedfinding.mcfeature.structure.generator.Generators;
 import com.seedfinding.mcterrain.TerrainGenerator;
+import dev.xpple.clientarguments.arguments.CRegistryEntryPredicateArgumentType;
 import dev.xpple.clientarguments.arguments.CRegistryPredicateArgumentType;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
@@ -48,6 +52,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.world.poi.PointOfInterestStorage;
+import net.minecraft.world.poi.PointOfInterestType;
 
 import java.util.*;
 import java.util.function.Function;
@@ -57,10 +65,10 @@ import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static dev.xpple.clientarguments.arguments.CRegistryEntryPredicateArgumentType.getRegistryEntryPredicate;
+import static dev.xpple.clientarguments.arguments.CRegistryEntryPredicateArgumentType.registryEntryPredicate;
 import static dev.xpple.clientarguments.arguments.CRegistryPredicateArgumentType.getCPredicate;
 import static dev.xpple.clientarguments.arguments.CRegistryPredicateArgumentType.registryPredicate;
-import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.biome;
-import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.getBiome;
 import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentType.decoratorFactory;
 import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentType.getDecoratorFactory;
 import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.enchantedItem;
@@ -75,12 +83,15 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         return dispatcher.register(literal(this.getRootLiteral())
             .then(literal("biome")
-                .then(argument("biome", biome())
-                    .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome")))))
+                .then(argument("biome", registryEntryPredicate(registryAccess, RegistryKeys.BIOME))
+                    .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getRegistryEntryPredicate(ctx, "biome", RegistryKeys.BIOME)))))
             .then(literal("feature")
                 .then(literal("structure")
                     .then(argument("structure", registryPredicate(RegistryKeys.STRUCTURE))
                         .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getCPredicate(ctx, "structure", RegistryKeys.STRUCTURE, STRUCTURE_NOT_FOUND_EXCEPTION)))))
+                .then(literal("poi")
+                    .then(argument("poi", registryEntryPredicate(registryAccess, RegistryKeys.POINT_OF_INTEREST_TYPE))
+                        .executes(ctx -> locatePoi(CustomClientCommandSource.of(ctx.getSource()), getRegistryEntryPredicate(ctx, "poi", RegistryKeys.POINT_OF_INTEREST_TYPE)))))
                 .then(literal("decorator")
                     .then(argument("decorator", decoratorFactory())
                         .executes(ctx -> locateDecorator(CustomClientCommandSource.of(ctx.getSource()), getDecoratorFactory(ctx, "decorator"))))))
@@ -95,38 +106,50 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         return "locate";
     }
 
-    private static int locateBiome(CustomClientCommandSource source, Biome biome) throws CommandSyntaxException {
+    private static int locateBiome(CustomClientCommandSource source, CRegistryEntryPredicateArgumentType.EntryPredicate<Biome> biome) throws CommandSyntaxException {
         final Either<BlockPos, BPos> pos;
 
         if (Configs.UseWorldSimulation) {
-            pos = locateBiomeUsingLibraries(biome, source);
+            pos = locateBiomeUsingWorldSimulation(biome, source);
         } else {
-            pos = locateBiomeUsingLibraries(biome, source);
+            pos = locateBiomeUsingLibraries(new Identifier(biome.asString()).getPath(), source);
         }
 
         BlockPos blockPos = pos.map(Function.identity(), SharedHelpers::fromBPos);
 
-        if (blockPos == null) {
-            Chat.print(Text.translatable("command.locate.biome.noneFound", biome.getName()));
-        } else {
-            Chat.print(chain(
-                highlight(Text.translatable("command.locate.biome.foundAt", biome.getName())),
-                highlight(" "),
-                copy(
-                    hover(
-                        accent("x: " + blockPos.getX() + ", z: " + blockPos.getZ()),
-                        base(Text.translatable("command.locate.biome.copy", biome.getName()))
-                    ),
-                    String.format("%d ~ %d", blockPos.getX(), blockPos.getZ())
-                ),
-                highlight(".")
-            ));
-        }
+        sendCoordinates(blockPos, biome.asString());
         return Command.SINGLE_SUCCESS;
     }
 
-    private static Either<BlockPos, BPos> locateBiomeUsingLibraries(Biome biome, CustomClientCommandSource source) throws CommandSyntaxException {
+    private static Either<BlockPos, BPos> locateBiomeUsingWorldSimulation(CRegistryEntryPredicateArgumentType.EntryPredicate<Biome> biome, CustomClientCommandSource source) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
+
+        if (!helpers.mcVersion().name.equals(SharedConstants.getGameVersion().getName())) {
+            throw UNSUPPORTED_VERSION_EXCEPTION.create();
+        }
+
+        try (SimulatedServer server = SimulatedServer.newServer(helpers.seed())) {
+            SimulatedWorld world = new SimulatedWorld(server, helpers.dimension());
+            BlockPos blockPos = BlockPos.ofFloored(source.getPosition());
+            Pair<BlockPos, RegistryEntry<Biome>> pair = world.locateBiome(biome, blockPos, 6400, 32, 64);
+            if (pair == null) {
+                return Either.left(null);
+            }
+            return Either.left(pair.getFirst());
+        } catch (Exception e) {
+            if (e instanceof CommandSyntaxException commandSyntaxException) {
+                throw commandSyntaxException;
+            }
+            throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
+        }
+    }
+
+    private static Either<BlockPos, BPos> locateBiomeUsingLibraries(String biomeString, CustomClientCommandSource source) throws CommandSyntaxException {
+        SharedHelpers helpers = new SharedHelpers(source);
+
+        var biome = Biomes.REGISTRY.values().stream()
+            .filter(b -> b.getName().equals(biomeString))
+            .findAny().orElseThrow(() -> BIOME_NOT_FOUND_EXCEPTION.create(biomeString));
 
         BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
         if (biome.getDimension() != biomeSource.getDimension()) {
@@ -140,7 +163,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             .findAny().orElse(null));
     }
 
-    private static int locateStructure(CustomClientCommandSource source, CRegistryPredicateArgumentType.RegistryPredicate<net.minecraft.world.gen.structure.Structure> structure) throws CommandSyntaxException {
+    private static int locateStructure(CustomClientCommandSource source, CRegistryPredicateArgumentType.RegistryPredicate<Structure> structure) throws CommandSyntaxException {
         final Either<BlockPos, BPos> pos;
 
         if (Configs.UseWorldSimulation) {
@@ -151,26 +174,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BlockPos blockPos = pos.map(Function.identity(), SharedHelpers::fromBPos);
 
-        if (blockPos == null) {
-            Chat.print(Text.translatable("command.locate.feature.structure.noneFound", structure.asString()));
-        } else {
-            Chat.print(chain(
-                highlight(Text.translatable("command.locate.feature.structure.foundAt", structure.asString())),
-                highlight(" "),
-                copy(
-                    hover(
-                        accent("x: " + blockPos.getX() + ", z: " + blockPos.getZ()),
-                        base(Text.translatable("command.locate.feature.structure.copy", structure.asString()))
-                    ),
-                    String.format("%d ~ %d", blockPos.getX(), blockPos.getZ())
-                ),
-                highlight(".")
-            ));
-        }
+        sendCoordinates(blockPos, structure.asString());
         return Command.SINGLE_SUCCESS;
     }
 
-    private static Either<BlockPos, BPos> locateStructureUsingWorldSimulation(CRegistryPredicateArgumentType.RegistryPredicate<net.minecraft.world.gen.structure.Structure> structure, CustomClientCommandSource source) throws CommandSyntaxException {
+    private static Either<BlockPos, BPos> locateStructureUsingWorldSimulation(CRegistryPredicateArgumentType.RegistryPredicate<Structure> structure, CustomClientCommandSource source) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
         if (!helpers.mcVersion().name.equals(SharedConstants.getGameVersion().getName())) {
@@ -179,13 +187,13 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         try (SimulatedServer server = SimulatedServer.newServer(helpers.seed())) {
             SimulatedWorld world = new SimulatedWorld(server, helpers.dimension());
-            Registry<net.minecraft.world.gen.structure.Structure> registry = world.getRegistryManager().get(RegistryKeys.STRUCTURE);
-            Optional<? extends RegistryEntryList.ListBacked<net.minecraft.world.gen.structure.Structure>> structures = structure.getKey().map(key -> registry.getEntry(key).map(RegistryEntryList::of), registry::getEntryList);
+            Registry<Structure> registry = world.getRegistryManager().get(RegistryKeys.STRUCTURE);
+            Optional<? extends RegistryEntryList.ListBacked<Structure>> structures = structure.getKey().map(key -> registry.getEntry(key).map(RegistryEntryList::of), registry::getEntryList);
             if (structures.isEmpty()) {
                 throw STRUCTURE_NOT_FOUND_EXCEPTION.create(structure.asString());
             }
             Vec3d position = source.getPosition();
-            com.mojang.datafixers.util.Pair<BlockPos, RegistryEntry<net.minecraft.world.gen.structure.Structure>> pair = world.getChunkManager().getChunkGenerator().locateStructure(world, structures.get(), BlockPos.ofFloored(position.x, position.y, position.z), 100, false);
+            Pair<BlockPos, RegistryEntry<Structure>> pair = world.getChunkManager().getChunkGenerator().locateStructure(world, structures.get(), BlockPos.ofFloored(position.x, position.y, position.z), 100, false);
             if (pair == null) {
                 return Either.left(null);
             }
@@ -201,12 +209,12 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static Either<BlockPos, BPos> locateStructureUsingLibraries(String structureString, CustomClientCommandSource source) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        FeatureFactory<? extends Structure<?, ?>> factory = Features.STRUCTURE_REGISTRY.get(structureString);
+        var factory = Features.STRUCTURE_REGISTRY.get(structureString);
         if (factory == null) {
             throw STRUCTURE_NOT_FOUND_EXCEPTION.create(structureString);
         }
 
-        final Structure<?, ?> structure = factory.create(helpers.mcVersion());
+        final var structure = factory.create(helpers.mcVersion());
 
         BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
         if (!structure.isValidDimension(biomeSource.getDimension())) {
@@ -255,6 +263,38 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         return Either.right(null);
     }
 
+    private int locatePoi(CustomClientCommandSource source, CRegistryEntryPredicateArgumentType.EntryPredicate<PointOfInterestType> poi) throws CommandSyntaxException {
+        if (!Configs.UseWorldSimulation) {
+            throw REQUIRES_WORLD_SIMULATION_EXCEPTION.create();
+        }
+
+        SharedHelpers helpers = new SharedHelpers(source);
+
+        if (!helpers.mcVersion().name.equals(SharedConstants.getGameVersion().getName())) {
+            throw UNSUPPORTED_VERSION_EXCEPTION.create();
+        }
+
+        try (SimulatedServer server = SimulatedServer.newServer(helpers.seed())) {
+            SimulatedWorld world = new SimulatedWorld(server, helpers.dimension());
+            BlockPos position = BlockPos.ofFloored(source.getPosition());
+            Optional<Pair<RegistryEntry<PointOfInterestType>, BlockPos>> optional = world.getPointOfInterestStorage().getNearestTypeAndPosition(poi, position, 256, PointOfInterestStorage.OccupationStatus.ANY);
+            if (optional.isEmpty()) {
+                Chat.print(Text.translatable("command.locate.noneFound", poi.asString()));
+            } else {
+                Pair<RegistryEntry<PointOfInterestType>, BlockPos> pair = optional.get();
+                BlockPos blockPos = pair.getSecond();
+                sendCoordinates(blockPos, poi.asString());
+            }
+        } catch (Exception e) {
+            if (e instanceof CommandSyntaxException commandSyntaxException) {
+                throw commandSyntaxException;
+            }
+            throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
+        }
+
+        return Command.SINGLE_SUCCESS;
+    }
+
     private static int locateDecorator(CustomClientCommandSource source, FeatureFactory<? extends Decorator<?, ?>> decoratorFactory) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
@@ -265,22 +305,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BPos decoratorPos = locateDecorator(decorator, source);
 
-        if (decoratorPos == null) {
-            Chat.print(Text.translatable("command.locate.feature.decorator.noneFound", decorator.getName()));
-        } else {
-            Chat.print(chain(
-                highlight(Text.translatable("command.locate.feature.decorator.foundAt", decorator.getName())),
-                highlight(" "),
-                copy(
-                    hover(
-                        accent("x: " + decoratorPos.getX() + ", z: " + decoratorPos.getZ()),
-                        base(Text.translatable("command.locate.feature.decorator.copy", decorator.getName()))
-                    ),
-                    String.format("%d ~ %d", decoratorPos.getX(), decoratorPos.getZ())
-                ),
-                highlight(".")
-            ));
-        }
+        sendCoordinates(decoratorPos, decorator.getName());
         return Command.SINGLE_SUCCESS;
     }
 
@@ -339,7 +364,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         List<BPos> lootPositions = locateLoot(item.getSecond(), i -> i.getName().equals(itemString), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
         if (lootPositions == null || lootPositions.isEmpty()) {
-            Chat.print(Text.translatable("command.locate.loot.noneFound", itemString));
+            Chat.print(Text.translatable("command.locate.noneFound", itemString));
         } else {
             Chat.print(chain(
                 highlight(Text.translatable("command.locate.loot.foundAt", amount, itemString)),
@@ -348,7 +373,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                     copy(
                         hover(
                             accent("x: " + bPos.getX() + ", z: " + bPos.getZ()),
-                            base(Text.translatable("command.locate.loot.copy", itemString))
+                            base(Text.translatable("command.locate.copy", itemString))
                         ),
                         String.format("%d ~ %d", bPos.getX(), bPos.getZ())
                     )
@@ -422,5 +447,32 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             }
         }
         return null;
+    }
+
+    private static void sendCoordinates(BlockPos blockPos, String name) {
+        if (blockPos == null) {
+            Chat.print(Text.translatable("command.locate.noneFound", name));
+        } else {
+            Chat.print(chain(
+                highlight(Text.translatable("command.locate.foundAt", name)),
+                highlight(" "),
+                copy(
+                    hover(
+                        accent("x: " + blockPos.getX() + ", y: " + blockPos.getY() + ", z: " + blockPos.getZ()),
+                        base(Text.translatable("command.locate.copy", name))
+                    ),
+                    String.format("%d %d %d", blockPos.getX(), blockPos.getY(), blockPos.getZ())
+                ),
+                highlight(".")
+            ));
+        }
+    }
+
+    private static void sendCoordinates(BPos bPos, String name) {
+        if (bPos == null) {
+            sendCoordinates((BlockPos) null, name);
+            return;
+        }
+        sendCoordinates(SharedHelpers.fromBPos(bPos), name);
     }
 }

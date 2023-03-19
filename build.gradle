@@ -50,7 +50,7 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	include modImplementation('dev.xpple:clientarguments:1.4.3')
+	include modImplementation('dev.xpple:clientarguments:1.4.4')
 
 	include modImplementation('dev.xpple:betterconfig:1.0.5')
 
