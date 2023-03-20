@@ -346,6 +346,10 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateLoot(CustomClientCommandSource source, int amount, Pair<String, Predicate<Item>> item) throws CommandSyntaxException {
+        if (Configs.UseWorldSimulation) {
+            throw UNSUPPORTED_BY_WORLD_SIMULATION_EXCEPTION.create();
+        }
+
         SharedHelpers helpers = new SharedHelpers(source);
 
         String itemString = item.getFirst();
