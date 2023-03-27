@@ -3,6 +3,7 @@ package dev.xpple.seedmapper.command.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.block.Block;
@@ -21,6 +22,7 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.features.Features;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -40,9 +42,9 @@ import static net.minecraft.command.CommandSource.suggestMatching;
 public class HighlightCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         final String[] blocks = new String[]{"ancient_debris", "andesite", "blackstone",/* "clay",*/ "coal_ore", "copper_ore", "deepslate", "diamond_ore", "diorite", "dirt", "emerald_ore", "gold_ore", "granite",/* "gravel",*/ "iron_ore", "lapis_ore", "magma_block", "nether_gold_ore", "quartz_ore", "redstone_ore",/* "sand",*/ "soulsand", "tuff"};
-        argumentBuilder
+        return dispatcher.register(literal(this.getRootLiteral())
             .then(literal("block")
                 .then(argument("block", word())
                     .suggests((context, builder) -> suggestMatching(blocks, builder))
@@ -53,7 +55,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                 .then(literal("slimechunk")
                     .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))
                     .then(argument("range", integer(0))
-                        .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "range"))))));
+                        .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "range")))))));
     }
 
     @Override
@@ -68,8 +70,8 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
     private static int highlightBlock(CustomClientCommandSource source, String blockString, int range) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        final Set<OreDecorator<?, ?>> oreDecorators = Features.getOresForVersion(helpers.mcVersion).stream()
-            .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension))
+        final Set<OreDecorator<?, ?>> oreDecorators = Features.getOresForVersion(helpers.mcVersion()).stream()
+            .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension()))
             .filter(oreDecorator -> oreDecorator.getDefaultOreBlock().getName().equals(blockString))
             .collect(Collectors.toSet());
 
@@ -77,7 +79,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             throw BLOCK_NOT_FOUND_EXCEPTION.create(blockString);
         }
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
         TerrainGenerator terrainGenerator = TerrainGenerator.of(biomeSource);
 
         final Set<Box> boxes = new HashSet<>();
@@ -89,14 +91,14 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                 Biome biome = biomeSource.getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);
 
                 final Map<BPos, Block> generatedOres = new HashMap<>();
-                Features.getOresForVersion(helpers.mcVersion).stream()
-                    .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension))
+                Features.getOresForVersion(helpers.mcVersion()).stream()
+                    .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension()))
                     .sorted(Comparator.comparingInt(oreDecorator -> oreDecorator.getSalt(biome)))
                     .forEachOrdered(oreDecorator -> {
                         if (!oreDecorator.canSpawn(cPos.getX(), cPos.getZ(), biomeSource)) {
                             return;
                         }
-                        oreDecorator.generate(WorldSeed.toStructureSeed(helpers.seed), cPos.getX(), cPos.getZ(), biome, new ChunkRand(), terrainGenerator).positions
+                        oreDecorator.generate(WorldSeed.toStructureSeed(helpers.seed()), cPos.getX(), cPos.getZ(), biome, new ChunkRand(), terrainGenerator).positions
                             .forEach(bPos -> {
                                 if (generatedOres.containsKey(bPos)) {
                                     if (!oreDecorator.getReplaceBlocks(biome).contains(generatedOres.get(bPos))) {
@@ -147,8 +149,8 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         BlockPos center = BlockPos.ofFloored(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
 
-        SlimeChunk slimeChunk = new SlimeChunk(helpers.mcVersion);
-        if (!slimeChunk.isValidDimension(helpers.dimension)) {
+        SlimeChunk slimeChunk = new SlimeChunk(helpers.mcVersion());
+        if (!slimeChunk.isValidDimension(helpers.dimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
@@ -157,7 +159,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         StreamSupport.stream(spiralIterator.spliterator(), false)
             .filter(cPos -> {
                 SlimeChunk.Data data = slimeChunk.at(cPos.getX(), cPos.getZ(), true);
-                return data.testStart(helpers.seed, rand);
+                return data.testStart(helpers.seed(), rand);
             })
             .limit(500)
             .forEach(cPos -> {

@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.util.DatabaseHelper;
@@ -10,6 +11,7 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.config.SeedResolution;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -20,13 +22,14 @@ import java.nio.file.Paths;
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.SeedMapper.MOD_PATH;
 import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class CheckSeedCommand extends ClientCommand {
 
     @Override
-    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        argumentBuilder
-            .executes(ctx -> checkSeed(CustomClientCommandSource.of(ctx.getSource())));
+    protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        return dispatcher.register(literal(this.getRootLiteral())
+            .executes(ctx -> checkSeed(CustomClientCommandSource.of(ctx.getSource()))));
     }
 
     @Override

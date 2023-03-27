@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.rand.ChunkRand;
@@ -34,6 +35,7 @@ import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
@@ -59,8 +61,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 public class LocateCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
     @Override
-    protected void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        argumentBuilder
+    protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        return dispatcher.register(literal(this.getRootLiteral())
             .then(literal("biome")
                 .then(argument("biome", biome())
                     .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome")))))
@@ -76,7 +78,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             .then(literal("loot")
                 .then(argument("amount", integer(1))
                     .then(argument("item", enchantedItem().loot())
-                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getEnchantedItem(ctx, "item"))))));
+                        .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getEnchantedItem(ctx, "item")))))));
     }
 
     @Override
@@ -87,7 +89,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static int locateBiome(CustomClientCommandSource source, Biome biome) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
         if (biome.getDimension() != biomeSource.getDimension()) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -124,9 +126,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static int locateStructure(CustomClientCommandSource source, FeatureFactory<? extends Structure<?, ?>> structureFactory) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        final Structure<?, ?> structure = structureFactory.create(helpers.mcVersion);
+        final Structure<?, ?> structure = structureFactory.create(helpers.mcVersion());
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
         if (!structure.isValidDimension(biomeSource.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -196,9 +198,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     private static int locateDecorator(CustomClientCommandSource source, FeatureFactory<? extends Decorator<?, ?>> decoratorFactory) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        final Decorator<?, ?> decorator = decoratorFactory.create(helpers.mcVersion);
+        final Decorator<?, ?> decorator = decoratorFactory.create(helpers.mcVersion());
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
         if (!decorator.isValidDimension(biomeSource.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
@@ -260,7 +262,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         BlockPos center = BlockPos.ofFloored(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
 
-        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(helpers.mcVersion), centerChunk, 6400, helpers.seed, new ChunkRand(), helpers.dimension);
+        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(helpers.mcVersion()), centerChunk, 6400, helpers.seed(), new ChunkRand(), helpers.dimension());
         if (slimeChunkPos == null) {
             Chat.print(Text.translatable("command.locate.feature.slimeChunk.noneFound"));
         } else {
@@ -310,13 +312,13 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         String itemString = item.getFirst();
 
-        Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(helpers.mcVersion).stream()
+        Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(helpers.mcVersion()).stream()
             .filter(structure -> structure instanceof ILoot)
-            .filter(structure -> structure.isValidDimension(helpers.dimension))
+            .filter(structure -> structure.isValidDimension(helpers.dimension()))
             .map(structure -> (RegionStructure<?, ?>) structure)
             .collect(Collectors.toSet());
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension, helpers.mcVersion, helpers.seed);
+        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
 
         BlockPos center = BlockPos.ofFloored(source.getPosition());
 

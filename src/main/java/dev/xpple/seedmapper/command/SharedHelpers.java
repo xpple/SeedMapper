@@ -12,10 +12,11 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.SharedConstants;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 
-public final class SharedHelpers {
+public record SharedHelpers(long seed, Dimension dimension, MCVersion mcVersion) {
 
     public interface Exceptions {
         DynamicCommandExceptionType NULL_POINTER_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.nullPointerException", arg));
@@ -30,29 +31,23 @@ public final class SharedHelpers {
         DynamicCommandExceptionType BLOCK_NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.blockNotFound", arg));
     }
 
-    public final long seed;
-    public final Dimension dimension;
-    public final MCVersion mcVersion;
-
     public SharedHelpers(FabricClientCommandSource source) throws CommandSyntaxException {
-        this.seed = getSeed(source);
-        if (source.getMeta("dimension") == null) {
-            this.dimension = getDimension(source.getWorld().getRegistryKey().getValue().getPath());
-        } else {
-            this.dimension = getDimension(((Identifier) source.getMeta("dimension")).getPath());
-        }
-        if (source.getMeta("version") == null) {
-            this.mcVersion = getMCVersion(SharedConstants.getGameVersion().getName());
-        } else {
-            this.mcVersion = (MCVersion) source.getMeta("version");
-        }
+        this(
+            getSeed(source),
+            source.getMeta("dimension") == null ?
+                getDimension(source.getWorld().getRegistryKey().getValue().getPath()) :
+                getDimension(((Identifier) source.getMeta("dimension")).getPath()),
+            source.getMeta("version") == null ?
+                getMCVersion(SharedConstants.getGameVersion().getName()) :
+                (MCVersion) source.getMeta("version")
+        );
     }
 
-    public static long getSeed(FabricClientCommandSource source) throws CommandSyntaxException {
+    public static long getSeed(@Nullable FabricClientCommandSource source) throws CommandSyntaxException {
         Long seed;
         for (SeedResolution.Method method : Configs.SeedResolutionOrder) {
             seed = switch (method) {
-                case COMMAND_SOURCE -> (Long) source.getMeta("seed");
+                case COMMAND_SOURCE -> source == null ? null : (Long) source.getMeta("seed");
                 case SAVED_SEEDS_CONFIG -> {
                     String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
                     yield Configs.SavedSeeds.get(key);

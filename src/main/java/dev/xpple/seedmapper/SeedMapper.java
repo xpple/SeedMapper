@@ -52,12 +52,12 @@ public class SeedMapper implements ClientModInitializer {
     }
 
     private static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
-        ClientCommand.instantiate(new SeedOverlayCommand(), dispatcher);
-        ClientCommand.instantiate(new TerrainVersionCommand(), dispatcher);
-        ClientCommand.instantiate(new LocateCommand(), dispatcher);
-        ClientCommand.instantiate(new HighlightCommand(), dispatcher);
-        ClientCommand.instantiate(new SourceCommand(), dispatcher);
-        ClientCommand.instantiate(new ClearScreenCommand(), dispatcher);
-        ClientCommand.instantiate(new CheckSeedCommand(), dispatcher);
+        ClientCommand.instantiate(new SeedOverlayCommand(), dispatcher, registryAccess);
+        ClientCommand.instantiate(new TerrainVersionCommand(), dispatcher, registryAccess);
+        ClientCommand.instantiate(new LocateCommand(), dispatcher, registryAccess);
+        ClientCommand.instantiate(new HighlightCommand(), dispatcher, registryAccess);
+        ClientCommand.instantiate(new SourceCommand(), dispatcher, registryAccess);
+        ClientCommand.instantiate(new ClearScreenCommand(), dispatcher, registryAccess);
+        ClientCommand.instantiate(new CheckSeedCommand(), dispatcher, registryAccess);
     }
 }
