@@ -29,12 +29,12 @@
   "command.locate.copy": "%s के निर्देशांक कॉपी करने के लिए क्लिक कीजिये।",
   "command.locate.loot.foundAt": "%d %s यहाँ मिला",
 
-  "command.seedoverlay.feedback.0": "पर ब्लॉक ",
-  "command.seedoverlay.feedback.1": "निर्देशांक कॉपी करने के लिए क्लिक कीजिये ",
-  "command.seedoverlay.feedback.2": " मेल नहीं खाता!",
-  "command.seedoverlay.feedback.3": "कुल ",
-  "command.seedoverlay.feedback.4": " ब्लॉक मेल नहीं खाते!",
-  "command.seedoverlay.feedback.5": "सभी ब्लॉक मेल खाते हैं!",
+  "command.seedoverlay.feedback.blockAt": "पर ब्लॉक ",
+  "command.seedoverlay.feedback.copy": "निर्देशांक कॉपी करने के लिए क्लिक कीजिये ",
+  "command.seedoverlay.feedback.noMatch": " मेल नहीं खाता!",
+  "ccommand.seedoverlay.feedback.total": "कुल ",
+  "command.seedoverlay.feedback.dontMatch": " ब्लॉक मेल नहीं खाते!",
+  "command.seedoverlay.feedback.allMatch": "सभी ब्लॉक मेल खाते हैं!",
 
   "command.terrainversion.feedback": " सबसे अच्छा मेल खाता है।"
 }

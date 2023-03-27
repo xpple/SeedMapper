@@ -69,30 +69,30 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
             z = key.minZ;
             String terrainBlockName = Registries.BLOCK.getId(value).getPath();
             Chat.print(chain(
-                highlight(Text.translatable("command.seedoverlay.feedback.0")),
+                highlight(Text.translatable("command.seedoverlay.feedback.blockAt")),
                 copy(
                     hover(
                         accent("x: " + x + ", y: " + y + ", z: " + z),
                         chain(
-                            base(Text.translatable("command.seedoverlay.feedback.1")),
+                            base(Text.translatable("command.seedoverlay.feedback.copy")),
                             highlight(terrainBlockName)
                         )
                     ),
                     String.format("%.0f %.0f %.0f", x, y ,z)
                 ),
-                highlight(Text.translatable("command.seedoverlay.feedback.2"))
+                highlight(Text.translatable("command.seedoverlay.feedback.noMatch"))
             ));
         });
 
         int blocks = boxes.size();
         if (blocks > 0) {
             Chat.print(chain(
-                highlight(Text.translatable("command.seedoverlay.feedback.3")),
+                highlight(Text.translatable("ccommand.seedoverlay.feedback.total")),
                 accent(String.valueOf(blocks)),
-                highlight(Text.translatable("command.seedoverlay.feedback.4"))
+                highlight(Text.translatable("command.seedoverlay.feedback.dontMatch"))
             ));
         } else {
-            Chat.print(highlight(Text.translatable("command.seedoverlay.feedback.5")));
+            Chat.print(highlight(Text.translatable("command.seedoverlay.feedback.allMatch")));
         }
         return blocks;
     }

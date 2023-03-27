@@ -45,12 +45,18 @@
   "command.locate.copy": "Click to copy coordinates of %s.",
   "command.locate.loot.foundAt": "%d %s found at",
 
-  "command.seedoverlay.feedback.0": "Block at ",
-  "command.seedoverlay.feedback.1": "Click to copy coordinates of ",
-  "command.seedoverlay.feedback.2": " doesn't match!",
-  "command.seedoverlay.feedback.3": "A total of ",
-  "command.seedoverlay.feedback.4": " blocks didn't match.",
-  "command.seedoverlay.feedback.5": "All blocks match!",
+  "command.seedoverlay.feedback.blockAt": "Block at ",
+  "command.seedoverlay.feedback.copy": "Click to copy coordinates of ",
+  "command.seedoverlay.feedback.noMatch": " doesn't match!",
+  "ccommand.seedoverlay.feedback.total": "A total of ",
+  "command.seedoverlay.feedback.dontMatch": " blocks didn't match.",
+  "command.seedoverlay.feedback.allMatch": "All blocks match!",
+
+  "command.simulate.start": "A world simulation server with seed %d has successfully been started.",
+  "command.simulate.stop": "The world simulation server has been stopped.",
+  "command.simulate.refresh": "The current world has been refreshed.",
+  "command.simulate.serverAlreadyRunning": "A world simulation server is already running!",
+  "command.simulate.noServerRunning": "No world simulation server is currently running!",
 
   "command.terrainversion.feedback": " is the best match."
 }

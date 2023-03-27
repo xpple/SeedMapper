@@ -30,12 +30,12 @@
     "command.locate.copy": "Fai clic per copiare le coordinate di %s.",
     "command.locate.loot.foundAt": "%d %s trovato in",
 
-    "command.seedoverlay.feedback.0": "Blocco a ",
-    "command.seedoverlay.feedback.1": "Clicca per copiare le coordinate di ",
-    "command.seedoverlay.feedback.2": " non corrisponde!",
-    "command.seedoverlay.feedback.3": "Un totale di ",
-    "command.seedoverlay.feedback.4": " i blocchi non corrispondevano.",
-    "command.seedoverlay.feedback.5": "Tutti i blocchi corrispondono!",
+    "command.seedoverlay.feedback.blockAt": "Blocco a ",
+    "command.seedoverlay.feedback.copy": "Clicca per copiare le coordinate di ",
+    "command.seedoverlay.feedback.noMatch": " non corrisponde!",
+    "ccommand.seedoverlay.feedback.total": "Un totale di ",
+    "command.seedoverlay.feedback.dontMatch": " i blocchi non corrispondevano.",
+    "command.seedoverlay.feedback.allMatch": "Tutti i blocchi corrispondono!",
 
     "command.terrainversion.feedback": " è l'abbinamento migliore."
 }

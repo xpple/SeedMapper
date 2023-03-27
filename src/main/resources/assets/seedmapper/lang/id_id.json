@@ -23,12 +23,12 @@
   "command.locate.copy": "Klik untuk menyalin kordinat dari %s.",
   "command.locate.loot.foundAt": "%d %s ditemukan di",
 
-  "command.seedoverlay.feedback.0": "Block di ",
-  "command.seedoverlay.feedback.1": "Klik untuk menyalin kordinat dari ",
-  "command.seedoverlay.feedback.2": " tidak cocok!",
-  "command.seedoverlay.feedback.3": "Total dari ",
-  "command.seedoverlay.feedback.4": " blok yang tidak cocok.",
-  "command.seedoverlay.feedback.5": "Semua blok cocok!",
+  "command.seedoverlay.feedback.blockAt": "Block di ",
+  "command.seedoverlay.feedback.copy": "Klik untuk menyalin kordinat dari ",
+  "command.seedoverlay.feedback.noMatch": " tidak cocok!",
+  "ccommand.seedoverlay.feedback.total": "Total dari ",
+  "command.seedoverlay.feedback.dontMatch": " blok yang tidak cocok.",
+  "command.seedoverlay.feedback.allMatch": "Semua blok cocok!",
 
   "command.terrainversion.feedback": " adalah versi yang paling cocok."
 }

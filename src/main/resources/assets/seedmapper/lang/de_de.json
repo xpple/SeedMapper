@@ -23,12 +23,12 @@
   "command.locate.copy": "Klicke um die Koordinaten von %s zu kopieren.",
   "command.locate.loot.foundAt": "%d %s gefunden bei",
 
-  "command.seedoverlay.feedback.0": "Block bei ",
-  "command.seedoverlay.feedback.1": "Klicke um die folgenden Koordinaten zu kopieren ",
-  "command.seedoverlay.feedback.2": " stimmen nicht überein!",
-  "command.seedoverlay.feedback.3": "Insgesamt ",
-  "command.seedoverlay.feedback.4": " blöcke stimmen nicht überein.",
-  "command.seedoverlay.feedback.5": "Alle Blöcke stimmen überein!",
+  "command.seedoverlay.feedback.blockAt": "Block bei ",
+  "command.seedoverlay.feedback.copy": "Klicke um die folgenden Koordinaten zu kopieren ",
+  "command.seedoverlay.feedback.noMatch": " stimmen nicht überein!",
+  "ccommand.seedoverlay.feedback.total": "Insgesamt ",
+  "command.seedoverlay.feedback.dontMatch": " blöcke stimmen nicht überein.",
+  "command.seedoverlay.feedback.allMatch": "Alle Blöcke stimmen überein!",
 
   "command.terrainversion.feedback": " hat die höchste übereinstimmung."
 }
