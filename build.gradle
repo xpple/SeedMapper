@@ -45,24 +45,24 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	include modImplementation('dev.xpple:clientarguments:1.4.3')
+	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 
-	include modImplementation('dev.xpple:betterconfig:1.0.4')
+	include modImplementation("dev.xpple:betterconfig:${project.betterconfig_version}")
 
-	extraLibs('com.seedfinding:mc_math:ffd2edcfcc0d18147549c88cc7d8ec6cf21b5b91') {transitive = false}
-	extraLibs('com.seedfinding:mc_seed:a2f2ececc89e09785191e585d524eaca2b1f998b') {transitive = false}
-	extraLibs('com.seedfinding:mc_core:ec2011499ad3e9cec584824355e57f941b18b7fd') {transitive = false}
-	extraLibs('com.seedfinding:mc_noise:7e3ba65e181796c4a2a1c8881d840b2254b92962') {transitive = false}
-	extraLibs('com.seedfinding:mc_biome:41a42cb9019a552598f12089059538853e18ec78') {transitive = false}
-	extraLibs('com.seedfinding:mc_terrain:b4246cbd5880c4f8745ccb90e1b102bde3448126') {transitive = false}
-	extraLibs('com.seedfinding:mc_feature:5441abc7f032af795a84a4be9365cb960bf45880') {transitive = false}
+	extraLibs("com.seedfinding:mc_math:${project.mc_math_version}") {transitive = false}
+	extraLibs("com.seedfinding:mc_seed:${project.mc_seed_version}") {transitive = false}
+	extraLibs("com.seedfinding:mc_core:${project.mc_core_version}") {transitive = false}
+	extraLibs("com.seedfinding:mc_noise:${project.mc_noise_version}") {transitive = false}
+	extraLibs("com.seedfinding:mc_biome:${project.mc_biome_version}") {transitive = false}
+	extraLibs("com.seedfinding:mc_terrain:${project.mc_terrain_version}") {transitive = false}
+	extraLibs("com.seedfinding:mc_feature:${project.mc_feature_version}") {transitive = false}
 
-	extraLibs('com.seedfinding:mc_reversal:ca64c0890c106f1a2207623c316fce86f250b918') {transitive = false}
+	extraLibs("com.seedfinding:mc_reversal:${project.mc_reversal_version}") {transitive = false}
 	configurations.implementation.extendsFrom(configurations.extraLibs)
 }
 
