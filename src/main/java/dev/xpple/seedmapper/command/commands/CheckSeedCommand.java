@@ -7,7 +7,6 @@ import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.util.DatabaseHelper;
 import dev.xpple.seedmapper.util.TextUtil;
-import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.config.SeedResolution;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -21,7 +20,7 @@ import java.nio.file.Paths;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 import static dev.xpple.seedmapper.SeedMapper.MOD_PATH;
-import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class CheckSeedCommand extends ClientCommand {
@@ -51,7 +50,7 @@ public class CheckSeedCommand extends ClientCommand {
                     if (seed == null) {
                         continue;
                     }
-                    Chat.print(chain(
+                    source.sendFeedback(chain(
                         Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                         highlight(" "),
                         format(
@@ -68,7 +67,7 @@ public class CheckSeedCommand extends ClientCommand {
                     if (seed == null) {
                         continue;
                     }
-                    Chat.print(chain(
+                    source.sendFeedback(chain(
                         Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                         highlight(" "),
                         format(
@@ -85,7 +84,7 @@ public class CheckSeedCommand extends ClientCommand {
                     if (seed == null) {
                         continue;
                     }
-                    Chat.print(chain(
+                    source.sendFeedback(chain(
                         Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                         highlight(" "),
                         format(
@@ -101,7 +100,7 @@ public class CheckSeedCommand extends ClientCommand {
                     if (seed == null) {
                         continue;
                     }
-                    Chat.print(chain(
+                    source.sendFeedback(chain(
                         Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
                         highlight(" "),
                         format(
@@ -114,7 +113,7 @@ public class CheckSeedCommand extends ClientCommand {
                 }
             }
         }
-        Chat.print(Text.translatable("command.checkSeed.none"));
+        source.sendFeedback(Text.translatable("command.checkSeed.none"));
         return Command.SINGLE_SUCCESS;
     }
 }

@@ -5,7 +5,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
-import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import dev.xpple.seedmapper.util.render.Shape;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -37,16 +36,16 @@ public class ClearScreenCommand extends ClientCommand {
     private int clearScreen(CustomClientCommandSource source) {
         Map<Object, Shape> shapeMap = RenderQueue.queue.get(RenderQueue.Layer.ON_TOP);
         if (shapeMap == null) {
-            Chat.print(Text.translatable("command.clearscreen.empty"));
+            source.sendFeedback(Text.translatable("command.clearscreen.empty"));
             return Command.SINGLE_SUCCESS;
         }
 
         final int size = shapeMap.size();
         if (size == 0) {
-            Chat.print(Text.translatable("command.clearscreen.empty"));
+            source.sendFeedback(Text.translatable("command.clearscreen.empty"));
         } else {
             shapeMap.clear();
-            Chat.print(Text.translatable("command.clearscreen.success", size));
+            source.sendFeedback(Text.translatable("command.clearscreen.success", size));
         }
         return Command.SINGLE_SUCCESS;
     }

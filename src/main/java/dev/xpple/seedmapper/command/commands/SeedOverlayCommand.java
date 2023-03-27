@@ -10,7 +10,6 @@ import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
-import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
@@ -27,7 +26,7 @@ import net.minecraft.world.chunk.WorldChunk;
 import java.util.HashMap;
 import java.util.Map;
 
-import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.Exceptions {
@@ -79,7 +78,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
                     }
                     boxes.put(new Box(mutable), terrainBlock);
                     String terrainBlockName = Registries.BLOCK.getId(terrainBlock).getPath();
-                    Chat.print(chain(
+                    source.sendFeedback(chain(
                         highlight(Text.translatable("command.seedoverlay.feedback.0")),
                         copy(
                             hover(
@@ -100,13 +99,13 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         }
         boxes.forEach((key, value) -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, key, key, Configs.BlockColours.get(value),  30 * 20));
         if (blocks > 0) {
-            Chat.print(chain(
+            source.sendFeedback(chain(
                 highlight(Text.translatable("command.seedoverlay.feedback.3")),
                 accent(String.valueOf(blocks)),
                 highlight(Text.translatable("command.seedoverlay.feedback.4"))
             ));
         } else {
-            Chat.print(highlight(Text.translatable("command.seedoverlay.feedback.5")));
+            source.sendFeedback(highlight(Text.translatable("command.seedoverlay.feedback.5")));
         }
         return blocks;
     }

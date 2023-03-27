@@ -1,7 +1,5 @@
-package dev.xpple.seedmapper.util.chat;
+package dev.xpple.seedmapper.util;
 
-import dev.xpple.seedmapper.util.RunnableClickEventActionHelper;
-import dev.xpple.seedmapper.util.TextUtil;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.HoverEvent.Action;
@@ -22,20 +20,20 @@ public class ChatBuilder {
     public static Formatting WARN = Formatting.YELLOW;
     public static Formatting ERROR = Formatting.RED;
 
-    public static MutableText chain(MutableText... texts) {
+    public static MutableText chain(Text... texts) {
         return chain(Arrays.asList(texts));
     }
 
-    public static MutableText chain(List<MutableText> texts) {
+    public static MutableText chain(List<Text> texts) {
         return TextUtil.appendAll(text(""), texts);
     }
 
-    public static MutableText join(MutableText delimiter, MutableText... texts) {
+    public static MutableText join(Text delimiter, Text... texts) {
         return join(delimiter, Arrays.asList(texts));
     }
 
-    public static MutableText join(MutableText delimiter, List<MutableText> texts) {
-        List<MutableText> elements = new ArrayList<>();
+    public static MutableText join(Text delimiter, List<Text> texts) {
+        List<Text> elements = new ArrayList<>();
 
         for (int i = 0; i < texts.size(); i++) {
             elements.add(texts.get(i));

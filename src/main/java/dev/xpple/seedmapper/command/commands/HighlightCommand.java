@@ -18,7 +18,6 @@ import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
-import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.features.Features;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -132,9 +131,9 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, -1));
 
         if (boxes.isEmpty()) {
-            Chat.print(Text.translatable("command.highlight.block.noneFound", blockString));
+            source.sendFeedback(Text.translatable("command.highlight.block.noneFound", blockString));
         } else {
-            Chat.print(Text.translatable("command.highlight.block.success", boxes.size(), blockString));
+            source.sendFeedback(Text.translatable("command.highlight.block.success", boxes.size(), blockString));
         }
         return Command.SINGLE_SUCCESS;
     }

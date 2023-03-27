@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static dev.xpple.seedmapper.SeedMapper.CLIENT;
+import static dev.xpple.seedmapper.SeedMapper.MOD_NAME;
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
 public class CustomClientCommandSource extends ClientCommandSource implements FabricClientCommandSource {
 
@@ -43,10 +45,14 @@ public class CustomClientCommandSource extends ClientCommandSource implements Fa
 
     @Override
     public void sendFeedback(Text message) {
+        message = chain(dark("["), accent(MOD_NAME), dark("] "), message);
+        CLIENT.inGameHud.getChatHud().addMessage(message);
+        CLIENT.getNarratorManager().narrate(message);
     }
 
     @Override
     public void sendError(Text message) {
+        this.sendFeedback(error(Text.literal("").append(message)));
     }
 
     @Override
