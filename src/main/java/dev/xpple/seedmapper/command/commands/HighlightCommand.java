@@ -27,6 +27,7 @@ import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.features.Features;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.SharedConstants;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockArgumentParser;

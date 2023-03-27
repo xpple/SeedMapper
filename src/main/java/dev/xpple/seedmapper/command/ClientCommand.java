@@ -11,6 +11,9 @@ import static dev.xpple.seedmapper.SeedMapper.MOD_PREFIX;
 
 public abstract class ClientCommand {
 
+    private final String rootLiteral = MOD_PREFIX + ':' + this.rootLiteral();
+    private final String aliasLiteral = this.alias() == null ? null : MOD_PREFIX + ':' + this.alias();
+
     public static void instantiate(ClientCommand command, CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         LiteralCommandNode<FabricClientCommandSource> root = command.build(dispatcher, registryAccess);
         if (command.alias() == null) {
@@ -32,11 +35,11 @@ public abstract class ClientCommand {
     }
 
     protected String getRootLiteral() {
-        return MOD_PREFIX + ":" + this.rootLiteral();
+        return this.rootLiteral;
     }
 
     private String getAliasLiteral() {
-        return MOD_PREFIX + ":" + this.alias();
+        return this.aliasLiteral;
     }
 
     protected abstract LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess);
