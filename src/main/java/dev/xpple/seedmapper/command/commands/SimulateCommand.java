@@ -62,7 +62,7 @@ public class SimulateCommand extends ClientCommand implements SharedHelpers.Exce
             throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
 
-        Chat.print(Text.translatable("command.simulate.start"));
+        Chat.print(Text.translatable("command.simulate.start", seed));
         return Command.SINGLE_SUCCESS;
     }
 
