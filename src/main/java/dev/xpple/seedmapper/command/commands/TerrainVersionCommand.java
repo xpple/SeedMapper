@@ -13,7 +13,6 @@ import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
-import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -27,7 +26,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class TerrainVersionCommand extends ClientCommand implements SharedHelpers.Exceptions {
@@ -90,12 +89,12 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
                 }
             });
         if (version.get().startsWith("1")) {
-            Chat.print(chain(
+            source.sendFeedback(chain(
                 accent(version.get()),
                 highlight(Text.translatable("command.terrainversion.feedback"))
             ));
         } else {
-            Chat.print(highlight(version.get()));
+            source.sendFeedback(highlight(version.get()));
         }
         return Command.SINGLE_SUCCESS;
     }

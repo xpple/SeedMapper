@@ -37,7 +37,6 @@ import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.simulation.SimulatedServer;
 import dev.xpple.seedmapper.simulation.SimulatedWorld;
-import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
@@ -73,7 +72,9 @@ import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentTyp
 import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentType.getDecoratorFactory;
 import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.enchantedItem;
 import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.getEnchantedItem;
-import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.getStructureFactory;
+import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.structureFactory;
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -117,7 +118,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BlockPos blockPos = pos.map(Function.identity(), SharedHelpers::fromBPos);
 
-        sendCoordinates(blockPos, biome.asString());
+        sendCoordinates(blockPos, biome.asString(), source);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -173,7 +174,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BlockPos blockPos = pos.map(Function.identity(), SharedHelpers::fromBPos);
 
-        sendCoordinates(blockPos, structure.asString());
+        sendCoordinates(blockPos, structure.asString(), source);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -277,11 +278,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             BlockPos position = BlockPos.ofFloored(source.getPosition());
             Optional<Pair<RegistryEntry<PointOfInterestType>, BlockPos>> optional = world.getPointOfInterestStorage().getNearestTypeAndPosition(poi, position, 256, PointOfInterestStorage.OccupationStatus.ANY);
             if (optional.isEmpty()) {
-                sendCoordinates((BlockPos) null, poi.asString());
+                sendCoordinates((BlockPos) null, poi.asString(), source);
             } else {
                 Pair<RegistryEntry<PointOfInterestType>, BlockPos> pair = optional.get();
                 BlockPos blockPos = pair.getSecond();
-                sendCoordinates(blockPos, poi.asString());
+                sendCoordinates(blockPos, poi.asString(), source);
             }
         } catch (CommandSyntaxException e) {
             throw e;
@@ -303,7 +304,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         BPos decoratorPos = locateDecorator(decorator, source);
 
-        sendCoordinates(decoratorPos, decorator.getName());
+        sendCoordinates(decoratorPos, decorator.getName(), source);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -366,9 +367,9 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
         List<BPos> lootPositions = locateLoot(item.getSecond(), i -> i.getName().equals(itemString), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
         if (lootPositions == null || lootPositions.isEmpty()) {
-            Chat.print(Text.translatable("command.locate.noneFound", itemString));
+            source.sendFeedback(Text.translatable("command.locate.noneFound", itemString));
         } else {
-            Chat.print(chain(
+            source.sendFeedback(chain(
                 highlight(Text.translatable("command.locate.loot.foundAt", amount, itemString)),
                 highlight(" "),
                 join(highlight(", "), lootPositions.stream().map(bPos ->
@@ -451,11 +452,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         return null;
     }
 
-    private static void sendCoordinates(BlockPos blockPos, String name) {
+    private static void sendCoordinates(BlockPos blockPos, String name, CustomClientCommandSource source) {
         if (blockPos == null) {
-            Chat.print(Text.translatable("command.locate.noneFound", name));
+            source.sendFeedback(Text.translatable("command.locate.noneFound", name));
         } else {
-            Chat.print(chain(
+            source.sendFeedback(chain(
                 highlight(Text.translatable("command.locate.foundAt", name)),
                 highlight(" "),
                 copy(
@@ -470,11 +471,11 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
         }
     }
 
-    private static void sendCoordinates(BPos bPos, String name) {
+    private static void sendCoordinates(BPos bPos, String name, CustomClientCommandSource source) {
         if (bPos == null) {
-            sendCoordinates((BlockPos) null, name);
+            sendCoordinates((BlockPos) null, name, source);
             return;
         }
-        sendCoordinates(SharedHelpers.fromBPos(bPos), name);
+        sendCoordinates(SharedHelpers.fromBPos(bPos), name, source);
     }
 }

@@ -22,18 +22,18 @@ import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.command.arguments.ClientBlockPredicateArgumentType;
 import dev.xpple.seedmapper.simulation.SimulatedServer;
 import dev.xpple.seedmapper.simulation.SimulatedWorld;
-import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.features.Features;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.SharedConstants;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.chunk.Chunk;
 
 import java.util.*;
@@ -88,9 +88,9 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, null, -1));
 
         if (boxes.isEmpty()) {
-            Chat.print(Text.translatable("command.highlight.block.noneFound"));
+            source.sendFeedback(Text.translatable("command.highlight.block.noneFound"));
         } else {
-            Chat.print(Text.translatable("command.highlight.block.success", boxes.size()));
+            source.sendFeedback(Text.translatable("command.highlight.block.success", boxes.size()));
         }
         return Command.SINGLE_SUCCESS;
     }

@@ -11,7 +11,6 @@ import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.simulation.SimulatedServer;
 import dev.xpple.seedmapper.simulation.SimulatedWorld;
-import dev.xpple.seedmapper.util.chat.Chat;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
@@ -62,7 +61,9 @@ public class SimulateCommand extends ClientCommand implements SharedHelpers.Exce
             throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
 
-        Chat.print(Text.translatable("command.simulate.start", seed));
+        if (source != null) {
+            source.sendFeedback(Text.translatable("command.simulate.start", seed));
+        }
         return Command.SINGLE_SUCCESS;
     }
 
@@ -74,7 +75,9 @@ public class SimulateCommand extends ClientCommand implements SharedHelpers.Exce
         currentServer = null;
         currentWorld = null;
 
-        Chat.print(Text.translatable("command.simulate.stop"));
+        if (source != null) {
+            source.sendFeedback(Text.translatable("command.simulate.stop"));
+        }
         return Command.SINGLE_SUCCESS;
     }
 
@@ -86,7 +89,7 @@ public class SimulateCommand extends ClientCommand implements SharedHelpers.Exce
         Dimension dimension = SharedHelpers.getDimension(CLIENT.world.getRegistryKey().getValue().getPath());
         currentWorld = new SimulatedWorld(currentServer, dimension);
 
-        Chat.print(Text.translatable("command.simulate.refresh"));
+        source.sendFeedback(Text.translatable("command.simulate.refresh"));
         return Command.SINGLE_SUCCESS;
     }
 }

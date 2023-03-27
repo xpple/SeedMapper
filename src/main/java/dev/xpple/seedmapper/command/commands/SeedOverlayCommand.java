@@ -12,7 +12,6 @@ import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.simulation.SimulatedServer;
 import dev.xpple.seedmapper.simulation.SimulatedWorld;
-import dev.xpple.seedmapper.util.chat.Chat;
 import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
@@ -30,7 +29,7 @@ import net.minecraft.world.chunk.Chunk;
 import java.util.HashMap;
 import java.util.Map;
 
-import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.Exceptions {
@@ -68,7 +67,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
             y = key.minY;
             z = key.minZ;
             String terrainBlockName = Registries.BLOCK.getId(value).getPath();
-            Chat.print(chain(
+            source.sendFeedback(chain(
                 highlight(Text.translatable("command.seedoverlay.feedback.blockAt")),
                 copy(
                     hover(
@@ -86,13 +85,13 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
 
         int blocks = boxes.size();
         if (blocks > 0) {
-            Chat.print(chain(
+            source.sendFeedback(chain(
                 highlight(Text.translatable("ccommand.seedoverlay.feedback.total")),
                 accent(String.valueOf(blocks)),
                 highlight(Text.translatable("command.seedoverlay.feedback.dontMatch"))
             ));
         } else {
-            Chat.print(highlight(Text.translatable("command.seedoverlay.feedback.allMatch")));
+            source.sendFeedback(highlight(Text.translatable("command.seedoverlay.feedback.allMatch")));
         }
         return blocks;
     }

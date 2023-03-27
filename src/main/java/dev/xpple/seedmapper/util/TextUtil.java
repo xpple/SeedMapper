@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static dev.xpple.seedmapper.util.chat.ChatBuilder.*;
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
 public class TextUtil {
 
@@ -36,7 +36,7 @@ public class TextUtil {
         return String.format("%" + before + "s%-" + rest + "s", "", text);
     }
 
-    public static MutableText formatList(List<MutableText> list) {
+    public static MutableText formatList(List<Text> list) {
         MutableText output = Text.literal("");
 
         AtomicInteger count = new AtomicInteger(0);
@@ -52,7 +52,7 @@ public class TextUtil {
         return output;
     }
 
-    public static MutableText appendAll(MutableText text, List<MutableText> toAppend) {
+    public static MutableText appendAll(MutableText text, List<Text> toAppend) {
         toAppend.forEach(text::append);
         return text;
     }
