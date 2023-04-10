@@ -23,9 +23,12 @@
     ]
   },
   "mixins": [
-    "seedmapper.mixin.server.json",
+    "seedmapper.mixin.advancement.json",
+    "seedmapper.mixin.client.json",
+    "seedmapper.mixin.fabric.json",
+    "seedmapper.mixin.recipe.json",
     "seedmapper.mixin.render.json",
-    "seedmapper.mixin.client.json"
+    "seedmapper.mixin.server.json"
   ],
   "accessWidener": "seedmapper.aw",
 

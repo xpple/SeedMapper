@@ -37,25 +37,21 @@ public class FakeLevelStorage extends LevelStorage {
 
     @Override
     public Path getSavesDirectory() {
-        System.out.println("getSavesDirectory called");
         return Path.of("fake");
     }
 
     @Override
     public Path getBackupsDirectory() {
-        System.out.println("getBackupsDirectory called");
         return Path.of("fake");
     }
 
     @Override
     public LevelList getLevelList() {
-        System.out.println("getLevelList called");
         return new LevelList(Collections.emptyList());
     }
 
     @Override
     public boolean levelExists(String name) {
-        System.out.println("levelExists called");
         return false;
     }
 
@@ -80,7 +76,6 @@ public class FakeLevelStorage extends LevelStorage {
 
         @Override
         public WorldSaveHandler createSaveHandler() {
-            System.out.println("createSaveHandler called");
             return null;
         }
 
