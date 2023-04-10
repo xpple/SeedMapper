@@ -1,5 +1,8 @@
 package dev.xpple.seedmapper.simulation;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.command.commands.SimulateCommand;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKeys;
@@ -35,24 +38,31 @@ public class SimulatedServer extends IntegratedServer {
         super(serverThread, client, session, resourcePackManager, saveLoader, apiServices, worldGenerationProgressListenerFactory);
     }
 
-    public static SimulatedServer newServer(long seed) throws Exception {
-        LevelStorage.Session session = FakeLevelStorage.create().createSession("fake");
+    public static SimulatedServer newServer(long seed) throws CommandSyntaxException {
+        SimulateCommand.isServerStarting = true;
+        try {
+            LevelStorage.Session session = FakeLevelStorage.create().createSession("fake");
 
-        ResourcePackManager resourcePackManager = new ResourcePackManager(new VanillaDataPackProvider());
+            ResourcePackManager resourcePackManager = new ResourcePackManager(new VanillaDataPackProvider());
 
-        GameRules gameRules = createGameRules();
+            GameRules gameRules = createGameRules();
 
-        LevelInfo levelInfo = new LevelInfo("fake", GameMode.SPECTATOR, false, Difficulty.PEACEFUL, true, gameRules, DataConfiguration.SAFE_MODE);
+            LevelInfo levelInfo = new LevelInfo("fake", GameMode.SPECTATOR, false, Difficulty.PEACEFUL, true, gameRules, DataConfiguration.SAFE_MODE);
 
-        Function<DynamicRegistryManager, DimensionOptionsRegistryHolder> dimensionsRegistrySupplier = WorldPresets::createDemoOptions;
+            Function<DynamicRegistryManager, DimensionOptionsRegistryHolder> dimensionsRegistrySupplier = WorldPresets::createDemoOptions;
 
-        GeneratorOptions generatorOptions = new GeneratorOptions(seed, true, false);
+            GeneratorOptions generatorOptions = new GeneratorOptions(seed, true, false);
 
-        SaveLoader saveLoader = createSaveLoader(resourcePackManager, levelInfo, dimensionsRegistrySupplier, generatorOptions);
+            SaveLoader saveLoader = createSaveLoader(resourcePackManager, levelInfo, dimensionsRegistrySupplier, generatorOptions);
 
-        ApiServices apiServices = new ApiServices(null, null, null, null);
+            ApiServices apiServices = new ApiServices(null, null, null, null);
 
-        return new SimulatedServer(null, client, session, resourcePackManager, saveLoader, apiServices, null);
+            return new SimulatedServer(null, client, session, resourcePackManager, saveLoader, apiServices, null);
+        } catch (Exception e) {
+            throw SharedHelpers.Exceptions.WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
+        } finally {
+            SimulateCommand.isServerStarting = false;
+        }
     }
 
     private static GameRules createGameRules() {

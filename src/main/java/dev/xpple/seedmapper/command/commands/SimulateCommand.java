@@ -23,6 +23,8 @@ public class SimulateCommand extends ClientCommand implements SharedHelpers.Exce
     public static SimulatedServer currentServer = null;
     public static SimulatedWorld currentWorld = null;
 
+    public static boolean isServerStarting = false;
+
     private static final SimpleCommandExceptionType SERVER_ALREADY_RUNNING_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("command.simulate.serverAlreadyRunning"));
     private static final SimpleCommandExceptionType NO_SERVER_RUNNING_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("command.simulate.noServerRunning"));
 

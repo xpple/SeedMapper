@@ -13,7 +13,7 @@ public class FakeLogger implements Logger {
     }
 
     private boolean shouldLog() {
-        return SimulateCommand.currentServer != null;
+        return !SimulateCommand.isServerStarting && SimulateCommand.currentServer == null;
     }
 
     @Override

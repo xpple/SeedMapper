@@ -136,10 +136,6 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
             });
 
             return boxes;
-        } catch (CommandSyntaxException e) {
-            throw e;
-        } catch (Exception e) {
-            throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
     }
 

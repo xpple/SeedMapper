@@ -108,10 +108,6 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
             BlockPos blockPos = BlockPos.ofFloored(source.getPosition());
 
             return overlayUsingWorldSimulation(source.getWorld().getChunk(blockPos), world.getChunk(blockPos));
-        } catch (CommandSyntaxException e) {
-            throw e;
-        } catch (Exception e) {
-            throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
     }
 

@@ -72,8 +72,6 @@ import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentTyp
 import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentType.getDecoratorFactory;
 import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.enchantedItem;
 import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.getEnchantedItem;
-import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.getStructureFactory;
-import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.structureFactory;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -137,10 +135,6 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 return Either.left(null);
             }
             return Either.left(pair.getFirst());
-        } catch (CommandSyntaxException e) {
-            throw e;
-        } catch (Exception e) {
-            throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
     }
 
@@ -198,10 +192,6 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 return Either.left(null);
             }
             return Either.left(pair.getFirst());
-        } catch (CommandSyntaxException e) {
-            throw e;
-        } catch (Exception e) {
-            throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
     }
 
@@ -284,10 +274,6 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                 BlockPos blockPos = pair.getSecond();
                 sendCoordinates(blockPos, poi.asString(), source);
             }
-        } catch (CommandSyntaxException e) {
-            throw e;
-        } catch (Exception e) {
-            throw WORLD_SIMULATION_ERROR_EXCEPTION.create(e.getMessage());
         }
 
         return Command.SINGLE_SUCCESS;
