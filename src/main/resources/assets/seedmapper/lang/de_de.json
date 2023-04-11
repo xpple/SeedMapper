@@ -26,7 +26,7 @@
   "command.seedoverlay.feedback.blockAt": "Block bei ",
   "command.seedoverlay.feedback.copy": "Klicke um die folgenden Koordinaten zu kopieren ",
   "command.seedoverlay.feedback.noMatch": " stimmen nicht überein!",
-  "ccommand.seedoverlay.feedback.total": "Insgesamt ",
+  "command.seedoverlay.feedback.total": "Insgesamt ",
   "command.seedoverlay.feedback.dontMatch": " blöcke stimmen nicht überein.",
   "command.seedoverlay.feedback.allMatch": "Alle Blöcke stimmen überein!",
 

@@ -26,7 +26,7 @@
   "command.seedoverlay.feedback.blockAt": "Block di ",
   "command.seedoverlay.feedback.copy": "Klik untuk menyalin kordinat dari ",
   "command.seedoverlay.feedback.noMatch": " tidak cocok!",
-  "ccommand.seedoverlay.feedback.total": "Total dari ",
+  "command.seedoverlay.feedback.total": "Total dari ",
   "command.seedoverlay.feedback.dontMatch": " blok yang tidak cocok.",
   "command.seedoverlay.feedback.allMatch": "Semua blok cocok!",
 

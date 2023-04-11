@@ -26,7 +26,7 @@
   "command.seedoverlay.feedback.blockAt": "Blok na ",
   "command.seedoverlay.feedback.copy": "Kliknij by skopiować współrzędne ",
   "command.seedoverlay.feedback.noMatch": " nie pasuje!",
-  "ccommand.seedoverlay.feedback.total": "Łącznie ",
+  "command.seedoverlay.feedback.total": "Łącznie ",
   "command.seedoverlay.feedback.dontMatch": " bloków nie pasuje.",
   "command.seedoverlay.feedback.allMatch": "Wszystkie bloki pasują!",
 

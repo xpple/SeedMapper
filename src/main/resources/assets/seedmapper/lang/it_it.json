@@ -33,7 +33,7 @@
     "command.seedoverlay.feedback.blockAt": "Blocco a ",
     "command.seedoverlay.feedback.copy": "Clicca per copiare le coordinate di ",
     "command.seedoverlay.feedback.noMatch": " non corrisponde!",
-    "ccommand.seedoverlay.feedback.total": "Un totale di ",
+    "command.seedoverlay.feedback.total": "Un totale di ",
     "command.seedoverlay.feedback.dontMatch": " i blocchi non corrispondevano.",
     "command.seedoverlay.feedback.allMatch": "Tutti i blocchi corrispondono!",
 

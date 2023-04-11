@@ -48,7 +48,7 @@
   "command.seedoverlay.feedback.blockAt": "Block at ",
   "command.seedoverlay.feedback.copy": "Click to copy coordinates of ",
   "command.seedoverlay.feedback.noMatch": " doesn't match!",
-  "ccommand.seedoverlay.feedback.total": "A total of ",
+  "command.seedoverlay.feedback.total": "A total of ",
   "command.seedoverlay.feedback.dontMatch": " blocks didn't match.",
   "command.seedoverlay.feedback.allMatch": "All blocks match!",
 

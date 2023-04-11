@@ -32,7 +32,7 @@
   "command.seedoverlay.feedback.blockAt": "पर ब्लॉक ",
   "command.seedoverlay.feedback.copy": "निर्देशांक कॉपी करने के लिए क्लिक कीजिये ",
   "command.seedoverlay.feedback.noMatch": " मेल नहीं खाता!",
-  "ccommand.seedoverlay.feedback.total": "कुल ",
+  "command.seedoverlay.feedback.total": "कुल ",
   "command.seedoverlay.feedback.dontMatch": " ब्लॉक मेल नहीं खाते!",
   "command.seedoverlay.feedback.allMatch": "सभी ब्लॉक मेल खाते हैं!",
 

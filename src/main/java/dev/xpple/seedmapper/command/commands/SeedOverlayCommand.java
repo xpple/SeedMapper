@@ -86,7 +86,7 @@ public class SeedOverlayCommand extends ClientCommand implements SharedHelpers.E
         int blocks = boxes.size();
         if (blocks > 0) {
             source.sendFeedback(chain(
-                highlight(Text.translatable("ccommand.seedoverlay.feedback.total")),
+                highlight(Text.translatable("command.seedoverlay.feedback.total")),
                 accent(String.valueOf(blocks)),
                 highlight(Text.translatable("command.seedoverlay.feedback.dontMatch"))
             ));
