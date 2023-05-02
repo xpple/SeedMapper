@@ -50,7 +50,3 @@ as if from that position.
    - Linux/Windows: `.minecraft/mods`
    - Mac: `minecraft/mods`
 3. Download SeedMapper from the [releases page](https://modrinth.com/mod/seedmapper/versions/) and move it to your mods folder
-
-## Post Scriptum
-When [QuiltMC](https://quiltmc.org/) officially releases this mod will transfer to Quilt, whereby it has to send the list 
-of mods the client is using to the server.
