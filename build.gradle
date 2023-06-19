@@ -1,6 +1,6 @@
 plugins {
-	id 'fabric-loom' version '1.1-SNAPSHOT'
-	id 'com.github.johnrengelman.shadow' version '7.1.2'
+	id 'fabric-loom' version '1.2-SNAPSHOT'
+	id 'com.github.johnrengelman.shadow' version '8.1.1'
 	id 'maven-publish'
 }
 
@@ -93,14 +93,14 @@ java {
 
 shadowJar {
 	configurations = [project.configurations.extraLibs]
-	classifier "dev"
+	setArchiveClassifier("dev")
 	relocate "com.seedfinding", "dev.xpple.seedfinding"
 }
 
 remapJar {
 	inputFile.set shadowJar.archiveFile
 	dependsOn shadowJar
-	classifier null
+	setArchiveClassifier(null)
 }
 
 // solve the duplicate strategy issue
