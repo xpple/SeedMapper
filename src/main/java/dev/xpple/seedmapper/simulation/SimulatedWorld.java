@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 public class SimulatedWorld extends ServerWorld {
 
     public SimulatedWorld(SimulatedServer server, Dimension dimension) {
-        super(server, Util.getMainWorkerExecutor(), ((MinecraftServerAccessor) server).getSession(), new UnmodifiableLevelProperties(server.getSaveProperties(), server.getSaveProperties().getMainWorldProperties()), getWorld(dimension), server.getCombinedDynamicRegistries().getCombinedRegistryManager().get(RegistryKeys.DIMENSION).get(getDimensionOptions(dimension)), FakeWorldGenerationProgressListener.INSTANCE, false, BiomeAccess.hashSeed(server.getSaveProperties().getGeneratorOptions().getSeed()), Collections.emptyList(), false);
+        super(server, Util.getMainWorkerExecutor(), ((MinecraftServerAccessor) server).getSession(), new UnmodifiableLevelProperties(server.getSaveProperties(), server.getSaveProperties().getMainWorldProperties()), getWorld(dimension), server.getCombinedDynamicRegistries().getCombinedRegistryManager().get(RegistryKeys.DIMENSION).get(getDimensionOptions(dimension)), FakeWorldGenerationProgressListener.INSTANCE, false, BiomeAccess.hashSeed(server.getSaveProperties().getGeneratorOptions().getSeed()), Collections.emptyList(), false, null);
     }
 
     private static RegistryKey<World> getWorld(Dimension dimension) {

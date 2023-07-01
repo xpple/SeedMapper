@@ -24,7 +24,7 @@ public class FakeLevelStorage extends LevelStorage {
     private static final Unsafe UNSAFE = UnsafeAccess.UNSAFE;
 
     private FakeLevelStorage(Path savesDirectory, Path backupsDirectory, DataFixer dataFixer) {
-        super(savesDirectory, backupsDirectory, dataFixer);
+        super(savesDirectory, backupsDirectory, null, dataFixer);
     }
 
     public static FakeLevelStorage create() {
@@ -66,7 +66,7 @@ public class FakeLevelStorage extends LevelStorage {
 
     public class FakeSession extends LevelStorage.Session {
         public FakeSession() throws IOException {
-            super("fake");
+            super("fake", Path.of("fake"));
         }
 
         @Override
