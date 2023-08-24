@@ -18,7 +18,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.util.Pair;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -38,8 +37,8 @@ public class SeedMapper implements ClientModInitializer {
         MOD_PATH.toFile().mkdirs();
 
         new ModConfigBuilder(MOD_ID, Configs.class)
-            .registerTypeHierarchyWithArgument(Block.class, new BlockAdapter(), new Pair<>(BlockArgumentType::block, BlockArgumentType::getBlock))
-            .registerTypeWithArgument(SeedResolution.class, new SeedResolutionAdapter(), new Pair<>(SeedResolutionArgumentType::seedResolution, SeedResolutionArgumentType::getSeedResolution))
+            .registerTypeHierarchy(Block.class, new BlockAdapter(), BlockArgumentType::block)
+            .registerType(SeedResolution.class, new SeedResolutionAdapter(), SeedResolutionArgumentType::seedResolution)
             .build();
 
         DatabaseHelper.fetchSeeds();
