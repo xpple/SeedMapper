@@ -32,7 +32,7 @@ public class SeedResolution implements Iterable<SeedResolution.Method> {
         ONLINE_DATABASE("OnlineDatabase"),
         SEED_CONFIG("SeedConfig");
 
-        public static final Codec<Method> CODEC = StringIdentifiable.createCodec(Method::values);
+        public static final EnumCodec<Method> CODEC = StringIdentifiable.createCodec(Method::values);
 
         private final String name;
 
