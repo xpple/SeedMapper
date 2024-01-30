@@ -44,7 +44,6 @@ public class DatabaseHelper {
             String value = seedEntry.get(2).getAsString();
             long seed = Long.parseLong(value.substring(0, value.length() - 1));
             seeds.put(key, seed);
-            System.out.println(key + " " + seed);
         }
     }
 }
