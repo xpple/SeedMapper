@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DatabaseHelper {
-    private static final String url = "https://script.google.com/macros/s/AKfycbxvJa3GPh2B_atqbxFdlpInPw4XGKk1jR7lHqALx1durf0X-VXi6bG4zi7Jg-FCU3DfFg/exec";
+    private static final String url = "https://script.google.com/macros/s/AKfycbye87L-fEYq2EkgczvhKb_kGecp5wL1oX95vg45TRSwNvpv7K-53zoInGTeI1FZ0kv7DA/exec";
     private static final HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
     private static final int DURATION = 10; // seconds
 
@@ -44,6 +44,7 @@ public class DatabaseHelper {
             String value = seedEntry.get(2).getAsString();
             long seed = Long.parseLong(value.substring(0, value.length() - 1));
             seeds.put(key, seed);
+            System.out.println(key + " " + seed);
         }
     }
 }
