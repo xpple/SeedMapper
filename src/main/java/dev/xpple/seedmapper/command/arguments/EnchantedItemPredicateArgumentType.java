@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.seedfinding.mccore.util.data.Pair;
+import com.mojang.datafixers.util.Pair;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.loot.enchantment.Enchantment;
 import com.seedfinding.mcfeature.loot.enchantment.EnchantmentInstance;

@@ -13,6 +13,7 @@ import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
@@ -42,6 +43,10 @@ public class TerrainVersionCommand extends ClientCommand implements SharedHelper
     }
 
     private int execute(CustomClientCommandSource source) throws CommandSyntaxException {
+        if (Configs.UseWorldSimulation) {
+            throw UNSUPPORTED_BY_WORLD_SIMULATION_EXCEPTION.create();
+        }
+
         SharedHelpers helpers = new SharedHelpers(source);
 
         final AtomicInteger blocks = new AtomicInteger(Integer.MAX_VALUE);
