@@ -1,32 +1,32 @@
 name: Build and upload jar as asset
 on:
-    release:
-        types:
-            - released
+  release:
+    types:
+      - released
 
 jobs:
-    build-and-upload:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout latest commit
-              uses: actions/checkout@v3
-              with:
-                  ref: ${{ github.event.pull_request.head.sha }}
-            - name: Set up JDK 17
-              uses: actions/setup-java@v3
-              with:
-                  java-version: '17'
-                  distribution: 'adopt'
-            - name: Setup Gradle
-              uses: gradle/gradle-build-action@v2
-              with:
-                  arguments: build
-            - name: Hash jar
-              run: sha256sum build/libs/*[^-dev].jar
-            - name: Upload asset
-              uses: svenstaro/upload-release-action@v2
-              with:
-                  repo_token: ${{ secrets.GITHUB_TOKEN }}
-                  file: build/libs/*[^-dev].jar
-                  tag: ${{ github.ref }}
-                  file_glob: true
+  build-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          arguments: build
+      - name: Hash jar
+        run: sha256sum build/libs/*[^-dev].jar
+      - name: Upload asset
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/libs/*[^-dev].jar
+          tag: ${{ github.ref }}
+          file_glob: true

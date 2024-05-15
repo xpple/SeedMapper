@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.mixin.render;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import dev.xpple.seedmapper.util.render.Shape;
 import net.minecraft.client.render.*;
@@ -25,7 +26,7 @@ public class MixinWorldRenderer {
     @Shadow @Final private BufferBuilderStorage bufferBuilders;
 
     @Inject(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))
-    private void render(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f positionMatrix, CallbackInfo ci) {
+    private void render(float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci, @Local MatrixStack matrixStack) {
         Map<Object, Shape> shapeMap = RenderQueue.queue.get(RenderQueue.Layer.ON_TOP);
         if (shapeMap == null) {
             return;
@@ -39,10 +40,10 @@ public class MixinWorldRenderer {
                 shapeMap.remove(shape);
                 return;
             }
-            matrices.push();
-            matrices.translate(pos.x - cameraPos.x, pos.y - cameraPos.y, pos.z - cameraPos.z);
-            shape.render(matrices, this.bufferBuilders.getOutlineVertexConsumers(), tickDelta);
-            matrices.pop();
+            matrixStack.push();
+            matrixStack.translate(pos.x - cameraPos.x, pos.y - cameraPos.y, pos.z - cameraPos.z);
+            shape.render(matrixStack, this.bufferBuilders.getOutlineVertexConsumers(), tickDelta);
+            matrixStack.pop();
         });
     }
 }

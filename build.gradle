@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.5-SNAPSHOT'
+	id 'fabric-loom' version '1.6-SNAPSHOT'
 	id 'com.github.johnrengelman.shadow' version '8.1.1'
 	id 'maven-publish'
 }
@@ -81,7 +81,7 @@ tasks.withType(JavaCompile).configureEach {
 	// If Javadoc is generated, this must be specified in that task too.
 	it.options.encoding = "UTF-8"
 
-	it.options.release = 17
+	it.options.release = 21
 }
 
 java {

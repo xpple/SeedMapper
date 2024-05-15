@@ -4,23 +4,21 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import dev.xpple.clientarguments.arguments.CDimensionArgumentType;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.util.Identifier;
 
 import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
-import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.dimension;
-import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.getCDimensionArgument;
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.entity;
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.getCEntity;
-import static dev.xpple.clientarguments.arguments.CRotationArgumentType.getCRotation;
-import static dev.xpple.clientarguments.arguments.CRotationArgumentType.rotation;
-import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.getCVec3;
-import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.vec3;
+import static dev.xpple.clientarguments.arguments.CDimensionArgument.dimension;
+import static dev.xpple.clientarguments.arguments.CDimensionArgument.getDimension;
+import static dev.xpple.clientarguments.arguments.CEntityArgument.entity;
+import static dev.xpple.clientarguments.arguments.CEntityArgument.getEntity;
+import static dev.xpple.clientarguments.arguments.CRotationArgument.getRotation;
+import static dev.xpple.clientarguments.arguments.CRotationArgument.rotation;
+import static dev.xpple.clientarguments.arguments.CVec3Argument.getVec3;
+import static dev.xpple.clientarguments.arguments.CVec3Argument.vec3;
 import static dev.xpple.seedmapper.command.arguments.MCVersionArgumentType.getMcVersion;
 import static dev.xpple.seedmapper.command.arguments.MCVersionArgumentType.mcVersion;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
@@ -37,19 +35,16 @@ public class SourceCommand extends ClientCommand {
                 .redirect(dispatcher.getRoot(), CommandContext::getSource))
             .then(literal("as")
                 .then(argument("entity", entity())
-                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withEntity(getCEntity(ctx, "entity")))))
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withEntity(getEntity(ctx, "entity")))))
             .then(literal("positioned")
                 .then(argument("pos", vec3())
-                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withPosition(getCVec3(ctx, "pos")))))
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withPosition(getVec3(ctx, "pos")))))
             .then(literal("rotated")
                 .then(argument("rot", rotation())
-                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withRotation(getCRotation(ctx, "rot").toAbsoluteRotation(ctx.getSource())))))
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withRotation(getRotation(ctx, "rot").getRotation(ctx.getSource())))))
             .then(literal("in")
                 .then(argument("dimension", dimension())
-                    .redirect(root, ctx -> {
-                        CDimensionArgumentType.DimensionArgument dimensionArgument = getCDimensionArgument(ctx, "dimension");
-                        return CustomClientCommandSource.of(ctx.getSource()).withMeta("dimension", new Identifier(dimensionArgument.getName()));
-                    })))
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("dimension", getDimension(ctx, "dimension").getValue()))))
             .then(literal("versioned")
                 .then(argument("version", mcVersion().all())
                     .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("version", getMcVersion(ctx, "version")))))
