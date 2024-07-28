@@ -17,6 +17,6 @@ public class BlockAdapter extends TypeAdapter<Block> {
 
     @Override
     public Block read(JsonReader reader) throws IOException {
-        return Registries.BLOCK.get(new Identifier(reader.nextString()));
+        return Registries.BLOCK.get(Identifier.of(reader.nextString()));
     }
 }

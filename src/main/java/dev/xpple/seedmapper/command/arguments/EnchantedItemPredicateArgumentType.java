@@ -26,12 +26,13 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<String, Predicate<Item>>>, SharedHelpers.Exceptions {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("iron_axe", "diamond_sword with sharpness 3", "diamond_chestplate with protection * without thorns *");
-    private static final Stream<String> items = Items.getItems().values().stream().map(Item::getName);
+    private static final Stream<String> items = Items.getItems().values().stream().map(item -> item.get().getName());
     private static final String[] lootableItems = new String[]{"diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings", "diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings"};
 
     private static final SimpleCommandExceptionType EXPECTED_WITH_OR_WITHOUT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.expectedWithOrWithout"));
@@ -115,7 +116,7 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
                 this.reader.skipWhitespace();
                 EnchantmentInstance enchantmentInstance = parseEnchantmentInstance(item);
                 predicate = predicate.and(i -> {
-                    String enchantmentString = enchantmentInstance.getName();
+                    String enchantmentString = enchantmentInstance.getEnchantment().getName();
                     int level = enchantmentInstance.getLevel();
                     if (level < 0) {
                         return includeEnchantment == i.getEnchantments().stream()
@@ -143,6 +144,7 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
 
             String itemString = this.reader.readUnquotedString();
             Item item = Items.getItems().values().stream()
+                .map(Supplier::get)
                 .filter(i -> i.getName().equals(itemString))
                 .findAny().orElseThrow(() -> {
                     this.reader.setCursor(cursor);

@@ -26,7 +26,7 @@ public class MixinWorldRenderer {
     @Shadow @Final private BufferBuilderStorage bufferBuilders;
 
     @Inject(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))
-    private void render(float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci, @Local MatrixStack matrixStack) {
+    private void render(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci, @Local MatrixStack matrixStack) {
         Map<Object, Shape> shapeMap = RenderQueue.queue.get(RenderQueue.Layer.ON_TOP);
         if (shapeMap == null) {
             return;
@@ -42,7 +42,7 @@ public class MixinWorldRenderer {
             }
             matrixStack.push();
             matrixStack.translate(pos.x - cameraPos.x, pos.y - cameraPos.y, pos.z - cameraPos.z);
-            shape.render(matrixStack, this.bufferBuilders.getOutlineVertexConsumers(), tickDelta);
+            shape.render(matrixStack, this.bufferBuilders.getOutlineVertexConsumers(), tickCounter.getLastDuration());
             matrixStack.pop();
         });
     }
