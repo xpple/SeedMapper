@@ -1,6 +1,8 @@
 package dev.xpple.seedmapper.util.config;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.betterconfig.api.Config;
+import dev.xpple.seedmapper.command.commands.SimulateCommand;
 import net.minecraft.block.Block;
 
 import java.util.HashMap;
@@ -25,12 +27,26 @@ public class Configs {
     @Config
     public static Set<Block> IgnoredBlocks = new HashSet<>();
 
-    @Config
+    @Config(setter = @Config.Setter("setAutoOverlay"))
     public static boolean AutoOverlay = false;
+    public static void setAutoOverlay(boolean autoOverlay) throws CommandSyntaxException {
+        AutoOverlay = autoOverlay;
+        if (!Configs.UseWorldSimulation) {
+            return;
+        }
+        if (autoOverlay) {
+            SimulateCommand.start(null);
+        } else {
+            SimulateCommand.stop(null);
+        }
+    }
 
     @Config
     public static Map<Block, Integer> BlockColours = new HashMap<>();
 
     @Config
     public static SeedResolution SeedResolutionOrder = new SeedResolution();
+
+    @Config
+    public static boolean UseWorldSimulation = false;
 }

@@ -3,7 +3,9 @@ package dev.xpple.seedmapper.command.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.datafixers.util.Either;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.block.Block;
@@ -12,19 +14,27 @@ import com.seedfinding.mccore.rand.seed.WorldSeed;
 import com.seedfinding.mccore.util.data.SpiralIterator;
 import com.seedfinding.mccore.util.pos.BPos;
 import com.seedfinding.mccore.util.pos.CPos;
-import com.seedfinding.mcfeature.decorator.ore.OreDecorator;
 import com.seedfinding.mcfeature.misc.SlimeChunk;
 import com.seedfinding.mcterrain.TerrainGenerator;
 import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.command.arguments.ClientBlockPredicateArgumentType;
+import dev.xpple.seedmapper.simulation.SimulatedServer;
+import dev.xpple.seedmapper.simulation.SimulatedWorld;
+import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.features.Features;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.SharedConstants;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.argument.BlockArgumentParser;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.world.chunk.Chunk;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,29 +42,28 @@ import java.util.stream.StreamSupport;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
+import static dev.xpple.seedmapper.command.arguments.ClientBlockPredicateArgumentType.blockPredicate;
+import static dev.xpple.seedmapper.command.arguments.ClientBlockPredicateArgumentType.getParseResult;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class HighlightCommand extends ClientCommand implements SharedHelpers.Exceptions {
 
+    private static final SimpleCommandExceptionType COULD_NOT_HIGHLIGHT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("command.highlight.couldNotHighlight"));
+
     @Override
     protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
-        final String[] blocks = new String[]{"ancient_debris", "andesite", "blackstone",/* "clay",*/ "coal_ore", "copper_ore", "deepslate", "diamond_ore", "diorite", "dirt", "emerald_ore", "gold_ore", "granite",/* "gravel",*/ "iron_ore", "lapis_ore", "magma_block", "nether_gold_ore", "quartz_ore", "redstone_ore",/* "sand",*/ "soulsand", "tuff"};
         return dispatcher.register(literal(this.getRootLiteral())
             .then(literal("block")
-                .then(argument("block", word())
-                    .suggests((context, builder) -> suggestMatching(blocks, builder))
-                    .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block")))
-                    .then(argument("range", integer(0))
-                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getString(ctx, "block"), getInteger(ctx, "range"))))))
+                .then(argument("block", blockPredicate(registryAccess))
+                    .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getParseResult(ctx, "block")))
+                    .then(argument("radius", integer(0))
+                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getParseResult(ctx, "block"), getInteger(ctx, "radius"))))))
             .then(literal("feature")
                 .then(literal("slimechunk")
                     .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))
-                    .then(argument("range", integer(0))
-                        .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "range")))))));
+                    .then(argument("radius", integer(0))
+                        .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "radius")))))));
     }
 
     @Override
@@ -62,20 +71,91 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         return "highlight";
     }
 
-    private static int highlightBlock(CustomClientCommandSource source, String blockString) throws CommandSyntaxException {
-        return highlightBlock(source, blockString, 160); // 10 chunks
+    private static int highlightBlock(CustomClientCommandSource source, Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult> result) throws CommandSyntaxException {
+        return highlightBlock(source, result, 3); // 3 chunks
     }
 
-    private static int highlightBlock(CustomClientCommandSource source, String blockString, int range) throws CommandSyntaxException {
+    private static int highlightBlock(CustomClientCommandSource source, Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult> result, int radius) throws CommandSyntaxException {
+        final Set<Box> boxes;
+
+        if (Configs.UseWorldSimulation) {
+            ClientBlockPredicateArgumentType.ClientBlockPredicate predicate = ClientBlockPredicateArgumentType.getBlockPredicate(result);
+            boxes = highlightBlockUsingWorldSimulation(predicate, radius, source);
+        } else {
+            boxes = highlightBlockUsingLibraries(result, radius, source);
+        }
+
+        boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, null, -1));
+
+        if (boxes.isEmpty()) {
+            source.sendFeedback(Text.translatable("command.highlight.block.noneFound"));
+        } else {
+            source.sendFeedback(Text.translatable("command.highlight.block.success", boxes.size()));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static Set<Box> highlightBlockUsingWorldSimulation(ClientBlockPredicateArgumentType.ClientBlockPredicate predicate, int radius, CustomClientCommandSource source) throws CommandSyntaxException {
         SharedHelpers helpers = new SharedHelpers(source);
 
-        final Set<OreDecorator<?, ?>> oreDecorators = Features.getOresForVersion(helpers.mcVersion()).stream()
-            .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension()))
-            .filter(oreDecorator -> oreDecorator.getDefaultOreBlock().getName().equals(blockString))
-            .collect(Collectors.toSet());
+        if (!helpers.mcVersion().name.equals(SharedConstants.getGameVersion().getName())) {
+            throw UNSUPPORTED_VERSION_EXCEPTION.create();
+        }
 
-        if (oreDecorators.isEmpty()) {
-            throw BLOCK_NOT_FOUND_EXCEPTION.create(blockString);
+        try (SimulatedServer server = SimulateCommand.currentServer == null ? SimulatedServer.newServer(helpers.seed()) : SimulateCommand.currentServer) {
+            SimulatedWorld world = SimulateCommand.currentWorld == null ? new SimulatedWorld(server, helpers.dimension()) : SimulateCommand.currentWorld;
+            CPos center = SharedHelpers.fromBlockPos(BlockPos.ofFloored(source.getPosition())).toChunkPos();
+
+            final Set<Box> boxes = new HashSet<>();
+
+            SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(center, new CPos(radius, radius), CPos.Builder::create);
+            StreamSupport.stream(spiralIterator.spliterator(), false).forEach(cPos -> {
+                Chunk chunk = world.getChunk(cPos.getX(), cPos.getZ());
+
+                final int startX, endX, startY, endY, startZ, endZ;
+                startX = ChunkSectionPos.getBlockCoord(cPos.getX());
+                endX = ChunkSectionPos.getOffsetPos(cPos.getX(), 15);
+                startY = chunk.getBottomY();
+                endY = chunk.getTopY();
+                startZ = ChunkSectionPos.getBlockCoord(cPos.getZ());
+                endZ = ChunkSectionPos.getOffsetPos(cPos.getZ(), 15);
+
+                BlockPos.Mutable mutable = new BlockPos.Mutable();
+                for (int x = startX; x <= endX; x++) {
+                    mutable.setX(x);
+                    for (int y = startY; y <= endY; y++) {
+                        mutable.setY(y);
+                        for (int z = startZ; z <= endZ; z++) {
+                            mutable.setZ(z);
+                            if (predicate.test(chunk, mutable)) {
+                                boxes.add(new Box(mutable));
+                            }
+                        }
+                    }
+                }
+            });
+
+            return boxes;
+        }
+    }
+
+    private static Set<Box> highlightBlockUsingLibraries(Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult> result, int radius, CustomClientCommandSource source) throws CommandSyntaxException {
+        SharedHelpers helpers = new SharedHelpers(source);
+
+        Set<String> blocks = result.map(
+            blockResult -> Collections.singleton(Registries.BLOCK.getId(blockResult.blockState().getBlock()).getPath()),
+            tagResult -> StreamSupport.stream(net.minecraft.block.Block.STATE_IDS.spliterator(), false)
+                .filter(state -> state.isIn(tagResult.tag()))
+                .map(state -> Registries.BLOCK.getId(state.getBlock()).getPath())
+                .collect(Collectors.toSet())
+        );
+
+        boolean noneMatch = Features.getOresForVersion(helpers.mcVersion()).stream()
+            .filter(oreDecorator -> oreDecorator.isValidDimension(helpers.dimension()))
+            .noneMatch(oreDecorator -> blocks.contains(oreDecorator.getDefaultOreBlock().getName()));
+
+        if (noneMatch) {
+            throw COULD_NOT_HIGHLIGHT_EXCEPTION.create();
         }
 
         BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
@@ -84,7 +164,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         final Set<Box> boxes = new HashSet<>();
         BlockPos center = BlockPos.ofFloored(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
-        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(range, range), (x, y, z) -> new CPos(x, z));
+        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(radius, radius), CPos.Builder::create);
         StreamSupport.stream(spiralIterator.spliterator(), false)
             .flatMap(cPos -> {
                 Biome biome = biomeSource.getBiome((cPos.getX() << 4) + 8, 0, (cPos.getZ() << 4) + 8);
@@ -108,41 +188,24 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
                             });
                     });
                 return generatedOres.entrySet().stream()
-                    .filter(entry -> entry.getValue().getName().equals(blockString))
+                    .filter(entry -> blocks.contains(entry.getValue().getName()))
                     .filter(entry -> entry.getKey().getY() > 0)
                     .map(Map.Entry::getKey);
             })
             .limit(500)
-            .forEach(pos -> boxes.add(new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1)));
-
-        int colour = switch (blockString) {
-            case "diamond_ore" -> 0x00E1FF;
-            case "redstone_ore" -> 0xE10000;
-            case "iron_ore" -> 0xAFAFAF;
-            case "coal_ore" -> 0x191919;
-            case "lapis_ore" -> 0x3232E1;
-            case "emerald_ore" -> 0x00E100;
-            case "gold_ore" -> 0xE1E100;
-            case "copper_ore" -> 0xE17D4B;
-            case "quartz_ore" -> 0xE1E1E1;
-            case "ancient_debris" -> 0x964B19;
-            default -> 0x00FF00;
-        };
-        boxes.forEach(box -> RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, colour, -1));
-
-        if (boxes.isEmpty()) {
-            source.sendFeedback(Text.translatable("command.highlight.block.noneFound", blockString));
-        } else {
-            source.sendFeedback(Text.translatable("command.highlight.block.success", boxes.size(), blockString));
-        }
-        return Command.SINGLE_SUCCESS;
+            .forEach(pos -> boxes.add(new Box(SharedHelpers.fromBPos(pos))));
+        return boxes;
     }
 
     private static int highlightSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
-        return highlightSlimeChunk(source, 160); // 10 chunks
+        return highlightSlimeChunk(source, 10); // 10 chunks
     }
 
     private static int highlightSlimeChunk(CustomClientCommandSource source, int range) throws CommandSyntaxException {
+        if (Configs.UseWorldSimulation) {
+            throw UNSUPPORTED_BY_WORLD_SIMULATION_EXCEPTION.create();
+        }
+
         SharedHelpers helpers = new SharedHelpers(source);
 
         BlockPos center = BlockPos.ofFloored(source.getPosition());
@@ -154,7 +217,7 @@ public class HighlightCommand extends ClientCommand implements SharedHelpers.Exc
         }
 
         ChunkRand rand = new ChunkRand();
-        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(range, range), (x, y, z) -> new CPos(x, z));
+        SpiralIterator<CPos> spiralIterator = new SpiralIterator<>(centerChunk, new CPos(range, range), CPos.Builder::create);
         StreamSupport.stream(spiralIterator.spliterator(), false)
             .filter(cPos -> {
                 SlimeChunk.Data data = slimeChunk.at(cPos.getX(), cPos.getZ(), true);
