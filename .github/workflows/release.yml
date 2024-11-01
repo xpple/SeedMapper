@@ -18,9 +18,9 @@ jobs:
           java-version: '21'
           distribution: 'adopt'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: build
+        uses: gradle/actions/setup-gradle@v4
+      - name: Build
+        run: ./gradlew build
       - name: Hash jar
         run: sha256sum build/libs/*[^-dev].jar
       - name: Upload asset
