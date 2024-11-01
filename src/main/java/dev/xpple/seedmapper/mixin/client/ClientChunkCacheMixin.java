@@ -9,16 +9,19 @@ import dev.xpple.seedmapper.util.config.Configs;
 import dev.xpple.seedmapper.util.maps.SimpleBlockMap;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import net.minecraft.SharedConstants;
-import net.minecraft.block.Block;
-import net.minecraft.client.world.ClientChunkManager;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.ChunkData;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.client.multiplayer.ClientChunkCache;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -27,20 +30,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static dev.xpple.seedmapper.SeedMapper.CLIENT;
+@Mixin(ClientChunkCache.class)
+public class ClientChunkCacheMixin {
 
-@Mixin(ClientChunkManager.class)
-public class MixinClientChunkManager {
+    @Shadow @Final ClientLevel level;
 
-    @Inject(method = "loadChunkFromPacket", at = @At("RETURN"))
-    private void onLoadChunk(int x, int z, PacketByteBuf buf, NbtCompound nbt, Consumer<ChunkData.BlockEntityVisitor> consumer, CallbackInfoReturnable<WorldChunk> cir) {
+    @Inject(method = "replaceWithPacketData", at = @At("RETURN"))
+    private void onLoadChunk(int x, int z, FriendlyByteBuf buf, CompoundTag nbt, Consumer<ClientboundLevelChunkPacketData.BlockEntityTagOutput> consumer, CallbackInfoReturnable<LevelChunk> cir) {
         if (Configs.AutoOverlay) {
-            String dimensionPath = CLIENT.world.getRegistryKey().getValue().getPath();
+            String dimensionPath = this.level.dimension().location().getPath();
             Dimension dimension = Dimension.fromString(dimensionPath);
             if (dimension == null) {
                 return;
             }
-            MCVersion mcVersion = MCVersion.fromString(SharedConstants.getGameVersion().getName());
+            MCVersion mcVersion = MCVersion.fromString(SharedConstants.getCurrentVersion().getName());
             if (mcVersion == null) {
                 return;
             }
@@ -52,15 +55,15 @@ public class MixinClientChunkManager {
             TerrainGenerator generator = TerrainGenerator.of(dimension, biomeSource);
             SimpleBlockMap map = new SimpleBlockMap(dimension);
 
-            BlockPos.Mutable mutable = new BlockPos.Mutable();
+            BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
-            final WorldChunk chunk = cir.getReturnValue();
+            final LevelChunk chunk = cir.getReturnValue();
             final ChunkPos chunkPos = chunk.getPos();
 
-            Map<Box, Block> boxes = new HashMap<>();
-            for (int _x = chunkPos.getStartX(); _x <= chunkPos.getEndX(); _x++) {
+            Map<AABB, Block> boxes = new HashMap<>();
+            for (int _x = chunkPos.getMinBlockX(); _x <= chunkPos.getMaxBlockX(); _x++) {
                 mutable.setX(_x);
-                for (int _z = chunkPos.getStartZ(); _z <= chunkPos.getEndZ(); _z++) {
+                for (int _z = chunkPos.getMinBlockZ(); _z <= chunkPos.getMaxBlockZ(); _z++) {
                     mutable.setZ(_z);
                     final var column = generator.getColumnAt(_x, _z);
                     final Biome biome = biomeSource.getBiome(_x, 0, _z);
@@ -74,7 +77,7 @@ public class MixinClientChunkManager {
                         if (map.get(terrainBlock) == column[y].getId()) {
                             continue;
                         }
-                        boxes.put(new Box(mutable), terrainBlock);
+                        boxes.put(new AABB(mutable), terrainBlock);
                     }
                 }
             }

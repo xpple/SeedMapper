@@ -1,34 +1,41 @@
 package dev.xpple.seedmapper.command;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
+import com.seedfinding.mccore.state.Dimension;
+import com.seedfinding.mccore.version.MCVersion;
+import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
+import dev.xpple.seedmapper.util.SeedDatabaseHelper;
+import dev.xpple.seedmapper.util.config.Configs;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientCommandSource;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.ChatFormatting;
+import net.minecraft.SharedConstants;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static dev.xpple.seedmapper.SeedMapper.CLIENT;
-import static dev.xpple.seedmapper.SeedMapper.MOD_NAME;
-import static dev.xpple.seedmapper.util.ChatBuilder.*;
+public class CustomClientCommandSource extends ClientSuggestionProvider implements FabricClientCommandSource {
 
-public class CustomClientCommandSource extends ClientCommandSource implements FabricClientCommandSource {
-
+    private final Minecraft client;
     private final Entity entity;
-    private final Vec3d position;
-    private final Vec2f rotation;
-    private final ClientWorld world;
+    private final Vec3 position;
+    private final Vec2 rotation;
+    private final ClientLevel world;
     private final Map<String, Object> meta;
 
-    public CustomClientCommandSource(ClientPlayNetworkHandler networkHandler, MinecraftClient client, Entity entity, Vec3d position, Vec2f rotation, ClientWorld world, Map<String, Object> meta) {
-        super(networkHandler, client);
+    public CustomClientCommandSource(ClientPacketListener listener, Minecraft minecraft, Entity entity, Vec3 position, Vec2 rotation, ClientLevel world, Map<String, Object> meta) {
+        super(listener, minecraft);
 
+        this.client = minecraft;
         this.entity = entity;
         this.position = position;
         this.rotation = rotation;
@@ -40,29 +47,28 @@ public class CustomClientCommandSource extends ClientCommandSource implements Fa
         if (source instanceof CustomClientCommandSource custom) {
             return custom;
         }
-        return new CustomClientCommandSource(CLIENT.getNetworkHandler(), CLIENT, source.getEntity(), source.getPosition(), source.getRotation(), source.getWorld(), new HashMap<>());
+        return new CustomClientCommandSource(Minecraft.getInstance().getConnection(), Minecraft.getInstance(), source.getEntity(), source.getPosition(), source.getRotation(), source.getWorld(), new HashMap<>());
     }
 
     @Override
-    public void sendFeedback(Text message) {
-        message = chain(dark("["), accent(MOD_NAME), dark("] "), message);
-        CLIENT.inGameHud.getChatHud().addMessage(message);
-        CLIENT.getNarratorManager().narrate(message);
+    public void sendFeedback(Component message) {
+        this.client.gui.getChat().addMessage(message);
+        this.client.getNarrator().sayNow(message);
     }
 
     @Override
-    public void sendError(Text message) {
-        this.sendFeedback(error(Text.literal("").append(message)));
+    public void sendError(Component message) {
+        this.sendFeedback(Component.empty().append(message).withStyle(ChatFormatting.RED));
     }
 
     @Override
-    public MinecraftClient getClient() {
-        return CLIENT;
+    public Minecraft getClient() {
+        return this.client;
     }
 
     @Override
-    public ClientPlayerEntity getPlayer() {
-        return getClient().player;
+    public LocalPlayer getPlayer() {
+        return this.getClient().player;
     }
 
     @Override
@@ -71,17 +77,17 @@ public class CustomClientCommandSource extends ClientCommandSource implements Fa
     }
 
     @Override
-    public Vec3d getPosition() {
+    public Vec3 getPosition() {
         return this.position;
     }
 
     @Override
-    public Vec2f getRotation() {
+    public Vec2 getRotation() {
         return this.rotation;
     }
 
     @Override
-    public ClientWorld getWorld() {
+    public ClientLevel getWorld() {
         return this.world;
     }
 
@@ -91,23 +97,71 @@ public class CustomClientCommandSource extends ClientCommandSource implements Fa
     }
 
     public CustomClientCommandSource withEntity(Entity entity) {
-        return new CustomClientCommandSource(CLIENT.getNetworkHandler(), CLIENT, entity, this.position, this.rotation, this.world, this.meta);
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, entity, this.position, this.rotation, this.world, this.meta);
     }
 
-    public CustomClientCommandSource withPosition(Vec3d position) {
-        return new CustomClientCommandSource(CLIENT.getNetworkHandler(), CLIENT, this.entity, position, this.rotation, this.world, this.meta);
+    public CustomClientCommandSource withPosition(Vec3 position) {
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, position, this.rotation, this.world, this.meta);
     }
 
-    public CustomClientCommandSource withRotation(Vec2f rotation) {
-        return new CustomClientCommandSource(CLIENT.getNetworkHandler(), CLIENT, this.entity, this.position, rotation, this.world, this.meta);
+    public CustomClientCommandSource withRotation(Vec2 rotation) {
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, rotation, this.world, this.meta);
     }
 
-    public CustomClientCommandSource withWorld(ClientWorld world) {
-        return new CustomClientCommandSource(CLIENT.getNetworkHandler(), CLIENT, this.entity, this.position, this.rotation, world, this.meta);
+    public CustomClientCommandSource withWorld(ClientLevel world) {
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, this.rotation, world, this.meta);
     }
 
     public CustomClientCommandSource withMeta(String key, Object value) {
         this.meta.put(key, value);
         return this;
+    }
+
+    public Pair<SeedResolutionArgument.SeedResolution.Method, Long> getSeed() throws CommandSyntaxException {
+        Long seed;
+        for (SeedResolutionArgument.SeedResolution.Method method : Configs.SeedResolutionOrder) {
+            seed = switch (method) {
+                case COMMAND_SOURCE -> (Long) this.getMeta("seed");
+                case SEED_CONFIG -> Configs.Seed;
+                case SAVED_SEEDS_CONFIG -> {
+                    String key = Minecraft.getInstance().getConnection().getConnection().getRemoteAddress().toString();
+                    yield Configs.SavedSeeds.get(key);
+                }
+                case ONLINE_DATABASE -> {
+                    String key = Minecraft.getInstance().getConnection().getConnection().getRemoteAddress().toString();
+                    yield SeedDatabaseHelper.getSeed(key);
+                }
+            };
+            if (seed != null) {
+                return Pair.of(method, seed);
+            }
+        }
+        throw CommandExceptions.NO_SEED_AVAILABLE_EXCEPTION.create();
+    }
+
+    public Dimension getDimension() throws CommandSyntaxException {
+        Object dimensionMeta = this.getMeta("dimension");
+        if (dimensionMeta != null) {
+            return (Dimension) dimensionMeta;
+        }
+        String dimensionString = this.getWorld().dimension().location().getPath();
+        Dimension dimension = Dimension.fromString(dimensionString);
+        if (dimension == null) {
+            throw CommandExceptions.UNKNOWN_DIMENSION_EXCEPTION.create(dimensionString);
+        }
+        return dimension;
+    }
+
+    public MCVersion getVersion() throws CommandSyntaxException {
+        Object versionMeta = this.getMeta("version");
+        if (versionMeta != null) {
+            return (MCVersion) versionMeta;
+        }
+        String versionString = SharedConstants.getCurrentVersion().getName();
+        MCVersion mcVersion = MCVersion.fromString(versionString);
+        if (mcVersion == null) {
+            throw CommandExceptions.UNKNOWN_VERSION_EXCEPTION.create(versionString);
+        }
+        return mcVersion;
     }
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.Iterables;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.rand.ChunkRand;
@@ -24,44 +23,45 @@ import com.seedfinding.mcfeature.loot.ChestContent;
 import com.seedfinding.mcfeature.loot.ILoot;
 import com.seedfinding.mcfeature.loot.item.Item;
 import com.seedfinding.mcfeature.misc.SlimeChunk;
-import com.seedfinding.mcfeature.structure.*;
+import com.seedfinding.mcfeature.structure.Mineshaft;
+import com.seedfinding.mcfeature.structure.RegionStructure;
+import com.seedfinding.mcfeature.structure.RuinedPortal;
+import com.seedfinding.mcfeature.structure.Stronghold;
+import com.seedfinding.mcfeature.structure.Structure;
 import com.seedfinding.mcfeature.structure.generator.Generator;
 import com.seedfinding.mcfeature.structure.generator.Generators;
 import com.seedfinding.mcterrain.TerrainGenerator;
-import dev.xpple.seedmapper.command.ClientCommand;
+import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
-import dev.xpple.seedmapper.command.SharedHelpers;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.biome;
-import static dev.xpple.seedmapper.command.arguments.BiomeArgumentType.getBiome;
-import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentType.decoratorFactory;
-import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgumentType.getDecoratorFactory;
-import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.enchantedItem;
-import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgumentType.getEnchantedItem;
-import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.getStructureFactory;
-import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgumentType.structureFactory;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static dev.xpple.seedmapper.command.CommandExceptions.*;
+import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
+import static dev.xpple.seedmapper.command.arguments.DecoratorFactoryArgument.*;
+import static dev.xpple.seedmapper.command.arguments.EnchantedItemPredicateArgument.*;
+import static dev.xpple.seedmapper.command.arguments.StructureFactoryArgument.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
-public class LocateCommand extends ClientCommand implements SharedHelpers.Exceptions {
+public class LocateCommand {
 
-    @Override
-    protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
-        return dispatcher.register(literal(this.getRootLiteral())
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+        dispatcher.register(literal("sm:locate")
             .then(literal("biome")
                 .then(argument("biome", biome())
                     .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome")))))
@@ -80,38 +80,31 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
                         .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getEnchantedItem(ctx, "item")))))));
     }
 
-    @Override
-    protected String rootLiteral() {
-        return "locate";
-    }
-
     private static int locateBiome(CustomClientCommandSource source, Biome biome) throws CommandSyntaxException {
-        SharedHelpers helpers = new SharedHelpers(source);
-
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
+        BiomeSource biomeSource = BiomeSource.of(source.getDimension(), source.getVersion(), source.getSeed().getSecond());
         if (biome.getDimension() != biomeSource.getDimension()) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
-        BlockPos center = BlockPos.ofFloored(source.getPosition());
+        BlockPos center = BlockPos.containing(source.getPosition());
         BPos biomePos = locateBiome(biome::equals, new BPos(center.getX(), 0, center.getZ()), 6400, 8, biomeSource);
 
         if (biomePos == null) {
-            source.sendFeedback(Text.translatable("command.locate.biome.noneFound", biome.getName()));
-        } else {
-            source.sendFeedback(chain(
-                highlight(Text.translatable("command.locate.biome.foundAt", biome.getName())),
-                highlight(" "),
-                copy(
-                    hover(
-                        accent("x: " + biomePos.getX() + ", z: " + biomePos.getZ()),
-                        base(Text.translatable("command.locate.biome.copy", biome.getName()))
-                    ),
-                    String.format("%d ~ %d", biomePos.getX(), biomePos.getZ())
-                ),
-                highlight(".")
-            ));
+            throw NO_BIOME_FOUND_EXCEPTION.create(biome.getName());
         }
+
+        source.sendFeedback(chain(
+            highlight(Component.translatable("command.locate.biome.foundAt", biome.getName())),
+            highlight(" "),
+            copy(
+                hover(
+                    accent("x: " + biomePos.getX() + ", z: " + biomePos.getZ()),
+                    base(Component.translatable("command.locate.biome.copy", biome.getName()))
+                ),
+                String.format("%d ~ %d", biomePos.getX(), biomePos.getZ())
+            ),
+            highlight(".")
+        ));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -123,34 +116,32 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateStructure(CustomClientCommandSource source, FeatureFactory<? extends Structure<?, ?>> structureFactory) throws CommandSyntaxException {
-        SharedHelpers helpers = new SharedHelpers(source);
+        final Structure<?, ?> structure = structureFactory.create(source.getVersion());
 
-        final Structure<?, ?> structure = structureFactory.create(helpers.mcVersion());
-
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
+        BiomeSource biomeSource = BiomeSource.of(source.getDimension(), source.getVersion(), source.getSeed().getSecond());
         if (!structure.isValidDimension(biomeSource.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
-        BlockPos center = BlockPos.ofFloored(source.getPosition());
+        BlockPos center = BlockPos.containing(source.getPosition());
         BPos structurePos = locateStructure(structure, new BPos(center.getX(), center.getY(), center.getZ()), 6400, new ChunkRand(), biomeSource, TerrainGenerator.of(biomeSource));
 
         if (structurePos == null) {
-            source.sendFeedback(Text.translatable("command.locate.feature.structure.noneFound", structure.getName()));
-        } else {
-            source.sendFeedback(chain(
-                highlight(Text.translatable("command.locate.feature.structure.foundAt", structure.getName())),
-                highlight(" "),
-                copy(
-                    hover(
-                        accent("x: " + structurePos.getX() + ", z: " + structurePos.getZ()),
-                        base(Text.translatable("command.locate.feature.structure.copy", structure.getName()))
-                    ),
-                    String.format("%d ~ %d", structurePos.getX(), structurePos.getZ())
-                ),
-                highlight(".")
-            ));
+            throw CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(structure.getName());
         }
+
+        source.sendFeedback(chain(
+            highlight(Component.translatable("command.locate.feature.structure.foundAt", structure.getName())),
+            highlight(" "),
+            copy(
+                hover(
+                    accent("x: " + structurePos.getX() + ", z: " + structurePos.getZ()),
+                    base(Component.translatable("command.locate.feature.structure.copy", structure.getName()))
+                ),
+                String.format("%d ~ %d", structurePos.getX(), structurePos.getZ())
+            ),
+            highlight(".")
+        ));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -159,7 +150,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
             int chunkInRegion = regionStructure.getSpacing();
             int regionSize = chunkInRegion * 16;
 
-            final int border = 30_000_000;
+            final int border = Level.MAX_LEVEL_SIZE;
             SpiralIterator<RPos> spiralIterator = new SpiralIterator<>(center.toRegionPos(regionSize), new BPos(-border, 0, -border).toRegionPos(regionSize), new BPos(border, 0, border).toRegionPos(regionSize), 1, (x, y, z) -> new RPos(x, z, regionSize));
             return StreamSupport.stream(spiralIterator.spliterator(), false)
                 .map(rPos -> regionStructure.getInRegion(source.getWorldSeed(), rPos.getX(), rPos.getZ(), chunkRand))
@@ -195,28 +186,26 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateDecorator(CustomClientCommandSource source, FeatureFactory<? extends Decorator<?, ?>> decoratorFactory) throws CommandSyntaxException {
-        SharedHelpers helpers = new SharedHelpers(source);
+        final Decorator<?, ?> decorator = decoratorFactory.create(source.getVersion());
 
-        final Decorator<?, ?> decorator = decoratorFactory.create(helpers.mcVersion());
-
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
+        BiomeSource biomeSource = BiomeSource.of(source.getDimension(), source.getVersion(), source.getSeed().getSecond());
         if (!decorator.isValidDimension(biomeSource.getDimension())) {
             throw INVALID_DIMENSION_EXCEPTION.create();
         }
 
-        BlockPos center = BlockPos.ofFloored(source.getPosition());
+        BlockPos center = BlockPos.containing(source.getPosition());
         BPos decoratorPos = locateDecorator(decorator, new BPos(center.getX(), center.getY(), center.getZ()).toChunkPos(), 6400, biomeSource, new ChunkRand());
 
         if (decoratorPos == null) {
-            source.sendFeedback(Text.translatable("command.locate.feature.decorator.noneFound", decorator.getName()));
+            source.sendFeedback(Component.translatable("command.locate.feature.decorator.noneFound", decorator.getName()));
         } else {
             source.sendFeedback(chain(
-                highlight(Text.translatable("command.locate.feature.decorator.foundAt", decorator.getName())),
+                highlight(Component.translatable("command.locate.feature.decorator.foundAt", decorator.getName())),
                 highlight(" "),
                 copy(
                     hover(
                         accent("x: " + decoratorPos.getX() + ", z: " + decoratorPos.getZ()),
-                        base(Text.translatable("command.locate.feature.decorator.copy", decorator.getName()))
+                        base(Component.translatable("command.locate.feature.decorator.copy", decorator.getName()))
                     ),
                     String.format("%d ~ %d", decoratorPos.getX(), decoratorPos.getZ())
                 ),
@@ -256,34 +245,32 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
-        SharedHelpers helpers = new SharedHelpers(source);
-
-        BlockPos center = BlockPos.ofFloored(source.getPosition());
+        BlockPos center = BlockPos.containing(source.getPosition());
         CPos centerChunk = new CPos(center.getX() >> 4, center.getZ() >> 4);
 
-        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(helpers.mcVersion()), centerChunk, 6400, helpers.seed(), new ChunkRand(), helpers.dimension());
+        CPos slimeChunkPos = locateSlimeChunk(new SlimeChunk(source.getVersion()), centerChunk, 6400, source.getSeed().getSecond(), new ChunkRand(), source.getDimension());
         if (slimeChunkPos == null) {
-            source.sendFeedback(Text.translatable("command.locate.feature.slimeChunk.noneFound"));
+            source.sendFeedback(Component.translatable("command.locate.feature.slimeChunk.noneFound"));
         } else {
             int x = (slimeChunkPos.getX() << 4) + 9;
             int z = (slimeChunkPos.getZ() << 4) + 9;
             source.sendFeedback(chain(
-                highlight(Text.translatable("command.locate.feature.slimeChunk.foundAt")),
+                highlight(Component.translatable("command.locate.feature.slimeChunk.foundAt")),
                 highlight(" "),
                 copy(
                     hover(
                         accent("x: " + x + ", z: " + z),
-                        base(Text.translatable("command.locate.feature.slimeChunk.copy"))
+                        base(Component.translatable("command.locate.feature.slimeChunk.copy"))
                     ),
                     String.format("%d ~ %d", x, z)
                 ),
                 highlight(" ("),
-                highlight(Text.translatable("command.locate.feature.slimeChunk.chunk")),
+                highlight(Component.translatable("command.locate.feature.slimeChunk.chunk")),
                 highlight(" "),
                 copy(
                     hover(
                         accent(slimeChunkPos.getX() + " " + slimeChunkPos.getZ()),
-                        base(Text.translatable("command.locate.feature.slimeChunk.copyChunk"))
+                        base(Component.translatable("command.locate.feature.slimeChunk.copyChunk"))
                     ),
                     String.format("%d %d", slimeChunkPos.getX(), slimeChunkPos.getZ())
                 ),
@@ -307,32 +294,32 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
     }
 
     private static int locateLoot(CustomClientCommandSource source, int amount, Pair<String, Predicate<Item>> item) throws CommandSyntaxException {
-        SharedHelpers helpers = new SharedHelpers(source);
+        Dimension dimension = source.getDimension();
 
         String itemString = item.getFirst();
 
-        Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(helpers.mcVersion()).stream()
+        Set<RegionStructure<?, ?>> lootableStructures = Features.getStructuresForVersion(source.getVersion()).stream()
             .filter(structure -> structure instanceof ILoot)
-            .filter(structure -> structure.isValidDimension(helpers.dimension()))
+            .filter(structure -> structure.isValidDimension(dimension))
             .map(structure -> (RegionStructure<?, ?>) structure)
             .collect(Collectors.toSet());
 
-        BiomeSource biomeSource = BiomeSource.of(helpers.dimension(), helpers.mcVersion(), helpers.seed());
+        BiomeSource biomeSource = BiomeSource.of(dimension, source.getVersion(), source.getSeed().getSecond());
 
-        BlockPos center = BlockPos.ofFloored(source.getPosition());
+        BlockPos center = BlockPos.containing(source.getPosition());
 
         List<BPos> lootPositions = locateLoot(item.getSecond(), i -> i.getName().equals(itemString), amount, new BPos(center.getX(), center.getY(), center.getZ()), new ChunkRand(), biomeSource, lootableStructures);
         if (lootPositions == null || lootPositions.isEmpty()) {
-            source.sendFeedback(Text.translatable("command.locate.loot.noneFound", itemString));
+            source.sendFeedback(Component.translatable("command.locate.loot.noneFound", itemString));
         } else {
             source.sendFeedback(chain(
-                highlight(Text.translatable("command.locate.loot.foundAt", amount, itemString)),
+                highlight(Component.translatable("command.locate.loot.foundAt", amount, itemString)),
                 highlight(" "),
                 join(highlight(", "), lootPositions.stream().map(bPos ->
                     copy(
                         hover(
                             accent("x: " + bPos.getX() + ", z: " + bPos.getZ()),
-                            base(Text.translatable("command.locate.loot.copy", itemString))
+                            base(Component.translatable("command.locate.loot.copy", itemString))
                         ),
                         String.format("%d ~ %d", bPos.getX(), bPos.getZ())
                     )
@@ -366,7 +353,7 @@ public class LocateCommand extends ClientCommand implements SharedHelpers.Except
 
             int chunkInRegion = structure.getSpacing();
             int regionSize = chunkInRegion * 16;
-            final int border = 30_000_000;
+            final int border = Level.MAX_LEVEL_SIZE;
             Iterator<RPos> iterator = new SpiralIterator<>(center.toRegionPos(regionSize), new BPos(-border, 0, -border).toRegionPos(regionSize), new BPos(border, 0, border).toRegionPos(regionSize), 1, (x, y, z) -> new RPos(x, z, regionSize)).iterator();
             structureInfo.add(new Triplet<>(structure, structureGenerator, iterator));
         }

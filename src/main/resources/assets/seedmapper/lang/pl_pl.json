@@ -1,20 +1,12 @@
 {
-  "commands.exceptions.dimensionNotSupported": "Wymiar \"%s\" nie jest wspierany.",
-  "commands.exceptions.versionNotFound": "Nie znaleziono wersji \"%s\"",
-  "commands.exceptions.nullPointerException": "\"%s\" jest niezdefiniowany.",
   "commands.exceptions.invalidDimension": "Invalid dimension.",
-  "commands.exceptions.biomeNotFound": "Biome \"%s\" was not found.",
-  "commands.exceptions.structureNotFound": "Structure \"%s\" was not found.",
-  "commands.exceptions.lootNotFound": "Item \"%s\" was not found.",
-  "commands.exceptions.lootItemNotFound": "Loot item \"%s\" was not found.",
-  "commands.exceptions.blockNotFound": "Block \"%s\" was not found.",
+  "commands.exceptions.noBiomeFound": "Couldn't locate %s within 6400 blocks.",
+  "commands.exceptions.noStructureFound": "Couldn't locate %s within 6400 blocks.",
   "commands.exceptions.expectedWithOrWithout": "Expected \"with\" or \"without\".",
   "commands.exceptions.unknownEnchantment": "Unknown enchantment \"%s\".",
   "commands.exceptions.levelOutOfBounds": "Level out of bounds.",
   "commands.exceptions.incompatibleEnchantment": "Incompatible enchantment.",
   "commands.exceptions.incompleteArgument": "Incomplete argument.",
-
-  "arguments.exceptions.tooFewArguments": "Za mała ilość argumentów.",
 
   "command.clearscreen.empty": "Couldn't clear any renders.",
   "command.clearscreen.success": "Cleared %d renders.",
@@ -22,10 +14,8 @@
   "command.highlight.block.noneFound": "No %s could be highlighted.",
   "command.highlight.block.success": "Highlighted %d %s.",
 
-  "command.locate.biome.noneFound": "Couldn't locate %s within 6400 blocks.",
   "command.locate.biome.foundAt": "%s found at",
   "command.locate.biome.copy": "Click to copy coordinates of %s.",
-  "command.locate.feature.structure.noneFound": "Couldn't locate %s within 6400 blocks.",
   "command.locate.feature.structure.foundAt": "%s found at",
   "command.locate.feature.structure.copy": "Click to copy coordinates of %s.",
   "command.locate.feature.slimeChunk.noneFound": "Couldn't locate a slime chunk within 6400 blocks.",

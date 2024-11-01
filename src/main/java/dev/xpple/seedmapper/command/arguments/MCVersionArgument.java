@@ -8,39 +8,39 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.seedfinding.mccore.version.MCVersion;
-import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.command.CommandExceptions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public class MCVersionArgumentType implements ArgumentType<MCVersion>, SharedHelpers.Exceptions {
+public class MCVersionArgument implements ArgumentType<MCVersion> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("1.17.1", "1.15", "b1.6.4");
 
-    private static final SimpleCommandExceptionType DISALLOWED_VERSION_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.disallowedVersion"));
+    private static final SimpleCommandExceptionType DISALLOWED_VERSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.disallowedVersion"));
 
     private MCVersion equalOrNewerThan = MCVersion.oldest();
     private boolean releaseOnly = true;
 
-    public static MCVersionArgumentType mcVersion() {
-        return new MCVersionArgumentType();
+    public static MCVersionArgument mcVersion() {
+        return new MCVersionArgument();
     }
 
     public static MCVersion getMcVersion(CommandContext<FabricClientCommandSource> context, String name) {
         return context.getArgument(name, MCVersion.class);
     }
 
-    public MCVersionArgumentType all() {
+    public MCVersionArgument all() {
         this.releaseOnly = false;
         return this;
     }
 
-    public MCVersionArgumentType equalOrNewerThan(MCVersion mcVersion) {
+    public MCVersionArgument equalOrNewerThan(MCVersion mcVersion) {
         this.equalOrNewerThan = mcVersion;
         return this;
     }
@@ -52,7 +52,7 @@ public class MCVersionArgumentType implements ArgumentType<MCVersion>, SharedHel
         MCVersion mcVersion = MCVersion.fromString(versionString);
         if (mcVersion == null) {
             reader.setCursor(cursor);
-            throw VERSION_NOT_FOUND_EXCEPTION.create(versionString);
+            throw CommandExceptions.UNKNOWN_VERSION_EXCEPTION.create(versionString);
         }
         if (this.releaseOnly && mcVersion.isOlderThan(MCVersion.v1_0)) {
             throw DISALLOWED_VERSION_EXCEPTION.create();
@@ -69,7 +69,7 @@ public class MCVersionArgumentType implements ArgumentType<MCVersion>, SharedHel
             .filter(mcVersion -> !this.releaseOnly || mcVersion.isNewerOrEqualTo(MCVersion.v1_0))
             .filter(mcVersion -> mcVersion.isNewerOrEqualTo(this.equalOrNewerThan))
             .map(mcVersion -> mcVersion.name);
-        return CommandSource.suggestMatching(versions, builder);
+        return SharedSuggestionProvider.suggest(versions, builder);
     }
 
     @Override

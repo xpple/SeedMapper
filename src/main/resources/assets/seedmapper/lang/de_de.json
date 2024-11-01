@@ -1,20 +1,12 @@
 {
-  "commands.exceptions.dimensionNotSupported": "Dimension \"%s\" wird nicht unterstützt.",
-  "commands.exceptions.versionNotFound": "Version \"%s\" konnte nicht gefunden werden.",
-  "commands.exceptions.nullPointerException": "\"%s\" hat keinen Wert.",
   "commands.exceptions.invalidDimension": "Ungültige Dimension.",
-  "commands.exceptions.biomeNotFound": "Biom \"%s\" wurde nicht gefunden.",
-  "commands.exceptions.structureNotFound": "Bauwerk \"%s\" wurde nicht gefunden.",
-  "commands.exceptions.lootNotFound": "Item \"%s\" was not found.",
-  "commands.exceptions.lootItemNotFound": "Gegenstand \"%s\" wurde nicht gefunden.",
-  "commands.exceptions.blockNotFound": "Block \"%s\" wurde nicht gefunden.",
+  "commands.exceptions.noBiomeFound": "Konnte %s innerhalb von 6400 Blöcken nicht finden.",
+  "commands.exceptions.noStructureFound": "Konnte %s innerhalb von 6400 Blöcken nicht finden.",
   "commands.exceptions.expectedWithOrWithout": "Expected \"with\" or \"without\".",
   "commands.exceptions.unknownEnchantment": "Unknown enchantment \"%s\".",
   "commands.exceptions.levelOutOfBounds": "Level out of bounds.",
   "commands.exceptions.incompatibleEnchantment": "Incompatible enchantment.",
   "commands.exceptions.incompleteArgument": "Incomplete argument.",
-
-  "arguments.exceptions.tooFewArguments": "Zu wenig Argumente.",
 
   "command.clearscreen.empty": "Couldn't clear any renders.",
   "command.clearscreen.success": "Cleared %d renders.",
@@ -22,10 +14,8 @@
   "command.highlight.block.noneFound": "Kein %s zum hervorheben konnte gefunden werden.",
   "command.highlight.block.success": "%d %s wurde hervorgehoben.",
 
-  "command.locate.biome.noneFound": "Konnte %s innerhalb von 6400 Blöcken nicht finden.",
   "command.locate.biome.foundAt": "%s gefunden bei",
   "command.locate.biome.copy": "Klicke um die Koordinaten von %s zu kopieren.",
-  "command.locate.feature.structure.noneFound": "Konnte %s innerhalb von 6400 Blöcken nicht finden.",
   "command.locate.feature.structure.foundAt": "%s gefunden bei",
   "command.locate.feature.structure.copy": "Klicke um die Koordinaten von %s zu kopieren.",
   "command.locate.feature.slimeChunk.noneFound": "Konnte Slime Chunks innerhalb von 6400 Blöcken nicht finden.",

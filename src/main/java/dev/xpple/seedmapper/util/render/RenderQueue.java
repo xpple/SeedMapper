@@ -1,8 +1,14 @@
 package dev.xpple.seedmapper.util.render;
 
-import net.minecraft.util.math.Box;
+import net.minecraft.world.phys.AABB;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class RenderQueue {
     private static int tickCounter = 0;
@@ -13,7 +19,7 @@ public class RenderQueue {
         addQueue.add(new AddQueueEntry(layer, key, shape, life));
     }
 
-    public static void addCuboid(Layer layer, Object key, Box cuboid, Integer color, int life) {
+    public static void addCuboid(Layer layer, Object key, AABB cuboid, Integer color, int life) {
         add(layer, key, new Cuboid(cuboid, Objects.requireNonNullElse(color, 0xFB8919)), life);
     }
 

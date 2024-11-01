@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class Features {
-    public static Map<String, FeatureFactory<? extends Structure<?, ?>>> STRUCTURE_REGISTRY = new HashMap<>();
-    public static Map<String, FeatureFactory<? extends OreDecorator<?, ?>>> ORE_REGISTRY = new HashMap<>();
-    public static Map<String, FeatureFactory<? extends Decorator<?, ?>>> DECORATOR_REGISTRY = new HashMap<>();
+    public static final Map<String, FeatureFactory<? extends Structure<?, ?>>> STRUCTURE_REGISTRY = new HashMap<>();
+    public static final Map<String, FeatureFactory<? extends OreDecorator<?, ?>>> ORE_REGISTRY = new HashMap<>();
+    public static final Map<String, FeatureFactory<? extends Decorator<?, ?>>> DECORATOR_REGISTRY = new HashMap<>();
 
     static {
         STRUCTURE_REGISTRY.put("bastion_remnant", BastionRemnant::new);

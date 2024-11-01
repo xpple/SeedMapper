@@ -1,3 +1,3 @@
 accessWidener    v1    named
-accessible    class    net/minecraft/client/render/RenderLayer$MultiPhase
-accessible    class    net/minecraft/client/render/RenderLayer$MultiPhaseParameters
+accessible    class    net/minecraft/client/renderer/RenderType$CompositeRenderType
+accessible    class    net/minecraft/client/renderer/RenderType$CompositeState

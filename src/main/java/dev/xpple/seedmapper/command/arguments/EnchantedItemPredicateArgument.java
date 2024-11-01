@@ -15,10 +15,10 @@ import com.seedfinding.mcfeature.loot.enchantment.EnchantmentInstance;
 import com.seedfinding.mcfeature.loot.enchantment.Enchantments;
 import com.seedfinding.mcfeature.loot.item.Item;
 import com.seedfinding.mcfeature.loot.item.Items;
-import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.command.CommandExceptions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,22 +29,22 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<String, Predicate<Item>>>, SharedHelpers.Exceptions {
+public class EnchantedItemPredicateArgument implements ArgumentType<Pair<String, Predicate<Item>>> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("iron_axe", "diamond_sword with sharpness 3", "diamond_chestplate with protection * without thorns *");
     private static final Stream<String> items = Items.getItems().values().stream().map(item -> item.get().getName());
     private static final String[] lootableItems = new String[]{"diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings", "diamond_pickaxe", "diamond_sword", "golden_horse_armor", "string", "bell", "poisonous_potato", "gold_ingot", "iron_boots", "iron_leggings", "flint_and_steel", "beetroot_seeds", "carrot", "gold_block", "gold_nugget", "bamboo", "diamond_horse_armor", "paper", "golden_hoe", "gunpowder", "lapis_lazuli", "iron_horse_armor", "diamond_chestplate", "diamond_shovel", "golden_chestplate", "golden_leggings", "golden_carrot", "filled_map", "coal", "diamond_boots", "compass", "golden_boots", "cooked_salmon", "iron_shovel", "suspicious_stew", "golden_pickaxe", "emerald", "golden_shovel", "sand", "leather_boots", "heart_of_the_sea", "iron_nugget", "wheat", "golden_sword", "light_weighted_pressure_plate", "pumpkin", "iron_pickaxe", "flint", "golden_axe", "potato", "cooked_cod", "map", "feather", "leather_chestplate", "leather_leggings", "enchanted_book", "iron_chestplate", "moss_block", "book", "clock", "iron_sword", "golden_apple", "enchanted_golden_apple", "fire_charge", "spider_eye", "bone", "prismarine_crystals", "obsidian", "glistering_melon_slice", "rotten_flesh", "experience_bottle", "diamond", "golden_helmet", "iron_helmet", "diamond_helmet", "leather_helmet", "iron_ingot", "saddle", "tnt", "diamond_leggings"};
 
-    private static final SimpleCommandExceptionType EXPECTED_WITH_OR_WITHOUT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.expectedWithOrWithout"));
-    private static final DynamicCommandExceptionType UNKNOWN_ENCHANTMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.exceptions.unknownEnchantment", arg));
-    private static final SimpleCommandExceptionType LEVEL_OUT_OF_BOUNDS_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.levelOutOfBounds"));
-    private static final SimpleCommandExceptionType INCOMPATIBLE_ENCHANTMENT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.incompatibleEnchantment"));
-    private static final SimpleCommandExceptionType INCOMPLETE_ARGUMENT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.exceptions.incompleteArgument"));
+    private static final SimpleCommandExceptionType EXPECTED_WITH_OR_WITHOUT_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.expectedWithOrWithout"));
+    private static final DynamicCommandExceptionType UNKNOWN_ENCHANTMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownEnchantment", arg));
+    private static final SimpleCommandExceptionType LEVEL_OUT_OF_BOUNDS_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.levelOutOfBounds"));
+    private static final SimpleCommandExceptionType INCOMPATIBLE_ENCHANTMENT_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.incompatibleEnchantment"));
+    private static final SimpleCommandExceptionType INCOMPLETE_ARGUMENT_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.incompleteArgument"));
 
     private boolean lootOnly = false;
 
-    public static EnchantedItemPredicateArgumentType enchantedItem() {
-        return new EnchantedItemPredicateArgumentType();
+    public static EnchantedItemPredicateArgument enchantedItem() {
+        return new EnchantedItemPredicateArgument();
     }
 
     @SuppressWarnings("unchecked")
@@ -52,7 +52,7 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
         return (Pair<String, Predicate<Item>>) context.getArgument(name, Pair.class);
     }
 
-    public EnchantedItemPredicateArgumentType loot() {
+    public EnchantedItemPredicateArgument loot() {
         this.lootOnly = true;
         return this;
     }
@@ -134,9 +134,9 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
             this.suggestor = builder -> {
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
                 if (lootOnly) {
-                    CommandSource.suggestMatching(lootableItems, newBuilder);
+                    SharedSuggestionProvider.suggest(lootableItems, newBuilder);
                 } else {
-                    CommandSource.suggestMatching(items, builder);
+                    SharedSuggestionProvider.suggest(items, builder);
                 }
 
                 builder.add(newBuilder);
@@ -148,11 +148,11 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
                 .filter(i -> i.getName().equals(itemString))
                 .findAny().orElseThrow(() -> {
                     this.reader.setCursor(cursor);
-                    return ITEM_NOT_FOUND_EXCEPTION.create(itemString);
+                    return CommandExceptions.UNKNOWN_ITEM_EXCEPTION.create(itemString);
                 });
             if (lootOnly && Arrays.stream(lootableItems).noneMatch(i -> i.equals(item.getName()))) {
                 this.reader.setCursor(cursor);
-                throw LOOT_ITEM_NOT_FOUND_EXCEPTION.create(itemString);
+                throw CommandExceptions.UNKNOWN_LOOT_ITEM_EXCEPTION.create(itemString);
             }
             return item;
         }
@@ -161,7 +161,7 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
             int cursor = this.reader.getCursor();
             this.suggestor = builder -> {
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
-                CommandSource.suggestMatching(Arrays.asList("with", "without"), newBuilder);
+                SharedSuggestionProvider.suggest(Arrays.asList("with", "without"), newBuilder);
                 builder.add(newBuilder);
             };
 
@@ -182,7 +182,7 @@ public class EnchantedItemPredicateArgumentType implements ArgumentType<Pair<Str
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
                 Stream<String> enchantmentStrings = Enchantments.getFor(MCVersion.latest()).stream()
                     .map(Enchantment::getName);
-                CommandSource.suggestMatching(enchantmentStrings, newBuilder);
+                SharedSuggestionProvider.suggest(enchantmentStrings, newBuilder);
                 builder.add(newBuilder);
             };
 

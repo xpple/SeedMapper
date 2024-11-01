@@ -3,29 +3,30 @@ package dev.xpple.seedmapper.util.config;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SeedResolutionAdapter extends TypeAdapter<SeedResolution> {
+public class SeedResolutionAdapter extends TypeAdapter<SeedResolutionArgument.SeedResolution> {
     @Override
-    public void write(JsonWriter writer, SeedResolution resolution) throws IOException {
+    public void write(JsonWriter writer, SeedResolutionArgument.SeedResolution resolution) throws IOException {
         writer.beginArray();
-        for (SeedResolution.Method method : resolution) {
-            writer.value(method.asString());
+        for (SeedResolutionArgument.SeedResolution.Method method : resolution) {
+            writer.value(method.getSerializedName());
         }
         writer.endArray();
     }
 
     @Override
-    public SeedResolution read(JsonReader reader) throws IOException {
-        List<SeedResolution.Method> methods = new ArrayList<>();
+    public SeedResolutionArgument.SeedResolution read(JsonReader reader) throws IOException {
+        List<SeedResolutionArgument.SeedResolution.Method> methods = new ArrayList<>();
         reader.beginArray();
         while (reader.hasNext()) {
-            methods.add(SeedResolution.Method.CODEC.byId(reader.nextString()));
+            methods.add(SeedResolutionArgument.SeedResolution.Method.CODEC.byName(reader.nextString()));
         }
         reader.endArray();
-        return new SeedResolution(methods);
+        return new SeedResolutionArgument.SeedResolution(methods);
     }
 }

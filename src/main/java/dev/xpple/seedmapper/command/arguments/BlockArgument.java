@@ -6,45 +6,45 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import dev.xpple.seedmapper.command.SharedHelpers;
-import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import dev.xpple.seedmapper.command.CommandExceptions;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class BlockArgumentType implements ArgumentType<Block>, SharedHelpers.Exceptions {
+public class BlockArgument implements ArgumentType<Block> {
 
-    private BlockArgumentType() {
+    private BlockArgument() {
     }
 
     private static final Collection<String> EXAMPLES = Arrays.asList("stone", "command_block", "minecraft:emerald_ore");
 
-    public static BlockArgumentType block() {
-        return new BlockArgumentType();
+    public static BlockArgument block() {
+        return new BlockArgument();
     }
 
-    public static Block getBlock(CommandContext<? extends CommandSource> context, String name) {
+    public static Block getBlock(CommandContext<? extends SharedSuggestionProvider> context, String name) {
         return context.getArgument(name, Block.class);
     }
 
     @Override
     public Block parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
-        Identifier identifier = Identifier.fromCommandInput(reader);
-        if (!Registries.BLOCK.containsId(identifier)) {
+        ResourceLocation resourceLocation = ResourceLocation.read(reader);
+        if (!BuiltInRegistries.BLOCK.containsKey(resourceLocation)) {
             reader.setCursor(cursor);
-            throw BLOCK_NOT_FOUND_EXCEPTION.createWithContext(reader, identifier);
+            throw CommandExceptions.UNKNOWN_BLOCK_EXCEPTION.createWithContext(reader, resourceLocation);
         }
-        return Registries.BLOCK.get(identifier);
+        return BuiltInRegistries.BLOCK.getValue(resourceLocation);
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestIdentifiers(Registries.BLOCK.getIds(), builder);
+        return SharedSuggestionProvider.suggestResource(BuiltInRegistries.BLOCK.keySet(), builder);
     }
 
     @Override

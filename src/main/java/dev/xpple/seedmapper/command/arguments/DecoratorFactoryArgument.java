@@ -7,22 +7,22 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.seedfinding.mcfeature.decorator.Decorator;
-import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class DecoratorFactoryArgumentType implements ArgumentType<FeatureFactory<? extends Decorator<?, ?>>>, SharedHelpers.Exceptions {
+public class DecoratorFactoryArgument implements ArgumentType<FeatureFactory<? extends Decorator<?, ?>>> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("desert_well", "end_gateway");
 
-    public static DecoratorFactoryArgumentType decoratorFactory() {
-        return new DecoratorFactoryArgumentType();
+    public static DecoratorFactoryArgument decoratorFactory() {
+        return new DecoratorFactoryArgument();
     }
 
     @SuppressWarnings("unchecked")
@@ -37,14 +37,14 @@ public class DecoratorFactoryArgumentType implements ArgumentType<FeatureFactory
         FeatureFactory<? extends Decorator<?, ?>> factory = Features.DECORATOR_REGISTRY.get(decoratorString);
         if (factory == null) {
             reader.setCursor(cursor);
-            throw DECORATOR_NOT_FOUND_EXCEPTION.create(decoratorString);
+            throw CommandExceptions.UNKNOWN_DECORATOR_EXCEPTION.create(decoratorString);
         }
         return factory;
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(Features.DECORATOR_REGISTRY.keySet(), builder);
+        return SharedSuggestionProvider.suggest(Features.DECORATOR_REGISTRY.keySet(), builder);
     }
 
     @Override

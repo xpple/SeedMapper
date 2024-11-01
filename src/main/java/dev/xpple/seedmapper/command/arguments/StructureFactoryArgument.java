@@ -7,22 +7,22 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.seedfinding.mcfeature.structure.Structure;
-import dev.xpple.seedmapper.command.SharedHelpers;
+import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.util.features.FeatureFactory;
 import dev.xpple.seedmapper.util.features.Features;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class StructureFactoryArgumentType implements ArgumentType<FeatureFactory<? extends Structure<?, ?>>>, SharedHelpers.Exceptions {
+public class StructureFactoryArgument implements ArgumentType<FeatureFactory<? extends Structure<?, ?>>> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("desert_temple", "bastion", "end_city");
 
-    public static StructureFactoryArgumentType structureFactory() {
-        return new StructureFactoryArgumentType();
+    public static StructureFactoryArgument structureFactory() {
+        return new StructureFactoryArgument();
     }
 
     @SuppressWarnings("unchecked")
@@ -37,14 +37,14 @@ public class StructureFactoryArgumentType implements ArgumentType<FeatureFactory
         FeatureFactory<? extends Structure<?, ?>> factory = Features.STRUCTURE_REGISTRY.get(structureString);
         if (factory == null) {
             reader.setCursor(cursor);
-            throw STRUCTURE_NOT_FOUND_EXCEPTION.create(structureString);
+            throw CommandExceptions.UNKNOWN_STRUCTURE_EXCEPTION.create(structureString);
         }
         return factory;
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(Features.STRUCTURE_REGISTRY.keySet(), builder);
+        return SharedSuggestionProvider.suggest(Features.STRUCTURE_REGISTRY.keySet(), builder);
     }
 
     @Override

@@ -2,50 +2,36 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import dev.xpple.seedmapper.command.ClientCommand;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.util.render.RenderQueue;
 import dev.xpple.seedmapper.util.render.Shape;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.Map;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
-public class ClearScreenCommand extends ClientCommand {
+public class ClearScreenCommand {
 
-    @Override
-    protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
-        return dispatcher.register(literal(this.getRootLiteral())
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+        dispatcher.register(literal("sm:clearscreen")
             .executes(ctx -> clearScreen(CustomClientCommandSource.of(ctx.getSource()))));
     }
 
-    @Override
-    protected String rootLiteral() {
-        return "clearscreen";
-    }
-
-    @Override
-    protected String alias() {
-        return "clear";
-    }
-
-    private int clearScreen(CustomClientCommandSource source) {
+    private static int clearScreen(CustomClientCommandSource source) {
         Map<Object, Shape> shapeMap = RenderQueue.queue.get(RenderQueue.Layer.ON_TOP);
         if (shapeMap == null) {
-            source.sendFeedback(Text.translatable("command.clearscreen.empty"));
+            source.sendFeedback(Component.translatable("command.clearscreen.empty"));
             return Command.SINGLE_SUCCESS;
         }
 
         final int size = shapeMap.size();
         if (size == 0) {
-            source.sendFeedback(Text.translatable("command.clearscreen.empty"));
+            source.sendFeedback(Component.translatable("command.clearscreen.empty"));
         } else {
             shapeMap.clear();
-            source.sendFeedback(Text.translatable("command.clearscreen.success", size));
+            source.sendFeedback(Component.translatable("command.clearscreen.success", size));
         }
         return Command.SINGLE_SUCCESS;
     }

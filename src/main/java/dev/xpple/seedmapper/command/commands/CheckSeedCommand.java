@@ -2,118 +2,79 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import dev.xpple.seedmapper.command.ClientCommand;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
-import dev.xpple.seedmapper.util.DatabaseHelper;
-import dev.xpple.seedmapper.util.TextUtil;
-import dev.xpple.seedmapper.util.config.Configs;
-import dev.xpple.seedmapper.util.config.SeedResolution;
+import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
+import dev.xpple.seedmapper.util.ComponentUtils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 
-import java.io.File;
-import java.nio.file.Paths;
-
-import static dev.xpple.seedmapper.SeedMapper.CLIENT;
-import static dev.xpple.seedmapper.SeedMapper.MOD_PATH;
+import static dev.xpple.seedmapper.SeedMapper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
-public class CheckSeedCommand extends ClientCommand {
+public class CheckSeedCommand {
 
-    @Override
-    protected LiteralCommandNode<FabricClientCommandSource> build(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
-        return dispatcher.register(literal(this.getRootLiteral())
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+        dispatcher.register(literal("sm:checkseed")
             .executes(ctx -> checkSeed(CustomClientCommandSource.of(ctx.getSource()))));
     }
 
-    @Override
-    protected String rootLiteral() {
-        return "checkseed";
-    }
-
-    @Override
-    protected String alias() {
-        return "seed";
-    }
-
-    private int checkSeed(CustomClientCommandSource source) {
-        Long seed;
-        for (SeedResolution.Method method : Configs.SeedResolutionOrder) {
-            switch (method) {
-                case COMMAND_SOURCE -> {
-                    seed = (Long) source.getMeta("seed");
-                    if (seed == null) {
-                        continue;
-                    }
-                    source.sendFeedback(chain(
-                        Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
-                        highlight(" "),
-                        format(
-                            Text.translatable("command.checkSeed.fromSource"),
-                            Formatting.UNDERLINE
-                        ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/sm:source seeded %s run ", source.getMeta("seed"))))),
-                        highlight(".")
-                    ));
-                    return Command.SINGLE_SUCCESS;
-                }
-                case SAVED_SEEDS_CONFIG -> {
-                    String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-                    seed = Configs.SavedSeeds.get(key);
-                    if (seed == null) {
-                        continue;
-                    }
-                    source.sendFeedback(chain(
-                        Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
-                        highlight(" "),
-                        format(
-                            Text.translatable("command.checkSeed.fromSavedSeeds"),
-                            Formatting.UNDERLINE
-                        ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, Paths.get(MOD_PATH + File.separator + "config.json").toAbsolutePath().toString()))),
-                        highlight(".")
-                    ));
-                    return Command.SINGLE_SUCCESS;
-                }
-                case ONLINE_DATABASE -> {
-                    String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
-                    seed = DatabaseHelper.getSeed(key);
-                    if (seed == null) {
-                        continue;
-                    }
-                    source.sendFeedback(chain(
-                        Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
-                        highlight(" "),
-                        format(
-                            Text.translatable("command.checkSeed.fromDatabase"),
-                            Formatting.UNDERLINE
-                        ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://docs.google.com/spreadsheets/d/1tuQiE-0leW88em9OHbZnH-RFNhVqgoHhIt9WQbeqqWw"))),
-                        highlight(".")
-                    ));
-                    return Command.SINGLE_SUCCESS;
-                }
-                case SEED_CONFIG -> {
-                    seed = Configs.Seed;
-                    if (seed == null) {
-                        continue;
-                    }
-                    source.sendFeedback(chain(
-                        Text.translatable("command.checkSeed.using", TextUtil.formatSeed(seed)),
-                        highlight(" "),
-                        format(
-                            Text.translatable("command.checkSeed.fromSeed"),
-                            Formatting.UNDERLINE
-                        ).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, Paths.get(MOD_PATH + File.separator + "config.json").toAbsolutePath().toString()))),
-                        highlight(".")
-                    ));
-                    return Command.SINGLE_SUCCESS;
-                }
-            }
+    private static int checkSeed(CustomClientCommandSource source) throws CommandSyntaxException {
+        Pair<SeedResolutionArgument.SeedResolution.Method, Long> seedPair = source.getSeed();
+        long seed = seedPair.getSecond();
+        switch (seedPair.getFirst()) {
+            case COMMAND_SOURCE -> source.sendFeedback(chain(
+                Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed)),
+                highlight(" "),
+                format(
+                    suggest(
+                        Component.translatable("command.checkSeed.fromSource"),
+                        String.format("/sm:source seeded %d run ", seed)
+                    ),
+                    ChatFormatting.UNDERLINE
+                ),
+                highlight(".")
+            ));
+            case SEED_CONFIG -> source.sendFeedback(chain(
+                Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed)),
+                highlight(" "),
+                format(
+                    file(
+                        Component.translatable("command.checkSeed.fromSeed"),
+                        modConfigPath.resolve("config.json").toAbsolutePath().toString()
+                    ),
+                    ChatFormatting.UNDERLINE
+                ),
+                highlight(".")
+            ));
+            case SAVED_SEEDS_CONFIG -> source.sendFeedback(chain(
+                Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed)),
+                highlight(" "),
+                format(
+                    file(
+                        Component.translatable("command.checkSeed.fromSavedSeeds"),
+                        modConfigPath.resolve("config.json").toAbsolutePath().toString()
+                    ),
+                    ChatFormatting.UNDERLINE
+                ),
+                highlight(".")
+            ));
+            case ONLINE_DATABASE -> source.sendFeedback(chain(
+                Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed)),
+                highlight(" "),
+                format(
+                    url(
+                        Component.translatable("command.checkSeed.fromDatabase"),
+                        "https://docs.google.com/spreadsheets/d/1tuQiE-0leW88em9OHbZnH-RFNhVqgoHhIt9WQbeqqWw"
+                    ),
+                    ChatFormatting.UNDERLINE
+                ),
+                highlight(".")
+            ));
         }
-        source.sendFeedback(Text.translatable("command.checkSeed.none"));
         return Command.SINGLE_SUCCESS;
     }
 }

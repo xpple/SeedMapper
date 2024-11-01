@@ -1,8 +1,8 @@
 package dev.xpple.seedmapper.util;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -11,7 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
-public class TextUtil {
+public final class ComponentUtils {
+
+    private ComponentUtils() {
+    }
 
     private static final NumberFormat numberFormat = NumberFormat.getInstance();
 
@@ -36,8 +39,8 @@ public class TextUtil {
         return String.format("%" + before + "s%-" + rest + "s", "", text);
     }
 
-    public static MutableText formatList(List<Text> list) {
-        MutableText output = Text.literal("");
+    public static MutableComponent formatList(List<Component> list) {
+        MutableComponent output = Component.literal("");
 
         AtomicInteger count = new AtomicInteger(0);
 
@@ -52,7 +55,7 @@ public class TextUtil {
         return output;
     }
 
-    public static MutableText appendAll(MutableText text, List<Text> toAppend) {
+    public static MutableComponent appendAll(MutableComponent text, List<Component> toAppend) {
         toAppend.forEach(text::append);
         return text;
     }
@@ -95,11 +98,11 @@ public class TextUtil {
         return axisDirection.equals(Direction.AxisDirection.POSITIVE) ? "+" : "-";
     }
 
-    public static MutableText formatSeed(long seed) {
+    public static MutableComponent formatSeed(long seed) {
         return copy(
             hover(
                 accent(String.valueOf(seed)),
-                base(Text.translatable("chat.copy.click"))
+                base(Component.translatable("chat.copy.click"))
             ),
             String.valueOf(seed)
         );

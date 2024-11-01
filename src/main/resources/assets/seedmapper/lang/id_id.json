@@ -1,20 +1,12 @@
 {
-  "commands.exceptions.dimensionNotSupported": "Dimensi \"%s\" tidak di dukung.",
-  "commands.exceptions.versionNotFound": "Versi \"%s\" tidak ditemukan.",
-  "commands.exceptions.nullPointerException": "\"%s\" adalah null.",
   "commands.exceptions.invalidDimension": "Dimensi tidak valid.",
-  "commands.exceptions.biomeNotFound": "Bioma \"%s\" tidak ditemukan.",
-  "commands.exceptions.structureNotFound": "Struktur \"%s\" tidak ditemukan.",
-  "commands.exceptions.lootNotFound": "Item \"%s\" was not found.",
-  "commands.exceptions.lootItemNotFound": "Barang jarahan \"%s\" tidak ditemukan.",
-  "commands.exceptions.blockNotFound": "Block \"%s\" tidak ditemukan.",
+  "commands.exceptions.noBiomeFound": "Tidak bisa mencari %s yang lebih dari 6400 blok.",
+  "commands.exceptions.noStructureFound": "Tidak bisa mencari %s yang lebih dari 64000 blok.",
   "commands.exceptions.expectedWithOrWithout": "Expected \"with\" or \"without\".",
   "commands.exceptions.unknownEnchantment": "Unknown enchantment \"%s\".",
   "commands.exceptions.levelOutOfBounds": "Level out of bounds.",
   "commands.exceptions.incompatibleEnchantment": "Incompatible enchantment.",
   "commands.exceptions.incompleteArgument": "Incomplete argument.",
-
-  "arguments.exceptions.tooFewArguments": "Argumen terlalu sedikit.",
 
   "command.clearscreen.empty": "Couldn't clear any renders.",
   "command.clearscreen.success": "Cleared %d renders.",
@@ -22,10 +14,8 @@
   "command.highlight.block.noneFound": "Tidak ada %s yang bisa di sorot.",
   "command.highlight.block.success": "Menyorot %d %s.",
 
-  "command.locate.biome.noneFound": "Tidak bisa mencari %s yang lebih dari 6400 blok.",
   "command.locate.biome.foundAt": "%s ditemukan di",
   "command.locate.biome.copy": "Klik untuk menyalin kordinat dari %s.",
-  "command.locate.feature.structure.noneFound": "Tidak bisa mencari %s yang lebih dari 64000 blok.",
   "command.locate.feature.structure.foundAt": "%s ditemukan di",
   "command.locate.feature.structure.copy": "Klik untuk menyalin kordinat dari %s.",
   "command.locate.feature.slimeChunk.noneFound": "Tidak bisa mencari bingkah geladir yang lebih dari 6400 blok.",

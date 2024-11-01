@@ -2,13 +2,13 @@
   "required": true,
   "minVersion": "0.8",
   "package": "dev.xpple.seedmapper.mixin.client",
-  "compatibilityLevel": "JAVA_16",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],
   "client": [
-    "MixinMinecraftClient",
-    "MixinClientChunkManager",
-    "MixinScreen"
+    "ClientChunkCacheMixin",
+    "MinecraftMixin",
+    "ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

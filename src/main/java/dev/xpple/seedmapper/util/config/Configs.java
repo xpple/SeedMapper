@@ -1,14 +1,14 @@
 package dev.xpple.seedmapper.util.config;
 
 import dev.xpple.betterconfig.api.Config;
-import net.minecraft.block.Block;
+import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.block.Block;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import static dev.xpple.seedmapper.SeedMapper.CLIENT;
 
 @SuppressWarnings("unused")
 public class Configs {
@@ -18,7 +18,7 @@ public class Configs {
     @Config(putter = @Config.Putter("none"), adder = @Config.Adder(value = "addSavedSeed", type = long.class))
     public static Map<String, Long> SavedSeeds = new HashMap<>();
     public static void addSavedSeed(long seed) {
-        String key = CLIENT.getNetworkHandler().getConnection().getAddress().toString();
+        String key = Minecraft.getInstance().getConnection().getConnection().getRemoteAddress().toString();
         SavedSeeds.put(key, seed);
     }
 
@@ -32,5 +32,5 @@ public class Configs {
     public static Map<Block, Integer> BlockColours = new HashMap<>();
 
     @Config
-    public static SeedResolution SeedResolutionOrder = new SeedResolution();
+    public static SeedResolutionArgument.SeedResolution SeedResolutionOrder = new SeedResolutionArgument.SeedResolution();
 }
