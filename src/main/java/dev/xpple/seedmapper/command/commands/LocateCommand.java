@@ -49,7 +49,7 @@ public class LocateCommand {
 
             BlockPos center = BlockPos.containing(source.getPosition());
 
-            spiral(center.getX(), center.getZ(), 6400, (x, z) -> {
+            spiral(center.getX(), center.getZ(), 6400, 32, (x, z) -> {
                 if (CubiomesHeaders.getBiomeAt(generator, 1, x, 63, z) != biome) {
                     return false;
                 }
@@ -109,7 +109,7 @@ public class LocateCommand {
                     highlight(".")
                 ));
                 return true;
-            }, CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION::create);
+            }, () -> CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE));
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -155,7 +155,11 @@ public class LocateCommand {
     }
 
     private static void spiral(final int centerX, final int centerZ, final int radius, CoordinateCallback callback, Supplier<? extends CommandSyntaxException> failure) throws CommandSyntaxException {
-        int x = centerX, dx = 0, z = centerZ, dz = -1;
+        spiral(centerX, centerZ, radius, 1, callback, failure);
+    }
+
+    private static void spiral(final int centerX, final int centerZ, final int radius, final int step, CoordinateCallback callback, Supplier<? extends CommandSyntaxException> failure) throws CommandSyntaxException {
+        int x = centerX, dx = 0, z = centerZ, dz = -step;
         final int leftBoundX = centerX - radius, rightBoundX = centerX + radius;
         final int bottomBoundZ = centerZ - radius, topBoundZ = centerZ + radius;
         final int max = (2 * radius) * (2 * radius);
@@ -165,7 +169,7 @@ public class LocateCommand {
                     return;
                 }
             }
-            if (x - centerX == z - centerZ || (x < centerX && x - centerX == centerZ - z) || (x > centerX && x - centerX == centerZ + 1 - z)) {
+            if (x - centerX == z - centerZ || (x < centerX && x - centerX == centerZ - z) || (x > centerX && x - centerX == centerZ + step - z)) {
                 final int temp = dx;
                 dx = -dz;
                 dz = temp;
