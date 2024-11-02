@@ -16,7 +16,7 @@ questions and support please head to my [Discord](https://discord.xpple.dev/).
 You need to have Java 23 installed to use this mod. I recommend to get Java 23 from [adoptium.net](https://adoptium.net/temurin/releases/?version=23). Next, configure your Minecraft launcher to use this release of Java.
 - Vanilla launcher: Go to `Installations` -> `Edit` -> `More options` -> `Java executable`.
 - MultiMC: Go to `Edit Instance` -> `Settings` -> `Java` -> `Java Installation`.
-- PrismLauncher: Go to `Settings` -> `Java` -> `Java Runtime` -> `Auto-Detect...`
+- PrismLauncher: Go to `Settings` -> `Java` -> `Java Runtime` -> `Auto-Detect...`.
 
 If you run into issues, contact your launcher's support.
 
