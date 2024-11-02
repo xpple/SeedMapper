@@ -122,7 +122,7 @@ public class LocateCommand {
         ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
         spiral(center.x, center.z, 6400, (x, z) -> {
             RandomSource random = WorldgenRandom.seedSlimeChunk(x, z, seed, 987234911L);
-            if (random.nextInt(2147483640) % 10 == 0) {
+            if (random.nextInt(10) == 0) {
                 int blockPosX = (x << 4) + 9;
                 int blockPosZ = (z << 4) + 9;
                 source.sendFeedback(chain(
