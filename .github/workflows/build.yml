@@ -1,0 +1,90 @@
+name: build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  compile-cubiomes:
+    name: Compile Cubiomes to shared library
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - name: Compile shared library (ubuntu-latest)
+        if: matrix.os == 'ubuntu-latest'
+        run: gcc -shared -o src/main/resources/libcubiomes.so src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biometree.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3 -fPIC
+      - name: Compile shared library (macos-latest)
+        if: matrix.os == 'macos-latest'
+        run: gcc -shared -o src/main/resources/libcubiomes.dylib src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biometree.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3 -fPIC
+      - name: Compile shared library (windows-latest)
+        if: matrix.os == 'windows-latest'
+        run: gcc -shared -o src/main/resources/libcubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biometree.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+
+      - name: Compute SHA256 hash (ubuntu-latest)
+        if: matrix.os == 'ubuntu-latest'
+        run: sha256sum src/main/resources/libcubiomes.so
+      - name: Compute SHA256 hash (macos-latest)
+        if: matrix.os == 'macos-latest'
+        run: shasum -a 256 src/main/resources/libcubiomes.dylib
+      - name: Compute SHA256 hash (windows-latest)
+        if: matrix.os == 'windows-latest'
+        run: Get-FileHash -Algorithm SHA256 src/main/resources/libcubiomes.dll
+
+      - name: Capture shared library (ubuntu-latest)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libcubiomes.so
+          path: src/main/resources/libcubiomes.so
+      - name: Capture shared library (macos-latest)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libcubiomes.dylib
+          path: src/main/resources/libcubiomes.dylib
+      - name: Capture shared library (windows-latest)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libcubiomes.dll
+          path: src/main/resources/libcubiomes.dll
+
+  build:
+    name: Build SeedMapper
+    needs: compile-cubiomes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Capture shared library
+        uses: actions/download-artifact@v4
+        with:
+          pattern: libcubiomes.*
+          merge-multiple: true
+          path: src/main/resources/
+      - name: Validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v3
+      - name: Setup JDK 23
+        uses: actions/setup-java@v4
+        with:
+          java-version: 23
+          distribution: 'temurin'
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: Build
+        run: ./gradlew build
+      - name: Capture build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeedMapper
+          path: build/libs/
