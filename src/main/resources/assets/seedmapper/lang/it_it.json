@@ -1,7 +1,7 @@
 {
     "commands.exceptions.invalidDimension": "Dimensione non valida.",
-    "commands.exceptions.noBiomeFound": "Impossibile individuare %s entro 6400 blocchi.",
-    "commands.exceptions.noStructureFound": "Impossibile individuare %s entro 6400 blocchi.",
+    "commands.exceptions.noBiomeFound": "Impossibile individuare bioma entro 6400 blocchi.",
+    "commands.exceptions.noStructureFound": "Impossibile individuare struttura entro 6400 blocchi.",
 
     "command.checkSeed.using": "SeedMapper sta usando il seme %d da",
     "command.checkSeed.fromSavedSeeds": "la configurazione \"SavedSeeds\"",

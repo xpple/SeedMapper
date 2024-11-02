@@ -1,7 +1,7 @@
 {
   "commands.exceptions.invalidDimension": "अमान्य आयाम।",
-  "commands.exceptions.noBiomeFound": "6400 ब्लॉक में %s का पता नहीं लगा सका।",
-  "commands.exceptions.noStructureFound": "6400 ब्लॉक में %s का पता नहीं लगा सका।",
+  "commands.exceptions.noBiomeFound": "6400 ब्लॉक में जैव क्षेत्र का पता नहीं लगा सका।",
+  "commands.exceptions.noStructureFound": "6400 ब्लॉक में संरचना का पता नहीं लगा सका।",
 
   "command.checkSeed.using": "SeedMapper सीड %d को यहाँ से उपयोग कर रहा है",
   "command.checkSeed.fromSavedSeeds": "\"SavedSeeds\" कॉन्फिग",

@@ -4,9 +4,9 @@
   "commands.exceptions.unknownVersion": "Unknown version \"%s\".",
   "commands.exceptions.invalidDimension": "Invalid dimension.",
   "commands.exceptions.unknownBiome": "Unknown biome \"%s\".",
-  "commands.exceptions.noBiomeFound": "Couldn't locate %s within 6400 blocks.",
+  "commands.exceptions.noBiomeFound": "Couldn't locate biome within 6400 blocks.",
   "commands.exceptions.unknownStructure": "Unknown structure \"%s\".",
-  "commands.exceptions.noStructureFound": "Couldn't locate %s within 6400 blocks.",
+  "commands.exceptions.noStructureFound": "Couldn't locate structure within 6400 blocks.",
   "commands.exceptions.incompatibleParameters": "Incompatible parameters",
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\"",
 
