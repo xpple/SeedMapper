@@ -1,7 +1,7 @@
 {
   "commands.exceptions.invalidDimension": "Ungültige Dimension.",
   "commands.exceptions.noBiomeFound": "Konnte Biom innerhalb von 6400 Blöcken nicht finden.",
-  "commands.exceptions.noStructureFound": "Konnte Konstruktion innerhalb von 6400 Blöcken nicht finden.",
+  "commands.exceptions.noStructureFound": "Konnte Konstruktion innerhalb von %d Blöcken nicht finden.",
 
   "command.locate.biome.foundAt": "Biom gefunden bei",
   "command.locate.feature.structure.foundAt": "Konstruktion gefunden bei",

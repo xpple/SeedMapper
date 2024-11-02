@@ -1,7 +1,7 @@
 {
   "commands.exceptions.invalidDimension": "Dimensi tidak valid.",
   "commands.exceptions.noBiomeFound": "Tidak bisa mencari bioma yang lebih dari 6400 blok.",
-  "commands.exceptions.noStructureFound": "Tidak bisa mencari struktur yang lebih dari 64000 blok.",
+  "commands.exceptions.noStructureFound": "Tidak bisa mencari struktur yang lebih dari %d blok.",
 
   "command.locate.biome.foundAt": "Bioma ditemukan di",
   "command.locate.feature.structure.foundAt": "Struktur ditemukan di",
