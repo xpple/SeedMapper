@@ -35,3 +35,6 @@ run/
 # github
 
 .env
+
+# libcubiomes
+/src/main/resources/libcubiomes.*

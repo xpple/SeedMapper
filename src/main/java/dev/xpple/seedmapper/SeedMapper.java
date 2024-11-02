@@ -24,7 +24,7 @@ public class SeedMapper implements ClientModInitializer {
     public static final Path modConfigPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
 
     static {
-        String libraryPath = FabricLoader.getInstance().getGameDir().resolve("libcubiomes.dll").toAbsolutePath().toString();
+        String libraryPath = SeedMapper.class.getClassLoader().getResource(System.mapLibraryName("libcubiomes")).getPath();
         System.load(libraryPath);
     }
 
