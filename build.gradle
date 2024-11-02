@@ -52,6 +52,10 @@ processResources {
 	from("LICENSE") {
 		rename {"${it}_${project.base.archivesName.get()}"}
 	}
+
+	from("src/main/c/LICENSE") {
+		rename {"${it}_cubiomes"}
+	}
 }
 
 tasks.withType(JavaCompile).configureEach {
