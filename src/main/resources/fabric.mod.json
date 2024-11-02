@@ -23,8 +23,6 @@
     ]
   },
   "mixins": [
-    "seedmapper.mixin.render.json",
-    "seedmapper.mixin.client.json"
   ],
   "accessWidener": "seedmapper.aw",
 

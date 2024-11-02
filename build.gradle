@@ -1,6 +1,5 @@
 plugins {
 	id 'fabric-loom' version '1.8-SNAPSHOT'
-	id 'com.gradleup.shadow' version '8.3.4'
 	id 'maven-publish'
 }
 
@@ -15,7 +14,6 @@ loom {
 }
 
 repositories {
-	mavenCentral()
 	maven {
 		name = 'xpple'
 		url = 'https://maven.xpple.dev/maven2'
@@ -24,15 +22,6 @@ repositories {
 		name = 'ParchmentMC'
 		url = 'https://maven.parchmentmc.org'
 	}
-	maven {
-		name = 'SeedFinding'
-		url 'https://nexus.seedfinding.com/repository/maven-seedfinding-snapshots'
-	}
-}
-
-configurations {
-	// configuration that holds jars to include in the jar
-	extraLibs
 }
 
 dependencies {
@@ -49,17 +38,6 @@ dependencies {
 
 	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 	include modImplementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
-
-	extraLibs("com.seedfinding:mc_math:${project.mc_math_version}") {transitive = false}
-	extraLibs("com.seedfinding:mc_seed:${project.mc_seed_version}") {transitive = false}
-	extraLibs("com.seedfinding:mc_core:${project.mc_core_version}") {transitive = false}
-	extraLibs("com.seedfinding:mc_noise:${project.mc_noise_version}") {transitive = false}
-	extraLibs("com.seedfinding:mc_biome:${project.mc_biome_version}") {transitive = false}
-	extraLibs("com.seedfinding:mc_terrain:${project.mc_terrain_version}") {transitive = false}
-	extraLibs("com.seedfinding:mc_feature:${project.mc_feature_version}") {transitive = false}
-
-	extraLibs("com.seedfinding:mc_reversal:${project.mc_reversal_version}") {transitive = false}
-	configurations.implementation.extendsFrom(configurations.extraLibs)
 }
 
 processResources {
@@ -77,29 +55,12 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = 23
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
-}
-
-shadowJar {
-	configurations = [project.configurations.extraLibs]
-	setArchiveClassifier("dev")
-	relocate "com.seedfinding", "dev.xpple.seedfinding"
-}
-
-remapJar {
-	inputFile.set shadowJar.archiveFile
-	dependsOn shadowJar
-	setArchiveClassifier(null)
-}
-
-// solve the duplicate strategy issue
-tasks.withType(Jar) {
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	sourceCompatibility = JavaVersion.VERSION_23
+	targetCompatibility = JavaVersion.VERSION_23
 }
 
 publishing {

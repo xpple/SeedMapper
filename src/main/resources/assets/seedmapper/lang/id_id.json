@@ -2,40 +2,12 @@
   "commands.exceptions.invalidDimension": "Dimensi tidak valid.",
   "commands.exceptions.noBiomeFound": "Tidak bisa mencari %s yang lebih dari 6400 blok.",
   "commands.exceptions.noStructureFound": "Tidak bisa mencari %s yang lebih dari 64000 blok.",
-  "commands.exceptions.expectedWithOrWithout": "Expected \"with\" or \"without\".",
-  "commands.exceptions.unknownEnchantment": "Unknown enchantment \"%s\".",
-  "commands.exceptions.levelOutOfBounds": "Level out of bounds.",
-  "commands.exceptions.incompatibleEnchantment": "Incompatible enchantment.",
-  "commands.exceptions.incompleteArgument": "Incomplete argument.",
 
-  "command.clearscreen.empty": "Couldn't clear any renders.",
-  "command.clearscreen.success": "Cleared %d renders.",
-
-  "command.highlight.block.noneFound": "Tidak ada %s yang bisa di sorot.",
-  "command.highlight.block.success": "Menyorot %d %s.",
-
-  "command.locate.biome.foundAt": "%s ditemukan di",
-  "command.locate.biome.copy": "Klik untuk menyalin kordinat dari %s.",
-  "command.locate.feature.structure.foundAt": "%s ditemukan di",
-  "command.locate.feature.structure.copy": "Klik untuk menyalin kordinat dari %s.",
+  "command.locate.biome.foundAt": "Bioma ditemukan di",
+  "command.locate.feature.structure.foundAt": "Struktur ditemukan di",
   "command.locate.feature.slimeChunk.noneFound": "Tidak bisa mencari bingkah geladir yang lebih dari 6400 blok.",
   "command.locate.feature.slimeChunk.foundAt": "Bingkah geladir ditemukan di",
   "command.locate.feature.slimeChunk.copy": "Klik untuk menyalin kordinat dari %s",
   "command.locate.feature.slimeChunk.chunk": "Bingkah",
   "command.locate.feature.slimeChunk.copyChunk": "Klik untuk menyalin kordinat bingkah dari bingkah geladir ini",
-  "command.locate.feature.decorator.noneFound": "Couldn't locate %s within 6400 blocks.",
-  "command.locate.feature.decorator.foundAt": "%s found at",
-  "command.locate.feature.decorator.copy": "Click to copy coordinates of %s.",
-  "command.locate.loot.noneFound": "Tidak bisa mencari %s yang lebih dari 64000 block.",
-  "command.locate.loot.foundAt": "%d %s ditemukan di",
-  "command.locate.loot.copy": "Klik untuk menyalin kordinat dari %s.",
-
-  "command.seedoverlay.feedback.0": "Block di ",
-  "command.seedoverlay.feedback.1": "Klik untuk menyalin kordinat dari ",
-  "command.seedoverlay.feedback.2": " tidak cocok!",
-  "command.seedoverlay.feedback.3": "Total dari ",
-  "command.seedoverlay.feedback.4": " blok yang tidak cocok.",
-  "command.seedoverlay.feedback.5": "Semua blok cocok!",
-
-  "command.terrainversion.feedback": " adalah versi yang paling cocok."
 }

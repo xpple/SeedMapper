@@ -2,40 +2,12 @@
   "commands.exceptions.invalidDimension": "Invalid dimension.",
   "commands.exceptions.noBiomeFound": "Couldn't locate %s within 6400 blocks.",
   "commands.exceptions.noStructureFound": "Couldn't locate %s within 6400 blocks.",
-  "commands.exceptions.expectedWithOrWithout": "Expected \"with\" or \"without\".",
-  "commands.exceptions.unknownEnchantment": "Unknown enchantment \"%s\".",
-  "commands.exceptions.levelOutOfBounds": "Level out of bounds.",
-  "commands.exceptions.incompatibleEnchantment": "Incompatible enchantment.",
-  "commands.exceptions.incompleteArgument": "Incomplete argument.",
 
-  "command.clearscreen.empty": "Couldn't clear any renders.",
-  "command.clearscreen.success": "Cleared %d renders.",
-
-  "command.highlight.block.noneFound": "No %s could be highlighted.",
-  "command.highlight.block.success": "Highlighted %d %s.",
-
-  "command.locate.biome.foundAt": "%s found at",
-  "command.locate.biome.copy": "Click to copy coordinates of %s.",
-  "command.locate.feature.structure.foundAt": "%s found at",
-  "command.locate.feature.structure.copy": "Click to copy coordinates of %s.",
+  "command.locate.biome.foundAt": "Biome found at",
+  "command.locate.feature.structure.foundAt": "Structure found at",
   "command.locate.feature.slimeChunk.noneFound": "Couldn't locate a slime chunk within 6400 blocks.",
   "command.locate.feature.slimeChunk.foundAt": "Slime chunk found at",
   "command.locate.feature.slimeChunk.copy": "Click to copy coordinates of this slime chunk",
   "command.locate.feature.slimeChunk.chunk": "Chunk",
   "command.locate.feature.slimeChunk.copyChunk": "Click to copy chunk coordinates of this slime chunk",
-  "command.locate.feature.decorator.noneFound": "Couldn't locate %s within 6400 blocks.",
-  "command.locate.feature.decorator.foundAt": "%s found at",
-  "command.locate.feature.decorator.copy": "Click to copy coordinates of %s.",
-  "command.locate.loot.noneFound": "Couldn't locate %s within 6400 blocks.",
-  "command.locate.loot.foundAt": "%d %s found at",
-  "command.locate.loot.copy": "Click to copy coordinates of %s.",
-
-  "command.seedoverlay.feedback.0": "Blok na ",
-  "command.seedoverlay.feedback.1": "Kliknij by skopiować współrzędne ",
-  "command.seedoverlay.feedback.2": " nie pasuje!",
-  "command.seedoverlay.feedback.3": "Łącznie ",
-  "command.seedoverlay.feedback.4": " bloków nie pasuje.",
-  "command.seedoverlay.feedback.5": "Wszystkie bloki pasują!",
-
-  "command.terrainversion.feedback": " jest najlepszym trafieniem."
 }

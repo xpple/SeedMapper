@@ -50,7 +50,7 @@ public class SeedResolutionArgument implements ArgumentType<SeedResolutionArgume
 
         try {
             parser.parse();
-        } catch (CommandSyntaxException ignored) {
+        } catch (CommandSyntaxException _) {
         }
 
         if (parser.suggestor != null) {

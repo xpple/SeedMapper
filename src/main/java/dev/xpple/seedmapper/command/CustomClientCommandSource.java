@@ -1,12 +1,13 @@
 package dev.xpple.seedmapper.command;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
-import com.seedfinding.mccore.state.Dimension;
-import com.seedfinding.mccore.version.MCVersion;
+import dev.xpple.seedmapper.command.arguments.DimensionArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
+import dev.xpple.seedmapper.command.arguments.VersionArgument;
+import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.util.SeedDatabaseHelper;
-import dev.xpple.seedmapper.util.config.Configs;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
@@ -139,29 +140,19 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         throw CommandExceptions.NO_SEED_AVAILABLE_EXCEPTION.create();
     }
 
-    public Dimension getDimension() throws CommandSyntaxException {
+    public int getDimension() throws CommandSyntaxException {
         Object dimensionMeta = this.getMeta("dimension");
         if (dimensionMeta != null) {
-            return (Dimension) dimensionMeta;
+            return (Integer) dimensionMeta;
         }
-        String dimensionString = this.getWorld().dimension().location().getPath();
-        Dimension dimension = Dimension.fromString(dimensionString);
-        if (dimension == null) {
-            throw CommandExceptions.UNKNOWN_DIMENSION_EXCEPTION.create(dimensionString);
-        }
-        return dimension;
+        return DimensionArgument.dimension().parse(new StringReader(this.getWorld().dimension().location().getPath()));
     }
 
-    public MCVersion getVersion() throws CommandSyntaxException {
+    public int getVersion() throws CommandSyntaxException {
         Object versionMeta = this.getMeta("version");
         if (versionMeta != null) {
-            return (MCVersion) versionMeta;
+            return (Integer) versionMeta;
         }
-        String versionString = SharedConstants.getCurrentVersion().getName();
-        MCVersion mcVersion = MCVersion.fromString(versionString);
-        if (mcVersion == null) {
-            throw CommandExceptions.UNKNOWN_VERSION_EXCEPTION.create(versionString);
-        }
-        return mcVersion;
+        return VersionArgument.version().parse(new StringReader(SharedConstants.getCurrentVersion().getName()));
     }
 }

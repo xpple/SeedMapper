@@ -39,7 +39,7 @@ public final class SeedDatabaseHelper {
                 try {
                     JsonArray rows = JsonParser.parseString(response).getAsJsonArray();
                     parseRows(rows);
-                } catch (RuntimeException ignored) {
+                } catch (RuntimeException _) {
                 }
             });
     }
