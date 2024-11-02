@@ -14,7 +14,14 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandBuildContext;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SeedMapper implements ClientModInitializer {
@@ -24,8 +31,18 @@ public class SeedMapper implements ClientModInitializer {
     public static final Path modConfigPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
 
     static {
-        String libraryPath = SeedMapper.class.getClassLoader().getResource(System.mapLibraryName("libcubiomes")).getPath();
-        System.load(libraryPath);
+        String libraryName = System.mapLibraryName("libcubiomes");
+        String extension = FilenameUtils.getExtension(libraryName);
+        libraryName = "libcubiomes" + '.' + extension;
+        URL libraryPath = SeedMapper.class.getClassLoader().getResource(libraryName);
+        Path libcubiomes;
+        try {
+            libcubiomes = Files.createTempFile("libcubiomes", '.' + extension);
+            IOUtils.copy(libraryPath, libcubiomes.toFile());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        System.load(libcubiomes.toAbsolutePath().toString());
     }
 
     @Override
