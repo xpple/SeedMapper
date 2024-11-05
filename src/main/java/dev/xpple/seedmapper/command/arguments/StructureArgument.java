@@ -21,7 +21,7 @@ public class StructureArgument implements ArgumentType<Integer> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("overworld", "the_nether", "the_end");
 
-    //<editor-fold defaultstate="collapsed" desc="STRUCTURES">
+    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> STRUCTURES;">
     private static final Map<String, Integer> STRUCTURES = ImmutableMap.<String, Integer>builder()
         .put("feature", CubiomesHeaders.Feature())
         .put("desert_pyramid", CubiomesHeaders.Desert_Pyramid())
