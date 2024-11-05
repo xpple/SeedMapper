@@ -7,8 +7,8 @@
   "commands.exceptions.noBiomeFound": "Couldn't locate biome within 6400 blocks.",
   "commands.exceptions.unknownStructure": "Unknown structure \"%s\".",
   "commands.exceptions.noStructureFound": "Couldn't locate structure within %d blocks.",
-  "commands.exceptions.incompatibleParameters": "Incompatible parameters",
-  "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\"",
+  "commands.exceptions.incompatibleParameters": "Incompatible parameters.",
+  "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\".",
 
   "command.checkSeed.using": "SeedMapper is using the seed %d from",
   "command.checkSeed.fromSavedSeeds": "the \"SavedSeeds\" config",
