@@ -42,10 +42,14 @@ public class LocateCommand {
     }
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
+        int dimension = source.getDimension();
+        if (CubiomesHeaders.getDimension(biome) != dimension) {
+            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+        }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment generator = Generator.allocate(arena);
             CubiomesHeaders.setupGenerator(generator, source.getVersion(), 0);
-            CubiomesHeaders.applySeed(generator, source.getDimension(), source.getSeed().getSecond());
+            CubiomesHeaders.applySeed(generator, dimension, source.getSeed().getSecond());
 
             BlockPos center = BlockPos.containing(source.getPosition());
 
