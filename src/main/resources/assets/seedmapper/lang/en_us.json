@@ -22,5 +22,6 @@
   "command.locate.feature.slimeChunk.foundAt": "Slime chunk found at",
   "command.locate.feature.slimeChunk.copy": "Click to copy coordinates of this slime chunk",
   "command.locate.feature.slimeChunk.chunk": "Chunk",
-  "command.locate.feature.slimeChunk.copyChunk": "Click to copy chunk coordinates of this slime chunk"
+  "command.locate.feature.slimeChunk.copyChunk": "Click to copy chunk coordinates of this slime chunk",
+  "command.locate.spawn.success": "Spawn point estimated to be at %s."
 }

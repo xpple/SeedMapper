@@ -38,7 +38,9 @@ public class LocateCommand {
                     .then(argument("structure", structure())
                         .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructure(ctx, "structure")))))
                 .then(literal("slimechunk")
-                    .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))));
+                    .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
+            .then(literal("spawn")
+                .executes(ctx -> locateSpawn(CustomClientCommandSource.of(ctx.getSource())))));
     }
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
@@ -160,5 +162,25 @@ public class LocateCommand {
             return false;
         }, CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand()::create);
         return Command.SINGLE_SUCCESS;
+    }
+
+    private static int locateSpawn(CustomClientCommandSource source) throws CommandSyntaxException {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment generator = Generator.allocate(arena);
+            Cubiomes.setupGenerator(generator, source.getVersion(), 0);
+            Cubiomes.applySeed(generator, source.getDimension(), source.getSeed().getSecond());
+            MemorySegment pos = Cubiomes.getSpawn(arena, generator);
+
+            source.sendFeedback(chain(
+                highlight(Component.translatable("command.locate.spawn.success", copy(
+                    hover(
+                        accent("x: %d, z: %d".formatted(Pos.x(pos), Pos.z(pos))),
+                        base(Component.translatable("chat.copy.click"))
+                    ),
+                    "%d ~ %d".formatted(Pos.x(pos), Pos.z(pos))
+                )))
+            ));
+            return Command.SINGLE_SUCCESS;
+        }
     }
 }
