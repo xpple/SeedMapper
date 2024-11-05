@@ -16,7 +16,7 @@ questions and support please head to my [Discord](https://discord.xpple.dev/).
 You need to have Java 23 installed to use this mod. I recommend to get Java 23 from [adoptium.net](https://adoptium.net/temurin/releases/?version=23). Next, configure your Minecraft launcher to use this release of Java.
 - Vanilla launcher: Go to `Installations` -> `Edit` -> `More options` -> `Java executable`.
 - MultiMC: Go to `Edit Instance` -> `Settings` -> `Java` -> `Java Installation`.
-- PrismLauncher: Go to `Settings` -> `Java` -> `Java Runtime` -> `Auto-Detect...`
+- PrismLauncher: Go to `Settings` -> `Java` -> `Java Runtime` -> `Auto-Detect...`.
 
 If you run into issues, contact your launcher's support.
 
@@ -60,6 +60,6 @@ To build the mod from scratch, do the following:
    ```
 4. Run the following command:
    ```shell
-   jextract --include-dir src/main/c --output src/main/java --target-package com.github.cubiomes --library run/libcubiomes --header-class-name CubiomesHeaders src/main/c/tables/btree18.h tables/btree19.h tables/btree20.h tables/btree192.h tables/btree213.h biomenoise.h biomes.h finders.h generator.h layers.h noise.h quadbase.h rng.h util.h
+   jextract --include-dir src/main/c --output src/main/java --target-package com.github.cubiomes --library run/libcubiomes --header-class-name CubiomesHeaders --use-system-load-library src/main/c/tables/btree18.h tables/btree19.h tables/btree20.h tables/btree192.h tables/btree213.h biomenoise.h biomes.h finders.h generator.h layers.h noise.h quadbase.h rng.h util.h
    ```
 5. Delete any library loads in `CubiomesHeaders.java`
