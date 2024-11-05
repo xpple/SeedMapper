@@ -1,6 +1,6 @@
 package dev.xpple.seedmapper.command.arguments;
 
-import com.github.cubiomes.CubiomesHeaders;
+import com.github.cubiomes.Cubiomes;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -22,9 +22,9 @@ public class DimensionArgument implements ArgumentType<Integer> {
     private static final Collection<String> EXAMPLES = Arrays.asList("overworld", "the_nether", "the_end");
 
     private static final Map<String, Integer> DIMENSIONS = ImmutableMap.<String, Integer>builder()
-        .put("overworld", CubiomesHeaders.DIM_OVERWORLD())
-        .put("the_nether", CubiomesHeaders.DIM_NETHER())
-        .put("the_end", CubiomesHeaders.DIM_END())
+        .put("overworld", Cubiomes.DIM_OVERWORLD())
+        .put("the_nether", Cubiomes.DIM_NETHER())
+        .put("the_end", Cubiomes.DIM_END())
         .build();
 
     public static DimensionArgument dimension() {

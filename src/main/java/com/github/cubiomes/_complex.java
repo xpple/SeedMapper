@@ -27,8 +27,8 @@ public class _complex {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_DOUBLE.withName("x"),
-        CubiomesHeaders.C_DOUBLE.withName("y")
+        Cubiomes.C_DOUBLE.withName("x"),
+        Cubiomes.C_DOUBLE.withName("y")
     ).withName("_complex");
 
     /**

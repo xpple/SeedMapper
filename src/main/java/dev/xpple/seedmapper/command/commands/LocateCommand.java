@@ -1,6 +1,6 @@
 package dev.xpple.seedmapper.command.commands;
 
-import com.github.cubiomes.CubiomesHeaders;
+import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.Pos;
 import com.github.cubiomes.StructureConfig;
@@ -43,18 +43,18 @@ public class LocateCommand {
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
         int dimension = source.getDimension();
-        if (CubiomesHeaders.getDimension(biome) != dimension) {
+        if (Cubiomes.getDimension(biome) != dimension) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment generator = Generator.allocate(arena);
-            CubiomesHeaders.setupGenerator(generator, source.getVersion(), 0);
-            CubiomesHeaders.applySeed(generator, dimension, source.getSeed().getSecond());
+            Cubiomes.setupGenerator(generator, source.getVersion(), 0);
+            Cubiomes.applySeed(generator, dimension, source.getSeed().getSecond());
 
             BlockPos center = BlockPos.containing(source.getPosition());
 
             SpiralLoop.spiral(center.getX(), center.getZ(), 6400, 32, (x, z) -> {
-                if (CubiomesHeaders.getBiomeAt(generator, 1, x, 63, z) != biome) {
+                if (Cubiomes.getBiomeAt(generator, 1, x, 63, z) != biome) {
                     return false;
                 }
                 source.sendFeedback(chain(
@@ -76,28 +76,32 @@ public class LocateCommand {
     }
 
     private static int locateStructure(CustomClientCommandSource source, int structure) throws CommandSyntaxException {
+        int dimension = source.getDimension();
+        if (Cubiomes.getStructureDimension(structure) != dimension) {
+            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+        }
         try (Arena arena = Arena.ofConfined()) {
             int version = source.getVersion();
             MemorySegment structureConfig = StructureConfig.allocate(arena);
-            int config = CubiomesHeaders.getStructureConfig(structure, version, structureConfig);
+            int config = Cubiomes.getStructureConfig(structure, version, structureConfig);
             if (config == 0) {
                 throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
             }
             long seed = source.getSeed().getSecond();
 
             MemorySegment generator = Generator.allocate(arena);
-            CubiomesHeaders.setupGenerator(generator, version, 0);
-            CubiomesHeaders.applySeed(generator, source.getDimension(), seed);
+            Cubiomes.setupGenerator(generator, version, 0);
+            Cubiomes.applySeed(generator, dimension, seed);
 
             BlockPos center = BlockPos.containing(source.getPosition());
             int regionSize = StructureConfig.regionSize(structureConfig) << 4;
             SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
                 MemorySegment structurePos = Pos.allocate(arena);
-                int valid = CubiomesHeaders.getStructurePos(structure, version, seed, x, z, structurePos);
+                int valid = Cubiomes.getStructurePos(structure, version, seed, x, z, structurePos);
                 if (valid == 0) {
                     return false;
                 }
-                if (CubiomesHeaders.isViableStructurePos(structure, generator, Pos.x(structurePos), Pos.z(structurePos), 0) == 0) {
+                if (Cubiomes.isViableStructurePos(structure, generator, Pos.x(structurePos), Pos.z(structurePos), 0) == 0) {
                     return false;
                 }
                 source.sendFeedback(chain(
@@ -119,7 +123,7 @@ public class LocateCommand {
     }
 
     private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
-        if (source.getDimension() != CubiomesHeaders.DIM_OVERWORLD()) {
+        if (source.getDimension() != Cubiomes.DIM_OVERWORLD()) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         long seed = source.getSeed().getSecond();

@@ -27,11 +27,11 @@ public class _invalid_parameter_handler {
     }
 
     private static final FunctionDescriptor $DESC = FunctionDescriptor.ofVoid(
-        CubiomesHeaders.C_POINTER,
-        CubiomesHeaders.C_POINTER,
-        CubiomesHeaders.C_POINTER,
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_LONG_LONG
+        Cubiomes.C_POINTER,
+        Cubiomes.C_POINTER,
+        Cubiomes.C_POINTER,
+        Cubiomes.C_INT,
+        Cubiomes.C_LONG_LONG
     );
 
     /**
@@ -41,13 +41,13 @@ public class _invalid_parameter_handler {
         return $DESC;
     }
 
-    private static final MethodHandle UP$MH = CubiomesHeaders.upcallHandle(Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH = Cubiomes.upcallHandle(_invalid_parameter_handler.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(Function fi, Arena arena) {
+    public static MemorySegment allocate(_invalid_parameter_handler.Function fi, Arena arena) {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 

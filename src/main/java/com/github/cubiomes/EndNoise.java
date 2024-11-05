@@ -28,7 +28,7 @@ public class EndNoise {
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
         PerlinNoise.layout().withName("perlin"),
-        CubiomesHeaders.C_INT.withName("mc"),
+        Cubiomes.C_INT.withName("mc"),
         MemoryLayout.paddingLayout(4)
     ).withName("EndNoise");
 

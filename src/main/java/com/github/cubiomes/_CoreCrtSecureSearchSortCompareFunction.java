@@ -27,10 +27,10 @@ public class _CoreCrtSecureSearchSortCompareFunction {
     }
 
     private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_POINTER,
-        CubiomesHeaders.C_POINTER,
-        CubiomesHeaders.C_POINTER
+        Cubiomes.C_INT,
+        Cubiomes.C_POINTER,
+        Cubiomes.C_POINTER,
+        Cubiomes.C_POINTER
     );
 
     /**
@@ -40,13 +40,13 @@ public class _CoreCrtSecureSearchSortCompareFunction {
         return $DESC;
     }
 
-    private static final MethodHandle UP$MH = CubiomesHeaders.upcallHandle(Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH = Cubiomes.upcallHandle(_CoreCrtSecureSearchSortCompareFunction.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(Function fi, Arena arena) {
+    public static MemorySegment allocate(_CoreCrtSecureSearchSortCompareFunction.Function fi, Arena arena) {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 

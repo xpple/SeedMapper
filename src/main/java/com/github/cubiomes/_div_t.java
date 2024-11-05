@@ -27,8 +27,8 @@ public class _div_t {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("quot"),
-        CubiomesHeaders.C_INT.withName("rem")
+        Cubiomes.C_INT.withName("quot"),
+        Cubiomes.C_INT.withName("rem")
     ).withName("_div_t");
 
     /**

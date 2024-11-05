@@ -26,7 +26,7 @@ public class _iobuf {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_POINTER.withName("_Placeholder")
+        Cubiomes.C_POINTER.withName("_Placeholder")
     ).withName("_iobuf");
 
     /**

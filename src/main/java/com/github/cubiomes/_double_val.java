@@ -29,8 +29,8 @@ public class _double_val {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.unionLayout(
-        MemoryLayout.sequenceLayout(4, CubiomesHeaders.C_SHORT).withName("_Sh"),
-        CubiomesHeaders.C_DOUBLE.withName("_Val")
+        MemoryLayout.sequenceLayout(4, Cubiomes.C_SHORT).withName("_Sh"),
+        Cubiomes.C_DOUBLE.withName("_Val")
     ).withName("$anon$219:9");
 
     /**

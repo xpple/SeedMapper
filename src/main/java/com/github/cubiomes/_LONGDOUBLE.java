@@ -26,7 +26,7 @@ public class _LONGDOUBLE {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_LONG_DOUBLE.withName("x")
+        Cubiomes.C_LONG_DOUBLE.withName("x")
     ).withName("$anon$429:9");
 
     /**

@@ -26,7 +26,7 @@ public class _CRT_DOUBLE {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_DOUBLE.withName("x")
+        Cubiomes.C_DOUBLE.withName("x")
     ).withName("$anon$415:9");
 
     /**

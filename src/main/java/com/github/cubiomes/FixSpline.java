@@ -27,8 +27,8 @@ public class FixSpline {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("len"),
-        CubiomesHeaders.C_FLOAT.withName("val")
+        Cubiomes.C_INT.withName("len"),
+        Cubiomes.C_FLOAT.withName("val")
     ).withName("FixSpline");
 
     /**

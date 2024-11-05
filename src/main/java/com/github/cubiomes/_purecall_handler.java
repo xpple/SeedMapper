@@ -35,13 +35,13 @@ public class _purecall_handler {
         return $DESC;
     }
 
-    private static final MethodHandle UP$MH = CubiomesHeaders.upcallHandle(Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH = Cubiomes.upcallHandle(_purecall_handler.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(Function fi, Arena arena) {
+    public static MemorySegment allocate(_purecall_handler.Function fi, Arena arena) {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 

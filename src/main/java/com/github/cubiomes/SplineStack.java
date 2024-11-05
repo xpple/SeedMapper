@@ -33,8 +33,8 @@ public class SplineStack {
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
         MemoryLayout.sequenceLayout(42, Spline.layout()).withName("stack"),
         MemoryLayout.sequenceLayout(151, FixSpline.layout()).withName("fstack"),
-        CubiomesHeaders.C_INT.withName("len"),
-        CubiomesHeaders.C_INT.withName("flen")
+        Cubiomes.C_INT.withName("len"),
+        Cubiomes.C_INT.withName("flen")
     ).withName("SplineStack");
 
     /**

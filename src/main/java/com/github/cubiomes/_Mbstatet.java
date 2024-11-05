@@ -28,9 +28,9 @@ public class _Mbstatet {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_LONG.withName("_Wchar"),
-        CubiomesHeaders.C_SHORT.withName("_Byte"),
-        CubiomesHeaders.C_SHORT.withName("_State")
+        Cubiomes.C_LONG.withName("_Wchar"),
+        Cubiomes.C_SHORT.withName("_Byte"),
+        Cubiomes.C_SHORT.withName("_State")
     ).withName("_Mbstatet");
 
     /**

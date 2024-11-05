@@ -29,8 +29,8 @@ public class _float_val {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.unionLayout(
-        MemoryLayout.sequenceLayout(2, CubiomesHeaders.C_SHORT).withName("_Sh"),
-        CubiomesHeaders.C_FLOAT.withName("_Val")
+        MemoryLayout.sequenceLayout(2, Cubiomes.C_SHORT).withName("_Sh"),
+        Cubiomes.C_FLOAT.withName("_Val")
     ).withName("$anon$226:9");
 
     /**

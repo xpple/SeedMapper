@@ -36,16 +36,16 @@ public class PerlinNoise {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        MemoryLayout.sequenceLayout(257, CubiomesHeaders.C_CHAR).withName("d"),
-        CubiomesHeaders.C_CHAR.withName("h2"),
+        MemoryLayout.sequenceLayout(257, Cubiomes.C_CHAR).withName("d"),
+        Cubiomes.C_CHAR.withName("h2"),
         MemoryLayout.paddingLayout(6),
-        CubiomesHeaders.C_DOUBLE.withName("a"),
-        CubiomesHeaders.C_DOUBLE.withName("b"),
-        CubiomesHeaders.C_DOUBLE.withName("c"),
-        CubiomesHeaders.C_DOUBLE.withName("amplitude"),
-        CubiomesHeaders.C_DOUBLE.withName("lacunarity"),
-        CubiomesHeaders.C_DOUBLE.withName("d2"),
-        CubiomesHeaders.C_DOUBLE.withName("t2")
+        Cubiomes.C_DOUBLE.withName("a"),
+        Cubiomes.C_DOUBLE.withName("b"),
+        Cubiomes.C_DOUBLE.withName("c"),
+        Cubiomes.C_DOUBLE.withName("amplitude"),
+        Cubiomes.C_DOUBLE.withName("lacunarity"),
+        Cubiomes.C_DOUBLE.withName("d2"),
+        Cubiomes.C_DOUBLE.withName("t2")
     ).withName("PerlinNoise");
 
     /**

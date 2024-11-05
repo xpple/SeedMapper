@@ -34,15 +34,15 @@ public class Piece {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_POINTER.withName("name"),
+        Cubiomes.C_POINTER.withName("name"),
         Pos3.layout().withName("pos"),
         Pos3.layout().withName("bb0"),
         Pos3.layout().withName("bb1"),
-        CubiomesHeaders.C_CHAR.withName("rot"),
-        CubiomesHeaders.C_CHAR.withName("depth"),
-        CubiomesHeaders.C_CHAR.withName("type"),
+        Cubiomes.C_CHAR.withName("rot"),
+        Cubiomes.C_CHAR.withName("depth"),
+        Cubiomes.C_CHAR.withName("type"),
         MemoryLayout.paddingLayout(1),
-        CubiomesHeaders.C_POINTER.withName("next")
+        Cubiomes.C_POINTER.withName("next")
     ).withName("Piece");
 
     /**

@@ -27,11 +27,11 @@ public class getParaRange$func {
     }
 
     private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_POINTER,
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_DOUBLE
+        Cubiomes.C_INT,
+        Cubiomes.C_POINTER,
+        Cubiomes.C_INT,
+        Cubiomes.C_INT,
+        Cubiomes.C_DOUBLE
     );
 
     /**
@@ -41,13 +41,13 @@ public class getParaRange$func {
         return $DESC;
     }
 
-    private static final MethodHandle UP$MH = CubiomesHeaders.upcallHandle(Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH = Cubiomes.upcallHandle(getParaRange$func.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(Function fi, Arena arena) {
+    public static MemorySegment allocate(getParaRange$func.Function fi, Arena arena) {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 

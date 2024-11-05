@@ -28,9 +28,9 @@ public class OctaveNoise {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("octcnt"),
+        Cubiomes.C_INT.withName("octcnt"),
         MemoryLayout.paddingLayout(4),
-        CubiomesHeaders.C_POINTER.withName("octaves")
+        Cubiomes.C_POINTER.withName("octaves")
     ).withName("OctaveNoise");
 
     /**

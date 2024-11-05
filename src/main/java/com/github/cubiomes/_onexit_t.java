@@ -27,7 +27,7 @@ public class _onexit_t {
     }
 
     private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-        CubiomesHeaders.C_INT);
+        Cubiomes.C_INT);
 
     /**
      * The descriptor of this function pointer
@@ -36,13 +36,13 @@ public class _onexit_t {
         return $DESC;
     }
 
-    private static final MethodHandle UP$MH = CubiomesHeaders.upcallHandle(Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH = Cubiomes.upcallHandle(_onexit_t.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(Function fi, Arena arena) {
+    public static MemorySegment allocate(_onexit_t.Function fi, Arena arena) {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 

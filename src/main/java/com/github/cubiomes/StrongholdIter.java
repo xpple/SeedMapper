@@ -37,14 +37,14 @@ public class StrongholdIter {
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
         Pos.layout().withName("pos"),
         Pos.layout().withName("nextapprox"),
-        CubiomesHeaders.C_INT.withName("index"),
-        CubiomesHeaders.C_INT.withName("ringnum"),
-        CubiomesHeaders.C_INT.withName("ringmax"),
-        CubiomesHeaders.C_INT.withName("ringidx"),
-        CubiomesHeaders.C_DOUBLE.withName("angle"),
-        CubiomesHeaders.C_DOUBLE.withName("dist"),
-        CubiomesHeaders.C_LONG_LONG.withName("rnds"),
-        CubiomesHeaders.C_INT.withName("mc"),
+        Cubiomes.C_INT.withName("index"),
+        Cubiomes.C_INT.withName("ringnum"),
+        Cubiomes.C_INT.withName("ringmax"),
+        Cubiomes.C_INT.withName("ringidx"),
+        Cubiomes.C_DOUBLE.withName("angle"),
+        Cubiomes.C_DOUBLE.withName("dist"),
+        Cubiomes.C_LONG_LONG.withName("rnds"),
+        Cubiomes.C_INT.withName("mc"),
         MemoryLayout.paddingLayout(4)
     ).withName("StrongholdIter");
 

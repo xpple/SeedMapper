@@ -33,8 +33,8 @@ public class BiomeNoiseBeta {
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
         MemoryLayout.sequenceLayout(3, OctaveNoise.layout()).withName("climate"),
         MemoryLayout.sequenceLayout(10, PerlinNoise.layout()).withName("oct"),
-        CubiomesHeaders.C_INT.withName("nptype"),
-        CubiomesHeaders.C_INT.withName("mc")
+        Cubiomes.C_INT.withName("nptype"),
+        Cubiomes.C_INT.withName("mc")
     ).withName("BiomeNoiseBeta");
 
     /**

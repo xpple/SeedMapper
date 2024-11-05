@@ -35,11 +35,11 @@ public class LayerStack {
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
         MemoryLayout.sequenceLayout(61, Layer.layout()).withName("layers"),
-        CubiomesHeaders.C_POINTER.withName("entry_1"),
-        CubiomesHeaders.C_POINTER.withName("entry_4"),
-        CubiomesHeaders.C_POINTER.withName("entry_16"),
-        CubiomesHeaders.C_POINTER.withName("entry_64"),
-        CubiomesHeaders.C_POINTER.withName("entry_256"),
+        Cubiomes.C_POINTER.withName("entry_1"),
+        Cubiomes.C_POINTER.withName("entry_4"),
+        Cubiomes.C_POINTER.withName("entry_16"),
+        Cubiomes.C_POINTER.withName("entry_64"),
+        Cubiomes.C_POINTER.withName("entry_256"),
         PerlinNoise.layout().withName("oceanRnd")
     ).withName("LayerStack");
 

@@ -28,7 +28,7 @@ public class DoublePerlinNoise {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_DOUBLE.withName("amplitude"),
+        Cubiomes.C_DOUBLE.withName("amplitude"),
         OctaveNoise.layout().withName("octA"),
         OctaveNoise.layout().withName("octB")
     ).withName("DoublePerlinNoise");

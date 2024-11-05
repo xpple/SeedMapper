@@ -26,7 +26,7 @@ public class _CRT_FLOAT {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_FLOAT.withName("f")
+        Cubiomes.C_FLOAT.withName("f")
     ).withName("$anon$420:9");
 
     /**

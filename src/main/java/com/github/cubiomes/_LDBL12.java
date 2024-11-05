@@ -27,7 +27,7 @@ public class _LDBL12 {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        MemoryLayout.sequenceLayout(12, CubiomesHeaders.C_CHAR).withName("ld12")
+        MemoryLayout.sequenceLayout(12, Cubiomes.C_CHAR).withName("ld12")
     ).withName("$anon$437:9");
 
     /**

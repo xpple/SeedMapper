@@ -31,11 +31,11 @@ public class BiomeTree {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_POINTER.withName("steps"),
-        CubiomesHeaders.C_POINTER.withName("param"),
-        CubiomesHeaders.C_POINTER.withName("nodes"),
-        CubiomesHeaders.C_INT.withName("order"),
-        CubiomesHeaders.C_INT.withName("len")
+        Cubiomes.C_POINTER.withName("steps"),
+        Cubiomes.C_POINTER.withName("param"),
+        Cubiomes.C_POINTER.withName("nodes"),
+        Cubiomes.C_INT.withName("order"),
+        Cubiomes.C_INT.withName("len")
     ).withName("BiomeTree");
 
     /**

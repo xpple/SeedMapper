@@ -29,9 +29,9 @@ public class __crt_locale_data_public {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_POINTER.withName("_locale_pctype"),
-        CubiomesHeaders.C_INT.withName("_locale_mb_cur_max"),
-        CubiomesHeaders.C_INT.withName("_locale_lc_codepage")
+        Cubiomes.C_POINTER.withName("_locale_pctype"),
+        Cubiomes.C_INT.withName("_locale_mb_cur_max"),
+        Cubiomes.C_INT.withName("_locale_lc_codepage")
     ).withName("__crt_locale_data_public");
 
     /**

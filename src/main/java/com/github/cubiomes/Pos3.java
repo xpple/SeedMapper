@@ -28,9 +28,9 @@ public class Pos3 {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("x"),
-        CubiomesHeaders.C_INT.withName("y"),
-        CubiomesHeaders.C_INT.withName("z")
+        Cubiomes.C_INT.withName("x"),
+        Cubiomes.C_INT.withName("y"),
+        Cubiomes.C_INT.withName("z")
     ).withName("Pos3");
 
     /**

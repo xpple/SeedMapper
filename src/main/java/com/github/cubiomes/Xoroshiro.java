@@ -27,8 +27,8 @@ public class Xoroshiro {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_LONG_LONG.withName("lo"),
-        CubiomesHeaders.C_LONG_LONG.withName("hi")
+        Cubiomes.C_LONG_LONG.withName("lo"),
+        Cubiomes.C_LONG_LONG.withName("hi")
     ).withName("Xoroshiro");
 
     /**

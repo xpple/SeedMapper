@@ -27,8 +27,8 @@ public class __crt_locale_pointers {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_POINTER.withName("locinfo"),
-        CubiomesHeaders.C_POINTER.withName("mbcinfo")
+        Cubiomes.C_POINTER.withName("locinfo"),
+        Cubiomes.C_POINTER.withName("mbcinfo")
     ).withName("__crt_locale_pointers");
 
     /**

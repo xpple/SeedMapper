@@ -32,13 +32,13 @@ public class Range {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("scale"),
-        CubiomesHeaders.C_INT.withName("x"),
-        CubiomesHeaders.C_INT.withName("z"),
-        CubiomesHeaders.C_INT.withName("sx"),
-        CubiomesHeaders.C_INT.withName("sz"),
-        CubiomesHeaders.C_INT.withName("y"),
-        CubiomesHeaders.C_INT.withName("sy")
+        Cubiomes.C_INT.withName("scale"),
+        Cubiomes.C_INT.withName("x"),
+        Cubiomes.C_INT.withName("z"),
+        Cubiomes.C_INT.withName("sx"),
+        Cubiomes.C_INT.withName("sz"),
+        Cubiomes.C_INT.withName("y"),
+        Cubiomes.C_INT.withName("sy")
     ).withName("Range");
 
     /**

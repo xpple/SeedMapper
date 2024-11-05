@@ -29,10 +29,10 @@ public class EndIsland {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("x"),
-        CubiomesHeaders.C_INT.withName("y"),
-        CubiomesHeaders.C_INT.withName("z"),
-        CubiomesHeaders.C_INT.withName("r")
+        Cubiomes.C_INT.withName("x"),
+        Cubiomes.C_INT.withName("y"),
+        Cubiomes.C_INT.withName("z"),
+        Cubiomes.C_INT.withName("r")
     ).withName("EndIsland");
 
     /**

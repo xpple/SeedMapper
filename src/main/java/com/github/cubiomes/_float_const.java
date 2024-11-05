@@ -31,10 +31,10 @@ public class _float_const {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.unionLayout(
-        MemoryLayout.sequenceLayout(4, CubiomesHeaders.C_SHORT).withName("_Word"),
-        CubiomesHeaders.C_FLOAT.withName("_Float"),
-        CubiomesHeaders.C_DOUBLE.withName("_Double"),
-        CubiomesHeaders.C_LONG_DOUBLE.withName("_Long_double")
+        MemoryLayout.sequenceLayout(4, Cubiomes.C_SHORT).withName("_Word"),
+        Cubiomes.C_FLOAT.withName("_Float"),
+        Cubiomes.C_DOUBLE.withName("_Double"),
+        Cubiomes.C_LONG_DOUBLE.withName("_Long_double")
     ).withName("$anon$239:9");
 
     /**

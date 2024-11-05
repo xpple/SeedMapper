@@ -27,13 +27,13 @@ public class monteCarloBiomes$eval {
     }
 
     private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_POINTER,
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_POINTER
+        Cubiomes.C_INT,
+        Cubiomes.C_POINTER,
+        Cubiomes.C_INT,
+        Cubiomes.C_INT,
+        Cubiomes.C_INT,
+        Cubiomes.C_INT,
+        Cubiomes.C_POINTER
     );
 
     /**
@@ -43,13 +43,13 @@ public class monteCarloBiomes$eval {
         return $DESC;
     }
 
-    private static final MethodHandle UP$MH = CubiomesHeaders.upcallHandle(Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH = Cubiomes.upcallHandle(monteCarloBiomes$eval.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(Function fi, Arena arena) {
+    public static MemorySegment allocate(monteCarloBiomes$eval.Function fi, Arena arena) {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 

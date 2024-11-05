@@ -31,12 +31,12 @@ public class _exception {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("type"),
+        Cubiomes.C_INT.withName("type"),
         MemoryLayout.paddingLayout(4),
-        CubiomesHeaders.C_POINTER.withName("name"),
-        CubiomesHeaders.C_DOUBLE.withName("arg1"),
-        CubiomesHeaders.C_DOUBLE.withName("arg2"),
-        CubiomesHeaders.C_DOUBLE.withName("retval")
+        Cubiomes.C_POINTER.withName("name"),
+        Cubiomes.C_DOUBLE.withName("arg1"),
+        Cubiomes.C_DOUBLE.withName("arg2"),
+        Cubiomes.C_DOUBLE.withName("retval")
     ).withName("_exception");
 
     /**

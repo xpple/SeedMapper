@@ -27,9 +27,9 @@ public class searchAll48$check {
     }
 
     private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-        CubiomesHeaders.C_INT,
-        CubiomesHeaders.C_LONG_LONG,
-        CubiomesHeaders.C_POINTER
+        Cubiomes.C_INT,
+        Cubiomes.C_LONG_LONG,
+        Cubiomes.C_POINTER
     );
 
     /**
@@ -39,13 +39,13 @@ public class searchAll48$check {
         return $DESC;
     }
 
-    private static final MethodHandle UP$MH = CubiomesHeaders.upcallHandle(Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH = Cubiomes.upcallHandle(searchAll48$check.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(Function fi, Arena arena) {
+    public static MemorySegment allocate(searchAll48$check.Function fi, Arena arena) {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 

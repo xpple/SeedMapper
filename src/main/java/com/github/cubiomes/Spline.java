@@ -32,11 +32,11 @@ public class Spline {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("len"),
-        CubiomesHeaders.C_INT.withName("typ"),
-        MemoryLayout.sequenceLayout(12, CubiomesHeaders.C_FLOAT).withName("loc"),
-        MemoryLayout.sequenceLayout(12, CubiomesHeaders.C_FLOAT).withName("der"),
-        MemoryLayout.sequenceLayout(12, CubiomesHeaders.C_POINTER).withName("val")
+        Cubiomes.C_INT.withName("len"),
+        Cubiomes.C_INT.withName("typ"),
+        MemoryLayout.sequenceLayout(12, Cubiomes.C_FLOAT).withName("loc"),
+        MemoryLayout.sequenceLayout(12, Cubiomes.C_FLOAT).withName("der"),
+        MemoryLayout.sequenceLayout(12, Cubiomes.C_POINTER).withName("val")
     ).withName("Spline");
 
     /**

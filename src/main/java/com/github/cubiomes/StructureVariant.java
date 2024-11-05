@@ -42,23 +42,23 @@ public class StructureVariant {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_CHAR.withName("abandoned"),
-        CubiomesHeaders.C_CHAR.withName("giant"),
-        CubiomesHeaders.C_CHAR.withName("underground"),
-        CubiomesHeaders.C_CHAR.withName("airpocket"),
-        CubiomesHeaders.C_CHAR.withName("basement"),
-        CubiomesHeaders.C_CHAR.withName("cracked"),
-        CubiomesHeaders.C_CHAR.withName("size"),
-        CubiomesHeaders.C_CHAR.withName("start"),
-        CubiomesHeaders.C_SHORT.withName("biome"),
-        CubiomesHeaders.C_CHAR.withName("rotation"),
-        CubiomesHeaders.C_CHAR.withName("mirror"),
-        CubiomesHeaders.C_SHORT.withName("x"),
-        CubiomesHeaders.C_SHORT.withName("y"),
-        CubiomesHeaders.C_SHORT.withName("z"),
-        CubiomesHeaders.C_SHORT.withName("sx"),
-        CubiomesHeaders.C_SHORT.withName("sy"),
-        CubiomesHeaders.C_SHORT.withName("sz")
+        Cubiomes.C_CHAR.withName("abandoned"),
+        Cubiomes.C_CHAR.withName("giant"),
+        Cubiomes.C_CHAR.withName("underground"),
+        Cubiomes.C_CHAR.withName("airpocket"),
+        Cubiomes.C_CHAR.withName("basement"),
+        Cubiomes.C_CHAR.withName("cracked"),
+        Cubiomes.C_CHAR.withName("size"),
+        Cubiomes.C_CHAR.withName("start"),
+        Cubiomes.C_SHORT.withName("biome"),
+        Cubiomes.C_CHAR.withName("rotation"),
+        Cubiomes.C_CHAR.withName("mirror"),
+        Cubiomes.C_SHORT.withName("x"),
+        Cubiomes.C_SHORT.withName("y"),
+        Cubiomes.C_SHORT.withName("z"),
+        Cubiomes.C_SHORT.withName("sx"),
+        Cubiomes.C_SHORT.withName("sy"),
+        Cubiomes.C_SHORT.withName("sz")
     ).withName("StructureVariant");
 
     /**

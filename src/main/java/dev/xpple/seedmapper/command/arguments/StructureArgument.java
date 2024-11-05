@@ -1,6 +1,6 @@
 package dev.xpple.seedmapper.command.arguments;
 
-import com.github.cubiomes.CubiomesHeaders;
+import com.github.cubiomes.Cubiomes;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -23,31 +23,31 @@ public class StructureArgument implements ArgumentType<Integer> {
 
     //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> STRUCTURES;">
     private static final Map<String, Integer> STRUCTURES = ImmutableMap.<String, Integer>builder()
-        .put("feature", CubiomesHeaders.Feature())
-        .put("desert_pyramid", CubiomesHeaders.Desert_Pyramid())
-        .put("jungle_pyramid", CubiomesHeaders.Jungle_Pyramid())
-        .put("swamp_hut", CubiomesHeaders.Swamp_Hut())
-        .put("igloo", CubiomesHeaders.Igloo())
-        .put("village", CubiomesHeaders.Village())
-        .put("ocean_ruin", CubiomesHeaders.Ocean_Ruin())
-        .put("shipwreck", CubiomesHeaders.Shipwreck())
-        .put("monument", CubiomesHeaders.Monument())
-        .put("mansion", CubiomesHeaders.Mansion())
-        .put("pillager_outpost", CubiomesHeaders.Outpost())
-        .put("ruined_portal", CubiomesHeaders.Ruined_Portal())
-        .put("ruined_portal_nether", CubiomesHeaders.Ruined_Portal_N())
-        .put("ancient_city", CubiomesHeaders.Ancient_City())
-        .put("buried_treasure", CubiomesHeaders.Treasure())
-        .put("mineshaft", CubiomesHeaders.Mineshaft())
-        .put("desert_well", CubiomesHeaders.Desert_Well())
-        .put("geode", CubiomesHeaders.Geode())
-        .put("fortress", CubiomesHeaders.Fortress())
-        .put("bastion_remnant", CubiomesHeaders.Bastion())
-        .put("end_city", CubiomesHeaders.End_City())
-        .put("end_gateway", CubiomesHeaders.End_Gateway())
-        .put("end_island", CubiomesHeaders.End_Island())
-        .put("trail_ruins", CubiomesHeaders.Trail_Ruins())
-        .put("trial_chambers", CubiomesHeaders.Trial_Chambers())
+        .put("feature", Cubiomes.Feature())
+        .put("desert_pyramid", Cubiomes.Desert_Pyramid())
+        .put("jungle_pyramid", Cubiomes.Jungle_Pyramid())
+        .put("swamp_hut", Cubiomes.Swamp_Hut())
+        .put("igloo", Cubiomes.Igloo())
+        .put("village", Cubiomes.Village())
+        .put("ocean_ruin", Cubiomes.Ocean_Ruin())
+        .put("shipwreck", Cubiomes.Shipwreck())
+        .put("monument", Cubiomes.Monument())
+        .put("mansion", Cubiomes.Mansion())
+        .put("pillager_outpost", Cubiomes.Outpost())
+        .put("ruined_portal", Cubiomes.Ruined_Portal())
+        .put("ruined_portal_nether", Cubiomes.Ruined_Portal_N())
+        .put("ancient_city", Cubiomes.Ancient_City())
+        .put("buried_treasure", Cubiomes.Treasure())
+        .put("mineshaft", Cubiomes.Mineshaft())
+        .put("desert_well", Cubiomes.Desert_Well())
+        .put("geode", Cubiomes.Geode())
+        .put("fortress", Cubiomes.Fortress())
+        .put("bastion_remnant", Cubiomes.Bastion())
+        .put("end_city", Cubiomes.End_City())
+        .put("end_gateway", Cubiomes.End_Gateway())
+        .put("end_island", Cubiomes.End_Island())
+        .put("trail_ruins", Cubiomes.Trail_Ruins())
+        .put("trial_chambers", Cubiomes.Trial_Chambers())
         .build();
     //</editor-fold>
 

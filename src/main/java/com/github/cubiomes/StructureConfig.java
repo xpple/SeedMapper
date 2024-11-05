@@ -31,12 +31,12 @@ public class StructureConfig {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("salt"),
-        CubiomesHeaders.C_CHAR.withName("regionSize"),
-        CubiomesHeaders.C_CHAR.withName("chunkRange"),
-        CubiomesHeaders.C_CHAR.withName("structType"),
-        CubiomesHeaders.C_CHAR.withName("properties"),
-        CubiomesHeaders.C_FLOAT.withName("rarity")
+        Cubiomes.C_INT.withName("salt"),
+        Cubiomes.C_CHAR.withName("regionSize"),
+        Cubiomes.C_CHAR.withName("chunkRange"),
+        Cubiomes.C_CHAR.withName("structType"),
+        Cubiomes.C_CHAR.withName("properties"),
+        Cubiomes.C_FLOAT.withName("rarity")
     ).withName("StructureConfig");
 
     /**

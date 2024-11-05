@@ -27,8 +27,8 @@ public class _Lldiv_t {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_LONG_LONG.withName("quot"),
-        CubiomesHeaders.C_LONG_LONG.withName("rem")
+        Cubiomes.C_LONG_LONG.withName("quot"),
+        Cubiomes.C_LONG_LONG.withName("rem")
     ).withName("$anon$29:9");
 
     /**

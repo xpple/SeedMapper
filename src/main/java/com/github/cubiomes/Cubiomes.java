@@ -13,24 +13,24 @@ import java.lang.invoke.MethodHandle;
 import static java.lang.foreign.MemoryLayout.PathElement.*;
 import static java.lang.foreign.ValueLayout.*;
 
-public class CubiomesHeaders extends CubiomesHeaders_1 {
+public class Cubiomes extends Cubiomes_1 {
 
-    CubiomesHeaders() {
+    Cubiomes() {
         // Should not be called directly
     }
 
     private static class voronoiAccess3D {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("voronoiAccess3D");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("voronoiAccess3D");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -84,21 +84,21 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class mapVoronoiPlane {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("mapVoronoiPlane");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("mapVoronoiPlane");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -224,7 +224,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class g_btree$constants {
         public static final SequenceLayout LAYOUT = MemoryLayout.sequenceLayout(6, BiomeTree.layout());
-        public static final MemorySegment SEGMENT = CubiomesHeaders.findOrThrow("g_btree").reinterpret(LAYOUT.byteSize());
+        public static final MemorySegment SEGMENT = Cubiomes.findOrThrow("g_btree").reinterpret(LAYOUT.byteSize());
     public static final MethodHandle HANDLE = LAYOUT.sliceHandle(sequenceElement());
         public static final long[] DIMS = { 6 };
     }
@@ -295,12 +295,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class initSurfaceNoise {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("initSurfaceNoise");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("initSurfaceNoise");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -354,11 +354,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class initSurfaceNoiseBeta {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("initSurfaceNoiseBeta");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("initSurfaceNoiseBeta");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -412,14 +412,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class sampleSurfaceNoise {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("sampleSurfaceNoise");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("sampleSurfaceNoise");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -473,16 +473,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class sampleSurfaceNoiseBetween {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_DOUBLE
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_DOUBLE
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("sampleSurfaceNoiseBetween");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("sampleSurfaceNoiseBetween");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -536,11 +536,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setNetherSeed {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setNetherSeed");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setNetherSeed");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -594,15 +594,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getNetherBiome {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getNetherBiome");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getNetherBiome");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -656,16 +656,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class mapNether2D {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("mapNether2D");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("mapNether2D");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -719,14 +719,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class mapNether3D {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
             Range.layout(),
-            CubiomesHeaders.C_FLOAT
+            Cubiomes.C_FLOAT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("mapNether3D");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("mapNether3D");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -780,15 +780,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class genNetherScaled {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
             Range.layout(),
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("genNetherScaled");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("genNetherScaled");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -842,12 +842,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setEndSeed {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setEndSeed");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setEndSeed");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -901,16 +901,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class mapEndBiome {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("mapEndBiome");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("mapEndBiome");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -964,16 +964,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class mapEnd {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("mapEnd");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("mapEnd");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1027,14 +1027,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getEndSurfaceHeight {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getEndSurfaceHeight");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getEndSurfaceHeight");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1088,19 +1088,19 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class mapEndSurfaceHeight {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("mapEndSurfaceHeight");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("mapEndSurfaceHeight");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1154,15 +1154,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class genEndScaled {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
             Range.layout(),
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("genEndScaled");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("genEndScaled");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1243,11 +1243,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class initBiomeNoise {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("initBiomeNoise");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("initBiomeNoise");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1301,12 +1301,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setBiomeSeed {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setBiomeSeed");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setBiomeSeed");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1360,11 +1360,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setBetaBiomeSeed {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setBetaBiomeSeed");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setBetaBiomeSeed");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1418,17 +1418,17 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class sampleBiomeNoise {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("sampleBiomeNoise");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("sampleBiomeNoise");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1482,15 +1482,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class sampleBiomeNoiseBeta {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("sampleBiomeNoiseBeta");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("sampleBiomeNoiseBeta");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1544,14 +1544,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class approxSurfaceBeta {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("approxSurfaceBeta");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("approxSurfaceBeta");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1605,12 +1605,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getOldBetaBiome {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_FLOAT,
-            CubiomesHeaders.C_FLOAT
+            Cubiomes.C_INT,
+            Cubiomes.C_FLOAT,
+            Cubiomes.C_FLOAT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getOldBetaBiome");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getOldBetaBiome");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1664,13 +1664,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class climateToBiome {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("climateToBiome");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("climateToBiome");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1724,14 +1724,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setClimateParaSeed {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setClimateParaSeed");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setClimateParaSeed");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1785,14 +1785,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class sampleClimatePara {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_DOUBLE
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_DOUBLE
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("sampleClimatePara");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("sampleClimatePara");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1846,15 +1846,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class genBiomeNoiseChunkSection {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("genBiomeNoiseChunkSection");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("genBiomeNoiseChunkSection");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1908,14 +1908,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class genBiomeNoiseScaled {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
             Range.layout(),
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("genBiomeNoiseScaled");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("genBiomeNoiseScaled");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -1969,14 +1969,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class genBiomeNoiseBetaScaled {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
             Range.layout()
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("genBiomeNoiseBetaScaled");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("genBiomeNoiseBetaScaled");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2030,14 +2030,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getBiomeDepthAndScale {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getBiomeDepthAndScale");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getBiomeDepthAndScale");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2095,7 +2095,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
             Range.layout()
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getVoronoiSrcRange");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getVoronoiSrcRange");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2176,12 +2176,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setupGenerator {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setupGenerator");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setupGenerator");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2235,12 +2235,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class applySeed {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("applySeed");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("applySeed");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2294,15 +2294,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getMinCacheSize {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getMinCacheSize");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getMinCacheSize");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2356,12 +2356,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class allocCache {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
             Range.layout()
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("allocCache");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("allocCache");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2415,13 +2415,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class genBiomes {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
             Range.layout()
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("genBiomes");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("genBiomes");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2475,15 +2475,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getBiomeAt {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getBiomeAt");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getBiomeAt");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2537,12 +2537,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getLayerForScale {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getLayerForScale");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getLayerForScale");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2596,12 +2596,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setupLayerStack {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setupLayerStack");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setupLayerStack");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2655,13 +2655,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getMinLayerCacheSize {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getMinLayerCacheSize");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getMinLayerCacheSize");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2715,18 +2715,18 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setupLayer {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_CHAR,
-            CubiomesHeaders.C_CHAR,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_CHAR,
+            Cubiomes.C_CHAR,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setupLayer");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setupLayer");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2780,16 +2780,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class genArea {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("genArea");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("genArea");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -2843,18 +2843,18 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class mapApproxHeight {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("mapApproxHeight");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("mapApproxHeight");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3203,15 +3203,73 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
         return BF_FORCED_OCEAN;
     }
 
-    private static class getStructureConfig {
+    private static class getStructureDimension {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getStructureConfig");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getStructureDimension");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * int getStructureDimension(int id)
+     * }
+     */
+    public static FunctionDescriptor getStructureDimension$descriptor() {
+        return getStructureDimension.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * int getStructureDimension(int id)
+     * }
+     */
+    public static MethodHandle getStructureDimension$handle() {
+        return getStructureDimension.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * int getStructureDimension(int id)
+     * }
+     */
+    public static MemorySegment getStructureDimension$address() {
+        return getStructureDimension.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * int getStructureDimension(int id)
+     * }
+     */
+    public static int getStructureDimension(int id) {
+        var mh$ = getStructureDimension.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("getStructureDimension", id);
+            }
+            return (int)mh$.invokeExact(id);
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class getStructureConfig {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getStructureConfig");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3265,16 +3323,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getStructurePos {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getStructurePos");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getStructurePos");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3328,18 +3386,18 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getMineshafts {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getMineshafts");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getMineshafts");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3393,15 +3451,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getEndIslands {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getEndIslands");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getEndIslands");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3455,18 +3513,18 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class mapEndIslandHeight {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("mapEndIslandHeight");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("mapEndIslandHeight");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3520,15 +3578,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class isEndChunkEmpty {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("isEndChunkEmpty");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("isEndChunkEmpty");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3583,12 +3641,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     private static class initFirstStronghold {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             Pos.layout(),
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("initFirstStronghold");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("initFirstStronghold");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3642,12 +3700,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class nextStronghold {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("nextStronghold");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("nextStronghold");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3702,11 +3760,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     private static class estimateSpawn {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             Pos.layout(),
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("estimateSpawn");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("estimateSpawn");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3761,10 +3819,10 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     private static class getSpawn {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             Pos.layout(),
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getSpawn");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getSpawn");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3819,18 +3877,18 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     private static class locateBiome {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             Pos.layout(),
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("locateBiome");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("locateBiome");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3884,15 +3942,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class isViableStructurePos {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("isViableStructurePos");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("isViableStructurePos");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -3946,13 +4004,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class isViableFeatureBiome {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("isViableFeatureBiome");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("isViableFeatureBiome");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4006,14 +4064,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class isViableStructureTerrain {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("isViableStructureTerrain");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("isViableStructureTerrain");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4067,14 +4125,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class isViableEndCityTerrain {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("isViableEndCityTerrain");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("isViableEndCityTerrain");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4128,17 +4186,17 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getVariant {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getVariant");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getVariant");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4192,14 +4250,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getEndCityPieces {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getEndCityPieces");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getEndCityPieces");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4442,16 +4500,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getFortressPieces {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getFortressPieces");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getFortressPieces");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4649,12 +4707,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getFixedEndGateways {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getFixedEndGateways");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getFixedEndGateways");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4709,14 +4767,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     private static class getLinkedGatewayChunk {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             Pos.layout(),
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
             Pos.layout(),
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getLinkedGatewayChunk");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getLinkedGatewayChunk");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4771,13 +4829,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     private static class getLinkedGatewayPos {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             Pos.layout(),
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
             Pos.layout()
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getLinkedGatewayPos");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getLinkedGatewayPos");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4921,14 +4979,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getHouseList {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getHouseList");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getHouseList");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4982,17 +5040,17 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class monteCarloBiomes {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
             Range.layout(),
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("monteCarloBiomes");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("monteCarloBiomes");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5046,18 +5104,18 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setupBiomeFilter {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setupBiomeFilter");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setupBiomeFilter");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5111,17 +5169,17 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class checkForBiomes {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
             Range.layout(),
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("checkForBiomes");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("checkForBiomes");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5175,19 +5233,19 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class checkForBiomesAtLayer {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("checkForBiomesAtLayer");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("checkForBiomesAtLayer");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5241,17 +5299,17 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class checkForTemps {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("checkForTemps");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("checkForTemps");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5305,19 +5363,19 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getBiomeCenters {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
             Range.layout(),
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getBiomeCenters");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getBiomeCenters");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5371,14 +5429,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class canBiomeGenerate {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("canBiomeGenerate");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("canBiomeGenerate");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5432,15 +5490,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class genPotential {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("genPotential");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("genPotential");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5494,14 +5552,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getAvailableBiomes {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getAvailableBiomes");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getAvailableBiomes");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5555,23 +5613,23 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getParaDescent {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_DOUBLE,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_DOUBLE,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getParaDescent");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getParaDescent");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5625,19 +5683,19 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getParaRange {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getParaRange");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getParaRange");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5691,11 +5749,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getBiomeParaExtremes {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getBiomeParaExtremes");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getBiomeParaExtremes");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5749,12 +5807,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getBiomeParaLimits {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getBiomeParaLimits");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getBiomeParaLimits");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5808,12 +5866,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getPossibleBiomesForLimits {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getPossibleBiomesForLimits");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getPossibleBiomesForLimits");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5867,16 +5925,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getLargestRec {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getLargestRec");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getLargestRec");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5930,11 +5988,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __acrt_iob_func {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__acrt_iob_func");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__acrt_iob_func");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -5988,11 +6046,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fgetwc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fgetwc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fgetwc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6046,9 +6104,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fgetwchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT    );
+            Cubiomes.C_SHORT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fgetwchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fgetwchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6102,12 +6160,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fputwc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fputwc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fputwc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6161,11 +6219,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fputwchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_SHORT
+            Cubiomes.C_SHORT,
+            Cubiomes.C_SHORT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fputwchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fputwchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6219,11 +6277,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getwc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getwc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getwc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6277,9 +6335,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getwchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT    );
+            Cubiomes.C_SHORT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getwchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getwchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6333,13 +6391,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fgetws {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fgetws");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fgetws");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6393,12 +6451,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fputws {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fputws");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fputws");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6452,12 +6510,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _getws_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_getws_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_getws_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6511,12 +6569,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class putwc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("putwc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("putwc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6570,11 +6628,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class putwchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_SHORT
+            Cubiomes.C_SHORT,
+            Cubiomes.C_SHORT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("putwchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("putwchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6628,11 +6686,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _putws {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_putws");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_putws");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6686,12 +6744,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class ungetwc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("ungetwc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("ungetwc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6745,12 +6803,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wfdopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wfdopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wfdopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6804,12 +6862,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wfopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wfopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wfopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6863,13 +6921,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wfopen_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wfopen_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wfopen_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6923,13 +6981,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wfreopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wfreopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wfreopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -6983,14 +7041,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wfreopen_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wfreopen_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wfreopen_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7044,13 +7102,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wfsopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wfsopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wfsopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7104,12 +7162,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wpopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wpopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wpopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7163,11 +7221,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wremove {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wremove");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wremove");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7221,12 +7279,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wtempnam {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wtempnam");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wtempnam");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7280,12 +7338,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wtmpnam_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wtmpnam_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wtmpnam_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7339,11 +7397,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _wtmpnam {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_wtmpnam");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_wtmpnam");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7397,11 +7455,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fgetwc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fgetwc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fgetwc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7455,12 +7513,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fputwc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fputwc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fputwc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7514,11 +7572,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _getwc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_getwc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_getwc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7572,12 +7630,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _putwc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_putwc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_putwc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7631,12 +7689,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _ungetwc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_SHORT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_SHORT,
+            Cubiomes.C_SHORT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_ungetwc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_ungetwc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7690,15 +7748,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vfwprintf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vfwprintf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vfwprintf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7752,15 +7810,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vfwprintf_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vfwprintf_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vfwprintf_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7814,15 +7872,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vfwprintf_p {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vfwprintf_p");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vfwprintf_p");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7876,15 +7934,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vfwscanf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vfwscanf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vfwscanf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -7938,16 +7996,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vswprintf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vswprintf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vswprintf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8001,16 +8059,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vswprintf_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vswprintf_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vswprintf_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8064,17 +8122,17 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vsnwprintf_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vsnwprintf_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vsnwprintf_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8128,16 +8186,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vswprintf_p {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vswprintf_p");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vswprintf_p");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8191,16 +8249,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vswscanf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vswscanf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vswscanf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8256,18 +8314,18 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
      * typedef long long fpos_t
      * }
      */
-    public static final OfLong fpos_t = CubiomesHeaders.C_LONG_LONG;
+    public static final OfLong fpos_t = Cubiomes.C_LONG_LONG;
 
     private static class _get_stream_buffer_pointers {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_get_stream_buffer_pointers");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_get_stream_buffer_pointers");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8321,11 +8379,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class clearerr_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("clearerr_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("clearerr_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8379,13 +8437,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fopen_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fopen_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fopen_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8439,15 +8497,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fread_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fread_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fread_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8501,14 +8559,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class freopen_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("freopen_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("freopen_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8562,12 +8620,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class gets_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("gets_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("gets_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8621,11 +8679,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class tmpfile_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("tmpfile_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("tmpfile_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8679,12 +8737,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class tmpnam_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("tmpnam_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("tmpnam_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8738,10 +8796,10 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class clearerr {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("clearerr");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("clearerr");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8795,11 +8853,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fclose {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fclose");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fclose");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8853,9 +8911,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fcloseall {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fcloseall");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fcloseall");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8909,12 +8967,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fdopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fdopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fdopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -8968,11 +9026,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class feof {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("feof");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("feof");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9026,11 +9084,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class ferror {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("ferror");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("ferror");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9084,11 +9142,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fflush {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fflush");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fflush");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9142,11 +9200,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fgetc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fgetc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fgetc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9200,9 +9258,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fgetchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fgetchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fgetchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9256,12 +9314,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fgetpos {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fgetpos");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fgetpos");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9315,13 +9373,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fgets {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fgets");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fgets");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9375,11 +9433,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fileno {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fileno");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fileno");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9433,9 +9491,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _flushall {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_flushall");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_flushall");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9489,12 +9547,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9548,12 +9606,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fputc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fputc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fputc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9607,11 +9665,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fputchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fputchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fputchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9665,12 +9723,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fputs {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fputs");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fputs");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9724,14 +9782,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fread {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fread");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fread");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9785,13 +9843,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class freopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("freopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("freopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9845,13 +9903,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fsopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fsopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fsopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9905,12 +9963,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fsetpos {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fsetpos");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fsetpos");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -9964,13 +10022,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fseek {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fseek");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fseek");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10024,13 +10082,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fseeki64 {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fseeki64");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fseeki64");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10084,11 +10142,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class ftell {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("ftell");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("ftell");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10142,11 +10200,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _ftelli64 {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_ftelli64");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_ftelli64");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10200,14 +10258,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fwrite {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fwrite");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fwrite");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10261,11 +10319,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10319,9 +10377,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10375,9 +10433,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _getmaxstdio {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_getmaxstdio");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_getmaxstdio");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10431,11 +10489,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _getw {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_getw");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_getw");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10489,11 +10547,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _pclose {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_pclose");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_pclose");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10547,12 +10605,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _popen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_popen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_popen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10606,12 +10664,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class putc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("putc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("putc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10665,11 +10723,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class putchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("putchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("putchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10723,11 +10781,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class puts {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("puts");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("puts");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10781,12 +10839,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _putw {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_putw");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_putw");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10840,11 +10898,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class remove {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("remove");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("remove");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10898,12 +10956,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class rename {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("rename");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("rename");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -10957,11 +11015,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _unlink {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_unlink");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_unlink");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11015,11 +11073,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class unlink {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("unlink");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("unlink");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11073,10 +11131,10 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class rewind {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("rewind");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("rewind");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11130,9 +11188,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _rmtmp {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_rmtmp");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_rmtmp");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11186,11 +11244,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setbuf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setbuf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setbuf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11244,11 +11302,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _setmaxstdio {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_setmaxstdio");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_setmaxstdio");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11302,14 +11360,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class setvbuf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("setvbuf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("setvbuf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11363,12 +11421,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _tempnam {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_tempnam");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_tempnam");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11422,9 +11480,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class tmpfile {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER    );
+            Cubiomes.C_POINTER    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("tmpfile");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("tmpfile");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11478,11 +11536,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class tmpnam {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("tmpnam");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("tmpnam");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11536,12 +11594,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class ungetc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("ungetc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("ungetc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11595,10 +11653,10 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _lock_file {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_lock_file");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_lock_file");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11652,10 +11710,10 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _unlock_file {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_unlock_file");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_unlock_file");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11709,11 +11767,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fclose_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fclose_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fclose_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11767,11 +11825,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fflush_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fflush_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fflush_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11825,11 +11883,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fgetc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fgetc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fgetc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11883,12 +11941,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fputc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fputc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fputc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -11942,14 +12000,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fread_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fread_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fread_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12003,15 +12061,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fread_nolock_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fread_nolock_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fread_nolock_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12065,13 +12123,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fseek_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fseek_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fseek_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12125,13 +12183,13 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fseeki64_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fseeki64_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fseeki64_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12185,11 +12243,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _ftell_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_ftell_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_ftell_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12243,11 +12301,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _ftelli64_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_ftelli64_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_ftelli64_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12301,14 +12359,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _fwrite_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_fwrite_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_fwrite_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12362,11 +12420,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _getc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_getc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_getc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12420,12 +12478,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _putc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_putc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_putc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12479,12 +12537,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _ungetc_nolock {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_ungetc_nolock");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_ungetc_nolock");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12538,9 +12596,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __p__commode {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER    );
+            Cubiomes.C_POINTER    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__p__commode");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__p__commode");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12594,15 +12652,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vfprintf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vfprintf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vfprintf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12656,15 +12714,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vfprintf_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vfprintf_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vfprintf_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12718,15 +12776,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vfprintf_p {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vfprintf_p");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vfprintf_p");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12780,11 +12838,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _set_printf_count_output {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_set_printf_count_output");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_set_printf_count_output");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12838,9 +12896,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class _get_printf_count_output {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("_get_printf_count_output");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("_get_printf_count_output");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12894,15 +12952,15 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vfscanf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vfscanf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vfscanf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -12956,16 +13014,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vsprintf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vsprintf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vsprintf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13019,16 +13077,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vsprintf_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vsprintf_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vsprintf_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13082,17 +13140,17 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vsnprintf_s {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vsnprintf_s");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vsnprintf_s");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13146,16 +13204,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vsprintf_p {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vsprintf_p");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vsprintf_p");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13209,16 +13267,16 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class __stdio_common_vsscanf {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("__stdio_common_vsscanf");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("__stdio_common_vsscanf");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13272,12 +13330,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class tempnam {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("tempnam");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("tempnam");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13331,9 +13389,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fcloseall {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fcloseall");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fcloseall");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13387,12 +13445,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fdopen {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fdopen");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fdopen");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13446,9 +13504,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fgetchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fgetchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fgetchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13502,11 +13560,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fileno {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fileno");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fileno");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13560,9 +13618,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class flushall {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("flushall");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("flushall");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13616,11 +13674,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class fputchar {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("fputchar");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("fputchar");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13674,11 +13732,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getw {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getw");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getw");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13732,12 +13790,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class putw {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("putw");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("putw");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13791,9 +13849,9 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class rmtmp {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT    );
+            Cubiomes.C_INT    );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("rmtmp");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("rmtmp");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13892,11 +13950,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class getQuadHutCst {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getQuadHutCst");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getQuadHutCst");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -13950,19 +14008,19 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class searchAll48 {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("searchAll48");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("searchAll48");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14017,14 +14075,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     private static class getOptimalAfk {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             Pos.layout(),
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("getOptimalAfk");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getOptimalAfk");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14078,22 +14136,22 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class scanForQuads {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
+            Cubiomes.C_INT,
             StructureConfig.layout(),
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_LONG_LONG,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("scanForQuads");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("scanForQuads");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14147,12 +14205,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class loadSavedSeeds {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("loadSavedSeeds");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("loadSavedSeeds");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14206,11 +14264,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class mc2str {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("mc2str");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("mc2str");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14264,11 +14322,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class str2mc {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("str2mc");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("str2mc");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14322,12 +14380,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class biome2str {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("biome2str");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("biome2str");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14381,11 +14439,11 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class struct2str {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("struct2str");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("struct2str");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14439,10 +14497,10 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class initBiomeColors {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("initBiomeColors");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("initBiomeColors");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14496,10 +14554,10 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class initBiomeTypeColors {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("initBiomeTypeColors");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("initBiomeTypeColors");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14553,12 +14611,12 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class parseBiomeColors {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("parseBiomeColors");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("parseBiomeColors");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14612,17 +14670,17 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class biomesToImage {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("biomesToImage");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("biomesToImage");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14676,14 +14734,14 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
 
     private static class savePPM {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_POINTER,
-            CubiomesHeaders.C_INT,
-            CubiomesHeaders.C_INT
+            Cubiomes.C_INT,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_POINTER,
+            Cubiomes.C_INT,
+            Cubiomes.C_INT
         );
 
-        public static final MemorySegment ADDR = CubiomesHeaders.findOrThrow("savePPM");
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("savePPM");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -14787,7 +14845,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment __FILEW__() {
         class Holder {
             static final MemorySegment __FILEW__
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("j");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("j");
         }
         return Holder.__FILEW__;
     }
@@ -15240,7 +15298,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRId8() {
         class Holder {
             static final MemorySegment PRId8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.PRId8;
     }
@@ -15252,7 +15310,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRId16() {
         class Holder {
             static final MemorySegment PRId16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hd");
         }
         return Holder.PRId16;
     }
@@ -15264,7 +15322,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRId32() {
         class Holder {
             static final MemorySegment PRId32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("d");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.PRId32;
     }
@@ -15276,7 +15334,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRId64() {
         class Holder {
             static final MemorySegment PRId64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRId64;
     }
@@ -15288,7 +15346,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdLEAST8() {
         class Holder {
             static final MemorySegment PRIdLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.PRIdLEAST8;
     }
@@ -15300,7 +15358,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdLEAST16() {
         class Holder {
             static final MemorySegment PRIdLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hd");
         }
         return Holder.PRIdLEAST16;
     }
@@ -15312,7 +15370,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdLEAST32() {
         class Holder {
             static final MemorySegment PRIdLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("d");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.PRIdLEAST32;
     }
@@ -15324,7 +15382,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdLEAST64() {
         class Holder {
             static final MemorySegment PRIdLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdLEAST64;
     }
@@ -15336,7 +15394,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdFAST8() {
         class Holder {
             static final MemorySegment PRIdFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.PRIdFAST8;
     }
@@ -15348,7 +15406,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdFAST16() {
         class Holder {
             static final MemorySegment PRIdFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("d");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.PRIdFAST16;
     }
@@ -15360,7 +15418,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdFAST32() {
         class Holder {
             static final MemorySegment PRIdFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("d");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.PRIdFAST32;
     }
@@ -15372,7 +15430,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdFAST64() {
         class Holder {
             static final MemorySegment PRIdFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdFAST64;
     }
@@ -15384,7 +15442,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdMAX() {
         class Holder {
             static final MemorySegment PRIdMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdMAX;
     }
@@ -15396,7 +15454,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIdPTR() {
         class Holder {
             static final MemorySegment PRIdPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.PRIdPTR;
     }
@@ -15408,7 +15466,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIi8() {
         class Holder {
             static final MemorySegment PRIi8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.PRIi8;
     }
@@ -15420,7 +15478,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIi16() {
         class Holder {
             static final MemorySegment PRIi16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hi");
         }
         return Holder.PRIi16;
     }
@@ -15432,7 +15490,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIi32() {
         class Holder {
             static final MemorySegment PRIi32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("i");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.PRIi32;
     }
@@ -15444,7 +15502,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIi64() {
         class Holder {
             static final MemorySegment PRIi64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIi64;
     }
@@ -15456,7 +15514,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiLEAST8() {
         class Holder {
             static final MemorySegment PRIiLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.PRIiLEAST8;
     }
@@ -15468,7 +15526,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiLEAST16() {
         class Holder {
             static final MemorySegment PRIiLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hi");
         }
         return Holder.PRIiLEAST16;
     }
@@ -15480,7 +15538,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiLEAST32() {
         class Holder {
             static final MemorySegment PRIiLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("i");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.PRIiLEAST32;
     }
@@ -15492,7 +15550,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiLEAST64() {
         class Holder {
             static final MemorySegment PRIiLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIiLEAST64;
     }
@@ -15504,7 +15562,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiFAST8() {
         class Holder {
             static final MemorySegment PRIiFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.PRIiFAST8;
     }
@@ -15516,7 +15574,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiFAST16() {
         class Holder {
             static final MemorySegment PRIiFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("i");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.PRIiFAST16;
     }
@@ -15528,7 +15586,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiFAST32() {
         class Holder {
             static final MemorySegment PRIiFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("i");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.PRIiFAST32;
     }
@@ -15540,7 +15598,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiFAST64() {
         class Holder {
             static final MemorySegment PRIiFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIiFAST64;
     }
@@ -15552,7 +15610,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiMAX() {
         class Holder {
             static final MemorySegment PRIiMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIiMAX;
     }
@@ -15564,7 +15622,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIiPTR() {
         class Holder {
             static final MemorySegment PRIiPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.PRIiPTR;
     }
@@ -15576,7 +15634,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIo8() {
         class Holder {
             static final MemorySegment PRIo8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.PRIo8;
     }
@@ -15588,7 +15646,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIo16() {
         class Holder {
             static final MemorySegment PRIo16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("ho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("ho");
         }
         return Holder.PRIo16;
     }
@@ -15600,7 +15658,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIo32() {
         class Holder {
             static final MemorySegment PRIo32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("o");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.PRIo32;
     }
@@ -15612,7 +15670,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIo64() {
         class Holder {
             static final MemorySegment PRIo64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIo64;
     }
@@ -15624,7 +15682,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoLEAST8() {
         class Holder {
             static final MemorySegment PRIoLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.PRIoLEAST8;
     }
@@ -15636,7 +15694,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoLEAST16() {
         class Holder {
             static final MemorySegment PRIoLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("ho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("ho");
         }
         return Holder.PRIoLEAST16;
     }
@@ -15648,7 +15706,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoLEAST32() {
         class Holder {
             static final MemorySegment PRIoLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("o");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.PRIoLEAST32;
     }
@@ -15660,7 +15718,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoLEAST64() {
         class Holder {
             static final MemorySegment PRIoLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoLEAST64;
     }
@@ -15672,7 +15730,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoFAST8() {
         class Holder {
             static final MemorySegment PRIoFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.PRIoFAST8;
     }
@@ -15684,7 +15742,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoFAST16() {
         class Holder {
             static final MemorySegment PRIoFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("o");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.PRIoFAST16;
     }
@@ -15696,7 +15754,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoFAST32() {
         class Holder {
             static final MemorySegment PRIoFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("o");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.PRIoFAST32;
     }
@@ -15708,7 +15766,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoFAST64() {
         class Holder {
             static final MemorySegment PRIoFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoFAST64;
     }
@@ -15720,7 +15778,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoMAX() {
         class Holder {
             static final MemorySegment PRIoMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoMAX;
     }
@@ -15732,7 +15790,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIoPTR() {
         class Holder {
             static final MemorySegment PRIoPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.PRIoPTR;
     }
@@ -15744,7 +15802,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIu8() {
         class Holder {
             static final MemorySegment PRIu8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.PRIu8;
     }
@@ -15756,7 +15814,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIu16() {
         class Holder {
             static final MemorySegment PRIu16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hu");
         }
         return Holder.PRIu16;
     }
@@ -15768,7 +15826,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIu32() {
         class Holder {
             static final MemorySegment PRIu32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("u");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.PRIu32;
     }
@@ -15780,7 +15838,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIu64() {
         class Holder {
             static final MemorySegment PRIu64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIu64;
     }
@@ -15792,7 +15850,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuLEAST8() {
         class Holder {
             static final MemorySegment PRIuLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.PRIuLEAST8;
     }
@@ -15804,7 +15862,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuLEAST16() {
         class Holder {
             static final MemorySegment PRIuLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hu");
         }
         return Holder.PRIuLEAST16;
     }
@@ -15816,7 +15874,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuLEAST32() {
         class Holder {
             static final MemorySegment PRIuLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("u");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.PRIuLEAST32;
     }
@@ -15828,7 +15886,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuLEAST64() {
         class Holder {
             static final MemorySegment PRIuLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuLEAST64;
     }
@@ -15840,7 +15898,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuFAST8() {
         class Holder {
             static final MemorySegment PRIuFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.PRIuFAST8;
     }
@@ -15852,7 +15910,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuFAST16() {
         class Holder {
             static final MemorySegment PRIuFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("u");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.PRIuFAST16;
     }
@@ -15864,7 +15922,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuFAST32() {
         class Holder {
             static final MemorySegment PRIuFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("u");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.PRIuFAST32;
     }
@@ -15876,7 +15934,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuFAST64() {
         class Holder {
             static final MemorySegment PRIuFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuFAST64;
     }
@@ -15888,7 +15946,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuMAX() {
         class Holder {
             static final MemorySegment PRIuMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuMAX;
     }
@@ -15900,7 +15958,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIuPTR() {
         class Holder {
             static final MemorySegment PRIuPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.PRIuPTR;
     }
@@ -15912,7 +15970,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIx8() {
         class Holder {
             static final MemorySegment PRIx8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.PRIx8;
     }
@@ -15924,7 +15982,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIx16() {
         class Holder {
             static final MemorySegment PRIx16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hx");
         }
         return Holder.PRIx16;
     }
@@ -15936,7 +15994,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIx32() {
         class Holder {
             static final MemorySegment PRIx32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("x");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.PRIx32;
     }
@@ -15948,7 +16006,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIx64() {
         class Holder {
             static final MemorySegment PRIx64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIx64;
     }
@@ -15960,7 +16018,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxLEAST8() {
         class Holder {
             static final MemorySegment PRIxLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.PRIxLEAST8;
     }
@@ -15972,7 +16030,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxLEAST16() {
         class Holder {
             static final MemorySegment PRIxLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hx");
         }
         return Holder.PRIxLEAST16;
     }
@@ -15984,7 +16042,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxLEAST32() {
         class Holder {
             static final MemorySegment PRIxLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("x");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.PRIxLEAST32;
     }
@@ -15996,7 +16054,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxLEAST64() {
         class Holder {
             static final MemorySegment PRIxLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxLEAST64;
     }
@@ -16008,7 +16066,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxFAST8() {
         class Holder {
             static final MemorySegment PRIxFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.PRIxFAST8;
     }
@@ -16020,7 +16078,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxFAST16() {
         class Holder {
             static final MemorySegment PRIxFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("x");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.PRIxFAST16;
     }
@@ -16032,7 +16090,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxFAST32() {
         class Holder {
             static final MemorySegment PRIxFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("x");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.PRIxFAST32;
     }
@@ -16044,7 +16102,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxFAST64() {
         class Holder {
             static final MemorySegment PRIxFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxFAST64;
     }
@@ -16056,7 +16114,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxMAX() {
         class Holder {
             static final MemorySegment PRIxMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxMAX;
     }
@@ -16068,7 +16126,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIxPTR() {
         class Holder {
             static final MemorySegment PRIxPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.PRIxPTR;
     }
@@ -16080,7 +16138,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIX8() {
         class Holder {
             static final MemorySegment PRIX8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhX");
         }
         return Holder.PRIX8;
     }
@@ -16092,7 +16150,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIX16() {
         class Holder {
             static final MemorySegment PRIX16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hX");
         }
         return Holder.PRIX16;
     }
@@ -16104,7 +16162,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIX32() {
         class Holder {
             static final MemorySegment PRIX32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("X");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("X");
         }
         return Holder.PRIX32;
     }
@@ -16116,7 +16174,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIX64() {
         class Holder {
             static final MemorySegment PRIX64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIX64;
     }
@@ -16128,7 +16186,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXLEAST8() {
         class Holder {
             static final MemorySegment PRIXLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhX");
         }
         return Holder.PRIXLEAST8;
     }
@@ -16140,7 +16198,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXLEAST16() {
         class Holder {
             static final MemorySegment PRIXLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hX");
         }
         return Holder.PRIXLEAST16;
     }
@@ -16152,7 +16210,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXLEAST32() {
         class Holder {
             static final MemorySegment PRIXLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("X");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("X");
         }
         return Holder.PRIXLEAST32;
     }
@@ -16164,7 +16222,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXLEAST64() {
         class Holder {
             static final MemorySegment PRIXLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXLEAST64;
     }
@@ -16176,7 +16234,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXFAST8() {
         class Holder {
             static final MemorySegment PRIXFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhX");
         }
         return Holder.PRIXFAST8;
     }
@@ -16188,7 +16246,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXFAST16() {
         class Holder {
             static final MemorySegment PRIXFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("X");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("X");
         }
         return Holder.PRIXFAST16;
     }
@@ -16200,7 +16258,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXFAST32() {
         class Holder {
             static final MemorySegment PRIXFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("X");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("X");
         }
         return Holder.PRIXFAST32;
     }
@@ -16212,7 +16270,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXFAST64() {
         class Holder {
             static final MemorySegment PRIXFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXFAST64;
     }
@@ -16224,7 +16282,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXMAX() {
         class Holder {
             static final MemorySegment PRIXMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXMAX;
     }
@@ -16236,7 +16294,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment PRIXPTR() {
         class Holder {
             static final MemorySegment PRIXPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llX");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llX");
         }
         return Holder.PRIXPTR;
     }
@@ -16248,7 +16306,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNd8() {
         class Holder {
             static final MemorySegment SCNd8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.SCNd8;
     }
@@ -16260,7 +16318,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNd16() {
         class Holder {
             static final MemorySegment SCNd16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hd");
         }
         return Holder.SCNd16;
     }
@@ -16272,7 +16330,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNd32() {
         class Holder {
             static final MemorySegment SCNd32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("d");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.SCNd32;
     }
@@ -16284,7 +16342,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNd64() {
         class Holder {
             static final MemorySegment SCNd64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNd64;
     }
@@ -16296,7 +16354,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdLEAST8() {
         class Holder {
             static final MemorySegment SCNdLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.SCNdLEAST8;
     }
@@ -16308,7 +16366,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdLEAST16() {
         class Holder {
             static final MemorySegment SCNdLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hd");
         }
         return Holder.SCNdLEAST16;
     }
@@ -16320,7 +16378,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdLEAST32() {
         class Holder {
             static final MemorySegment SCNdLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("d");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.SCNdLEAST32;
     }
@@ -16332,7 +16390,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdLEAST64() {
         class Holder {
             static final MemorySegment SCNdLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNdLEAST64;
     }
@@ -16344,7 +16402,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdFAST8() {
         class Holder {
             static final MemorySegment SCNdFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhd");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhd");
         }
         return Holder.SCNdFAST8;
     }
@@ -16356,7 +16414,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdFAST16() {
         class Holder {
             static final MemorySegment SCNdFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("d");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.SCNdFAST16;
     }
@@ -16368,7 +16426,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdFAST32() {
         class Holder {
             static final MemorySegment SCNdFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("d");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("d");
         }
         return Holder.SCNdFAST32;
     }
@@ -16380,7 +16438,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdFAST64() {
         class Holder {
             static final MemorySegment SCNdFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNdFAST64;
     }
@@ -16392,7 +16450,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdMAX() {
         class Holder {
             static final MemorySegment SCNdMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNdMAX;
     }
@@ -16404,7 +16462,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNdPTR() {
         class Holder {
             static final MemorySegment SCNdPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lld");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lld");
         }
         return Holder.SCNdPTR;
     }
@@ -16416,7 +16474,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNi8() {
         class Holder {
             static final MemorySegment SCNi8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.SCNi8;
     }
@@ -16428,7 +16486,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNi16() {
         class Holder {
             static final MemorySegment SCNi16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hi");
         }
         return Holder.SCNi16;
     }
@@ -16440,7 +16498,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNi32() {
         class Holder {
             static final MemorySegment SCNi32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("i");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.SCNi32;
     }
@@ -16452,7 +16510,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNi64() {
         class Holder {
             static final MemorySegment SCNi64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNi64;
     }
@@ -16464,7 +16522,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiLEAST8() {
         class Holder {
             static final MemorySegment SCNiLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.SCNiLEAST8;
     }
@@ -16476,7 +16534,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiLEAST16() {
         class Holder {
             static final MemorySegment SCNiLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hi");
         }
         return Holder.SCNiLEAST16;
     }
@@ -16488,7 +16546,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiLEAST32() {
         class Holder {
             static final MemorySegment SCNiLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("i");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.SCNiLEAST32;
     }
@@ -16500,7 +16558,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiLEAST64() {
         class Holder {
             static final MemorySegment SCNiLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNiLEAST64;
     }
@@ -16512,7 +16570,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiFAST8() {
         class Holder {
             static final MemorySegment SCNiFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhi");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhi");
         }
         return Holder.SCNiFAST8;
     }
@@ -16524,7 +16582,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiFAST16() {
         class Holder {
             static final MemorySegment SCNiFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("i");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.SCNiFAST16;
     }
@@ -16536,7 +16594,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiFAST32() {
         class Holder {
             static final MemorySegment SCNiFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("i");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("i");
         }
         return Holder.SCNiFAST32;
     }
@@ -16548,7 +16606,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiFAST64() {
         class Holder {
             static final MemorySegment SCNiFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNiFAST64;
     }
@@ -16560,7 +16618,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiMAX() {
         class Holder {
             static final MemorySegment SCNiMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNiMAX;
     }
@@ -16572,7 +16630,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNiPTR() {
         class Holder {
             static final MemorySegment SCNiPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("lli");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("lli");
         }
         return Holder.SCNiPTR;
     }
@@ -16584,7 +16642,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNo8() {
         class Holder {
             static final MemorySegment SCNo8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.SCNo8;
     }
@@ -16596,7 +16654,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNo16() {
         class Holder {
             static final MemorySegment SCNo16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("ho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("ho");
         }
         return Holder.SCNo16;
     }
@@ -16608,7 +16666,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNo32() {
         class Holder {
             static final MemorySegment SCNo32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("o");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.SCNo32;
     }
@@ -16620,7 +16678,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNo64() {
         class Holder {
             static final MemorySegment SCNo64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNo64;
     }
@@ -16632,7 +16690,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoLEAST8() {
         class Holder {
             static final MemorySegment SCNoLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.SCNoLEAST8;
     }
@@ -16644,7 +16702,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoLEAST16() {
         class Holder {
             static final MemorySegment SCNoLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("ho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("ho");
         }
         return Holder.SCNoLEAST16;
     }
@@ -16656,7 +16714,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoLEAST32() {
         class Holder {
             static final MemorySegment SCNoLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("o");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.SCNoLEAST32;
     }
@@ -16668,7 +16726,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoLEAST64() {
         class Holder {
             static final MemorySegment SCNoLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNoLEAST64;
     }
@@ -16680,7 +16738,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoFAST8() {
         class Holder {
             static final MemorySegment SCNoFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hho");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hho");
         }
         return Holder.SCNoFAST8;
     }
@@ -16692,7 +16750,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoFAST16() {
         class Holder {
             static final MemorySegment SCNoFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("o");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.SCNoFAST16;
     }
@@ -16704,7 +16762,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoFAST32() {
         class Holder {
             static final MemorySegment SCNoFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("o");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("o");
         }
         return Holder.SCNoFAST32;
     }
@@ -16716,7 +16774,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoFAST64() {
         class Holder {
             static final MemorySegment SCNoFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNoFAST64;
     }
@@ -16728,7 +16786,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoMAX() {
         class Holder {
             static final MemorySegment SCNoMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNoMAX;
     }
@@ -16740,7 +16798,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNoPTR() {
         class Holder {
             static final MemorySegment SCNoPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llo");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llo");
         }
         return Holder.SCNoPTR;
     }
@@ -16752,7 +16810,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNu8() {
         class Holder {
             static final MemorySegment SCNu8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.SCNu8;
     }
@@ -16764,7 +16822,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNu16() {
         class Holder {
             static final MemorySegment SCNu16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hu");
         }
         return Holder.SCNu16;
     }
@@ -16776,7 +16834,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNu32() {
         class Holder {
             static final MemorySegment SCNu32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("u");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.SCNu32;
     }
@@ -16788,7 +16846,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNu64() {
         class Holder {
             static final MemorySegment SCNu64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNu64;
     }
@@ -16800,7 +16858,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuLEAST8() {
         class Holder {
             static final MemorySegment SCNuLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.SCNuLEAST8;
     }
@@ -16812,7 +16870,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuLEAST16() {
         class Holder {
             static final MemorySegment SCNuLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hu");
         }
         return Holder.SCNuLEAST16;
     }
@@ -16824,7 +16882,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuLEAST32() {
         class Holder {
             static final MemorySegment SCNuLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("u");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.SCNuLEAST32;
     }
@@ -16836,7 +16894,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuLEAST64() {
         class Holder {
             static final MemorySegment SCNuLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNuLEAST64;
     }
@@ -16848,7 +16906,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuFAST8() {
         class Holder {
             static final MemorySegment SCNuFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhu");
         }
         return Holder.SCNuFAST8;
     }
@@ -16860,7 +16918,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuFAST16() {
         class Holder {
             static final MemorySegment SCNuFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("u");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.SCNuFAST16;
     }
@@ -16872,7 +16930,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuFAST32() {
         class Holder {
             static final MemorySegment SCNuFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("u");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("u");
         }
         return Holder.SCNuFAST32;
     }
@@ -16884,7 +16942,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuFAST64() {
         class Holder {
             static final MemorySegment SCNuFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNuFAST64;
     }
@@ -16896,7 +16954,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuMAX() {
         class Holder {
             static final MemorySegment SCNuMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNuMAX;
     }
@@ -16908,7 +16966,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNuPTR() {
         class Holder {
             static final MemorySegment SCNuPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llu");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llu");
         }
         return Holder.SCNuPTR;
     }
@@ -16920,7 +16978,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNx8() {
         class Holder {
             static final MemorySegment SCNx8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.SCNx8;
     }
@@ -16932,7 +16990,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNx16() {
         class Holder {
             static final MemorySegment SCNx16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hx");
         }
         return Holder.SCNx16;
     }
@@ -16944,7 +17002,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNx32() {
         class Holder {
             static final MemorySegment SCNx32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("x");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.SCNx32;
     }
@@ -16956,7 +17014,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNx64() {
         class Holder {
             static final MemorySegment SCNx64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNx64;
     }
@@ -16968,7 +17026,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxLEAST8() {
         class Holder {
             static final MemorySegment SCNxLEAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.SCNxLEAST8;
     }
@@ -16980,7 +17038,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxLEAST16() {
         class Holder {
             static final MemorySegment SCNxLEAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hx");
         }
         return Holder.SCNxLEAST16;
     }
@@ -16992,7 +17050,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxLEAST32() {
         class Holder {
             static final MemorySegment SCNxLEAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("x");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.SCNxLEAST32;
     }
@@ -17004,7 +17062,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxLEAST64() {
         class Holder {
             static final MemorySegment SCNxLEAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNxLEAST64;
     }
@@ -17016,7 +17074,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxFAST8() {
         class Holder {
             static final MemorySegment SCNxFAST8
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("hhx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("hhx");
         }
         return Holder.SCNxFAST8;
     }
@@ -17028,7 +17086,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxFAST16() {
         class Holder {
             static final MemorySegment SCNxFAST16
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("x");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.SCNxFAST16;
     }
@@ -17040,7 +17098,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxFAST32() {
         class Holder {
             static final MemorySegment SCNxFAST32
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("x");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("x");
         }
         return Holder.SCNxFAST32;
     }
@@ -17052,7 +17110,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxFAST64() {
         class Holder {
             static final MemorySegment SCNxFAST64
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNxFAST64;
     }
@@ -17064,7 +17122,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxMAX() {
         class Holder {
             static final MemorySegment SCNxMAX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNxMAX;
     }
@@ -17076,7 +17134,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment SCNxPTR() {
         class Holder {
             static final MemorySegment SCNxPTR
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("llx");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("llx");
         }
         return Holder.SCNxPTR;
     }
@@ -17862,7 +17920,7 @@ public class CubiomesHeaders extends CubiomesHeaders_1 {
     public static MemorySegment _CRT_INTERNAL_STDIO_SYMBOL_PREFIX() {
         class Holder {
             static final MemorySegment _CRT_INTERNAL_STDIO_SYMBOL_PREFIX
-                = CubiomesHeaders.LIBRARY_ARENA.allocateFrom("");
+                = Cubiomes.LIBRARY_ARENA.allocateFrom("");
         }
         return Holder._CRT_INTERNAL_STDIO_SYMBOL_PREFIX;
     }

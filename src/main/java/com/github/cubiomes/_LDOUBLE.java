@@ -27,7 +27,7 @@ public class _LDOUBLE {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        MemoryLayout.sequenceLayout(10, CubiomesHeaders.C_CHAR).withName("ld")
+        MemoryLayout.sequenceLayout(10, Cubiomes.C_CHAR).withName("ld")
     ).withName("$anon$395:13");
 
     /**

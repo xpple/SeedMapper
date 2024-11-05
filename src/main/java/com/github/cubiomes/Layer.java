@@ -38,19 +38,19 @@ public class Layer {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_POINTER.withName("getMap"),
-        CubiomesHeaders.C_CHAR.withName("mc"),
-        CubiomesHeaders.C_CHAR.withName("zoom"),
-        CubiomesHeaders.C_CHAR.withName("edge"),
+        Cubiomes.C_POINTER.withName("getMap"),
+        Cubiomes.C_CHAR.withName("mc"),
+        Cubiomes.C_CHAR.withName("zoom"),
+        Cubiomes.C_CHAR.withName("edge"),
         MemoryLayout.paddingLayout(1),
-        CubiomesHeaders.C_INT.withName("scale"),
-        CubiomesHeaders.C_LONG_LONG.withName("layerSalt"),
-        CubiomesHeaders.C_LONG_LONG.withName("startSalt"),
-        CubiomesHeaders.C_LONG_LONG.withName("startSeed"),
-        CubiomesHeaders.C_POINTER.withName("noise"),
-        CubiomesHeaders.C_POINTER.withName("data"),
-        CubiomesHeaders.C_POINTER.withName("p"),
-        CubiomesHeaders.C_POINTER.withName("p2")
+        Cubiomes.C_INT.withName("scale"),
+        Cubiomes.C_LONG_LONG.withName("layerSalt"),
+        Cubiomes.C_LONG_LONG.withName("startSalt"),
+        Cubiomes.C_LONG_LONG.withName("startSeed"),
+        Cubiomes.C_POINTER.withName("noise"),
+        Cubiomes.C_POINTER.withName("data"),
+        Cubiomes.C_POINTER.withName("p"),
+        Cubiomes.C_POINTER.withName("p2")
     ).withName("Layer");
 
     /**

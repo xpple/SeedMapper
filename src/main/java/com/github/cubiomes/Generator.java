@@ -48,17 +48,17 @@ public class Generator {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_INT.withName("mc"),
-        CubiomesHeaders.C_INT.withName("dim"),
-        CubiomesHeaders.C_INT.withName("flags"),
+        Cubiomes.C_INT.withName("mc"),
+        Cubiomes.C_INT.withName("dim"),
+        Cubiomes.C_INT.withName("flags"),
         MemoryLayout.paddingLayout(4),
-        CubiomesHeaders.C_LONG_LONG.withName("seed"),
-        CubiomesHeaders.C_LONG_LONG.withName("sha"),
+        Cubiomes.C_LONG_LONG.withName("seed"),
+        Cubiomes.C_LONG_LONG.withName("sha"),
         MemoryLayout.unionLayout(
             MemoryLayout.structLayout(
                 LayerStack.layout().withName("ls"),
                 MemoryLayout.sequenceLayout(5, Layer.layout()).withName("xlayer"),
-                CubiomesHeaders.C_POINTER.withName("entry")
+                Cubiomes.C_POINTER.withName("entry")
             ).withName("$anon$24:9"),
             MemoryLayout.structLayout(
                 BiomeNoise.layout().withName("bn")

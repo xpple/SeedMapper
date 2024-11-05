@@ -37,10 +37,10 @@ public class SurfaceNoise {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_DOUBLE.withName("xzScale"),
-        CubiomesHeaders.C_DOUBLE.withName("yScale"),
-        CubiomesHeaders.C_DOUBLE.withName("xzFactor"),
-        CubiomesHeaders.C_DOUBLE.withName("yFactor"),
+        Cubiomes.C_DOUBLE.withName("xzScale"),
+        Cubiomes.C_DOUBLE.withName("yScale"),
+        Cubiomes.C_DOUBLE.withName("xzFactor"),
+        Cubiomes.C_DOUBLE.withName("yFactor"),
         OctaveNoise.layout().withName("octmin"),
         OctaveNoise.layout().withName("octmax"),
         OctaveNoise.layout().withName("octmain"),

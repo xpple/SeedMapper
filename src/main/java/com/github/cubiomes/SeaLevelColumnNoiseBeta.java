@@ -32,11 +32,11 @@ public class SeaLevelColumnNoiseBeta {
     }
 
     private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        CubiomesHeaders.C_DOUBLE.withName("contASample"),
-        CubiomesHeaders.C_DOUBLE.withName("contBSample"),
-        MemoryLayout.sequenceLayout(2, CubiomesHeaders.C_DOUBLE).withName("minSample"),
-        MemoryLayout.sequenceLayout(2, CubiomesHeaders.C_DOUBLE).withName("maxSample"),
-        MemoryLayout.sequenceLayout(2, CubiomesHeaders.C_DOUBLE).withName("mainSample")
+        Cubiomes.C_DOUBLE.withName("contASample"),
+        Cubiomes.C_DOUBLE.withName("contBSample"),
+        MemoryLayout.sequenceLayout(2, Cubiomes.C_DOUBLE).withName("minSample"),
+        MemoryLayout.sequenceLayout(2, Cubiomes.C_DOUBLE).withName("maxSample"),
+        MemoryLayout.sequenceLayout(2, Cubiomes.C_DOUBLE).withName("mainSample")
     ).withName("SeaLevelColumnNoiseBeta");
 
     /**
