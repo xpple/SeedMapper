@@ -18,6 +18,7 @@
 
   "command.locate.biome.foundAt": "Biome found at",
   "command.locate.feature.structure.foundAt": "Structure found at",
+  "command.locate.feature.stronghold.success": "Stronghold found at %s.",
   "command.locate.feature.slimeChunk.noneFound": "Couldn't locate a slime chunk within 6400 blocks.",
   "command.locate.feature.slimeChunk.foundAt": "Slime chunk found at",
   "command.locate.feature.slimeChunk.copy": "Click to copy coordinates of this slime chunk",

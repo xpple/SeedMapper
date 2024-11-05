@@ -3,6 +3,7 @@ package dev.xpple.seedmapper.command.commands;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.Pos;
+import com.github.cubiomes.StrongholdIter;
 import com.github.cubiomes.StructureConfig;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -20,6 +21,9 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
 import static dev.xpple.seedmapper.command.arguments.StructureArgument.*;
@@ -37,6 +41,8 @@ public class LocateCommand {
                 .then(literal("structure")
                     .then(argument("structure", structure())
                         .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructure(ctx, "structure")))))
+                .then(literal("stronghold")
+                    .executes(ctx -> locateStronghold(CustomClientCommandSource.of(ctx.getSource()))))
                 .then(literal("slimechunk")
                     .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
             .then(literal("spawn")
@@ -119,6 +125,48 @@ public class LocateCommand {
                 ));
                 return true;
             }, () -> CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE));
+            return Command.SINGLE_SUCCESS;
+        }
+    }
+
+    private static int locateStronghold(CustomClientCommandSource source) throws CommandSyntaxException {
+        int dimension = source.getDimension();
+        if (dimension != Cubiomes.DIM_OVERWORLD()) {
+            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+        }
+        int version = source.getVersion();
+        long seed = source.getSeed().getSecond();
+
+        BlockPos position = BlockPos.containing(source.getPosition());
+
+        try (Arena arena = Arena.ofConfined()) {
+            SortedSet<MemorySegment> strongholdLocations = new TreeSet<>(Comparator.comparingDouble(o -> position.distToLowCornerSqr(Pos.x(o), position.getY(), Pos.z(o))));
+
+            MemorySegment strongholdIter = StrongholdIter.allocate(arena);
+            Cubiomes.initFirstStronghold(arena, strongholdIter, version, seed);
+            MemorySegment generator = Generator.allocate(arena);
+            Cubiomes.setupGenerator(generator, version, 0);
+            Cubiomes.applySeed(generator, dimension, seed);
+
+            for (int i = 0; i < 12; i++) {
+                if (Cubiomes.nextStronghold(strongholdIter, generator) == 0) {
+                    break;
+                }
+                MemorySegment pos = Pos.allocate(arena);
+                strongholdLocations.add(pos.copyFrom(StrongholdIter.pos(strongholdIter)));
+            }
+
+            MemorySegment pos = strongholdLocations.getFirst();
+
+            source.sendFeedback(chain(
+                highlight(Component.translatable("command.locate.feature.stronghold.success", copy(
+                    hover(
+                        accent("x: %d, z: %d".formatted(Pos.x(pos), Pos.z(pos))),
+                        base(Component.translatable("chat.copy.click"))
+                    ),
+                    "%d ~ %d".formatted(Pos.x(pos), Pos.z(pos))
+                )))
+            ));
             return Command.SINGLE_SUCCESS;
         }
     }
