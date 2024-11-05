@@ -17,7 +17,7 @@ public final class SpiralLoop {
         int x = centerX, dx = 0, z = centerZ, dz = -step;
         final int leftBoundX = centerX - radius, rightBoundX = centerX + radius;
         final int bottomBoundZ = centerZ - radius, topBoundZ = centerZ + radius;
-        final int max = (2 * radius + 1) * (2 * radius + 1);
+        final long max = (2L * radius + 1) * (2L * radius + 1);
         for (int i = 0; i < max ; i++) {
             if (leftBoundX <= x && x <= rightBoundX && bottomBoundZ <= z && z <= topBoundZ) {
                 if (callback.consume(x, z)) {

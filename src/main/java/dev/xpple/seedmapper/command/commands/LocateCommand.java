@@ -99,8 +99,7 @@ public class LocateCommand {
             int regionSize = StructureConfig.regionSize(structureConfig) << 4;
             SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
                 MemorySegment structurePos = Pos.allocate(arena);
-                int valid = Cubiomes.getStructurePos(structure, version, seed, x, z, structurePos);
-                if (valid == 0) {
+                if (Cubiomes.getStructurePos(structure, version, seed, x, z, structurePos) == 0) {
                     return false;
                 }
                 if (Cubiomes.isViableStructurePos(structure, generator, Pos.x(structurePos), Pos.z(structurePos), 0) == 0) {
