@@ -16,19 +16,19 @@ public final class ChatBuilder {
     private ChatBuilder() {
     }
 
-    public static final ChatFormatting BASE = ChatFormatting.GRAY;
-    public static final ChatFormatting ACCENT = ChatFormatting.AQUA;
-    public static final ChatFormatting HIGHLIGHT = ChatFormatting.WHITE;
-    public static final ChatFormatting DARK = ChatFormatting.DARK_GRAY;
-    public static final ChatFormatting WARN = ChatFormatting.YELLOW;
-    public static final ChatFormatting ERROR = ChatFormatting.RED;
+    private static final ChatFormatting BASE = ChatFormatting.GRAY;
+    private static final ChatFormatting ACCENT = ChatFormatting.AQUA;
+    private static final ChatFormatting HIGHLIGHT = ChatFormatting.WHITE;
+    private static final ChatFormatting DARK = ChatFormatting.DARK_GRAY;
+    private static final ChatFormatting WARN = ChatFormatting.YELLOW;
+    private static final ChatFormatting ERROR = ChatFormatting.RED;
 
     public static MutableComponent chain(Component... components) {
         return chain(Arrays.asList(components));
     }
 
     public static MutableComponent chain(List<Component> components) {
-        return ComponentUtils.appendAll(component(""), components);
+        return ComponentUtils.appendAll(Component.empty(), components);
     }
 
     public static MutableComponent join(Component delimiter, Component... components) {
@@ -104,27 +104,27 @@ public final class ChatBuilder {
     }
 
     public static MutableComponent hover(MutableComponent component, MutableComponent hover) {
-        return apply(component, () -> component.withStyle((style) -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, hover))));
+        return component.withStyle((style) -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, hover)));
     }
 
     public static MutableComponent copy(MutableComponent component, String copy) {
-        return apply(component, () -> component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copy))));
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copy)));
     }
 
     public static MutableComponent command(MutableComponent component, String command) {
-        return apply(component, () -> component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))));
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command)));
     }
 
     public static MutableComponent file(MutableComponent component, String file) {
-        return apply(component, () -> component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file))));
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file)));
     }
 
     public static MutableComponent url(MutableComponent component, String url) {
-        return apply(component, () -> component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))));
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
     }
 
     public static MutableComponent page(MutableComponent component, String page) {
-        return apply(component, () -> component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, page))));
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, page)));
     }
 
     public static MutableComponent run(MutableComponent component, Runnable runnable) {
@@ -132,12 +132,6 @@ public final class ChatBuilder {
     }
 
     public static MutableComponent suggest(MutableComponent component, String command) {
-        return apply(component, () -> component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command))));
-    }
-
-    private static MutableComponent apply(MutableComponent component, Runnable action) {
-        action.run();
-
-        return component;
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)));
     }
 }
