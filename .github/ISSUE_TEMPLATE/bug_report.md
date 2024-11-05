@@ -7,6 +7,12 @@ assignees: ''
 
 ---
 
+**Context**
+- **SeedMapper version**:
+- **Java version**:
+- **Operating system**:
+- **System architecture**:
+
 **Describe the bug**
 A clear and concise description of what the bug is. Make sure to always use the latest (stable) version of SeedMapper before opening an issue.
 
