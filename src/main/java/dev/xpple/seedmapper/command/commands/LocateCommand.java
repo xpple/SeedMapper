@@ -84,16 +84,16 @@ public class LocateCommand {
     }
 
     private static int locateStructure(CustomClientCommandSource source, int structure) throws CommandSyntaxException {
-        int dimension = source.getDimension();
-        if (Cubiomes.getStructureDimension(structure) != dimension) {
-            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
-        }
         try (Arena arena = Arena.ofConfined()) {
             int version = source.getVersion();
+            int dimension = source.getDimension();
             MemorySegment structureConfig = StructureConfig.allocate(arena);
             int config = Cubiomes.getStructureConfig(structure, version, structureConfig);
             if (config == 0) {
                 throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
+            }
+            if (StructureConfig.dim(structureConfig) != dimension) {
+                throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
             }
             long seed = source.getSeed().getSecond();
 

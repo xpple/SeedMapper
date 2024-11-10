@@ -2344,14 +2344,14 @@ public class Cubiomes_1 {
     public static int btree192_order() {
         return btree192_order;
     }
-    private static final int btree213_order = (int)6L;
+    private static final int btree21wd_order = (int)6L;
     /**
      * {@snippet lang=c :
-     * enum <anonymous>.btree213_order = 6
+     * enum <anonymous>.btree21wd_order = 6
      * }
      */
-    public static int btree213_order() {
-        return btree213_order;
+    public static int btree21wd_order() {
+        return btree21wd_order;
     }
 
     private static class _calloc_base {
@@ -30962,14 +30962,14 @@ public class Cubiomes_1 {
     public static int MC_1_20() {
         return MC_1_20;
     }
-    private static final int MC_1_21_2 = (int)26L;
+    private static final int MC_1_21_1 = (int)26L;
     /**
      * {@snippet lang=c :
-     * enum MCVersion.MC_1_21_2 = 26
+     * enum MCVersion.MC_1_21_1 = 26
      * }
      */
-    public static int MC_1_21_2() {
-        return MC_1_21_2;
+    public static int MC_1_21_1() {
+        return MC_1_21_1;
     }
     private static final int MC_1_21_3 = (int)27L;
     /**
@@ -30980,19 +30980,28 @@ public class Cubiomes_1 {
     public static int MC_1_21_3() {
         return MC_1_21_3;
     }
-    private static final int MC_1_21 = (int)26L;
+    private static final int MC_1_21_WD = (int)28L;
     /**
      * {@snippet lang=c :
-     * enum MCVersion.MC_1_21 = 26
+     * enum MCVersion.MC_1_21_WD = 28
+     * }
+     */
+    public static int MC_1_21_WD() {
+        return MC_1_21_WD;
+    }
+    private static final int MC_1_21 = (int)28L;
+    /**
+     * {@snippet lang=c :
+     * enum MCVersion.MC_1_21 = 28
      * }
      */
     public static int MC_1_21() {
         return MC_1_21;
     }
-    private static final int MC_NEWEST = (int)27L;
+    private static final int MC_NEWEST = (int)28L;
     /**
      * {@snippet lang=c :
-     * enum MCVersion.MC_NEWEST = 27
+     * enum MCVersion.MC_NEWEST = 28
      * }
      */
     public static int MC_NEWEST() {
@@ -35692,64 +35701,6 @@ public class Cubiomes_1 {
                 traceDowncall("mapVoronoi114", x0, x1, x2, x3, x4, x5);
             }
             return (int)mh$.invokeExact(x0, x1, x2, x3, x4, x5);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
-        }
-    }
-
-    private static class getVoronoiSHA {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            Cubiomes.C_LONG_LONG,
-            Cubiomes.C_LONG_LONG
-        );
-
-        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getVoronoiSHA");
-
-        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-    }
-
-    /**
-     * Function descriptor for:
-     * {@snippet lang=c :
-     * uint64_t getVoronoiSHA(uint64_t worldSeed)
-     * }
-     */
-    public static FunctionDescriptor getVoronoiSHA$descriptor() {
-        return getVoronoiSHA.DESC;
-    }
-
-    /**
-     * Downcall method handle for:
-     * {@snippet lang=c :
-     * uint64_t getVoronoiSHA(uint64_t worldSeed)
-     * }
-     */
-    public static MethodHandle getVoronoiSHA$handle() {
-        return getVoronoiSHA.HANDLE;
-    }
-
-    /**
-     * Address for:
-     * {@snippet lang=c :
-     * uint64_t getVoronoiSHA(uint64_t worldSeed)
-     * }
-     */
-    public static MemorySegment getVoronoiSHA$address() {
-        return getVoronoiSHA.ADDR;
-    }
-
-    /**
-     * {@snippet lang=c :
-     * uint64_t getVoronoiSHA(uint64_t worldSeed)
-     * }
-     */
-    public static long getVoronoiSHA(long worldSeed) {
-        var mh$ = getVoronoiSHA.HANDLE;
-        try {
-            if (TRACE_DOWNCALLS) {
-                traceDowncall("getVoronoiSHA", worldSeed);
-            }
-            return (long)mh$.invokeExact(worldSeed);
         } catch (Throwable ex$) {
            throw new AssertionError("should not reach here", ex$);
         }

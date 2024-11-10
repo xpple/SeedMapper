@@ -4,19 +4,74 @@ package com.github.cubiomes;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
-import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
-import java.lang.foreign.SequenceLayout;
 import java.lang.invoke.MethodHandle;
 
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 import static java.lang.foreign.ValueLayout.*;
 
 public class Cubiomes extends Cubiomes_1 {
 
     Cubiomes() {
         // Should not be called directly
+    }
+
+    private static class getVoronoiSHA {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            Cubiomes.C_LONG_LONG,
+            Cubiomes.C_LONG_LONG
+        );
+
+        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getVoronoiSHA");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * uint64_t getVoronoiSHA(uint64_t worldSeed)
+     * }
+     */
+    public static FunctionDescriptor getVoronoiSHA$descriptor() {
+        return getVoronoiSHA.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * uint64_t getVoronoiSHA(uint64_t worldSeed)
+     * }
+     */
+    public static MethodHandle getVoronoiSHA$handle() {
+        return getVoronoiSHA.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * uint64_t getVoronoiSHA(uint64_t worldSeed)
+     * }
+     */
+    public static MemorySegment getVoronoiSHA$address() {
+        return getVoronoiSHA.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * uint64_t getVoronoiSHA(uint64_t worldSeed)
+     * }
+     */
+    public static long getVoronoiSHA(long worldSeed) {
+        var mh$ = getVoronoiSHA.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("getVoronoiSHA", worldSeed);
+            }
+            return (long)mh$.invokeExact(worldSeed);
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
     }
 
     private static class voronoiAccess3D {
@@ -220,77 +275,6 @@ public class Cubiomes extends Cubiomes_1 {
      */
     public static int NP_MAX() {
         return NP_MAX;
-    }
-
-    private static class g_btree$constants {
-        public static final SequenceLayout LAYOUT = MemoryLayout.sequenceLayout(6, BiomeTree.layout());
-        public static final MemorySegment SEGMENT = Cubiomes.findOrThrow("g_btree").reinterpret(LAYOUT.byteSize());
-    public static final MethodHandle HANDLE = LAYOUT.sliceHandle(sequenceElement());
-        public static final long[] DIMS = { 6 };
-    }
-
-    /**
-     * Layout for variable:
-     * {@snippet lang=c :
-     * extern BiomeTree g_btree[6]
-     * }
-     */
-    public static SequenceLayout g_btree$layout() {
-        return g_btree$constants.LAYOUT;
-    }
-
-    /**
-     * Dimensions for array variable:
-     * {@snippet lang=c :
-     * extern BiomeTree g_btree[6]
-     * }
-     */
-    public static long[] g_btree$dimensions() {
-        return g_btree$constants.DIMS;
-    }
-
-    /**
-     * Getter for variable:
-     * {@snippet lang=c :
-     * extern BiomeTree g_btree[6]
-     * }
-     */
-    public static MemorySegment g_btree() {
-        return g_btree$constants.SEGMENT;
-    }
-
-    /**
-     * Setter for variable:
-     * {@snippet lang=c :
-     * extern BiomeTree g_btree[6]
-     * }
-     */
-    public static void g_btree(MemorySegment varValue) {
-        MemorySegment.copy(varValue, 0L, g_btree$constants.SEGMENT, 0L, g_btree$constants.LAYOUT.byteSize());
-    }
-
-    /**
-     * Indexed getter for variable:
-     * {@snippet lang=c :
-     * extern BiomeTree g_btree[6]
-     * }
-     */
-    public static MemorySegment g_btree(long index0) {
-        try {
-            return (MemorySegment)g_btree$constants.HANDLE.invokeExact(g_btree$constants.SEGMENT, 0L, index0);
-        } catch (Throwable ex$) {
-            throw new AssertionError("should not reach here", ex$);
-        }
-    }
-
-    /**
-     * Indexed setter for variable:
-     * {@snippet lang=c :
-     * extern BiomeTree g_btree[6]
-     * }
-     */
-    public static void g_btree(long index0, MemorySegment varValue) {
-        MemorySegment.copy(varValue, 0L, g_btree(index0), 0L, BiomeTree.layout().byteSize());
     }
 
     private static class initSurfaceNoise {
@@ -3148,42 +3132,6 @@ public class Cubiomes extends Cubiomes_1 {
     public static int FEATURE_NUM() {
         return FEATURE_NUM;
     }
-    private static final int STRUCT_TRIANGULAR = (int)1L;
-    /**
-     * {@snippet lang=c :
-     * enum <anonymous>.STRUCT_TRIANGULAR = 1
-     * }
-     */
-    public static int STRUCT_TRIANGULAR() {
-        return STRUCT_TRIANGULAR;
-    }
-    private static final int STRUCT_CHUNK = (int)2L;
-    /**
-     * {@snippet lang=c :
-     * enum <anonymous>.STRUCT_CHUNK = 2
-     * }
-     */
-    public static int STRUCT_CHUNK() {
-        return STRUCT_CHUNK;
-    }
-    private static final int STRUCT_NETHER = (int)16L;
-    /**
-     * {@snippet lang=c :
-     * enum <anonymous>.STRUCT_NETHER = 16
-     * }
-     */
-    public static int STRUCT_NETHER() {
-        return STRUCT_NETHER;
-    }
-    private static final int STRUCT_END = (int)32L;
-    /**
-     * {@snippet lang=c :
-     * enum <anonymous>.STRUCT_END = 32
-     * }
-     */
-    public static int STRUCT_END() {
-        return STRUCT_END;
-    }
     private static final int BF_APPROX = (int)1L;
     /**
      * {@snippet lang=c :
@@ -3201,64 +3149,6 @@ public class Cubiomes extends Cubiomes_1 {
      */
     public static int BF_FORCED_OCEAN() {
         return BF_FORCED_OCEAN;
-    }
-
-    private static class getStructureDimension {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            Cubiomes.C_INT,
-            Cubiomes.C_INT
-        );
-
-        public static final MemorySegment ADDR = Cubiomes.findOrThrow("getStructureDimension");
-
-        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-    }
-
-    /**
-     * Function descriptor for:
-     * {@snippet lang=c :
-     * int getStructureDimension(int id)
-     * }
-     */
-    public static FunctionDescriptor getStructureDimension$descriptor() {
-        return getStructureDimension.DESC;
-    }
-
-    /**
-     * Downcall method handle for:
-     * {@snippet lang=c :
-     * int getStructureDimension(int id)
-     * }
-     */
-    public static MethodHandle getStructureDimension$handle() {
-        return getStructureDimension.HANDLE;
-    }
-
-    /**
-     * Address for:
-     * {@snippet lang=c :
-     * int getStructureDimension(int id)
-     * }
-     */
-    public static MemorySegment getStructureDimension$address() {
-        return getStructureDimension.ADDR;
-    }
-
-    /**
-     * {@snippet lang=c :
-     * int getStructureDimension(int id)
-     * }
-     */
-    public static int getStructureDimension(int id) {
-        var mh$ = getStructureDimension.HANDLE;
-        try {
-            if (TRACE_DOWNCALLS) {
-                traceDowncall("getStructureDimension", id);
-            }
-            return (int)mh$.invokeExact(id);
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
-        }
     }
 
     private static class getStructureConfig {

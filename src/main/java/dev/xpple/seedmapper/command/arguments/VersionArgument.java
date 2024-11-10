@@ -120,8 +120,8 @@ public class VersionArgument implements ArgumentType<Integer> {
         .put("1.20.5", Cubiomes.MC_1_20_6())
         .put("1.20.6", Cubiomes.MC_1_20_6())
         .put("1.20", Cubiomes.MC_1_20())
-        .put("1.21.1", Cubiomes.MC_1_21_2())
-        .put("1.21.2", Cubiomes.MC_1_21_2())
+        .put("1.21.1", Cubiomes.MC_1_21_1())
+        .put("1.21.2", Cubiomes.MC_1_21_1())
         .put("1.21.3", Cubiomes.MC_1_21_3())
         .put("1.21", Cubiomes.MC_1_21())
         .build();

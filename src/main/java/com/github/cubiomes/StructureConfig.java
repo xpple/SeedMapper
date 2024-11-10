@@ -19,7 +19,7 @@ import static java.lang.foreign.ValueLayout.*;
  *     int8_t regionSize;
  *     int8_t chunkRange;
  *     uint8_t structType;
- *     uint8_t properties;
+ *     int8_t dim;
  *     float rarity;
  * }
  * }
@@ -35,7 +35,7 @@ public class StructureConfig {
         Cubiomes.C_CHAR.withName("regionSize"),
         Cubiomes.C_CHAR.withName("chunkRange"),
         Cubiomes.C_CHAR.withName("structType"),
-        Cubiomes.C_CHAR.withName("properties"),
+        Cubiomes.C_CHAR.withName("dim"),
         Cubiomes.C_FLOAT.withName("rarity")
     ).withName("StructureConfig");
 
@@ -222,48 +222,48 @@ public class StructureConfig {
         struct.set(structType$LAYOUT, structType$OFFSET, fieldValue);
     }
 
-    private static final OfByte properties$LAYOUT = (OfByte)$LAYOUT.select(groupElement("properties"));
+    private static final OfByte dim$LAYOUT = (OfByte)$LAYOUT.select(groupElement("dim"));
 
     /**
      * Layout for field:
      * {@snippet lang=c :
-     * uint8_t properties
+     * int8_t dim
      * }
      */
-    public static final OfByte properties$layout() {
-        return properties$LAYOUT;
+    public static final OfByte dim$layout() {
+        return dim$LAYOUT;
     }
 
-    private static final long properties$OFFSET = 7;
+    private static final long dim$OFFSET = 7;
 
     /**
      * Offset for field:
      * {@snippet lang=c :
-     * uint8_t properties
+     * int8_t dim
      * }
      */
-    public static final long properties$offset() {
-        return properties$OFFSET;
+    public static final long dim$offset() {
+        return dim$OFFSET;
     }
 
     /**
      * Getter for field:
      * {@snippet lang=c :
-     * uint8_t properties
+     * int8_t dim
      * }
      */
-    public static byte properties(MemorySegment struct) {
-        return struct.get(properties$LAYOUT, properties$OFFSET);
+    public static byte dim(MemorySegment struct) {
+        return struct.get(dim$LAYOUT, dim$OFFSET);
     }
 
     /**
      * Setter for field:
      * {@snippet lang=c :
-     * uint8_t properties
+     * int8_t dim
      * }
      */
-    public static void properties(MemorySegment struct, byte fieldValue) {
-        struct.set(properties$LAYOUT, properties$OFFSET, fieldValue);
+    public static void dim(MemorySegment struct, byte fieldValue) {
+        struct.set(dim$LAYOUT, dim$OFFSET, fieldValue);
     }
 
     private static final OfFloat rarity$LAYOUT = (OfFloat)$LAYOUT.select(groupElement("rarity"));
