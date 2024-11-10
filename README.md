@@ -56,10 +56,10 @@ To build the mod from scratch, do the following:
    You will find the tool in the `build/jextract/bin/` folder. You must use Java 22 to build `jextract`!
 3. Compile cubiomes to a shared library (the following is for Windows):
    ```
-   gcc -shared -o run/libcubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biometree.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+   gcc -shared -o src/main/resources/libcubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
    ```
 4. Run the following command:
    ```shell
-   jextract --include-dir src/main/c --output src/main/java --target-package com.github.cubiomes --library run/libcubiomes --header-class-name Cubiomes --use-system-load-library src/main/c/tables/btree18.h tables/btree19.h tables/btree20.h tables/btree192.h tables/btree213.h biomenoise.h biomes.h finders.h generator.h layers.h noise.h quadbase.h rng.h util.h
+   jextract --include-dir src/main/c --output src/main/java --target-package com.github.cubiomes --library src/main/resources/libcubiomes.dll --header-class-name Cubiomes --use-system-load-library src/main/c/tables/btree18.h tables/btree19.h tables/btree20.h tables/btree192.h tables/btree213.h biomenoise.h biomes.h finders.h generator.h layers.h noise.h quadbase.h rng.h util.h
    ```
 5. Delete any library loads in `Cubiomes_1.java`
