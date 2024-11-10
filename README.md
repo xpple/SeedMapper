@@ -60,6 +60,6 @@ To build the mod from scratch, do the following:
    ```
 4. Run the following command:
    ```shell
-   jextract --include-dir src/main/c --output src/main/java --target-package com.github.cubiomes --library src/main/resources/libcubiomes.dll --header-class-name Cubiomes --use-system-load-library src/main/c/tables/btree18.h tables/btree19.h tables/btree20.h tables/btree192.h tables/btree213.h biomenoise.h biomes.h finders.h generator.h layers.h noise.h quadbase.h rng.h util.h
+   jextract --include-dir src/main/c --output src/main/java --target-package com.github.cubiomes --library src/main/resources/libcubiomes.dll --header-class-name Cubiomes --use-system-load-library src/main/c/tables/btree18.h tables/btree19.h tables/btree20.h tables/btree192.h tables/btree21wd.h biomenoise.h biomes.h finders.h generator.h layers.h noise.h quadbase.h rng.h util.h
    ```
 5. Delete any library loads in `Cubiomes_1.java`
