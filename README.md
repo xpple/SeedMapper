@@ -17,7 +17,7 @@ You need to have Java 23 installed to use this mod. I recommend to get Java 23 f
 - Vanilla launcher: Go to `Installations` -> `Edit` -> `More options` -> `Java executable`.
 - MultiMC: Go to `Edit Instance` -> `Settings` -> `Java` -> `Java Installation`.
 - PrismLauncher: Go to `Settings` -> `Java` -> `Java Runtime` -> `Auto-Detect...`.
-  - Do not forget to enable "Skip Java compatibility checks" 
+  - Do not forget to enable "Skip Java compatibility checks".
 
 If you run into issues, contact your launcher's support.
 
