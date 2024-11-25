@@ -24,6 +24,6 @@
   "command.locate.feature.slimeChunk.copy": "Нажмите для копирования координат слайм чанка",
   "command.locate.feature.slimeChunk.chunk": "Чанк",
   "command.locate.feature.slimeChunk.copyChunk": "Нажмите для копирования координат чанка этого слайм чанка",
-  "command.locate.spawn.success": "Точка спауна предполагается на координатах %s."
+  "command.locate.spawn.success": "По оценкам, точка спауна находится на координатах %s."
 }
 
