@@ -22,8 +22,8 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.Comparator;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
 import static dev.xpple.seedmapper.command.arguments.StructureArgument.*;
@@ -140,7 +140,7 @@ public class LocateCommand {
         BlockPos position = BlockPos.containing(source.getPosition());
 
         try (Arena arena = Arena.ofConfined()) {
-            SortedSet<MemorySegment> strongholdLocations = new TreeSet<>(Comparator.comparingDouble(o -> position.distToLowCornerSqr(Pos.x(o), position.getY(), Pos.z(o))));
+            Queue<MemorySegment> strongholdLocations = new PriorityQueue<>(Comparator.comparingDouble(o -> position.distToLowCornerSqr(Pos.x(o), position.getY(), Pos.z(o))));
 
             MemorySegment strongholdIter = StrongholdIter.allocate(arena);
             Cubiomes.initFirstStronghold(arena, strongholdIter, version, seed);
@@ -156,7 +156,7 @@ public class LocateCommand {
                 strongholdLocations.add(pos.copyFrom(StrongholdIter.pos(strongholdIter)));
             }
 
-            MemorySegment pos = strongholdLocations.getFirst();
+            MemorySegment pos = strongholdLocations.peek();
 
             source.sendFeedback(chain(
                 highlight(Component.translatable("command.locate.feature.stronghold.success", copy(
