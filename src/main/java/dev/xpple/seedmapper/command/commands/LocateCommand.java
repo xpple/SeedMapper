@@ -148,7 +148,8 @@ public class LocateCommand {
             Cubiomes.setupGenerator(generator, version, 0);
             Cubiomes.applySeed(generator, dimension, seed);
 
-            for (int i = 0; i < 12; i++) {
+            final int count = source.getVersion() <= Cubiomes.MC_1_8() ? 3 : 128;
+            for (int i = 0; i < count; i++) {
                 if (Cubiomes.nextStronghold(strongholdIter, generator) == 0) {
                     break;
                 }
