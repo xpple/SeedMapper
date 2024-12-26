@@ -11,6 +11,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.util.SpiralLoop;
+import dev.xpple.seedmapper.util.TwoDTree;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -21,9 +24,6 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
 import static dev.xpple.seedmapper.command.arguments.StructureArgument.*;
@@ -31,6 +31,8 @@ import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class LocateCommand {
+
+    private static final Long2ObjectMap<TwoDTree> cachedStrongholds = new Long2ObjectOpenHashMap<>();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("sm:locate")
@@ -139,37 +141,39 @@ public class LocateCommand {
 
         BlockPos position = BlockPos.containing(source.getPosition());
 
-        try (Arena arena = Arena.ofConfined()) {
-            Queue<MemorySegment> strongholdLocations = new PriorityQueue<>(Comparator.comparingDouble(o -> position.distToLowCornerSqr(Pos.x(o), position.getY(), Pos.z(o))));
+        TwoDTree tree = cachedStrongholds.computeIfAbsent(seed, _ -> new TwoDTree());
+        if (tree.isEmpty()) {
+            try (Arena arena = Arena.ofConfined()) {
+                MemorySegment strongholdIter = StrongholdIter.allocate(arena);
+                Cubiomes.initFirstStronghold(arena, strongholdIter, version, seed);
+                MemorySegment generator = Generator.allocate(arena);
+                Cubiomes.setupGenerator(generator, version, 0);
+                Cubiomes.applySeed(generator, dimension, seed);
 
-            MemorySegment strongholdIter = StrongholdIter.allocate(arena);
-            Cubiomes.initFirstStronghold(arena, strongholdIter, version, seed);
-            MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, version, 0);
-            Cubiomes.applySeed(generator, dimension, seed);
-
-            final int count = source.getVersion() <= Cubiomes.MC_1_8() ? 3 : 128;
-            for (int i = 0; i < count; i++) {
-                if (Cubiomes.nextStronghold(strongholdIter, generator) == 0) {
-                    break;
+                final int count = source.getVersion() <= Cubiomes.MC_1_8() ? 3 : 128;
+                for (int i = 0; i < count; i++) {
+                    if (Cubiomes.nextStronghold(strongholdIter, generator) == 0) {
+                        break;
+                    }
+                    MemorySegment pos = Pos.allocate(arena);
+                    pos.copyFrom(StrongholdIter.pos(strongholdIter));
+                    tree.insert(new BlockPos(Pos.x(pos), 0, Pos.z(pos)));
                 }
-                MemorySegment pos = Pos.allocate(arena);
-                strongholdLocations.add(pos.copyFrom(StrongholdIter.pos(strongholdIter)));
             }
-
-            MemorySegment pos = strongholdLocations.peek();
-
-            source.sendFeedback(chain(
-                highlight(Component.translatable("command.locate.feature.stronghold.success", copy(
-                    hover(
-                        accent("x: %d, z: %d".formatted(Pos.x(pos), Pos.z(pos))),
-                        base(Component.translatable("chat.copy.click"))
-                    ),
-                    "%d ~ %d".formatted(Pos.x(pos), Pos.z(pos))
-                )))
-            ));
-            return Command.SINGLE_SUCCESS;
         }
+
+        BlockPos pos = tree.nearestTo(position.atY(0));
+
+        source.sendFeedback(chain(
+            highlight(Component.translatable("command.locate.feature.stronghold.success", copy(
+                hover(
+                    accent("x: %d, z: %d".formatted(pos.getX(), pos.getZ())),
+                    base(Component.translatable("chat.copy.click"))
+                ),
+                "%d ~ %d".formatted(pos.getX(), pos.getZ())
+            )))
+        ));
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
