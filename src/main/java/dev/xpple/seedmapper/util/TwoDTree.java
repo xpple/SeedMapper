@@ -55,8 +55,10 @@ public class TwoDTree {
         }
 
         Result bestResult = this.nearestTo(near, target, !x, bestPos, bestDistanceSqr);
+        bestPos = bestResult.pos;
+        bestDistanceSqr = bestResult.distance;
 
-        int distance = x ? target.getX() - bestPos.getX() : target.getZ() - bestPos.getZ();
+        int distance = x ? target.getX() - node.pos.getX() : target.getZ() - node.pos.getZ();
         if (distance * distance < bestDistanceSqr) {
             Result farResult = this.nearestTo(far, target, !x, bestPos, bestDistanceSqr);
             if (farResult.distance < bestDistanceSqr) {
