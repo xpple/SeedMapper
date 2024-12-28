@@ -48,7 +48,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         if (source instanceof CustomClientCommandSource custom) {
             return custom;
         }
-        return new CustomClientCommandSource(Minecraft.getInstance().getConnection(), Minecraft.getInstance(), source.getEntity(), source.getPosition(), source.getRotation(), source.getWorld(), new HashMap<>());
+        return new CustomClientCommandSource(source.getClient().getConnection(), source.getClient(), source.getEntity(), source.getPosition(), source.getRotation(), source.getWorld(), new HashMap<>());
     }
 
     @Override
@@ -125,11 +125,11 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
                 case COMMAND_SOURCE -> (Long) this.getMeta("seed");
                 case SEED_CONFIG -> Configs.Seed;
                 case SAVED_SEEDS_CONFIG -> {
-                    String key = Minecraft.getInstance().getConnection().getConnection().getRemoteAddress().toString();
+                    String key = this.client.getConnection().getConnection().getRemoteAddress().toString();
                     yield Configs.SavedSeeds.get(key);
                 }
                 case ONLINE_DATABASE -> {
-                    String key = Minecraft.getInstance().getConnection().getConnection().getRemoteAddress().toString();
+                    String key = this.client.getConnection().getConnection().getRemoteAddress().toString();
                     yield SeedDatabaseHelper.getSeed(key);
                 }
             };
@@ -143,7 +143,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
     public int getDimension() throws CommandSyntaxException {
         Object dimensionMeta = this.getMeta("dimension");
         if (dimensionMeta != null) {
-            return (Integer) dimensionMeta;
+            return (int) dimensionMeta;
         }
         return DimensionArgument.dimension().parse(new StringReader(this.getWorld().dimension().location().getPath()));
     }
@@ -151,7 +151,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
     public int getVersion() throws CommandSyntaxException {
         Object versionMeta = this.getMeta("version");
         if (versionMeta != null) {
-            return (Integer) versionMeta;
+            return (int) versionMeta;
         }
         return VersionArgument.version().parse(new StringReader(SharedConstants.getCurrentVersion().getName()));
     }
