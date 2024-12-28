@@ -155,8 +155,7 @@ public class LocateCommand {
                     if (Cubiomes.nextStronghold(strongholdIter, generator) == 0) {
                         break;
                     }
-                    MemorySegment pos = Pos.allocate(arena);
-                    pos.copyFrom(StrongholdIter.pos(strongholdIter));
+                    MemorySegment pos = StrongholdIter.pos(strongholdIter);
                     tree.insert(new BlockPos(Pos.x(pos), 0, Pos.z(pos)));
                 }
             }
