@@ -130,7 +130,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
                 }
                 case ONLINE_DATABASE -> {
                     String key = this.client.getConnection().getConnection().getRemoteAddress().toString();
-                    yield SeedDatabaseHelper.getSeed(key);
+                    yield SeedDatabaseHelper.getSeed(key, this.getWorld().getBiomeManager().biomeZoomSeed);
                 }
             };
             if (seed != null) {

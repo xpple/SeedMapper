@@ -1,8 +1,5 @@
 package dev.xpple.seedmapper.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -10,6 +7,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,14 +16,19 @@ public final class SeedDatabaseHelper {
     private SeedDatabaseHelper() {
     }
 
-    private static final String DATABASE_URL = "https://script.google.com/macros/s/AKfycbye87L-fEYq2EkgczvhKb_kGecp5wL1oX95vg45TRSwNvpv7K-53zoInGTeI1FZ0kv7DA/exec";
+    private static final String DATABASE_URL = "https://docs.google.com/spreadsheets/d/1tuQiE-0leW88em9OHbZnH-RFNhVqgoHhIt9WQbeqqWw/export?format=csv&gid=0";
     private static final HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
 
-    private static final Map<String, Long> seeds = new HashMap<>();
+    private static final Map<String, Long> connectionToSeed = new HashMap<>();
+    private static final Map<Long, Long> hashedSeedToSeed = new HashMap<>();
 
-    public static @Nullable Long getSeed(String connection) {
-        return seeds.get(connection);
+    public static @Nullable Long getSeed(String connection, long hashedSeed) {
+        Long seed = connectionToSeed.get(connection);
+        if (seed != null) {
+            return seed;
+        }
+        return hashedSeedToSeed.get(hashedSeed);
     }
 
     public static void fetchSeeds() {
@@ -35,22 +38,21 @@ public final class SeedDatabaseHelper {
             .build();
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
             .thenApply(HttpResponse::body)
-            .thenAccept(response -> {
-                try {
-                    JsonArray rows = JsonParser.parseString(response).getAsJsonArray();
-                    parseRows(rows);
-                } catch (RuntimeException _) {
-                }
-            });
+            .thenAccept(SeedDatabaseHelper::parseCsv);
     }
 
-    private static void parseRows(JsonArray rows) {
-        for (JsonElement row : rows) {
-            JsonArray seedEntry = row.getAsJsonArray();
-            String key = seedEntry.get(0).getAsString();
-            String value = seedEntry.get(2).getAsString();
-            long seed = Long.parseLong(value.substring(0, value.length() - 1));
-            seeds.put(key, seed);
-        }
+    private static void parseCsv(String csv) {
+        Arrays.stream(csv.split("\n")).skip(1).forEach(row -> {
+            try {
+                String[] seedEntry = row.split(",");
+                String connection = seedEntry[0];
+                String seedString = seedEntry[2];
+                long seed = Long.parseLong(seedString.substring(0, seedString.length() - 1));
+                connectionToSeed.put(connection, seed);
+                long hashedSeed = Long.parseLong(seedEntry[6]);
+                hashedSeedToSeed.put(hashedSeed, seed);
+            } catch (RuntimeException _) {
+            }
+        });
     }
 }
