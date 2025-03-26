@@ -16,7 +16,7 @@ public final class SeedDatabaseHelper {
     private SeedDatabaseHelper() {
     }
 
-    private static final String DATABASE_URL = "https://docs.google.com/spreadsheets/d/1tuQiE-0leW88em9OHbZnH-RFNhVqgoHhIt9WQbeqqWw/export?format=csv&gid=0";
+    private static final URI DATABASE_URL = URI.create("https://docs.google.com/spreadsheets/d/1tuQiE-0leW88em9OHbZnH-RFNhVqgoHhIt9WQbeqqWw/export?format=csv&gid=0");
     private static final HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
 
@@ -32,7 +32,7 @@ public final class SeedDatabaseHelper {
     }
 
     public static void fetchSeeds() {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(DATABASE_URL))
+        HttpRequest request = HttpRequest.newBuilder(DATABASE_URL)
             .timeout(TIMEOUT)
             .GET()
             .build();

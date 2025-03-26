@@ -11,11 +11,15 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
+import java.net.URI;
+
 import static dev.xpple.seedmapper.SeedMapper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CheckSeedCommand {
+
+    private static final URI DATABASE_URL = URI.create("https://docs.google.com/spreadsheets/d/1tuQiE-0leW88em9OHbZnH-RFNhVqgoHhIt9WQbeqqWw");
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("sm:checkseed")
@@ -68,7 +72,7 @@ public class CheckSeedCommand {
                 format(
                     url(
                         Component.translatable("command.checkSeed.fromDatabase"),
-                        "https://docs.google.com/spreadsheets/d/1tuQiE-0leW88em9OHbZnH-RFNhVqgoHhIt9WQbeqqWw"
+                        DATABASE_URL
                     ),
                     ChatFormatting.UNDERLINE
                 ),

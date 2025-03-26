@@ -1,18 +1,27 @@
 package dev.xpple.seedmapper.util;
 
+import net.minecraft.world.item.component.WritableBookContent;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
+// TODO: when needed add screen mixin
 public final class RunnableClickEventActionHelper {
 
     private RunnableClickEventActionHelper() {
     }
 
-    public static final Map<String, Runnable> runnables = new HashMap<>();
+    private static final Random random = new Random();
 
-    public static String registerCode(Runnable code) {
-        String randomString = ComponentUtils.random(10);
-        runnables.put(randomString, code);
-        return randomString;
+    public static final Map<Integer, Runnable> runnables = new HashMap<>();
+
+    public static int registerCode(Runnable code) {
+        int randomInt;
+        do {
+            randomInt = random.nextInt();
+        } while (randomInt < 0 || randomInt > WritableBookContent.MAX_PAGES);
+        runnables.put(randomInt, code);
+        return randomInt;
     }
 }

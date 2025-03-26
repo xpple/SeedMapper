@@ -7,6 +7,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.HoverEvent.Action;
 import net.minecraft.network.chat.MutableComponent;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -104,27 +105,27 @@ public final class ChatBuilder {
     }
 
     public static MutableComponent hover(MutableComponent component, MutableComponent hover) {
-        return component.withStyle((style) -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, hover)));
+        return component.withStyle((style) -> style.withHoverEvent(new HoverEvent.ShowText(hover)));
     }
 
     public static MutableComponent copy(MutableComponent component, String copy) {
-        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copy)));
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent.CopyToClipboard(copy)));
     }
 
     public static MutableComponent command(MutableComponent component, String command) {
-        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command)));
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent.RunCommand(command)));
     }
 
     public static MutableComponent file(MutableComponent component, String file) {
-        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file)));
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent.OpenFile(file)));
     }
 
-    public static MutableComponent url(MutableComponent component, String url) {
-        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
+    public static MutableComponent url(MutableComponent component, URI url) {
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent.OpenUrl(url)));
     }
 
-    public static MutableComponent page(MutableComponent component, String page) {
-        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, page)));
+    public static MutableComponent page(MutableComponent component, int page) {
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent.ChangePage(page)));
     }
 
     public static MutableComponent run(MutableComponent component, Runnable runnable) {
@@ -132,6 +133,6 @@ public final class ChatBuilder {
     }
 
     public static MutableComponent suggest(MutableComponent component, String command) {
-        return component.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)));
+        return component.withStyle(style -> style.withClickEvent(new ClickEvent.SuggestCommand(command)));
     }
 }
