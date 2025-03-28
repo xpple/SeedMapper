@@ -67,7 +67,7 @@ jobs:
     needs: compile-cubiomes
     runs-on: ubuntu-latest
     env:
-      LLVM_HOME: /usr/lib/llvm-14
+      LLVM_HOME: /usr/lib/llvm-13
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -89,9 +89,12 @@ jobs:
         run: |
           chmod +x ./gradlew
           chmod +x ./jextract/gradlew
-      - name: Install libclang 14 # 13 is not available
-        run: sudo apt install libclang-14-dev
-      - name: Check location of libclang
+      - name: Install LLVM 13
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+          tar -xf clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+          sudo mv clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04 /usr/lib/llvm-13
+      - name: Check location of LLVM
         run: |
           ls /usr/bin
           ls /usr/lib
