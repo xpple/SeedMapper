@@ -31,7 +31,7 @@ public abstract class CreateJavaBindingsTask extends DefaultTask {
         output = this.executeCommand(jextractDir, "./gradlew" + EXTENSION, "--stacktrace", "-Pjdk_home=" + JAVA_HOME, "-Pllvm_home=" + LLVM_HOME, "clean", "verify");
         System.out.println(output);
         File rootDir = this.getProject().getRootDir();
-        output = this.executeCommand(rootDir, "./jextract/build/jextract/bin/jextract" + EXTENSION, "--include-dir", "src/main/c", "--output", "src/main/java", "--use-system-load-library", "--target-package", "com.github.cubiomes", "--header-class-name", "Cubiomes", "src/main/c/tables/btree18.h", "tables/btree19.h", "tables/btree20.h", "tables/btree192.h", "tables/btree21wd.h", "biomenoise.h", "biomes.h", "finders.h", "generator.h", "layers.h", "noise.h", "quadbase.h", "rng.h", "util.h");
+        output = this.executeCommand(rootDir, "./jextract/build/jextract/bin/jextract" + EXTENSION, "--include-dir", "src/main/c", "--output", "src/main/java", "--use-system-load-library", "--target-package", "com.github.cubiomes", "--header-class-name", "Cubiomes", "@includes.txt", "src/main/c/tables/btree18.h", "tables/btree19.h", "tables/btree20.h", "tables/btree192.h", "tables/btree21wd.h", "biomenoise.h", "biomes.h", "finders.h", "generator.h", "layers.h", "noise.h", "quadbase.h", "rng.h", "util.h");
         System.out.println(output);
     }
 

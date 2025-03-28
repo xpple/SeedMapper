@@ -42,3 +42,5 @@ src/main/resources/libcubiomes.dylib
 src/main/resources/libcubiomes.so
 
 src/main/java/com/github/cubiomes/
+
+dump_includes.txt

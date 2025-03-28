@@ -91,14 +91,9 @@ jobs:
           chmod +x ./jextract/gradlew
       - name: Install LLVM 13
         run: |
-          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+          wget --no-verbose https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
           tar -xf clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
           sudo mv clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04 /usr/lib/llvm-13
-      - name: Check location of LLVM
-        run: |
-          ls /usr/bin
-          ls /usr/lib
-          ls /usr/include
       - name: Build
         run: ./gradlew build
       - name: Capture build artifacts
