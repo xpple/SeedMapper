@@ -13,13 +13,15 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.commands.CommandBuildContext;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
-import java.net.URL;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class SeedMapper implements ClientModInitializer {
 
@@ -28,18 +30,15 @@ public class SeedMapper implements ClientModInitializer {
     public static final Path modConfigPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
 
     static {
-        String libraryName = System.mapLibraryName("libcubiomes");
-        String extension = FilenameUtils.getExtension(libraryName);
-        libraryName = "libcubiomes" + '.' + extension;
-        URL libraryPath = SeedMapper.class.getClassLoader().getResource(libraryName);
-        Path libcubiomes;
-        try {
-            libcubiomes = Files.createTempFile("libcubiomes", '.' + extension);
-            IOUtils.copy(libraryPath, libcubiomes.toFile());
-        } catch (Exception e) {
+        String libraryName = System.mapLibraryName("cubiomes");
+        ModContainer modContainer = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
+        try (BufferedReader locationReader = Files.newBufferedReader(modContainer.findPath("library_location.txt").orElseThrow());
+             OutputStream outputStream = Files.newOutputStream(Paths.get(locationReader.readLine()))
+        ) {
+            Files.copy(modContainer.findPath(libraryName).orElseThrow(), outputStream);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.load(libcubiomes.toAbsolutePath().toString());
     }
 
     @Override
