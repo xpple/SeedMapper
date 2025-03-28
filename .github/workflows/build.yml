@@ -69,8 +69,6 @@ jobs:
     env:
       LLVM_HOME: /usr/lib/llvm-19
     steps:
-      - name: Check location of llvm # remove later
-        run: which clang
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -88,7 +86,9 @@ jobs:
           java-version: 23
           distribution: 'temurin'
       - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
+        run: |
+          chmod +x ./gradlew
+          chmod +x ./jextract/gradlew
       - name: Build
         run: ./gradlew build
       - name: Capture build artifacts
