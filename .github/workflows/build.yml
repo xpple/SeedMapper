@@ -67,12 +67,8 @@ jobs:
     needs: compile-cubiomes
     runs-on: ubuntu-latest
     env:
-      LLVM_HOME: /usr/lib/llvm-19
+      LLVM_HOME: /usr/lib/llvm-14
     steps:
-      - name: Check location of llvm
-        run: |
-          ls /usr/bin
-          ls /usr/lib
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -93,6 +89,13 @@ jobs:
         run: |
           chmod +x ./gradlew
           chmod +x ./jextract/gradlew
+      - name: Install libclang 14 # 13 is not available
+        run: sudo apt install libclang-14-dev
+      - name: Check location of libclang
+        run: |
+          ls /usr/bin
+          ls /usr/lib
+          ls /usr/include
       - name: Build
         run: ./gradlew build
       - name: Capture build artifacts
