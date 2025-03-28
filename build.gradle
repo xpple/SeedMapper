@@ -55,9 +55,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.register('createJavaBindings', CreateJavaBindingsTask) {
-	outputFile = new File(temporaryDir, "library_location.txt")
-}
+tasks.register('createJavaBindings', CreateJavaBindingsTask) {}
 compileJava.dependsOn('createJavaBindings')
 
 // TODO: run `createJavaBindings` on IDE import
@@ -70,8 +68,6 @@ processResources {
 	filesMatching("fabric.mod.json") {
 		expand props
 	}
-
-	from createJavaBindings
 
 	from("LICENSE") {
 		rename {"${it}_${project.base.archivesName.get()}"}

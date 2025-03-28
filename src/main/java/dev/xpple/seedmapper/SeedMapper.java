@@ -16,12 +16,10 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.commands.CommandBuildContext;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class SeedMapper implements ClientModInitializer {
 
@@ -32,13 +30,14 @@ public class SeedMapper implements ClientModInitializer {
     static {
         String libraryName = System.mapLibraryName("cubiomes");
         ModContainer modContainer = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
-        try (BufferedReader locationReader = Files.newBufferedReader(modContainer.findPath("library_location.txt").orElseThrow());
-             OutputStream outputStream = Files.newOutputStream(Paths.get(locationReader.readLine()))
-        ) {
-            Files.copy(modContainer.findPath(libraryName).orElseThrow(), outputStream);
+        Path tempFile;
+        try {
+            tempFile = Files.createTempFile(libraryName, "");
+            Files.copy(modContainer.findPath(libraryName).orElseThrow(), tempFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        System.load(tempFile.toAbsolutePath().toString());
     }
 
     @Override
