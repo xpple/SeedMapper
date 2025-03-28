@@ -69,6 +69,10 @@ jobs:
     env:
       LLVM_HOME: /usr/lib/llvm-19
     steps:
+      - name: Check location of llvm
+        run: |
+          ls /usr/bin
+          ls /usr/lib
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
