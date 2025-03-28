@@ -31,7 +31,7 @@ jobs:
           lipo -create -output src/main/resources/libcubiomes.dylib src/main/resources/libcubiomes_arm64.dylib src/main/resources/libcubiomes_x86_64.dylib
       - name: Compile shared library (windows-latest)
         if: matrix.os == 'windows-latest'
-        run: gcc -shared -o src/main/resources/libcubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+        run: gcc -shared -o src/main/resources/cubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
 
       - name: Compute SHA256 hash (ubuntu-latest)
         if: matrix.os == 'ubuntu-latest'
@@ -41,7 +41,7 @@ jobs:
         run: shasum -a 256 src/main/resources/libcubiomes.dylib
       - name: Compute SHA256 hash (windows-latest)
         if: matrix.os == 'windows-latest'
-        run: Get-FileHash -Algorithm SHA256 src/main/resources/libcubiomes.dll
+        run: Get-FileHash -Algorithm SHA256 src/main/resources/cubiomes.dll
 
       - name: Capture shared library (ubuntu-latest)
         if: matrix.os == 'ubuntu-latest'
@@ -59,13 +59,15 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: libcubiomes.dll
-          path: src/main/resources/libcubiomes.dll
+          name: cubiomes.dll
+          path: src/main/resources/cubiomes.dll
 
   build:
     name: Build SeedMapper
     needs: compile-cubiomes
     runs-on: ubuntu-latest
+    env:
+      LLVM_HOME: /usr/lib/llvm-13
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -74,7 +76,6 @@ jobs:
       - name: Capture shared library
         uses: actions/download-artifact@v4
         with:
-          pattern: libcubiomes.*
           merge-multiple: true
           path: src/main/resources/
       - name: Validate gradle wrapper
@@ -85,7 +86,17 @@ jobs:
           java-version: 23
           distribution: 'temurin'
       - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
+        run: |
+          chmod +x ./gradlew
+          chmod +x ./jextract/gradlew
+      - name: Install LLVM 13
+        run: |
+          wget --no-verbose https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+          tar -xf clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+          sudo mv clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04 $LLVM_HOME
+      - name: Compile jextract
+        working-directory: jextract
+        run: ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
       - name: Build
         run: ./gradlew build
       - name: Capture build artifacts
