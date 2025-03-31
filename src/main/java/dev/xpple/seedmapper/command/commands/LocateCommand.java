@@ -5,11 +5,15 @@ import com.github.cubiomes.Generator;
 import com.github.cubiomes.Pos;
 import com.github.cubiomes.StrongholdIter;
 import com.github.cubiomes.StructureConfig;
+import com.github.cubiomes.StructureVariant;
+import com.github.cubiomes.SurfaceNoise;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
+import dev.xpple.seedmapper.feature.StructureChecks;
+import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.TwoDTree;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -24,7 +28,9 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.util.List;
 
+import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
 import static dev.xpple.seedmapper.command.arguments.StructureArgument.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
@@ -42,7 +48,9 @@ public class LocateCommand {
             .then(literal("feature")
                 .then(literal("structure")
                     .then(argument("structure", structure())
-                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructure(ctx, "structure")))))
+                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructure(ctx, "structure")))
+                        .then(argument("variantdata", bool())
+                            .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructure(ctx, "structure"), getBool(ctx, "variantdata"))))))
                 .then(literal("stronghold")
                     .executes(ctx -> locateStronghold(CustomClientCommandSource.of(ctx.getSource()))))
                 .then(literal("slimechunk")
@@ -86,6 +94,10 @@ public class LocateCommand {
     }
 
     private static int locateStructure(CustomClientCommandSource source, int structure) throws CommandSyntaxException {
+        return locateStructure(source, structure, false);
+    }
+
+    private static int locateStructure(CustomClientCommandSource source, int structure, boolean variantData) throws CommandSyntaxException {
         try (Arena arena = Arena.ofConfined()) {
             int version = source.getVersion();
             int dimension = source.getDimension();
@@ -103,14 +115,17 @@ public class LocateCommand {
             Cubiomes.setupGenerator(generator, version, 0);
             Cubiomes.applySeed(generator, dimension, seed);
 
+            // currently only used for end cities
+            MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
+            Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed);
+
+            StructureChecks.StructureCheck structureCheck = StructureChecks.get(structure);
+
             BlockPos center = BlockPos.containing(source.getPosition());
             int regionSize = StructureConfig.regionSize(structureConfig) << 4;
             SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
                 MemorySegment structurePos = Pos.allocate(arena);
-                if (Cubiomes.getStructurePos(structure, version, seed, x, z, structurePos) == 0) {
-                    return false;
-                }
-                if (Cubiomes.isViableStructurePos(structure, generator, Pos.x(structurePos), Pos.z(structurePos), 0) == 0) {
+                if (!structureCheck.check(generator, surfaceNoise, x, z, structurePos)) {
                     return false;
                 }
                 source.sendFeedback(chain(
@@ -125,6 +140,20 @@ public class LocateCommand {
                     ),
                     highlight(".")
                 ));
+
+                if (!variantData) {
+                    return true;
+                }
+                int biome = Cubiomes.getBiomeAt(generator, 4, Pos.x(structurePos) >> 2, 320 >> 2, Pos.z(structurePos) >> 2);
+                MemorySegment structureVariant = StructureVariant.allocate(arena);
+                Cubiomes.getVariant(structureVariant, structure, version, seed, Pos.x(structurePos), Pos.z(structurePos), biome);
+
+                List<Component> components = StructureVariantFeedbackHelper.get(structure, structureVariant);
+                if (components.isEmpty()) {
+                    return true;
+                }
+                source.sendFeedback(Component.translatable("command.locate.feature.structure.variantData"));
+                components.forEach(component -> source.sendFeedback(Component.literal(" - ").append(component)));
                 return true;
             }, () -> CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE));
             return Command.SINGLE_SUCCESS;
