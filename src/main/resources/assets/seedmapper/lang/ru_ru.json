@@ -4,7 +4,7 @@
   "commands.exceptions.unknownVersion": "Неизвестное измерение \"%s\".",
   "commands.exceptions.invalidDimension": "Недопустимое измерение.",
   "commands.exceptions.unknownBiome": "Неизвестный биом \"%s\".",
-  "commands.exceptions.noBiomeFound": "Не удалось найти биом в пределах 6400 блоков.",
+  "commands.exceptions.noBiomeFound": "Не удалось найти биом в пределах %s блоков.",
   "commands.exceptions.unknownStructure": "Неизвестная структура \"%s\".",
   "commands.exceptions.noStructureFound": "Не удалось найти структуру в пределах %d блоков.",
   "commands.exceptions.incompatibleParameters": "Несовместимые параметры.",

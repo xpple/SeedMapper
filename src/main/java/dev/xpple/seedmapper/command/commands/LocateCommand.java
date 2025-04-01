@@ -38,6 +38,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class LocateCommand {
 
+    private static final int BIOME_SEARCH_RADIUS = 6400;
+
     private static final Long2ObjectMap<TwoDTree> cachedStrongholds = new Long2ObjectOpenHashMap<>();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -71,24 +73,25 @@ public class LocateCommand {
 
             BlockPos center = BlockPos.containing(source.getPosition());
 
-            SpiralLoop.spiral(center.getX(), center.getZ(), 6400, 32, (x, z) -> {
-                if (Cubiomes.getBiomeAt(generator, 1, x, 63, z) != biome) {
-                    return false;
-                }
-                source.sendFeedback(chain(
-                    highlight(Component.translatable("command.locate.biome.foundAt")),
-                    highlight(" "),
-                    copy(
-                        hover(
-                            accent("x: %d, z: %d".formatted(x, z)),
-                            base(Component.translatable("chat.copy.click"))
-                        ),
-                        "%d ~ %d".formatted(x, z)
+            SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.getX(), center.getZ(), BIOME_SEARCH_RADIUS, 32, (x, z) -> {
+                return Cubiomes.getBiomeAt(generator, 1, x, 63, z) == biome;
+            });
+            if (pos == null) {
+                throw CommandExceptions.NO_BIOME_FOUND_EXCEPTION.create(BIOME_SEARCH_RADIUS);
+            }
+
+            source.sendFeedback(chain(
+                highlight(Component.translatable("command.locate.biome.foundAt")),
+                highlight(" "),
+                copy(
+                    hover(
+                        accent("x: %d, z: %d".formatted(pos.x(), pos.z())),
+                        base(Component.translatable("chat.copy.click"))
                     ),
-                    highlight(".")
-                ));
-                return true;
-            }, CommandExceptions.NO_BIOME_FOUND_EXCEPTION::create);
+                    "%d ~ %d".formatted(pos.x(), pos.z())
+                ),
+                highlight(".")
+            ));
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -123,39 +126,40 @@ public class LocateCommand {
 
             BlockPos center = BlockPos.containing(source.getPosition());
             int regionSize = StructureConfig.regionSize(structureConfig) << 4;
-            SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
-                MemorySegment structurePos = Pos.allocate(arena);
-                if (!structureCheck.check(generator, surfaceNoise, x, z, structurePos)) {
-                    return false;
-                }
-                source.sendFeedback(chain(
-                    highlight(Component.translatable("command.locate.feature.structure.foundAt")),
-                    highlight(" "),
-                    copy(
-                        hover(
-                            accent("x: %d, z: %d".formatted(Pos.x(structurePos), Pos.z(structurePos))),
-                            base(Component.translatable("chat.copy.click"))
-                        ),
-                        "%d ~ %d".formatted(Pos.x(structurePos), Pos.z(structurePos))
+            MemorySegment structurePos = Pos.allocate(arena);
+            SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
+                return structureCheck.check(generator, surfaceNoise, x, z, structurePos);
+            });
+            if (pos == null) {
+                throw CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE);
+            }
+
+            source.sendFeedback(chain(
+                highlight(Component.translatable("command.locate.feature.structure.foundAt")),
+                highlight(" "),
+                copy(
+                    hover(
+                        accent("x: %d, z: %d".formatted(Pos.x(structurePos), Pos.z(structurePos))),
+                        base(Component.translatable("chat.copy.click"))
                     ),
-                    highlight(".")
-                ));
+                    "%d ~ %d".formatted(Pos.x(structurePos), Pos.z(structurePos))
+                ),
+                highlight(".")
+            ));
 
-                if (!variantData) {
-                    return true;
-                }
-                int biome = Cubiomes.getBiomeAt(generator, 4, Pos.x(structurePos) >> 2, 320 >> 2, Pos.z(structurePos) >> 2);
-                MemorySegment structureVariant = StructureVariant.allocate(arena);
-                Cubiomes.getVariant(structureVariant, structure, version, seed, Pos.x(structurePos), Pos.z(structurePos), biome);
+            if (!variantData) {
+                return Command.SINGLE_SUCCESS;
+            }
+            int biome = Cubiomes.getBiomeAt(generator, 4, Pos.x(structurePos) >> 2, 320 >> 2, Pos.z(structurePos) >> 2);
+            MemorySegment structureVariant = StructureVariant.allocate(arena);
+            Cubiomes.getVariant(structureVariant, structure, version, seed, Pos.x(structurePos), Pos.z(structurePos), biome);
 
-                List<Component> components = StructureVariantFeedbackHelper.get(structure, structureVariant);
-                if (components.isEmpty()) {
-                    return true;
-                }
-                source.sendFeedback(Component.translatable("command.locate.feature.structure.variantData"));
-                components.forEach(component -> source.sendFeedback(Component.literal(" - ").append(component)));
-                return true;
-            }, () -> CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE));
+            List<Component> components = StructureVariantFeedbackHelper.get(structure, structureVariant);
+            if (components.isEmpty()) {
+                return Command.SINGLE_SUCCESS;
+            }
+            source.sendFeedback(Component.translatable("command.locate.feature.structure.variantData"));
+            components.forEach(component -> source.sendFeedback(Component.literal(" - ").append(component)));
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -210,37 +214,36 @@ public class LocateCommand {
         }
         long seed = source.getSeed().getSecond();
         ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
-        SpiralLoop.spiral(center.x, center.z, 6400, (x, z) -> {
+        SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.x, center.z, 6400, (x, z) -> {
             RandomSource random = WorldgenRandom.seedSlimeChunk(x, z, seed, 987234911L);
-            if (random.nextInt(10) == 0) {
-                int blockPosX = (x << 4) + 9;
-                int blockPosZ = (z << 4) + 9;
-                source.sendFeedback(chain(
-                    highlight(Component.translatable("command.locate.feature.slimeChunk.foundAt")),
-                    highlight(" "),
-                    copy(
-                        hover(
-                            accent("x: %d, z: %d".formatted(blockPosX, blockPosZ)),
-                            base(Component.translatable("command.locate.feature.slimeChunk.copy"))
-                        ),
-                        "%d ~ %d".formatted(blockPosX, blockPosZ)
-                    ),
-                    highlight(" ("),
-                    highlight(Component.translatable("command.locate.feature.slimeChunk.chunk")),
-                    highlight(" "),
-                    copy(
-                        hover(
-                            accent(x + " " + z),
-                            base(Component.translatable("command.locate.feature.slimeChunk.copyChunk"))
-                        ),
-                        "%d %d".formatted(x, z)
-                    ),
-                    highlight(").")
-                ));
-                return true;
-            }
-            return false;
-        }, CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand()::create);
+            return random.nextInt(10) == 0;
+        });
+        assert pos != null;
+
+        int blockPosX = (pos.x() << 4) + 9;
+        int blockPosZ = (pos.z() << 4) + 9;
+        source.sendFeedback(chain(
+            highlight(Component.translatable("command.locate.feature.slimeChunk.foundAt")),
+            highlight(" "),
+            copy(
+                hover(
+                    accent("x: %d, z: %d".formatted(blockPosX, blockPosZ)),
+                    base(Component.translatable("command.locate.feature.slimeChunk.copy"))
+                ),
+                "%d ~ %d".formatted(blockPosX, blockPosZ)
+            ),
+            highlight(" ("),
+            highlight(Component.translatable("command.locate.feature.slimeChunk.chunk")),
+            highlight(" "),
+            copy(
+                hover(
+                    accent(pos.x() + " " + pos.z()),
+                    base(Component.translatable("command.locate.feature.slimeChunk.copyChunk"))
+                ),
+                "%d %d".formatted(pos.x(), pos.z())
+            ),
+            highlight(").")
+        ));
         return Command.SINGLE_SUCCESS;
     }
 
