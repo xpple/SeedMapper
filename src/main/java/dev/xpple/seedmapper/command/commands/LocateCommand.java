@@ -2,7 +2,9 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
+import com.github.cubiomes.Piece;
 import com.github.cubiomes.Pos;
+import com.github.cubiomes.Pos3;
 import com.github.cubiomes.StrongholdIter;
 import com.github.cubiomes.StructureConfig;
 import com.github.cubiomes.StructureVariant;
@@ -29,6 +31,7 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
@@ -146,6 +149,42 @@ public class LocateCommand {
                 ),
                 highlight(".")
             ));
+
+            if (structure == Cubiomes.End_City()) {
+                MemorySegment pieces = Piece.allocateArray(Cubiomes.END_CITY_PIECES_MAX(), arena);
+                int numPieces = Cubiomes.getEndCityPieces(pieces, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
+                IntStream.range(0, numPieces)
+                    .mapToObj(i -> Piece.asSlice(pieces, i))
+                    .filter(piece -> Piece.type(piece) == Cubiomes.END_SHIP())
+                    .findAny() // only one ship per end city
+                    .map(Piece::pos)
+                    .map(city -> new BlockPos(Pos3.x(city), Pos3.y(city) + 60, Pos3.z(city)))
+                    .ifPresent(city -> source.sendFeedback(Component.literal(" - ").append(Component.translatable("command.locate.feature.structure.endCity.hasShip",
+                        copy(
+                            hover(
+                                accent("x: %d, y: %d, z: %d".formatted(city.getX(), city.getY(), city.getZ())),
+                                base(Component.translatable("chat.copy.click"))
+                            ),
+                            "%d %d %d".formatted(city.getX(), city.getY(), city.getZ())
+                        )))));
+            } else if (structure == Cubiomes.Fortress()) {
+                // 400 == max fortress pieces as specified in Cubiomes Viewer
+                MemorySegment pieces = Piece.allocateArray(400, arena);
+                int numPieces = Cubiomes.getFortressPieces(pieces, 400, version, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
+                IntStream.range(0, numPieces)
+                    .mapToObj(i -> Piece.asSlice(pieces, i))
+                    .filter(piece -> Piece.type(piece) == Cubiomes.BRIDGE_SPAWNER())
+                    .map(Piece::pos)
+                    .map(monsterThrone -> new BlockPos(Pos3.x(monsterThrone), Pos3.y(monsterThrone) + 10, Pos3.z(monsterThrone)))
+                    .forEach(spawnerPos -> source.sendFeedback(Component.literal(" - ").append(Component.translatable("command.locate.feature.structure.fortress.hasSpawner",
+                        copy(
+                            hover(
+                                accent("x: %d, y: %d, z: %d".formatted(spawnerPos.getX(), spawnerPos.getY(), spawnerPos.getZ())),
+                                base(Component.translatable("chat.copy.click"))
+                            ),
+                            "%d %d %d".formatted(spawnerPos.getX(), spawnerPos.getY(), spawnerPos.getZ())
+                        )))));
+            }
 
             if (!variantData) {
                 return Command.SINGLE_SUCCESS;

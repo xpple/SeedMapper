@@ -18,6 +18,8 @@
 
   "command.locate.biome.foundAt": "Biome found at",
   "command.locate.feature.structure.foundAt": "Structure found at",
+  "command.locate.feature.structure.endCity.hasShip": "The end city has a ship near %s.",
+  "command.locate.feature.structure.fortress.hasSpawner": "The fortress has a spawner near %s.",
   "command.locate.feature.structure.variantData": "The structure has the following variant data:",
   "command.locate.feature.structure.yLevel": "Y level: %s.",
   "command.locate.feature.structure.start": "Start: %s.",
