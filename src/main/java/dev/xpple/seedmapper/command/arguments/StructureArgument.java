@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class StructureArgument implements ArgumentType<Integer> {
 
-    private static final Collection<String> EXAMPLES = Arrays.asList("overworld", "the_nether", "the_end");
+    private static final Collection<String> EXAMPLES = Arrays.asList("pillager_outpost", "ruined_portal_nether", "trail_ruins");
 
     //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> STRUCTURES;">
     private static final Map<String, Integer> STRUCTURES = ImmutableMap.<String, Integer>builder()
