@@ -35,19 +35,26 @@ public final class StructureChecks {
 
         Int2ObjectMap<PiecesPredicateCheck> tempPiecesPredicateChecks = new Int2ObjectOpenHashMap<>();
         tempPiecesPredicateChecks.defaultReturnValue((_, _, _, _) -> true);
-        tempPiecesPredicateChecks.put(Cubiomes.End_City(), (piecesPredicate, pieces, generator, structurePos) -> {
-            int numPieces = Cubiomes.getEndCityPieces(pieces, Generator.seed(generator), Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
-            return piecesPredicate.test(numPieces, pieces);
-        });
-        tempPiecesPredicateChecks.put(Cubiomes.Fortress(), (piecesPredicate, pieces, generator, structurePos) -> {
-            int numPieces = Cubiomes.getFortressPieces(pieces, MAX_END_CITY_AND_FORTRESS_PIECES, Generator.mc(generator), Generator.seed(generator), Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
-            return piecesPredicate.test(numPieces, pieces);
-        });
+        for (int structure : StructurePredicateArgument.STRUCTURE_PIECES.keySet()) {
+            if (structure == Cubiomes.End_City()) {
+                tempPiecesPredicateChecks.put(structure, (piecesPredicate, pieces, generator, structurePos) -> {
+                    int numPieces = Cubiomes.getEndCityPieces(pieces, Generator.seed(generator), Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
+                    return piecesPredicate.test(numPieces, pieces);
+                });
+            } else if (structure == Cubiomes.Fortress()) {
+                tempPiecesPredicateChecks.put(structure, (piecesPredicate, pieces, generator, structurePos) -> {
+                    int numPieces = Cubiomes.getFortressPieces(pieces, MAX_END_CITY_AND_FORTRESS_PIECES, Generator.mc(generator), Generator.seed(generator), Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
+                    return piecesPredicate.test(numPieces, pieces);
+                });
+            } else {
+                throw new AssertionError();
+            }
+        }
         PIECES_PREDICATE_CHECKS = Int2ObjectMaps.unmodifiable(tempPiecesPredicateChecks);
 
         Int2ObjectMap<VariantPredicateCheck> tempVariantPredicateChecks = new Int2ObjectOpenHashMap<>();
         tempVariantPredicateChecks.defaultReturnValue((_, _, _, _) -> true);
-        for (int structure : StructurePredicateArgument.VARIANT_SUPPORTED_STRUCTURES) {
+        for (int structure : StructurePredicateArgument.STRUCTURE_VARIANTS.keySet()) {
             tempVariantPredicateChecks.put(structure, (variantPredicate, structureVariant, generator, structurePos) -> {
                 int biome = Cubiomes.getBiomeAt(generator, 4, Pos.x(structurePos) >> 2, 320 >> 2, Pos.z(structurePos) >> 2);
                 Cubiomes.getVariant(structureVariant, structure, Generator.mc(generator), Generator.seed(generator), Pos.x(structurePos), Pos.z(structurePos), biome);

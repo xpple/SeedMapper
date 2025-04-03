@@ -61,70 +61,48 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
         .build();
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="public static final Set<Integer> PIECES_SUPPORTED_STRUCTURES;">
-    public static final Set<Integer> PIECES_SUPPORTED_STRUCTURES = Set.of(
-        Cubiomes.End_City(),
-        Cubiomes.Fortress());
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> END_CITY_PIECES;">
-    private static final Map<String, Integer> END_CITY_PIECES = ImmutableMap.<String, Integer>builder()
-        .put("base_floor", Cubiomes.BASE_FLOOR())
-        .put("base_roof", Cubiomes.BASE_ROOF())
-        .put("bridge_end", Cubiomes.BRIDGE_END())
-        .put("bridge_gentle_stairs", Cubiomes.BRIDGE_GENTLE_STAIRS())
-        .put("bridge_piece", Cubiomes.BRIDGE_PIECE())
-        .put("bridge_steep_stairs", Cubiomes.BRIDGE_STEEP_STAIRS())
-        .put("fat_tower_base", Cubiomes.FAT_TOWER_BASE())
-        .put("fat_tower_middle", Cubiomes.FAT_TOWER_MIDDLE())
-        .put("fat_tower_top", Cubiomes.FAT_TOWER_TOP())
-        .put("second_floor_1", Cubiomes.SECOND_FLOOR_1())
-        .put("second_floor_2", Cubiomes.SECOND_FLOOR_2())
-        .put("second_roof", Cubiomes.SECOND_ROOF())
-        .put("end_ship", Cubiomes.END_SHIP())
-        .put("third_floor_1", Cubiomes.THIRD_FLOOR_1())
-        .put("third_floor_2", Cubiomes.THIRD_FLOOR_2())
-        .put("third_roof", Cubiomes.THIRD_ROOF())
-        .put("tower_base", Cubiomes.TOWER_BASE())
-        .put("tower_floor", Cubiomes.TOWER_FLOOR())
-        .put("tower_piece", Cubiomes.TOWER_PIECE())
-        .put("tower_top", Cubiomes.TOWER_TOP())
+    //<editor-fold defaultstate="collapsed" desc="public static final Map<Integer, Map<String, Integer>> STRUCTURE_PIECES;">
+    public static final Map<Integer, Map<String, Integer>> STRUCTURE_PIECES = ImmutableMap.<Integer, Map<String, Integer>>builder()
+        .put(Cubiomes.End_City(), ImmutableMap.<String, Integer>builder()
+            .put("base_floor", Cubiomes.BASE_FLOOR())
+            .put("base_roof", Cubiomes.BASE_ROOF())
+            .put("bridge_end", Cubiomes.BRIDGE_END())
+            .put("bridge_gentle_stairs", Cubiomes.BRIDGE_GENTLE_STAIRS())
+            .put("bridge_piece", Cubiomes.BRIDGE_PIECE())
+            .put("bridge_steep_stairs", Cubiomes.BRIDGE_STEEP_STAIRS())
+            .put("fat_tower_base", Cubiomes.FAT_TOWER_BASE())
+            .put("fat_tower_middle", Cubiomes.FAT_TOWER_MIDDLE())
+            .put("fat_tower_top", Cubiomes.FAT_TOWER_TOP())
+            .put("second_floor_1", Cubiomes.SECOND_FLOOR_1())
+            .put("second_floor_2", Cubiomes.SECOND_FLOOR_2())
+            .put("second_roof", Cubiomes.SECOND_ROOF())
+            .put("end_ship", Cubiomes.END_SHIP())
+            .put("third_floor_1", Cubiomes.THIRD_FLOOR_1())
+            .put("third_floor_2", Cubiomes.THIRD_FLOOR_2())
+            .put("third_roof", Cubiomes.THIRD_ROOF())
+            .put("tower_base", Cubiomes.TOWER_BASE())
+            .put("tower_floor", Cubiomes.TOWER_FLOOR())
+            .put("tower_piece", Cubiomes.TOWER_PIECE())
+            .put("tower_top", Cubiomes.TOWER_TOP())
+            .build())
+        .put(Cubiomes.Fortress(), ImmutableMap.<String, Integer>builder()
+            .put("fortress_start", Cubiomes.FORTRESS_START())
+            .put("bridge_straight", Cubiomes.BRIDGE_STRAIGHT())
+            .put("bridge_crossing", Cubiomes.BRIDGE_CROSSING())
+            .put("bridge_fortified_crossing", Cubiomes.BRIDGE_FORTIFIED_CROSSING())
+            .put("bridge_stairs", Cubiomes.BRIDGE_STAIRS())
+            .put("bridge_spawner", Cubiomes.BRIDGE_SPAWNER())
+            .put("bridge_corridor_entrance", Cubiomes.BRIDGE_CORRIDOR_ENTRANCE())
+            .put("corridor_straight", Cubiomes.CORRIDOR_STRAIGHT())
+            .put("corridor_crossing", Cubiomes.CORRIDOR_CROSSING())
+            .put("corridor_turn_right", Cubiomes.CORRIDOR_TURN_RIGHT())
+            .put("corridor_turn_left", Cubiomes.CORRIDOR_TURN_LEFT())
+            .put("corridor_stairs", Cubiomes.CORRIDOR_STAIRS())
+            .put("corridor_t_crossing", Cubiomes.CORRIDOR_T_CROSSING())
+            .put("corridor_nether_wart", Cubiomes.CORRIDOR_NETHER_WART())
+            .put("fortress_end", Cubiomes.FORTRESS_END())
+            .build())
         .build();
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> FORTRESS_PIECES;">
-    private static final Map<String, Integer> FORTRESS_PIECES = ImmutableMap.<String, Integer>builder()
-        .put("fortress_start", Cubiomes.FORTRESS_START())
-        .put("bridge_straight", Cubiomes.BRIDGE_STRAIGHT())
-        .put("bridge_crossing", Cubiomes.BRIDGE_CROSSING())
-        .put("bridge_fortified_crossing", Cubiomes.BRIDGE_FORTIFIED_CROSSING())
-        .put("bridge_stairs", Cubiomes.BRIDGE_STAIRS())
-        .put("bridge_spawner", Cubiomes.BRIDGE_SPAWNER())
-        .put("bridge_corridor_entrance", Cubiomes.BRIDGE_CORRIDOR_ENTRANCE())
-        .put("corridor_straight", Cubiomes.CORRIDOR_STRAIGHT())
-        .put("corridor_crossing", Cubiomes.CORRIDOR_CROSSING())
-        .put("corridor_turn_right", Cubiomes.CORRIDOR_TURN_RIGHT())
-        .put("corridor_turn_left", Cubiomes.CORRIDOR_TURN_LEFT())
-        .put("corridor_stairs", Cubiomes.CORRIDOR_STAIRS())
-        .put("corridor_t_crossing", Cubiomes.CORRIDOR_T_CROSSING())
-        .put("corridor_nether_wart", Cubiomes.CORRIDOR_NETHER_WART())
-        .put("fortress_end", Cubiomes.FORTRESS_END())
-        .build();
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="public static final Set<Integer> VARIANT_SUPPORTED_STRUCTURES;">
-    public static final Set<Integer> VARIANT_SUPPORTED_STRUCTURES = Set.of(
-        Cubiomes.Village(),
-        Cubiomes.Bastion(),
-        Cubiomes.Ancient_City(),
-        Cubiomes.Ruined_Portal(),
-        Cubiomes.Ruined_Portal_N(),
-        Cubiomes.Igloo(),
-        Cubiomes.Desert_Pyramid(),
-        Cubiomes.Jungle_Temple(),
-        Cubiomes.Swamp_Hut(),
-        Cubiomes.Geode(),
-        Cubiomes.Trial_Chambers());
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> GENERAL_VARIANTS;">
@@ -137,53 +115,6 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
             .put("west", 3)
             .build(), m -> (int) StructureVariant.rotation(m)))
         .put("mirrored", Pair.of(Map.of("true", 1, "false", 0), m -> (int) StructureVariant.mirror(m)))
-        .build();
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> VILLAGE_SPECIFIC_VARIANTS;">
-    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> VILLAGE_SPECIFIC_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
-        .put("start", Pair.of(ImmutableMap.<String, Integer>builder()
-            .put("plains_fountain_01", 0)
-            .put("plains_meeting_point_1", 1)
-            .put("plains_meeting_point_2", 2)
-            .put("plains_meeting_point_3", 3)
-            .put("desert_meeting_point_1", 1)
-            .put("desert_meeting_point_2", 2)
-            .put("desert_meeting_point_3", 3)
-            .put("savanna_meeting_point_1", 1)
-            .put("savanna_meeting_point_2", 2)
-            .put("savanna_meeting_point_3", 3)
-            .put("savanna_meeting_point_4", 4)
-            .put("taiga_meeting_point_1", 1)
-            .put("taiga_meeting_point_2", 2)
-            .put("snowy_meeting_point_1", 1)
-            .put("snowy_meeting_point_2", 2)
-            .put("snowy_meeting_point_3", 3)
-            .build(), m -> (int) StructureVariant.start(m)))
-        .put("abandoned", Pair.of(Map.of("true", 1, "false", 0), m -> (int) StructureVariant.abandoned(m)))
-        .build();
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> BASTION_SPECIFIC_VARIANTS;">
-    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> BASTION_SPECIFIC_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
-        .put("start", Pair.of(ImmutableMap.<String, Integer>builder()
-            .put("units.air_base", 0)
-            .put("hoglin_stable.air_base", 1)
-            .put("treasure.big_air_full", 2)
-            .put("bridge.starting_pieces.entrance_base", 3)
-            .build(), m -> (int) StructureVariant.start(m)))
-        .build();
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> ANCIENT_CITY_SPECIFIC_VARIANTS;">
-    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> ANCIENT_CITY_SPECIFIC_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
-        .put("start", Pair.of(ImmutableMap.<String, Integer>builder()
-            .put("city_center_1", 1)
-            .put("city_center_2", 2)
-            .put("city_center_3", 3)
-            .build(), m -> (int) StructureVariant.start(m)))
-        // seems to be only -27
-        // .put("y_level", Pair.of(Map.of("-27", -27), m -> (int) StructureVariant.y(m)))
         .build();
     //</editor-fold>
 
@@ -210,39 +141,76 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
         .build();
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> IGLOO_SPECIFIC_VARIANTS;">
-    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> IGLOO_SPECIFIC_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
-        .put("size", Pair.of(ImmutableMap.<String, Integer>builder()
-            .put("4", 4)
-            .put("5", 5)
-            .put("6", 6)
-            .put("7", 7)
-            .put("8", 8)
-            .put("9", 9)
-            .put("10", 10)
-            .put("11", 11)
-            .build(), m -> (int) StructureVariant.size(m)))
-        .put("basement", Pair.of(Map.of("true", 1, "false", 0), m -> (int) StructureVariant.basement(m)))
-        .build();
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> GEODE_SPECIFIC_VARIANTS;">
-    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> GEODE_SPECIFIC_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
-        .put("size", Pair.of(ImmutableMap.<String, Integer>builder()
-            .put("3", 3)
-            .put("4", 4)
-            .put("5", 5)
-            .build(), m -> (int) StructureVariant.size(m)))
-        .put("cracked", Pair.of(Map.of("true", 1, "false", 0), m -> (int) StructureVariant.cracked(m)))
-        .build();
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> TRIAL_CHAMBERS_SPECIFIC_VARIANTS;">
-    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> TRIAL_CHAMBERS_SPECIFIC_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
-        .put("start", Pair.of(ImmutableMap.<String, Integer>builder()
-            .put("corridor.end_1", 0)
-            .put("corridor.end_2", 1)
-            .build(), m -> (int) StructureVariant.size(m)))
+    //<editor-fold defaultstate="collapsed" desc="public static final Map<Integer, Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>> STRUCTURE_VARIANTS;">
+    public static final Map<Integer, Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>> STRUCTURE_VARIANTS = ImmutableMap.<Integer, Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>>builder()
+        .put(Cubiomes.Village(), ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
+            .put("start", Pair.of(ImmutableMap.<String, Integer>builder()
+                .put("plains_fountain_01", 0)
+                .put("plains_meeting_point_1", 1)
+                .put("plains_meeting_point_2", 2)
+                .put("plains_meeting_point_3", 3)
+                .put("desert_meeting_point_1", 1)
+                .put("desert_meeting_point_2", 2)
+                .put("desert_meeting_point_3", 3)
+                .put("savanna_meeting_point_1", 1)
+                .put("savanna_meeting_point_2", 2)
+                .put("savanna_meeting_point_3", 3)
+                .put("savanna_meeting_point_4", 4)
+                .put("taiga_meeting_point_1", 1)
+                .put("taiga_meeting_point_2", 2)
+                .put("snowy_meeting_point_1", 1)
+                .put("snowy_meeting_point_2", 2)
+                .put("snowy_meeting_point_3", 3)
+                .build(), m -> (int) StructureVariant.start(m)))
+            .put("abandoned", Pair.of(Map.of("true", 1, "false", 0), m -> (int) StructureVariant.abandoned(m)))
+            .build())
+        .put(Cubiomes.Bastion(), ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
+            .put("start", Pair.of(ImmutableMap.<String, Integer>builder()
+                .put("units.air_base", 0)
+                .put("hoglin_stable.air_base", 1)
+                .put("treasure.big_air_full", 2)
+                .put("bridge.starting_pieces.entrance_base", 3)
+                .build(), m -> (int) StructureVariant.start(m)))
+            .build())
+        .put(Cubiomes.Ancient_City(), ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
+            .put("start", Pair.of(ImmutableMap.<String, Integer>builder()
+                .put("city_center_1", 1)
+                .put("city_center_2", 2)
+                .put("city_center_3", 3)
+                .build(), m -> (int) StructureVariant.start(m)))
+            .build())
+        .put(Cubiomes.Ruined_Portal(), RUINED_PORTAL_SPECIFIC_VARIANTS)
+        .put(Cubiomes.Ruined_Portal_N(), RUINED_PORTAL_SPECIFIC_VARIANTS)
+        .put(Cubiomes.Igloo(), ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
+            .put("size", Pair.of(ImmutableMap.<String, Integer>builder()
+                .put("4", 4)
+                .put("5", 5)
+                .put("6", 6)
+                .put("7", 7)
+                .put("8", 8)
+                .put("9", 9)
+                .put("10", 10)
+                .put("11", 11)
+                .build(), m -> (int) StructureVariant.size(m)))
+            .put("basement", Pair.of(Map.of("true", 1, "false", 0), m -> (int) StructureVariant.basement(m)))
+            .build())
+        .put(Cubiomes.Desert_Pyramid(), Collections.emptyMap())
+        .put(Cubiomes.Jungle_Temple(), Collections.emptyMap())
+        .put(Cubiomes.Swamp_Hut(), Collections.emptyMap())
+        .put(Cubiomes.Geode(), ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
+            .put("size", Pair.of(ImmutableMap.<String, Integer>builder()
+                .put("3", 3)
+                .put("4", 4)
+                .put("5", 5)
+                .build(), m -> (int) StructureVariant.size(m)))
+            .put("cracked", Pair.of(Map.of("true", 1, "false", 0), m -> (int) StructureVariant.cracked(m)))
+            .build())
+        .put(Cubiomes.Trial_Chambers(), ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
+            .put("start", Pair.of(ImmutableMap.<String, Integer>builder()
+                .put("corridor.end_1", 0)
+                .put("corridor.end_2", 1)
+                .build(), m -> (int) StructureVariant.size(m)))
+            .build())
         .build();
     //</editor-fold>
 
@@ -319,20 +287,12 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
         }
 
         private PiecesPredicate parsePieces(int structure) throws CommandSyntaxException {
-            if (!PIECES_SUPPORTED_STRUCTURES.contains(structure)) {
+            Map<String, Integer> piecesMap = STRUCTURE_PIECES.get(structure);
+            if (piecesMap == null) {
                 return (_, _) -> true;
             }
             if (!reader.canRead()) {
                 return (_, _) -> true;
-            }
-
-            Map<String, Integer> piecesMap;
-            if (structure == Cubiomes.End_City()) {
-                piecesMap = END_CITY_PIECES;
-            } else if (structure == Cubiomes.Fortress()) {
-                piecesMap = FORTRESS_PIECES;
-            } else {
-                throw new AssertionError();
             }
 
             // pieces that must be present
@@ -380,14 +340,13 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
 
         private VariantPredicate parseVariant(int structure) throws CommandSyntaxException {
             VariantPredicate variantPredicate = _ -> true;
-            if (!VARIANT_SUPPORTED_STRUCTURES.contains(structure)) {
+            Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> specificVariantKeys = STRUCTURE_VARIANTS.get(structure);
+            if (specificVariantKeys == null) {
                 return variantPredicate;
             }
             if (!reader.canRead()) {
                 return variantPredicate;
             }
-
-            Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> specificVariantKeys = getSpecificVariantKeys(structure);
 
             reader.expect('{');
             while (true) {
@@ -420,28 +379,6 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
             reader.expect('}');
 
             return variantPredicate;
-        }
-
-        private static Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> getSpecificVariantKeys(int structure) {
-            Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> specificVariantKeys;
-            if (structure == Cubiomes.Village()) {
-                specificVariantKeys = VILLAGE_SPECIFIC_VARIANTS;
-            } else if (structure == Cubiomes.Bastion()) {
-                specificVariantKeys = BASTION_SPECIFIC_VARIANTS;
-            } else if (structure == Cubiomes.Ancient_City()) {
-                specificVariantKeys = ANCIENT_CITY_SPECIFIC_VARIANTS;
-            } else if (structure == Cubiomes.Ruined_Portal() || structure == Cubiomes.Ruined_Portal_N()) {
-                specificVariantKeys = RUINED_PORTAL_SPECIFIC_VARIANTS;
-            } else if (structure == Cubiomes.Igloo()) {
-                specificVariantKeys = IGLOO_SPECIFIC_VARIANTS;
-            } else if (structure == Cubiomes.Geode()) {
-                specificVariantKeys = GEODE_SPECIFIC_VARIANTS;
-            } else if (structure == Cubiomes.Trial_Chambers()) {
-                specificVariantKeys = TRIAL_CHAMBERS_SPECIFIC_VARIANTS;
-            } else {
-                specificVariantKeys = Collections.emptyMap();
-            }
-            return specificVariantKeys;
         }
 
         private int parseVariantValue(Pair<Map<String, Integer>, Function<MemorySegment, Integer>> variantsMap) throws CommandSyntaxException {
