@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-// TODO: when needed add screen mixin
 public final class RunnableClickEventActionHelper {
 
     private RunnableClickEventActionHelper() {
