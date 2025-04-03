@@ -119,7 +119,7 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> RUINED_PORTAL_SPECIFIC_VARIANTS;">
-    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> RUINED_PORTAL_SPECIFIC_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
+    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> RUINED_PORTAL_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
         .put("start", Pair.of(ImmutableMap.<String, Integer>builder()
             .put("ruined_portal.giant_portal_1", 1)
             .put("ruined_portal.giant_portal_2", 2)
@@ -179,8 +179,8 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
                 .put("city_center_3", 3)
                 .build(), m -> (int) StructureVariant.start(m)))
             .build())
-        .put(Cubiomes.Ruined_Portal(), RUINED_PORTAL_SPECIFIC_VARIANTS)
-        .put(Cubiomes.Ruined_Portal_N(), RUINED_PORTAL_SPECIFIC_VARIANTS)
+        .put(Cubiomes.Ruined_Portal(), RUINED_PORTAL_VARIANTS)
+        .put(Cubiomes.Ruined_Portal_N(), RUINED_PORTAL_VARIANTS)
         .put(Cubiomes.Igloo(), ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
             .put("size", Pair.of(ImmutableMap.<String, Integer>builder()
                 .put("4", 4)
