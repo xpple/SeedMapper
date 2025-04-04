@@ -23,6 +23,7 @@
     ]
   },
   "mixins": [
+    "mixins.seedmapper.json"
   ],
   "accessWidener": "seedmapper.aw",
 

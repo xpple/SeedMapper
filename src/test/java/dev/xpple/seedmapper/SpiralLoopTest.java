@@ -1,6 +1,5 @@
 package dev.xpple.seedmapper;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import org.junit.jupiter.api.Test;
@@ -15,12 +14,10 @@ public class SpiralLoopTest {
     @Test
     public void testOriginCentred() {
         List<Pair<Integer, Integer>> coords = new ArrayList<>();
-        try {
-            SpiralLoop.spiral(0, 0, 2, 1, (x, z) -> {
-                coords.add(Pair.of(x, z));
-                return false;
-            }, CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand()::create);
-        } catch (CommandSyntaxException _) {}
+        SpiralLoop.spiral(0, 0, 2, 1, (x, z) -> {
+            coords.add(Pair.of(x, z));
+            return false;
+        });
         Iterator<Pair<Integer, Integer>> iterator = coords.iterator();
         assertEquals(Pair.of(0, 0), iterator.next());
         assertEquals(Pair.of(1, 0), iterator.next());
@@ -53,12 +50,10 @@ public class SpiralLoopTest {
     @Test
     public void testOffset5m10() {
         List<Pair<Integer, Integer>> coords = new ArrayList<>();
-        try {
-            SpiralLoop.spiral(5, -10, 2, 1, (x, z) -> {
-                coords.add(Pair.of(x, z));
-                return false;
-            }, CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand()::create);
-        } catch (CommandSyntaxException _) {}
+        SpiralLoop.spiral(5, -10, 2, 1, (x, z) -> {
+            coords.add(Pair.of(x, z));
+            return false;
+        });
         Iterator<Pair<Integer, Integer>> iterator = coords.iterator();
         assertEquals(Pair.of(5, -10), iterator.next());
         assertEquals(Pair.of(6, -10), iterator.next());
@@ -91,12 +86,10 @@ public class SpiralLoopTest {
     @Test
     public void testStep10() {
         List<Pair<Integer, Integer>> coords = new ArrayList<>();
-        try {
-            SpiralLoop.spiral(0, 0, 20, 10, (x, z) -> {
-                coords.add(Pair.of(x, z));
-                return false;
-            }, CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand()::create);
-        } catch (CommandSyntaxException _) {}
+        SpiralLoop.spiral(0, 0, 20, 10, (x, z) -> {
+            coords.add(Pair.of(x, z));
+            return false;
+        });
         Iterator<Pair<Integer, Integer>> iterator = coords.iterator();
         assertEquals(Pair.of(0, 0), iterator.next());
         assertEquals(Pair.of(10, 0), iterator.next());
@@ -129,12 +122,10 @@ public class SpiralLoopTest {
     @Test
     public void testOffset10m5Step32() {
         List<Pair<Integer, Integer>> coords = new ArrayList<>();
-        try {
-            SpiralLoop.spiral(10, -5, 64, 32, (x, z) -> {
-                coords.add(Pair.of(x, z));
-                return false;
-            }, CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand()::create);
-        } catch (CommandSyntaxException _) {}
+        SpiralLoop.spiral(10, -5, 64, 32, (x, z) -> {
+            coords.add(Pair.of(x, z));
+            return false;
+        });
         Iterator<Pair<Integer, Integer>> iterator = coords.iterator();
         assertEquals(Pair.of(10, -5), iterator.next());
         assertEquals(Pair.of(42, -5), iterator.next());

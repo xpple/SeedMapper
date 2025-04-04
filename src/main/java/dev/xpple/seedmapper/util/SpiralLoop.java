@@ -1,19 +1,17 @@
 package dev.xpple.seedmapper.util;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import java.util.function.Supplier;
+import org.jetbrains.annotations.Nullable;
 
 public final class SpiralLoop {
 
     private SpiralLoop() {
     }
 
-    public static void spiral(final int centerX, final int centerZ, final int radius, CoordinateCallback callback, Supplier<? extends CommandSyntaxException> failure) throws CommandSyntaxException {
-        spiral(centerX, centerZ, radius, 1, callback, failure);
+    public static @Nullable Coordinate spiral(final int centerX, final int centerZ, final int radius, CoordinateCallback callback) {
+        return spiral(centerX, centerZ, radius, 1, callback);
     }
 
-    public static void spiral(final int centerX, final int centerZ, final int radius, final int step, CoordinateCallback callback, Supplier<? extends CommandSyntaxException> failure) throws CommandSyntaxException {
+    public static @Nullable Coordinate spiral(final int centerX, final int centerZ, final int radius, final int step, CoordinateCallback callback) {
         int x = centerX, dx = 0, z = centerZ, dz = -step;
         final int leftBoundX = centerX - radius, rightBoundX = centerX + radius;
         final int bottomBoundZ = centerZ - radius, topBoundZ = centerZ + radius;
@@ -21,7 +19,7 @@ public final class SpiralLoop {
         for (int i = 0; i < max ; i++) {
             if (leftBoundX <= x && x <= rightBoundX && bottomBoundZ <= z && z <= topBoundZ) {
                 if (callback.consume(x, z)) {
-                    return;
+                    return new Coordinate(x, z);
                 }
             }
             if (x - centerX == z - centerZ || (x < centerX && x - centerX == centerZ - z) || (x > centerX && x - centerX == centerZ + step - z)) {
@@ -32,11 +30,14 @@ public final class SpiralLoop {
             x += dx;
             z += dz;
         }
-        throw failure.get();
+        return null;
     }
 
     @FunctionalInterface
     public interface CoordinateCallback {
         boolean consume(int x, int z);
+    }
+
+    public record Coordinate(int x, int z) {
     }
 }
