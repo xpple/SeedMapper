@@ -13,13 +13,13 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.commands.CommandBuildContext;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
-import java.net.URL;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 public class SeedMapper implements ClientModInitializer {
 
@@ -28,18 +28,16 @@ public class SeedMapper implements ClientModInitializer {
     public static final Path modConfigPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
 
     static {
-        String libraryName = System.mapLibraryName("libcubiomes");
-        String extension = FilenameUtils.getExtension(libraryName);
-        libraryName = "libcubiomes" + '.' + extension;
-        URL libraryPath = SeedMapper.class.getClassLoader().getResource(libraryName);
-        Path libcubiomes;
+        String libraryName = System.mapLibraryName("cubiomes");
+        ModContainer modContainer = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
+        Path tempFile;
         try {
-            libcubiomes = Files.createTempFile("libcubiomes", '.' + extension);
-            IOUtils.copy(libraryPath, libcubiomes.toFile());
-        } catch (Exception e) {
+            tempFile = Files.createTempFile(libraryName, "");
+            Files.copy(modContainer.findPath(libraryName).orElseThrow(), tempFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.load(libcubiomes.toAbsolutePath().toString());
+        System.load(tempFile.toAbsolutePath().toString());
     }
 
     @Override
