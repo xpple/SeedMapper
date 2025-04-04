@@ -16,14 +16,19 @@ import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
+import dev.xpple.seedmapper.util.CheckedSupplier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.TwoDTree;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -31,11 +36,14 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
-import static dev.xpple.seedmapper.command.arguments.StructureArgument.*;
+import static dev.xpple.seedmapper.command.arguments.StructurePredicateArgument.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -45,23 +53,58 @@ public class LocateCommand {
 
     private static final Long2ObjectMap<TwoDTree> cachedStrongholds = new Long2ObjectOpenHashMap<>();
 
+    private static final ExecutorService locatingExecutor = Executors.newCachedThreadPool();
+    private static Future<Integer> currentTask = null;
+
+    public static final Component STOP_TASK_COMPONENT = run(hover(format(Component.translatable("commands.exceptions.alreadyBusyLocating.stopTask"), ChatFormatting.UNDERLINE), base(Component.translatable("commands.exceptions.alreadyBusyLocating.clickToStop"))), () -> {
+        if (currentTask != null && !currentTask.isDone()) {
+            currentTask.cancel(true);
+            Minecraft.getInstance().player.displayClientMessage(Component.translatable("command.locate.taskStopped"), false);
+        } else {
+            Minecraft.getInstance().player.displayClientMessage(format(Component.translatable("command.locate.noTaskRunning"), ChatFormatting.RED), false);
+        }
+    });
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(locatingExecutor::shutdownNow));
+    }
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("sm:locate")
             .then(literal("biome")
                 .then(argument("biome", biome())
-                    .executes(ctx -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome")))))
+                    .executes(ctx -> schedule(() -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome"))))))
             .then(literal("feature")
                 .then(literal("structure")
-                    .then(argument("structure", structure())
-                        .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructure(ctx, "structure")))
+                    .then(argument("structure", structurePredicate())
+                        .executes(ctx -> schedule(() -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructurePredicate(ctx, "structure"))))
                         .then(argument("variantdata", bool())
-                            .executes(ctx -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructure(ctx, "structure"), getBool(ctx, "variantdata"))))))
+                            .executes(ctx -> schedule(() -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructurePredicate(ctx, "structure"), getBool(ctx, "variantdata")))))))
                 .then(literal("stronghold")
-                    .executes(ctx -> locateStronghold(CustomClientCommandSource.of(ctx.getSource()))))
+                    .executes(ctx -> schedule(() -> locateStronghold(CustomClientCommandSource.of(ctx.getSource())))))
                 .then(literal("slimechunk")
-                    .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
+                    .executes(ctx -> schedule(() -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))))
             .then(literal("spawn")
-                .executes(ctx -> locateSpawn(CustomClientCommandSource.of(ctx.getSource())))));
+                .executes(ctx -> schedule(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource()))))));
+    }
+
+    private static int schedule(CheckedSupplier<Integer, CommandSyntaxException> task) throws CommandSyntaxException {
+        if (currentTask != null && !currentTask.isDone()) {
+            throw CommandExceptions.ALREADY_BUSY_LOCATING_EXCEPTION.create();
+        }
+        currentTask = locatingExecutor.submit(() -> {
+            try {
+                return task.get();
+            } catch (CommandSyntaxException e) {
+                Player player = Minecraft.getInstance().player;
+                if (player != null) {
+                    Minecraft.getInstance().schedule(() -> player.displayClientMessage(format((MutableComponent) e.getRawMessage(), ChatFormatting.RED), false));
+                }
+                return 0;
+            }
+        });
+        Minecraft.getInstance().player.displayClientMessage(Component.translatable("command.locate.taskStarted"), false);
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
@@ -99,14 +142,15 @@ public class LocateCommand {
         }
     }
 
-    private static int locateStructure(CustomClientCommandSource source, int structure) throws CommandSyntaxException {
-        return locateStructure(source, structure, false);
+    private static int locateStructure(CustomClientCommandSource source, StructureAndPredicate structureAndPredicate) throws CommandSyntaxException {
+        return locateStructure(source, structureAndPredicate, false);
     }
 
-    private static int locateStructure(CustomClientCommandSource source, int structure, boolean variantData) throws CommandSyntaxException {
+    private static int locateStructure(CustomClientCommandSource source, StructureAndPredicate structureAndPredicate, boolean variantData) throws CommandSyntaxException {
         try (Arena arena = Arena.ofConfined()) {
             int version = source.getVersion();
             int dimension = source.getDimension();
+            int structure = structureAndPredicate.structure();
             MemorySegment structureConfig = StructureConfig.allocate(arena);
             int config = Cubiomes.getStructureConfig(structure, version, structureConfig);
             if (config == 0) {
@@ -125,13 +169,30 @@ public class LocateCommand {
             MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
             Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed);
 
-            StructureChecks.StructureCheck structureCheck = StructureChecks.get(structure);
+            // check if the structure will generate at a position
+            StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
+            // check if the structure at that location also matches our requirements
+            PiecesPredicate piecesPredicate = structureAndPredicate.piecesPredicate();
+            StructureChecks.PiecesPredicateCheck piecesPredicateCheck = StructureChecks.getPiecesPredicateCheck(structure);
+            VariantPredicate variantPredicate = structureAndPredicate.variantPredicate();
+            StructureChecks.VariantPredicateCheck variantPredicateCheck = StructureChecks.getVariantPredicateCheck(structure);
 
             BlockPos center = BlockPos.containing(source.getPosition());
             int regionSize = StructureConfig.regionSize(structureConfig) << 4;
             MemorySegment structurePos = Pos.allocate(arena);
+            MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
+            MemorySegment structureVariant = StructureVariant.allocate(arena);
             SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
-                return structureCheck.check(generator, surfaceNoise, x, z, structurePos);
+                if (!generationCheck.check(generator, surfaceNoise, x, z, structurePos)) {
+                    return false;
+                }
+                if (!piecesPredicateCheck.check(piecesPredicate, pieces, generator, structurePos)) {
+                    return false;
+                }
+                if (!variantPredicateCheck.check(variantPredicate, structureVariant, generator, structurePos)) {
+                    return false;
+                }
+                return true;
             });
             if (pos == null) {
                 throw CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE);
@@ -151,7 +212,6 @@ public class LocateCommand {
             ));
 
             if (structure == Cubiomes.End_City()) {
-                MemorySegment pieces = Piece.allocateArray(Cubiomes.END_CITY_PIECES_MAX(), arena);
                 int numPieces = Cubiomes.getEndCityPieces(pieces, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
                 IntStream.range(0, numPieces)
                     .mapToObj(i -> Piece.asSlice(pieces, i))
@@ -168,8 +228,6 @@ public class LocateCommand {
                             "%d %d %d".formatted(city.getX(), city.getY(), city.getZ())
                         )))));
             } else if (structure == Cubiomes.Fortress()) {
-                // 400 == max fortress pieces as specified in Cubiomes Viewer
-                MemorySegment pieces = Piece.allocateArray(400, arena);
                 int numPieces = Cubiomes.getFortressPieces(pieces, 400, version, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
                 IntStream.range(0, numPieces)
                     .mapToObj(i -> Piece.asSlice(pieces, i))
@@ -190,7 +248,6 @@ public class LocateCommand {
                 return Command.SINGLE_SUCCESS;
             }
             int biome = Cubiomes.getBiomeAt(generator, 4, Pos.x(structurePos) >> 2, 320 >> 2, Pos.z(structurePos) >> 2);
-            MemorySegment structureVariant = StructureVariant.allocate(arena);
             Cubiomes.getVariant(structureVariant, structure, version, seed, Pos.x(structurePos), Pos.z(structurePos), biome);
 
             List<Component> components = StructureVariantFeedbackHelper.get(structure, structureVariant);
