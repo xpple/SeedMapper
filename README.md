@@ -6,11 +6,11 @@ is not known, you could crack it using [SeedCrackerX](https://github.com/19Miste
 questions and support please head to my [Discord](https://discord.xpple.dev/).
 
 ## Installation
-1. Install the [Fabric Loader](https://fabricmc.net/use/)
-2. Download the [Fabric API](https://minecraft.curseforge.com/projects/fabric/) and move it to your mods folder
-   - Linux/Windows: `.minecraft/mods`
-   - Mac: `minecraft/mods`
-3. Download SeedMapper from the [releases page](https://modrinth.com/mod/seedmapper/versions/) and move it to your mods folder
+1. Install the [Fabric Loader](https://fabricmc.net/use/).
+2. Download the [Fabric API](https://minecraft.curseforge.com/projects/fabric/) and move it to your mods folder:
+   - Linux/Windows: `.minecraft/mods`.
+   - Mac: `minecraft/mods`.
+3. Download SeedMapper from the [releases page](https://modrinth.com/mod/seedmapper/versions/) and move it to your mods folder.
 
 ## IMPORTANT
 You need to have Java 23 installed to use this mod. I recommend to get Java 23 from [adoptium.net](https://adoptium.net/temurin/releases/?version=23). Next, configure your Minecraft launcher to use this release of Java.
@@ -30,9 +30,9 @@ Usage: `/sm:locate biome <biome>`
 Locates a given biome closest to the player. All biomes in all dimensions are supported.
 
 ### Structure locating
-Usage: `/sm:locate feature structure <structure>`
+Usage: `/sm:locate feature structure <structure>[<pieces>]{<variants>}`
 
-Locates a given structure closest to the player. All structures in all dimensions are supported. However, due to limitations in the underlying library, some structures (in particular desert pyramids, jungle temples and woodland mansions) may result in occasional false positives.
+Locates a given structure closest to the player. All structures in all dimensions are supported. However, due to limitations in the underlying library, some structures (in particular desert pyramids, jungle temples and woodland mansions) may result in occasional false positives. For more advanced querying you can also use piece and variant data to further restrict the search. For example, the following command will search for end cities with ships: `/sm:locate feature structure end_city[end_ship]`.
 
 ### Slime chunk locating
 Usage: `/sm:locate feature slimechunk`
