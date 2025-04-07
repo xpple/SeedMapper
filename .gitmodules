@@ -4,4 +4,4 @@
 [submodule "jextract"]
 	path = jextract
 	url = https://github.com/xpple/jextract
-	branch = no-platform-dependent-types
+	branch = fix-platform-dependent-types
