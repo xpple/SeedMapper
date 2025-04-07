@@ -45,5 +45,23 @@ Usage: `/sm:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotatio
 Executes a given command from a modified source. For example, modifying the source's position will execute the command 
 as if you were in that position. This command is really powerful, use it!
 
-## Inner workings
-This mod internally uses (a fork of) the C library [cubiomes](https://github.com/Cubitect/cubiomes) by Cubitect. Java bindings for this library were created with (also a fork of) [jextract](https://github.com/openjdk/jextract). The bindings use the [Foreign Function & Memory API](https://openjdk.org/jeps/454) from [Project Panama](https://openjdk.org/projects/panama/). See [CreateJavaBindingsTask.java](https://github.com/xpple/SeedMapper/blob/master/buildSrc/src/main/java/dev/xpple/seedmapper/buildscript/CreateJavaBindingsTask.java) for the Gradle task that automates this. To build the mod locally, first install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed. Then [build jextract](https://github.com/openjdk/jextract/?tab=readme-ov-file#building). The Java bindings will be created automatically when you build the mod.
+## Building from source
+This mod internally uses (a fork of) the C library [cubiomes](https://github.com/Cubitect/cubiomes) by Cubitect. Java bindings for this library were created with (also a fork of) [jextract](https://github.com/openjdk/jextract). The bindings use the [Foreign Function & Memory API](https://openjdk.org/jeps/454) from [Project Panama](https://openjdk.org/projects/panama/). See [CreateJavaBindingsTask.java](https://github.com/xpple/SeedMapper/blob/master/buildSrc/src/main/java/dev/xpple/seedmapper/buildscript/CreateJavaBindingsTask.java) for the Gradle task that automates this.
+
+To build the mod locally, follow these steps:
+
+1. Compile cubiomes to a shared library. The following is for Windows:
+   ```shell
+   gcc -shared -o src/main/resources/cubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+   ```
+2. Install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed.
+3. Compile jextract:
+   ```shell
+   cd jextract
+   ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
+   ```
+4. Build the mod:
+   ```shell
+   ./gradlew build
+   ```
+   You should find the Java bindings in `src/main/java/com/github/cubiomes`.
