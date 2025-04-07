@@ -58,8 +58,6 @@ dependencies {
 tasks.register('createJavaBindings', CreateJavaBindingsTask) {}
 compileJava.dependsOn('createJavaBindings')
 
-// TODO: run `createJavaBindings` on IDE import
-
 processResources {
 	def props = [version: project.mod_version, loader_version: project.fabric_loader_version]
 	inputs.properties props
