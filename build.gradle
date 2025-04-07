@@ -1,3 +1,5 @@
+import dev.xpple.seedmapper.buildscript.CreateJavaBindingsTask
+
 plugins {
 	id 'fabric-loom' version "${fabric_loom_version}"
 	id 'maven-publish'
@@ -52,6 +54,9 @@ dependencies {
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
+tasks.register('createJavaBindings', CreateJavaBindingsTask) {}
+compileJava.dependsOn('createJavaBindings')
 
 processResources {
 	def props = [version: project.mod_version, loader_version: project.fabric_loader_version]

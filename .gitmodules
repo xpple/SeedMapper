@@ -1,3 +1,7 @@
 [submodule "src/main/c"]
 	path = src/main/c
 	url = https://github.com/xpple/cubiomes
+[submodule "jextract"]
+	path = jextract
+	url = https://github.com/xpple/jextract
+	branch = fix-platform-dependent-types

@@ -45,22 +45,5 @@ Usage: `/sm:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotatio
 Executes a given command from a modified source. For example, modifying the source's position will execute the command 
 as if you were in that position. This command is really powerful, use it!
 
-## Building the mod locally
-This mod internally uses (a fork of) the C library [cubiomes](https://github.com/Cubitect/cubiomes) by Cubitect. Java bindings for this library were created with [jextract](https://github.com/openjdk/jextract). The bindings use the [Foreign Function & Memory API](https://openjdk.org/jeps/454) from [Project Panama](https://openjdk.org/projects/panama/).
-
-To build the mod from scratch, do the following:
-1. Install [LLVM 13.0.0](https://github.com/llvm/llvm-project/releases/tag/llvmorg-13.0.0)
-2. Clone `jextract` and build it:
-   ```shell
-   ./gradlew -Pjdk22_home=<jdk22_home_dir> -Pllvm_home=<libclang_dir> clean verify
-   ```
-   You will find the tool in the `build/jextract/bin/` folder. You must use Java 22 to build `jextract`!
-3. Compile cubiomes to a shared library (the following is for Windows):
-   ```
-   gcc -shared -o src/main/resources/libcubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
-   ```
-4. Run the following command:
-   ```shell
-   jextract --include-dir src/main/c --output src/main/java --target-package com.github.cubiomes --library src/main/resources/libcubiomes --header-class-name Cubiomes --use-system-load-library src/main/c/tables/btree18.h tables/btree19.h tables/btree20.h tables/btree192.h tables/btree21wd.h biomenoise.h biomes.h finders.h generator.h layers.h noise.h quadbase.h rng.h util.h
-   ```
-5. Delete any library loads in `Cubiomes_1.java`
+## Inner workings
+This mod internally uses (a fork of) the C library [cubiomes](https://github.com/Cubitect/cubiomes) by Cubitect. Java bindings for this library were created with (also a fork of) [jextract](https://github.com/openjdk/jextract). The bindings use the [Foreign Function & Memory API](https://openjdk.org/jeps/454) from [Project Panama](https://openjdk.org/projects/panama/). See [CreateJavaBindingsTask.java](https://github.com/xpple/SeedMapper/blob/master/buildSrc/src/main/java/dev/xpple/seedmapper/buildscript/CreateJavaBindingsTask.java) for the Gradle task that automates this. To build the mod locally, first install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed. Then [build jextract](https://github.com/openjdk/jextract/?tab=readme-ov-file#building). The Java bindings will be created automatically when you build the mod.
