@@ -73,22 +73,22 @@ public class LocateCommand {
         dispatcher.register(literal("sm:locate")
             .then(literal("biome")
                 .then(argument("biome", biome())
-                    .executes(ctx -> schedule(() -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome"))))))
+                    .executes(ctx -> submit(() -> locateBiome(CustomClientCommandSource.of(ctx.getSource()), getBiome(ctx, "biome"))))))
             .then(literal("feature")
                 .then(literal("structure")
                     .then(argument("structure", structurePredicate())
-                        .executes(ctx -> schedule(() -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructurePredicate(ctx, "structure"))))
+                        .executes(ctx -> submit(() -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructurePredicate(ctx, "structure"))))
                         .then(argument("variantdata", bool())
-                            .executes(ctx -> schedule(() -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructurePredicate(ctx, "structure"), getBool(ctx, "variantdata")))))))
+                            .executes(ctx -> submit(() -> locateStructure(CustomClientCommandSource.of(ctx.getSource()), getStructurePredicate(ctx, "structure"), getBool(ctx, "variantdata")))))))
                 .then(literal("stronghold")
-                    .executes(ctx -> schedule(() -> locateStronghold(CustomClientCommandSource.of(ctx.getSource())))))
+                    .executes(ctx -> submit(() -> locateStronghold(CustomClientCommandSource.of(ctx.getSource())))))
                 .then(literal("slimechunk")
-                    .executes(ctx -> schedule(() -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))))
+                    .executes(ctx -> submit(() -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))))
             .then(literal("spawn")
-                .executes(ctx -> schedule(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource()))))));
+                .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource()))))));
     }
 
-    private static int schedule(CheckedSupplier<Integer, CommandSyntaxException> task) throws CommandSyntaxException {
+    private static int submit(CheckedSupplier<Integer, CommandSyntaxException> task) throws CommandSyntaxException {
         if (currentTask != null && !currentTask.isDone()) {
             throw CommandExceptions.ALREADY_BUSY_LOCATING_EXCEPTION.create();
         }
