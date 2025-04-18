@@ -126,17 +126,14 @@ public class LocateCommand {
                 throw CommandExceptions.NO_BIOME_FOUND_EXCEPTION.create(BIOME_SEARCH_RADIUS);
             }
 
-            source.sendFeedback(chain(
-                highlight(Component.translatable("command.locate.biome.foundAt")),
-                highlight(" "),
+            source.sendFeedback(Component.translatable("command.locate.biome.foundAt",
                 copy(
                     hover(
                         accent("x: %d, z: %d".formatted(pos.x(), pos.z())),
                         base(Component.translatable("chat.copy.click"))
                     ),
                     "%d ~ %d".formatted(pos.x(), pos.z())
-                ),
-                highlight(".")
+                )
             ));
             return Command.SINGLE_SUCCESS;
         }
@@ -198,17 +195,14 @@ public class LocateCommand {
                 throw CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE);
             }
 
-            source.sendFeedback(chain(
-                highlight(Component.translatable("command.locate.feature.structure.foundAt")),
-                highlight(" "),
+            source.sendFeedback(Component.translatable("command.locate.feature.structure.foundAt",
                 copy(
                     hover(
                         accent("x: %d, z: %d".formatted(Pos.x(structurePos), Pos.z(structurePos))),
                         base(Component.translatable("chat.copy.click"))
                     ),
                     "%d ~ %d".formatted(Pos.x(structurePos), Pos.z(structurePos))
-                ),
-                highlight(".")
+                )
             ));
 
             if (structure == Cubiomes.End_City()) {
@@ -318,9 +312,7 @@ public class LocateCommand {
 
         int blockPosX = (pos.x() << 4) + 9;
         int blockPosZ = (pos.z() << 4) + 9;
-        source.sendFeedback(chain(
-            highlight(Component.translatable("command.locate.feature.slimeChunk.foundAt")),
-            highlight(" "),
+        source.sendFeedback(Component.translatable("command.locate.feature.slimeChunk.foundAt",
             copy(
                 hover(
                     accent("x: %d, z: %d".formatted(blockPosX, blockPosZ)),
@@ -328,17 +320,13 @@ public class LocateCommand {
                 ),
                 "%d ~ %d".formatted(blockPosX, blockPosZ)
             ),
-            highlight(" ("),
-            highlight(Component.translatable("command.locate.feature.slimeChunk.chunk")),
-            highlight(" "),
             copy(
                 hover(
                     accent(pos.x() + " " + pos.z()),
                     base(Component.translatable("command.locate.feature.slimeChunk.copyChunk"))
                 ),
                 "%d %d".formatted(pos.x(), pos.z())
-            ),
-            highlight(").")
+            )
         ));
         return Command.SINGLE_SUCCESS;
     }

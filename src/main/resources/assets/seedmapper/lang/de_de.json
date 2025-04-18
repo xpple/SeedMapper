@@ -1,13 +1,12 @@
 {
   "commands.exceptions.invalidDimension": "Ungültige Dimension.",
   "commands.exceptions.noBiomeFound": "Konnte Biom innerhalb von %s Blöcken nicht finden.",
-  "commands.exceptions.noStructureFound": "Konnte Konstruktion innerhalb von %d Blöcken nicht finden.",
+  "commands.exceptions.noStructureFound": "Konnte Konstruktion innerhalb von %s Blöcken nicht finden.",
 
-  "command.locate.biome.foundAt": "Biom gefunden bei",
-  "command.locate.feature.structure.foundAt": "Konstruktion gefunden bei",
+  "command.locate.biome.foundAt": "Biom gefunden bei %s.",
+  "command.locate.feature.structure.foundAt": "Konstruktion gefunden bei %s.",
   "command.locate.feature.slimeChunk.noneFound": "Konnte Slime Chunks innerhalb von 6400 Blöcken nicht finden.",
-  "command.locate.feature.slimeChunk.foundAt": "Slime Chunk gefunden bei",
+  "command.locate.feature.slimeChunk.foundAt": "Slime Chunk gefunden bei %s (Chunk %s).",
   "command.locate.feature.slimeChunk.copy": "Klicke um die Koordinaten von diesem Slime Chunk zu kopieren.",
-  "command.locate.feature.slimeChunk.chunk": "Chunk",
   "command.locate.feature.slimeChunk.copyChunk": "Klicke um die Chunk Koordinaten von diesem Slime Chunk zu kopieren."
 }

@@ -6,24 +6,15 @@
   "commands.exceptions.unknownBiome": "Неизвестный биом \"%s\".",
   "commands.exceptions.noBiomeFound": "Не удалось найти биом в пределах %s блоков.",
   "commands.exceptions.unknownStructure": "Неизвестная структура \"%s\".",
-  "commands.exceptions.noStructureFound": "Не удалось найти структуру в пределах %d блоков.",
+  "commands.exceptions.noStructureFound": "Не удалось найти структуру в пределах %s блоков.",
   "commands.exceptions.incompatibleParameters": "Несовместимые параметры.",
-  "commands.exceptions.unknownResolutionMethod": "Недопустимый метод разрешения \"%s\"."
+  "commands.exceptions.unknownResolutionMethod": "Недопустимый метод разрешения \"%s\".",
 
-  "command.checkSeed.using": "SeedMapper использует сид %d из",
-  "command.checkSeed.fromSavedSeeds": "списка \"Сохраненных Сидов\" в конфигурации",
-  "command.checkSeed.fromDatabase": "онлайн базы данных",
-  "command.checkSeed.fromSeed": "конфигурации \"Сида\"",
-  "command.checkSeed.fromSource": "команды /sm:source",
-
-  "command.locate.biome.foundAt": "Биом найден на",
-  "command.locate.feature.structure.foundAt": "Структура найдена на",
+  "command.locate.feature.structure.foundAt": "Структура найдена на %s.",
   "command.locate.feature.stronghold.success": "Крепость края найдена на %s.",
   "command.locate.feature.slimeChunk.noneFound": "Не удалось найти слайм чанк в пределах 6400 блоков.",
-  "command.locate.feature.slimeChunk.foundAt": "Слайм чанк найден на",
+  "command.locate.feature.slimeChunk.foundAt": "Слайм чанк найден на %s (чанк %s).",
   "command.locate.feature.slimeChunk.copy": "Нажмите для копирования координат слайм чанка",
-  "command.locate.feature.slimeChunk.chunk": "Чанк",
   "command.locate.feature.slimeChunk.copyChunk": "Нажмите для копирования координат чанка этого слайм чанка",
   "command.locate.spawn.success": "По оценкам, точка спауна находится на координатах %s."
 }
-

@@ -30,54 +30,42 @@ public class CheckSeedCommand {
         Pair<SeedResolutionArgument.SeedResolution.Method, Long> seedPair = source.getSeed();
         long seed = seedPair.getSecond();
         switch (seedPair.getFirst()) {
-            case COMMAND_SOURCE -> source.sendFeedback(chain(
-                Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed)),
-                highlight(" "),
+            case COMMAND_SOURCE -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed),
                 format(
                     suggest(
                         Component.translatable("command.checkSeed.fromSource"),
-                        String.format("/sm:source seeded %d run ", seed)
+                        "/sm:source seeded %d run ".formatted(seed)
                     ),
                     ChatFormatting.UNDERLINE
-                ),
-                highlight(".")
-            ));
-            case SEED_CONFIG -> source.sendFeedback(chain(
-                Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed)),
-                highlight(" "),
+                ))
+            );
+            case SEED_CONFIG -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed),
                 format(
                     file(
                         Component.translatable("command.checkSeed.fromSeed"),
                         modConfigPath.resolve("config.json").toAbsolutePath().toString()
                     ),
                     ChatFormatting.UNDERLINE
-                ),
-                highlight(".")
-            ));
-            case SAVED_SEEDS_CONFIG -> source.sendFeedback(chain(
-                Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed)),
-                highlight(" "),
+                ))
+            );
+            case SAVED_SEEDS_CONFIG -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed),
                 format(
                     file(
                         Component.translatable("command.checkSeed.fromSavedSeeds"),
                         modConfigPath.resolve("config.json").toAbsolutePath().toString()
                     ),
                     ChatFormatting.UNDERLINE
-                ),
-                highlight(".")
-            ));
-            case ONLINE_DATABASE -> source.sendFeedback(chain(
-                Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed)),
-                highlight(" "),
+                ))
+            );
+            case ONLINE_DATABASE -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed),
                 format(
                     url(
                         Component.translatable("command.checkSeed.fromDatabase"),
                         DATABASE_URL
                     ),
                     ChatFormatting.UNDERLINE
-                ),
-                highlight(".")
-            ));
+                ))
+            );
         }
         return Command.SINGLE_SUCCESS;
     }

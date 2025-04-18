@@ -1,19 +1,11 @@
 {
     "commands.exceptions.invalidDimension": "Dimensione non valida.",
     "commands.exceptions.noBiomeFound": "Impossibile individuare bioma entro %s blocchi.",
-    "commands.exceptions.noStructureFound": "Impossibile individuare struttura entro %d blocchi.",
+    "commands.exceptions.noStructureFound": "Impossibile individuare struttura entro %s blocchi.",
 
-    "command.checkSeed.using": "SeedMapper sta usando il seme %d da",
-    "command.checkSeed.fromSavedSeeds": "la configurazione \"SavedSeeds\"",
-    "command.checkSeed.fromDatabase": "la banca dati online",
-    "command.checkSeed.fromSeed": "la configurazione del seme \"Seed\"",
-    "command.checkSeed.fromSource": "il comando /sm:source",
-
-    "command.locate.biome.foundAt": "Bioma trovato a",
-    "command.locate.feature.structure.foundAt": "Struttura trovato in",
+    "command.locate.feature.structure.foundAt": "Struttura trovato in %s.",
     "command.locate.feature.slimeChunk.noneFound": "Impossibile individuare un slime chunk entro 6400 blocchi.",
-    "command.locate.feature.slimeChunk.foundAt": "Slime chunk trovato a",
+    "command.locate.feature.slimeChunk.foundAt": "Slime chunk trovato a %s (chunk %s).",
     "command.locate.feature.slimeChunk.copy": "Clicca per copiare le coordinate di questo slime chunk",
-    "command.locate.feature.slimeChunk.chunk": "Chunk",
     "command.locate.feature.slimeChunk.copyChunk": "Fai clic per copiare le coordinate del chunk di questo slime chunk"
 }

@@ -1,13 +1,11 @@
 {
   "commands.exceptions.invalidDimension": "Dimensi tidak valid.",
   "commands.exceptions.noBiomeFound": "Tidak bisa mencari bioma yang lebih dari %s blok.",
-  "commands.exceptions.noStructureFound": "Tidak bisa mencari struktur yang lebih dari %d blok.",
+  "commands.exceptions.noStructureFound": "Tidak bisa mencari struktur yang lebih dari %s blok.",
 
-  "command.locate.biome.foundAt": "Bioma ditemukan di",
-  "command.locate.feature.structure.foundAt": "Struktur ditemukan di",
+  "command.locate.feature.structure.foundAt": "Struktur ditemukan di %s.",
   "command.locate.feature.slimeChunk.noneFound": "Tidak bisa mencari bingkah geladir yang lebih dari 6400 blok.",
-  "command.locate.feature.slimeChunk.foundAt": "Bingkah geladir ditemukan di",
+  "command.locate.feature.slimeChunk.foundAt": "Bingkah geladir ditemukan di %s (bingkah %s).",
   "command.locate.feature.slimeChunk.copy": "Klik untuk menyalin kordinat dari %s",
-  "command.locate.feature.slimeChunk.chunk": "Bingkah",
-  "command.locate.feature.slimeChunk.copyChunk": "Klik untuk menyalin kordinat bingkah dari bingkah geladir ini",
+  "command.locate.feature.slimeChunk.copyChunk": "Klik untuk menyalin kordinat bingkah dari bingkah geladir ini"
 }
