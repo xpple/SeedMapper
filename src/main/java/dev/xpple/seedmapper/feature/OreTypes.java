@@ -38,6 +38,7 @@ public final class OreTypes {
         .add(Cubiomes.LowerGraniteOre())
         .add(Cubiomes.LowerRedstoneOre())
         .add(Cubiomes.MagmaOre())
+        .add(Cubiomes.MediumDiamondOre())
         .add(Cubiomes.MiddleIronOre())
         .add(Cubiomes.NetherGoldOre())
         .add(Cubiomes.NetherGravelOre())
