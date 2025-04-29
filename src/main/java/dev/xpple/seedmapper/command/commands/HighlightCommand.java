@@ -6,39 +6,27 @@ import com.github.cubiomes.OreConfig;
 import com.github.cubiomes.Pos3;
 import com.github.cubiomes.Pos3List;
 import com.github.cubiomes.SurfaceNoise;
-import com.google.common.cache.CacheBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.OreTypes;
-import dev.xpple.seedmapper.render.NoDepthLayer;
+import dev.xpple.seedmapper.render.RenderManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.phys.AABB;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.time.Duration;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static dev.xpple.seedmapper.command.arguments.BlockArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class HighlightCommand {
-
-    private static final Set<Pair<AABB, Integer>> blockRenders = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<Pair<AABB, Integer>, Boolean>build().asMap());
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("sm:highlight")
@@ -105,7 +93,7 @@ public class HighlightCommand {
             int colour = blockPair.getSecond();
             generatedOres.forEach((pos, oreBlock) -> {
                 if (oreBlock == block) {
-                    blockRenders.add(Pair.of(new AABB(pos), colour));
+                    RenderManager.drawBox(pos, colour);
                     count[0]++;
                 }
             });
@@ -113,30 +101,5 @@ public class HighlightCommand {
             source.sendFeedback(Component.translatable("command.highlight.success", count[0]));
             return count[0];
         }
-    }
-
-    public static void registerEvents() {
-        WorldRenderEvents.AFTER_ENTITIES.register(HighlightCommand::renderOres);
-    }
-
-    private static void renderOres(WorldRenderContext context) {
-        blockRenders.forEach(boxColourPair -> {
-            AABB box = boxColourPair.getFirst();
-            AABB relativeBox = box.move(context.camera().getPosition().scale(-1));
-            PoseStack stack = context.matrixStack();
-            stack.pushPose();
-            int colour = boxColourPair.getSecond();
-            float red = ARGB.redFloat(colour);
-            float green = ARGB.greenFloat(colour);
-            float blue = ARGB.blueFloat(colour);
-            ShapeRenderer.renderLineBox(stack, context.consumers().getBuffer(NoDepthLayer.LINES_NO_DEPTH_LAYER), relativeBox, red, green, blue, 1);
-            stack.popPose();
-        });
-    }
-
-    public static int clearRenders() {
-        int size = blockRenders.size();
-        blockRenders.clear();
-        return size;
     }
 }

@@ -667,7 +667,6 @@
 
 --include-function biome2str
 --include-function biomesToImage
---include-function free_ptr
 --include-function initBiomeColors
 --include-function initBiomeTypeColors
 --include-function loadSavedSeeds
