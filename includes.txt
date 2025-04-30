@@ -315,6 +315,8 @@
 --include-constant DIORITE
 --include-constant DIRT
 --include-constant DeepslateOre
+--include-constant DeltasGoldOre
+--include-constant DeltasQuartzOre
 --include-constant Desert_Pyramid
 --include-constant Desert_Well
 --include-constant DiamondOre
@@ -378,10 +380,10 @@
 --include-constant NETHER_QUARTZ_ORE
 --include-constant NetherGoldOre
 --include-constant NetherGravelOre
+--include-constant NetherQuartzOre
 --include-constant Ocean_Ruin
 --include-constant Outpost
 --include-constant PIECE_COUNT
---include-constant QuartzOre
 --include-constant REDSTONE_ORE
 --include-constant RedstoneOre
 --include-constant Ruined_Portal
