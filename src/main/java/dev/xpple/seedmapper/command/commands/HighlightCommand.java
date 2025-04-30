@@ -12,6 +12,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.OreTypes;
 import dev.xpple.seedmapper.render.RenderManager;
+import dev.xpple.seedmapper.util.SpiralLoop;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -23,6 +24,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BlockArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -32,10 +34,16 @@ public class HighlightCommand {
         dispatcher.register(literal("sm:highlight")
             .then(literal("block")
                 .then(argument("block", block())
-                    .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block"))))));
+                    .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block")))
+                    .then(argument("chunks", integer(0))
+                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block"), getInteger(ctx, "chunks")))))));
     }
 
     private static int highlightBlock(CustomClientCommandSource source, Pair<Integer, Integer> blockPair) throws CommandSyntaxException {
+        return highlightBlock(source, blockPair, 0);
+    }
+
+    private static int highlightBlock(CustomClientCommandSource source, Pair<Integer, Integer> blockPair, int chunkRange) throws CommandSyntaxException {
         int version = source.getVersion();
         int dimension = source.getDimension();
         long seed = source.getSeed().getSecond();
@@ -46,48 +54,51 @@ public class HighlightCommand {
             MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
             Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed);
 
-            ChunkPos chunk = new ChunkPos(BlockPos.containing(source.getPosition()));
-            int biome = Cubiomes.getBiomeForOreGen(generator, chunk.x, chunk.z);
-
-            // TODO: multiple chunks
+            ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
             Map<BlockPos, Integer> generatedOres = new HashMap<>();
-            OreTypes.ORE_TYPES.stream()
-                .<MemorySegment>mapMulti((oreType, consumer) -> {
-                    MemorySegment oreConfig = OreConfig.allocate(arena);
-                    if (Cubiomes.getOreConfig(oreType, version, biome, oreConfig) != 0) {
-                        consumer.accept(oreConfig);
-                    }
-                })
-                .filter(oreConfig -> Cubiomes.isViableOreBiome(version, OreConfig.oreType(oreConfig), biome) != 0)
-                .sorted(Comparator.comparingInt(OreConfig::index))
-                .forEachOrdered(oreConfig -> {
-                    int oreBlock = OreConfig.oreBlock(oreConfig);
-                    int numReplaceBlocks = OreConfig.numReplaceBlocks(oreConfig);
-                    MemorySegment replaceBlocks = OreConfig.replaceBlocks(oreConfig);
-                    MemorySegment pos3List = Cubiomes.generateOres(arena, generator, surfaceNoise, oreConfig, chunk.x, chunk.z);
-                    int size = Pos3List.size(pos3List);
-                    MemorySegment pos3s = Pos3List.pos3s(pos3List);
-                    for (int i = 0; i < size; i++) {
-                        MemorySegment pos3 = Pos3.asSlice(pos3s, i);
-                        BlockPos pos = new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3));
-                        Integer previouslyGeneratedOre = generatedOres.get(pos);
-                        if (previouslyGeneratedOre != null) {
-                            boolean contains = false;
-                            for (int j = 0; j < numReplaceBlocks; j++) {
-                                int replaceBlock = replaceBlocks.getAtIndex(Cubiomes.C_INT, j);
-                                if (replaceBlock == previouslyGeneratedOre) {
-                                    contains = true;
-                                    break;
+
+            SpiralLoop.spiral(center.x, center.z, chunkRange, (chunkX, chunkZ) -> {
+                // TODO: check biome at multiple altitudes (technically should check 3x3 square of chunks)
+                int biome = Cubiomes.getBiomeForOreGen(generator, chunkX, chunkZ);
+                OreTypes.ORE_TYPES.stream()
+                    .filter(oreType -> Cubiomes.isViableOreBiome(version, oreType, biome) != 0)
+                    .<MemorySegment>mapMulti((oreType, consumer) -> {
+                        MemorySegment oreConfig = OreConfig.allocate(arena);
+                        if (Cubiomes.getOreConfig(oreType, version, biome, oreConfig) != 0) {
+                            consumer.accept(oreConfig);
+                        }
+                    })
+                    .sorted(Comparator.comparingInt(OreConfig::index))
+                    .forEachOrdered(oreConfig -> {
+                        int oreBlock = OreConfig.oreBlock(oreConfig);
+                        int numReplaceBlocks = OreConfig.numReplaceBlocks(oreConfig);
+                        MemorySegment replaceBlocks = OreConfig.replaceBlocks(oreConfig);
+                        MemorySegment pos3List = Cubiomes.generateOres(arena, generator, surfaceNoise, oreConfig, chunkX, chunkZ);
+                        int size = Pos3List.size(pos3List);
+                        MemorySegment pos3s = Pos3List.pos3s(pos3List);
+                        for (int i = 0; i < size; i++) {
+                            MemorySegment pos3 = Pos3.asSlice(pos3s, i);
+                            BlockPos pos = new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3));
+                            Integer previouslyGeneratedOre = generatedOres.get(pos);
+                            if (previouslyGeneratedOre != null) {
+                                boolean contains = false;
+                                for (int j = 0; j < numReplaceBlocks; j++) {
+                                    int replaceBlock = replaceBlocks.getAtIndex(Cubiomes.C_INT, j);
+                                    if (replaceBlock == previouslyGeneratedOre) {
+                                        contains = true;
+                                        break;
+                                    }
+                                }
+                                if (!contains) {
+                                    continue;
                                 }
                             }
-                            if (!contains) {
-                                continue;
-                            }
+                            generatedOres.put(pos, oreBlock);
                         }
-                        generatedOres.put(pos, oreBlock);
-                    }
-                    Cubiomes.freePos3List(pos3List);
-                });
+                        Cubiomes.freePos3List(pos3List);
+                    });
+                return false;
+            });
             int[] count = {0};
             int block = blockPair.getFirst();
             int colour = blockPair.getSecond();
