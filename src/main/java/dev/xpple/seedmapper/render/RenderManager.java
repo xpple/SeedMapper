@@ -7,6 +7,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
 
 import java.time.Duration;
@@ -60,6 +62,10 @@ public final class RenderManager {
 
     private static void renderLines(WorldRenderContext context) {
         lines.forEach(line -> {
+            ChunkPos chunkPos = new ChunkPos(BlockPos.containing(line.start()));
+            if (context.world().getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false) == null) {
+                return;
+            }
             Line relativeLine = line.offset(context.camera().getPosition().scale(-1));
             Vec3 start = relativeLine.start();
             Vec3 end = relativeLine.end();
