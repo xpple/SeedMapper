@@ -59,7 +59,8 @@
   "command.locate.feature.slimeChunk.copyChunk": "Click to copy chunk coordinates of this slime chunk",
   "command.locate.spawn.success": "Spawn point estimated to be at %s.",
 
-  "command.highlight.success": "Highlighted %s ores.",
+  "command.highlight.chunkSuccess": "Highlighted %s ores in chunk %s.",
+  "command.highlight.success": "Highlighted %s ores in total!",
 
   "command.clear.success": "Cleared all renders."
 }

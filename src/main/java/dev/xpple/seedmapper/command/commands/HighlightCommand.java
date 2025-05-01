@@ -27,6 +27,8 @@ import java.util.Map;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BlockArgument.*;
+import static dev.xpple.seedmapper.thread.ThreadingHelper.*;
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class HighlightCommand {
@@ -36,8 +38,8 @@ public class HighlightCommand {
             .then(literal("block")
                 .then(argument("block", block())
                     .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block")))
-                    .then(argument("chunks", integer(0))
-                        .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block"), getInteger(ctx, "chunks")))))));
+                    .then(argument("chunks", integer(0, 20))
+                        .executes(ctx -> submit(() -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block"), getInteger(ctx, "chunks"))))))));
     }
 
     private static int highlightBlock(CustomClientCommandSource source, Pair<Integer, Integer> blockPair) throws CommandSyntaxException {
@@ -56,9 +58,10 @@ public class HighlightCommand {
             Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed);
 
             ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
-            Map<BlockPos, Integer> generatedOres = new HashMap<>();
 
+            int[] count = {0};
             SpiralLoop.spiral(center.x, center.z, chunkRange, (chunkX, chunkZ) -> {
+                Map<BlockPos, Integer> generatedOres = new HashMap<>();
                 // TODO: check biome at multiple altitudes (technically should check 3x3 square of chunks)
                 int biome = Cubiomes.getBiomeForOreGen(generator, chunkX, chunkZ);
                 OreTypes.ORE_TYPES.stream()
@@ -98,18 +101,30 @@ public class HighlightCommand {
                         }
                         Cubiomes.freePos3List(pos3List);
                     });
+
+                int block = blockPair.getFirst();
+                int colour = blockPair.getSecond();
+                List<BlockPos> blockOres = generatedOres.entrySet().stream()
+                    .filter(entry -> entry.getValue() == block)
+                    .map(Map.Entry::getKey)
+                    .toList();
+                count[0] += blockOres.size();
+                source.getClient().schedule(() -> {
+                    RenderManager.drawBoxes(blockOres, colour);
+                    source.sendFeedback(Component.translatable("command.highlight.chunkSuccess", accent(String.valueOf(blockOres.size())), copy(
+                        hover(
+                            accent("%d %d".formatted(chunkX, chunkZ)),
+                            base(Component.translatable("chat.copy.click"))
+                        ),
+                        "%d %d".formatted(chunkX, chunkZ)
+                    )));
+                });
+
                 return false;
             });
-            int block = blockPair.getFirst();
-            int colour = blockPair.getSecond();
-            List<BlockPos> blockOres = generatedOres.entrySet().stream()
-                .filter(entry -> entry.getValue() == block)
-                .map(Map.Entry::getKey)
-                .toList();
-            RenderManager.drawBoxes(blockOres, colour);
 
-            source.sendFeedback(Component.translatable("command.highlight.success", blockOres.size()));
-            return blockOres.size();
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.success", accent(String.valueOf(count[0])))));
+            return count[0];
         }
     }
 }

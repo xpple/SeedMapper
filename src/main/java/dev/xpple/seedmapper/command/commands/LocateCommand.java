@@ -16,19 +16,14 @@ import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
-import dev.xpple.seedmapper.util.CheckedSupplier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.TwoDTree;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -36,14 +31,12 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
 import static dev.xpple.seedmapper.command.arguments.StructurePredicateArgument.*;
+import static dev.xpple.seedmapper.thread.ThreadingHelper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -52,22 +45,6 @@ public class LocateCommand {
     private static final int BIOME_SEARCH_RADIUS = 6400;
 
     private static final Long2ObjectMap<TwoDTree> cachedStrongholds = new Long2ObjectOpenHashMap<>();
-
-    private static final ExecutorService locatingExecutor = Executors.newCachedThreadPool();
-    private static Future<Integer> currentTask = null;
-
-    public static final Component STOP_TASK_COMPONENT = run(hover(format(Component.translatable("commands.exceptions.alreadyBusyLocating.stopTask"), ChatFormatting.UNDERLINE), base(Component.translatable("commands.exceptions.alreadyBusyLocating.clickToStop"))), () -> {
-        if (currentTask != null && !currentTask.isDone()) {
-            currentTask.cancel(true);
-            Minecraft.getInstance().player.displayClientMessage(Component.translatable("command.locate.taskStopped"), false);
-        } else {
-            Minecraft.getInstance().player.displayClientMessage(format(Component.translatable("command.locate.noTaskRunning"), ChatFormatting.RED), false);
-        }
-    });
-
-    static {
-        Runtime.getRuntime().addShutdownHook(new Thread(locatingExecutor::shutdownNow));
-    }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("sm:locate")
@@ -86,25 +63,6 @@ public class LocateCommand {
                     .executes(ctx -> submit(() -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))))
             .then(literal("spawn")
                 .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource()))))));
-    }
-
-    private static int submit(CheckedSupplier<Integer, CommandSyntaxException> task) throws CommandSyntaxException {
-        if (currentTask != null && !currentTask.isDone()) {
-            throw CommandExceptions.ALREADY_BUSY_LOCATING_EXCEPTION.create();
-        }
-        currentTask = locatingExecutor.submit(() -> {
-            try {
-                return task.get();
-            } catch (CommandSyntaxException e) {
-                Player player = Minecraft.getInstance().player;
-                if (player != null) {
-                    Minecraft.getInstance().schedule(() -> player.displayClientMessage(format((MutableComponent) e.getRawMessage(), ChatFormatting.RED), false));
-                }
-                return 0;
-            }
-        });
-        Minecraft.getInstance().player.displayClientMessage(Component.translatable("command.locate.taskStarted"), false);
-        return Command.SINGLE_SUCCESS;
     }
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
