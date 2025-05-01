@@ -61,5 +61,5 @@
 
   "command.highlight.success": "Highlighted %s ores.",
 
-  "command.clear.success": "Cleared %s renders."
+  "command.clear.success": "Cleared all renders."
 }

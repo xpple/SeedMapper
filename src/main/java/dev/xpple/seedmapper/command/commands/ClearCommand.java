@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.command.commands;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.render.RenderManager;
@@ -15,8 +16,8 @@ public class ClearCommand {
     }
 
     private static int clear(CustomClientCommandSource source) {
-        int count = RenderManager.clear();
-        source.sendFeedback(Component.translatable("command.clear.success", count));
-        return count;
+        RenderManager.clear();
+        source.sendFeedback(Component.translatable("command.clear.success"));
+        return Command.SINGLE_SUCCESS;
     }
 }

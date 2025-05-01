@@ -7,13 +7,13 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public final class RenderManager {
 
@@ -21,38 +21,34 @@ public final class RenderManager {
     }
 
     private static final Set<Line> lines = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<Line, Boolean>build().asMap());;
-    private static final AtomicInteger boxCount = new AtomicInteger(0);
 
-    public static void drawBox(BlockPos pos, int colour) {
-        drawBox(new AABB(pos), colour);
+    public static void drawBoxes(List<BlockPos> posBatch, int colour) {
+        Set<Line> lines = new HashSet<>();
+
+        posBatch.forEach(pos -> {
+            Vec3 minPosition = new Vec3(pos);
+            Vec3 size = new Vec3(1, 1, 1);
+            addLine(new Line(minPosition, minPosition.add(size.x(), 0, 0), colour), lines);
+            addLine(new Line(minPosition, minPosition.add(0, size.y(), 0), colour), lines);
+            addLine(new Line(minPosition, minPosition.add(0, 0, size.z()), colour), lines);
+            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), 0, 0), colour), lines);
+            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), size.y(), size.z()), colour), lines);
+            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(0, 0, size.z()), colour), lines);
+            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), 0, 0), colour), lines);
+            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(0, size.y(), 0), colour), lines);
+            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), size.y(), size.z()), colour), lines);
+            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, 0, size.z()), colour), lines);
+            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, size.y(), 0), colour), lines);
+            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(size.x(), size.y(), size.z()), colour), lines);
+        });
+        RenderManager.lines.addAll(lines);
     }
 
-    public static void drawBox(AABB box, int colour) {
-        boxCount.getAndIncrement();
-        Vec3 minPosition = box.getMinPosition();
-        Vec3 size = box.getMaxPosition().subtract(box.getMinPosition());
-
-        addLine(new Line(minPosition, minPosition.add(size.x(), 0, 0), colour));
-        addLine(new Line(minPosition, minPosition.add(0, size.y(), 0), colour));
-        addLine(new Line(minPosition, minPosition.add(0, 0, size.z()), colour));
-        addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), 0, 0), colour));
-        addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), size.y(), size.z()), colour));
-        addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(0, 0, size.z()), colour));
-        addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), 0, 0), colour));
-        addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(0, size.y(), 0), colour));
-        addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), size.y(), size.z()), colour));
-        addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, 0, size.z()), colour));
-        addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, size.y(), 0), colour));
-        addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(size.x(), size.y(), size.z()), colour));
-    }
-
-    public static int clear() {
-        int size = boxCount.getAndSet(0);
+    public static void clear() {
         lines.clear();
-        return size;
     }
 
-    private static void addLine(Line line) {
+    private static void addLine(Line line, Set<Line> lines) {
         if (!lines.add(line)) {
             lines.remove(line);
         }

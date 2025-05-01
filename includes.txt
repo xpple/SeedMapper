@@ -673,6 +673,7 @@
 --include-function initBiomeTypeColors
 --include-function loadSavedSeeds
 --include-function mc2str
+--include-function ore2str
 --include-function parseBiomeColors
 --include-function savePPM
 --include-function str2mc

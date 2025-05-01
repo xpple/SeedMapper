@@ -22,6 +22,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
@@ -99,18 +100,16 @@ public class HighlightCommand {
                     });
                 return false;
             });
-            int[] count = {0};
             int block = blockPair.getFirst();
             int colour = blockPair.getSecond();
-            generatedOres.forEach((pos, oreBlock) -> {
-                if (oreBlock == block) {
-                    RenderManager.drawBox(pos, colour);
-                    count[0]++;
-                }
-            });
+            List<BlockPos> blockOres = generatedOres.entrySet().stream()
+                .filter(entry -> entry.getValue() == block)
+                .map(Map.Entry::getKey)
+                .toList();
+            RenderManager.drawBoxes(blockOres, colour);
 
-            source.sendFeedback(Component.translatable("command.highlight.success", count[0]));
-            return count[0];
+            source.sendFeedback(Component.translatable("command.highlight.success", blockOres.size()));
+            return blockOres.size();
         }
     }
 }
