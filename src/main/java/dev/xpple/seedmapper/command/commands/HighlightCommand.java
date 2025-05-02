@@ -10,6 +10,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
+import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.OreTypes;
 import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.util.SpiralLoop;
@@ -17,6 +18,8 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -61,6 +64,8 @@ public class HighlightCommand {
 
             int[] count = {0};
             SpiralLoop.spiral(center.x, center.z, chunkRange, (chunkX, chunkZ) -> {
+                LevelChunk chunk = source.getWorld().getChunkSource().getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
+                boolean doAirCheck = Configs.OreAirCheck && chunk != null;
                 Map<BlockPos, Integer> generatedOres = new HashMap<>();
                 // TODO: check biome at multiple altitudes (technically should check 3x3 square of chunks)
                 int biome = Cubiomes.getBiomeForOreGen(generator, chunkX, chunkZ);
@@ -83,6 +88,9 @@ public class HighlightCommand {
                         for (int i = 0; i < size; i++) {
                             MemorySegment pos3 = Pos3.asSlice(pos3s, i);
                             BlockPos pos = new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3));
+                            if (doAirCheck && chunk.getBlockState(pos).isAir()) {
+                                continue;
+                            }
                             Integer previouslyGeneratedOre = generatedOres.get(pos);
                             if (previouslyGeneratedOre != null) {
                                 boolean contains = false;
