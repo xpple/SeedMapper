@@ -60,13 +60,16 @@ To build the mod locally, follow these steps:
    gcc -shared -o src/main/resources/cubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
    ```
 3. Install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed.
-4. Compile jextract:
+4. Compile jextract. Again, the following is for Windows:
    ```shell
    cd jextract
-   ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
+   ./gradlew --stacktrace -Pjdk_home="$env:JAVA_HOME" -Pllvm_home="$env:LLVM_HOME" clean verify
+   cd ../
    ```
 5. Build the mod:
    ```shell
    ./gradlew build
    ```
    You should find the Java bindings in `src/main/java/com/github/cubiomes`.
+
+Lastly, you can also consult the [GitHub Actions workflow file](https://github.com/xpple/SeedMapper/blob/master/.github/workflows/build.yml), which contains build instructions for each major OS.
