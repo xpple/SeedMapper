@@ -4,10 +4,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.command.commands.CheckSeedCommand;
+import dev.xpple.seedmapper.command.commands.ClearCommand;
+import dev.xpple.seedmapper.command.commands.HighlightCommand;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.config.SeedResolutionAdapter;
+import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.util.SeedDatabaseHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -49,11 +52,14 @@ public class SeedMapper implements ClientModInitializer {
         SeedDatabaseHelper.fetchSeeds();
 
         ClientCommandRegistrationCallback.EVENT.register(SeedMapper::registerCommands);
+        RenderManager.registerEvents();
     }
 
     private static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         LocateCommand.register(dispatcher);
         SourceCommand.register(dispatcher);
         CheckSeedCommand.register(dispatcher);
+        HighlightCommand.register(dispatcher);
+        ClearCommand.register(dispatcher);
     }
 }
