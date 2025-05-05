@@ -57,7 +57,7 @@ public final class RenderManager {
     }
 
     public static void registerEvents() {
-        WorldRenderEvents.AFTER_ENTITIES.register(RenderManager::renderLines);
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(RenderManager::renderLines);
     }
 
     private static void renderLines(WorldRenderContext context) {
