@@ -35,7 +35,7 @@ Usage: `/sm:locate feature structure <structure>[<pieces>]{<variants>}`.
 Locates a given structure closest to the player. All structures in all dimensions are supported. However, due to limitations in the underlying library, some structures (in particular desert pyramids, jungle temples and woodland mansions) may result in occasional false positives. For more advanced querying you can also use piece and variant data to further restrict the search. For example, the following command will search for end cities with ships: `/sm:locate feature structure end_city[end_ship]`.
 
 ### Ore highlighting
-Usage: `/sm:highlight block <block>`.
+Usage: `/sm:highlight block <block> [chunks]`.
 
 Highlights the specified block in the world. All versions from 1.13 onwards are supported. Due to high dependence on the [`OCEAN_FLOOR_WG`](https://minecraft.wiki/w/Heightmap#OCEAN_FLOOR_WG) heightmap, coal, copper and emerald ore locations may be off.
 
