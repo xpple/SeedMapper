@@ -50,17 +50,22 @@ This mod internally uses (a fork of) the C library [cubiomes](https://github.com
 
 To build the mod locally, follow these steps:
 
-1. Compile cubiomes to a shared library. The following is for Windows:
+1. Clone the repository:
+   ```shell
+   git clone --recurse-submodules https://github.com/xpple/SeedMapper
+   cd SeedMapper
+   ```
+2. Compile cubiomes to a shared library. The following is for Windows:
    ```shell
    gcc -shared -o src/main/resources/cubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
    ```
-2. Install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed.
-3. Compile jextract:
+3. Install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed.
+4. Compile jextract:
    ```shell
    cd jextract
    ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
    ```
-4. Build the mod:
+5. Build the mod:
    ```shell
    ./gradlew build
    ```
