@@ -3,6 +3,7 @@ package dev.xpple.seedmapper;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
+import dev.xpple.seedmapper.command.commands.BuildInfoCommand;
 import dev.xpple.seedmapper.command.commands.CheckSeedCommand;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
@@ -55,5 +56,6 @@ public class SeedMapper implements ClientModInitializer {
         LocateCommand.register(dispatcher);
         SourceCommand.register(dispatcher);
         CheckSeedCommand.register(dispatcher);
+        BuildInfoCommand.register(dispatcher);
     }
 }

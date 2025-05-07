@@ -56,5 +56,7 @@
   "command.locate.feature.slimeChunk.foundAt": "Slime chunk found at %s (chunk %s).",
   "command.locate.feature.slimeChunk.copy": "Click to copy coordinates of this slime chunk",
   "command.locate.feature.slimeChunk.copyChunk": "Click to copy chunk coordinates of this slime chunk",
-  "command.locate.spawn.success": "Spawn point estimated to be at %s."
+  "command.locate.spawn.success": "Spawn point estimated to be at %s.",
+
+  "command.buildInfo.success": "Running SeedMapper on version %s (%s@{%s})."
 }
