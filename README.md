@@ -53,14 +53,19 @@ as if you were in that position. This command is really powerful, use it!
 ## Building from source
 This mod internally uses (a fork of) the C library [cubiomes](https://github.com/Cubitect/cubiomes) by Cubitect. Java bindings for this library were created with (also a fork of) [jextract](https://github.com/openjdk/jextract). The bindings use the [Foreign Function & Memory API](https://openjdk.org/jeps/454) from [Project Panama](https://openjdk.org/projects/panama/). See [CreateJavaBindingsTask.java](https://github.com/xpple/SeedMapper/blob/master/buildSrc/src/main/java/dev/xpple/seedmapper/buildscript/CreateJavaBindingsTask.java) for the Gradle task that automates this.
 
-To build the mod locally, follow these steps:
+### Windows
+
+- Install [Build Tools for Visual Studio 2022](https://aka.ms/vs/17/release/vs_BuildTools.exe): Desktop development with C++
+- Install [LLVM](https://github.com/llvm/llvm-project/releases) 13.0.0 or above then add to enviroment variables as LLVM_HOME
+- Install [gcc](https://sourceforge.net/projects/gcc-win64/) then add to enviroment variables Path
+
+Then follow these steps:
 
 1. Compile cubiomes to a shared library. The following is for Windows:
    ```shell
    gcc -shared -o src/main/resources/cubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
    ```
-2. Install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed.
-3. Compile jextract:
+2. Compile jextract:
    ```shell
    cd jextract
    ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
@@ -69,4 +74,49 @@ To build the mod locally, follow these steps:
    ```shell
    ./gradlew build
    ```
-   You should find the Java bindings in `src/main/java/com/github/cubiomes`.
+
+### MacOS
+
+Then follow these steps:
+
+1. Compile cubiomes to a shared library. The following is for Windows:
+   ```shell
+   gcc -shared -o src/main/resources/libcubiomes.dylib src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+   ```
+2. Compile jextract:
+   ```shell
+   cd jextract
+   ```
+   ```shell
+   ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
+   ```
+4. Build the mod:
+   ```shell
+   cd ../
+   ```
+   ```shell
+   ./gradlew build
+   ```
+
+### Linux
+
+Then follow these steps:
+
+1. Compile cubiomes to a shared library. The following is for Windows:
+   ```shell
+   gcc -shared -o src/main/resources/libcubiomes.os src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+   ```
+2. Compile jextract:
+   ```shell
+   cd jextract
+   ```
+   ```shell
+   ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
+   ```
+4. Build the mod:
+   ```shell
+   cd ../
+   ```
+   ```shell
+   ./gradlew build
+   ```
