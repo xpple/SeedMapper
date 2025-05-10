@@ -58,6 +58,7 @@ This mod internally uses (a fork of) the C library [cubiomes](https://github.com
 - Install [Build Tools for Visual Studio 2022](https://aka.ms/vs/17/release/vs_BuildTools.exe): Desktop development with C++
 - Install [LLVM](https://github.com/llvm/llvm-project/releases) 13.0.0 or above then add to enviroment variables as LLVM_HOME
 - Install [gcc](https://sourceforge.net/projects/gcc-win64/) then add to enviroment variables Path
+- Install [Java](https://adoptium.net/temurin/releases/?os=windows&version=23)
 
 Then follow these steps:
 
@@ -65,7 +66,7 @@ Then follow these steps:
    ```shell
    gcc -shared -o src/main/resources/cubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
    ```
-2. Compile jextract:
+2. Compile jextract: remember to setup enviroment path
    ```shell
    cd jextract
    ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
@@ -79,6 +80,30 @@ Then follow these steps:
    ```
 
 ### MacOS
+Setup enviroment
+
+1. If you dont have [homebrew](https://brew.sh/), install it first then run this command:
+   ```shell
+   brew install gcc llvm
+   ```
+
+2. Install java use [sdkman](https://sdkman.io/): choose any JAVA 23 or above
+
+2. JAVA_HOME:
+   ```shell
+   export JAVA_HOME="path/to/your/java"
+   ```
+   ```shell
+      # example for java from sdk
+      export JAVA_HOME="~/.sdkman/candidates/java/current"
+   ```
+
+3. LLVM_HOME:
+   ```shell
+   unset LLVM_HOME
+   export LLVM_HOME=$(brew --prefix llvm)
+   ```
+
 
 Then follow these steps:
 
@@ -101,14 +126,18 @@ Then follow these steps:
    ./gradlew build
    ```
 
-### Linux
-  Not Working Now
+### Linux 
+
+<p align="center"><span style="color:red; text-transform: uppercase;"><strong>Not Working Now</strong></span></p>
+<p align="center">(I'm try to find the way to build it on linux)</p>
+
+Setup enviroment:
    ```
    sudo apt update
-   sudo apt install llvm-17 libclang-17-dev
+   sudo apt install llvm-18 libclang-18-dev
    sudo apt install build-essential clang cmake
-   export JAVA_HOME="/home/quan/.sdkman/candidates/java/current"
-   export LLVM_HOME=/usr/lib/llvm-17
+   export JAVA_HOME="/home/user/.sdkman/candidates/java/current"
+   export LLVM_HOME=/usr/lib/llvm-18
    export LD_LIBRARY_PATH=$LLVM_HOME/lib:$LD_LIBRARY_PATH
    ```
 
@@ -125,7 +154,8 @@ Then follow these steps:
    ```shell
    ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
    ```
-4. Build the mod:
+   `-Djava.library.path=$LLVM_HOME/path/to/libclang`
+3. Build the mod:
    ```shell
    cd ../
    ```
