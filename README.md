@@ -72,6 +72,9 @@ Then follow these steps:
    ```
 4. Build the mod:
    ```shell
+   cd ../
+   ```
+   ```shell
    ./gradlew build
    ```
 
@@ -99,12 +102,21 @@ Then follow these steps:
    ```
 
 ### Linux
+  Not Working Now
+   ```
+   sudo apt update
+   sudo apt install llvm-17 libclang-17-dev
+   sudo apt install build-essential clang cmake
+   export JAVA_HOME="/home/quan/.sdkman/candidates/java/current"
+   export LLVM_HOME=/usr/lib/llvm-17
+   export LD_LIBRARY_PATH=$LLVM_HOME/lib:$LD_LIBRARY_PATH
+   ```
 
 Then follow these steps:
 
-1. Compile cubiomes to a shared library. The following is for Windows:
+1. Compile cubiomes to a shared library:
    ```shell
-   gcc -shared -o src/main/resources/libcubiomes.os src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+   gcc -shared -o src/main/resources/libcubiomes.so src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3 -fPIC
    ```
 2. Compile jextract:
    ```shell
