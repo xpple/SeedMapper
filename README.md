@@ -53,20 +53,112 @@ as if you were in that position. This command is really powerful, use it!
 ## Building from source
 This mod internally uses (a fork of) the C library [cubiomes](https://github.com/Cubitect/cubiomes) by Cubitect. Java bindings for this library were created with (also a fork of) [jextract](https://github.com/openjdk/jextract). The bindings use the [Foreign Function & Memory API](https://openjdk.org/jeps/454) from [Project Panama](https://openjdk.org/projects/panama/). See [CreateJavaBindingsTask.java](https://github.com/xpple/SeedMapper/blob/master/buildSrc/src/main/java/dev/xpple/seedmapper/buildscript/CreateJavaBindingsTask.java) for the Gradle task that automates this.
 
-To build the mod locally, follow these steps:
+### Windows
+
+- Install [Build Tools for Visual Studio 2022](https://aka.ms/vs/17/release/vs_BuildTools.exe): Desktop development with C++
+- Install [LLVM](https://github.com/llvm/llvm-project/releases) 13.0.0 or above then add to enviroment variables as LLVM_HOME
+- Install [gcc](https://sourceforge.net/projects/gcc-win64/) then add to enviroment variables Path
+- Install [Java](https://adoptium.net/temurin/releases/?os=windows&version=23)
+
+Then follow these steps:
 
 1. Compile cubiomes to a shared library. The following is for Windows:
    ```shell
    gcc -shared -o src/main/resources/cubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
    ```
-2. Install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed.
-3. Compile jextract:
+2. Compile jextract: remember to setup enviroment path
    ```shell
    cd jextract
    ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
    ```
 4. Build the mod:
    ```shell
+   cd ../
+   ```
+   ```shell
    ./gradlew build
    ```
-   You should find the Java bindings in `src/main/java/com/github/cubiomes`.
+
+### MacOS
+Setup enviroment
+
+1. If you dont have [homebrew](https://brew.sh/), install it first then run this command:
+   ```shell
+   brew install gcc llvm
+   ```
+
+2. Install java use [sdkman](https://sdkman.io/): choose any JAVA 23 or above
+
+2. JAVA_HOME:
+   ```shell
+   export JAVA_HOME="path/to/your/java"
+   ```
+   ```shell
+      # example for java from sdk
+      export JAVA_HOME="~/.sdkman/candidates/java/current"
+   ```
+
+3. LLVM_HOME:
+   ```shell
+   unset LLVM_HOME
+   export LLVM_HOME=$(brew --prefix llvm)
+   ```
+
+
+Then follow these steps:
+
+1. Compile cubiomes to a shared library. The following is for Windows:
+   ```shell
+   gcc -shared -o src/main/resources/libcubiomes.dylib src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+   ```
+2. Compile jextract:
+   ```shell
+   cd jextract
+   ```
+   ```shell
+   ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
+   ```
+4. Build the mod:
+   ```shell
+   cd ../
+   ```
+   ```shell
+   ./gradlew build
+   ```
+
+### Linux 
+
+<p align="center"><span style="color:red; text-transform: uppercase;"><strong>Not Working Now</strong></span></p>
+<p align="center">(I'm try to find the way to build it on linux)</p>
+
+Setup enviroment:
+   ```
+   sudo apt update
+   sudo apt install llvm-18 libclang-18-dev
+   sudo apt install build-essential clang cmake
+   export JAVA_HOME="/home/user/.sdkman/candidates/java/current"
+   export LLVM_HOME=/usr/lib/llvm-18
+   export LD_LIBRARY_PATH=$LLVM_HOME/lib:$LD_LIBRARY_PATH
+   ```
+
+Then follow these steps:
+
+1. Compile cubiomes to a shared library:
+   ```shell
+   gcc -shared -o src/main/resources/libcubiomes.so src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3 -fPIC
+   ```
+2. Compile jextract:
+   ```shell
+   cd jextract
+   ```
+   ```shell
+   ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=$LLVM_HOME clean verify
+   ```
+   `-Djava.library.path=$LLVM_HOME/path/to/libclang`
+3. Build the mod:
+   ```shell
+   cd ../
+   ```
+   ```shell
+   ./gradlew build
+   ```
