@@ -62,5 +62,7 @@
   "command.highlight.chunkSuccess": "Highlighted %s ores in chunk %s.",
   "command.highlight.success": "Highlighted %s ores in total!",
 
-  "command.clear.success": "Cleared all renders."
+  "command.clear.success": "Cleared all renders.",
+
+  "command.buildInfo.success": "Running SeedMapper on version %s (%s@{%s})."
 }
