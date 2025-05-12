@@ -21,4 +21,7 @@ public class Configs {
 
     @Config
     public static SeedResolutionArgument.SeedResolution SeedResolutionOrder = new SeedResolutionArgument.SeedResolution();
+
+    @Config(comment = "Whether or not SeedMapper should use in-game air checks to invalidate ore positions.")
+    public static boolean OreAirCheck = true;
 }
