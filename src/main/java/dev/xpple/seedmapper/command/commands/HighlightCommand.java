@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BlockArgument.*;
@@ -67,13 +68,23 @@ public class HighlightCommand {
                 LevelChunk chunk = source.getWorld().getChunkSource().getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
                 boolean doAirCheck = Configs.OreAirCheck && chunk != null;
                 Map<BlockPos, Integer> generatedOres = new HashMap<>();
-                // TODO: check biome at multiple altitudes (technically should check 3x3 square of chunks)
-                int biome = Cubiomes.getBiomeForOreGen(generator, chunkX, chunkZ);
+                List<Integer> biomes;
+                if (version <= Cubiomes.MC_1_17()) {
+                    biomes = List.of(Cubiomes.getBiomeForOreGen(generator, chunkX, chunkZ, 0));
+                } else {
+                    // check certain Y-coordinates that matter for ore generation
+                    // Minecraft checks _all_ biomes in a 3x3 square of chunks, which is not necessary
+                    biomes = IntStream.of(-30, 64, 120)
+                        .map(y -> Cubiomes.getBiomeForOreGen(generator, chunkX, chunkZ, y))
+                        .boxed()
+                        .toList();
+                }
                 OreTypes.ORE_TYPES.stream()
-                    .filter(oreType -> Cubiomes.isViableOreBiome(version, oreType, biome) != 0)
+                    .filter(oreType -> biomes.stream().anyMatch(biome -> Cubiomes.isViableOreBiome(version, oreType, biome) != 0))
                     .<MemorySegment>mapMulti((oreType, consumer) -> {
                         MemorySegment oreConfig = OreConfig.allocate(arena);
-                        if (Cubiomes.getOreConfig(oreType, version, biome, oreConfig) != 0) {
+                        // just do biomes.getFirst() because in 1.17 there is only one, and in 1.18 it does not matter
+                        if (Cubiomes.getOreConfig(oreType, version, biomes.getFirst(), oreConfig) != 0) {
                             consumer.accept(oreConfig);
                         }
                     })
