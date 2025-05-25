@@ -14,11 +14,11 @@ import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.OreTypes;
 import dev.xpple.seedmapper.render.RenderManager;
+import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -139,13 +139,7 @@ public class HighlightCommand {
                 count[0] += blockOres.size();
                 source.getClient().schedule(() -> {
                     RenderManager.drawBoxes(blockOres, colour);
-                    source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), copy(
-                        hover(
-                            accent("%d %d".formatted(chunkX, chunkZ)),
-                            base(Component.translatable("chat.copy.click"))
-                        ),
-                        "%d %d".formatted(chunkX, chunkZ)
-                    )));
+                    source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ComponentUtils.formatXZ(chunkX, chunkZ)));
                 });
 
                 return false;
@@ -204,19 +198,13 @@ public class HighlightCommand {
                     int colour = BLOCKS.values().stream().filter(pair -> Objects.equals(block, pair.getFirst())).findAny().orElseThrow().getSecond();
                     RenderManager.drawBoxes(positions, colour);
                     if (block == Cubiomes.RAW_COPPER_BLOCK() || block == Cubiomes.RAW_IRON_BLOCK()) {
-                        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", ComponentUtils.formatList(positions.stream().map(pos ->
-                            copy(
-                                hover(
-                                    accent("x: %d, y: %d, z: %d".formatted(pos.getX(), pos.getY(), pos.getZ())),
-                                    base(Component.translatable("chat.copy.click"))
-                                ),
-                                "%d %d %d".formatted(pos.getX(), pos.getY(), pos.getZ())
-                            )
-                        ).toList(), Component.literal(", ")))));
+                        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", join(Component.literal(", "), positions.stream().map(pos -> {
+                            return ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ());
+                        })))));
                     }
                 });
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.success", count[0])));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.success", accent(String.valueOf(count[0])))));
             return count[0];
         }
     }

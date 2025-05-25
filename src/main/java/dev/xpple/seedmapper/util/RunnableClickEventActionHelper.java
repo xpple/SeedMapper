@@ -19,8 +19,7 @@ public final class RunnableClickEventActionHelper {
         int randomInt;
         do {
             randomInt = random.nextInt();
-        } while (randomInt < 0 || randomInt > WritableBookContent.MAX_PAGES);
-        runnables.put(randomInt, code);
+        } while ((randomInt >= 0 && randomInt < WritableBookContent.MAX_PAGES) || runnables.putIfAbsent(randomInt, code) != null);
         return randomInt;
     }
 }
