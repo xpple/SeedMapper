@@ -13,6 +13,7 @@
   "commands.exceptions.unknownVariantKey": "Unknown structure variant key \"%s\".",
   "commands.exceptions.unknownVariantValue": "Unknown structure variant value \"%s\".",
   "commands.exceptions.noStructureFound": "Couldn't locate structure within %s blocks.",
+  "commands.exceptions.noOreVeinFound": "Couldn't locate an ore vein within %s chunks.",
   "commands.exceptions.unknownOre": "Unknown block \"%s\".",
   "commands.exceptions.incompatibleParameters": "Incompatible parameters.",
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\".",
@@ -58,6 +59,8 @@
   "command.locate.feature.slimeChunk.copy": "Click to copy coordinates of this slime chunk",
   "command.locate.feature.slimeChunk.copyChunk": "Click to copy chunk coordinates of this slime chunk",
   "command.locate.spawn.success": "Spawn point estimated to be at %s.",
+  "command.locate.oreVein.foundAt": "Ore vein found at %s.",
+  "command.locate.oreVein.copy": "Click to copy coordinates of this ore vein",
 
   "command.highlight.block.chunkSuccess": "Highlighted %s ores in chunk %s.",
   "command.highlight.block.success": "Highlighted %s ores in total!",

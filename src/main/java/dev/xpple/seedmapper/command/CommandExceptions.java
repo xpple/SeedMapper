@@ -22,6 +22,7 @@ public final class CommandExceptions {
     public static final SimpleCommandExceptionType NO_SEED_AVAILABLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.noSeedAvailable"));
     public static final DynamicCommandExceptionType NO_BIOME_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.noBiomeFound", arg));
     public static final DynamicCommandExceptionType NO_STRUCTURE_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.noStructureFound", arg));
+    public static final DynamicCommandExceptionType NO_ORE_VEIN_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.noOreVeinFound", arg));
     public static final SimpleCommandExceptionType INVALID_DIMENSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.invalidDimension"));
     public static final SimpleCommandExceptionType INCOMPATIBLE_PARAMETERS_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.incompatibleParameters"));
 }

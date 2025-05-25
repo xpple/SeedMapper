@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
+import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Piece;
 import com.github.cubiomes.Pos;
 import com.github.cubiomes.Pos3;
@@ -26,6 +27,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 import java.lang.foreign.Arena;
@@ -62,7 +64,9 @@ public class LocateCommand {
                 .then(literal("slimechunk")
                     .executes(ctx -> submit(() -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))))
             .then(literal("spawn")
-                .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource()))))));
+                .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource())))))
+            .then(literal("orevein")
+                .executes(ctx -> submit(() -> locateOreVein(CustomClientCommandSource.of(ctx.getSource()))))));
     }
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
@@ -305,6 +309,50 @@ public class LocateCommand {
                     "%d ~ %d".formatted(Pos.x(pos), Pos.z(pos))
                 )))
             ));
+            return Command.SINGLE_SUCCESS;
+        }
+    }
+
+    private static int locateOreVein(CustomClientCommandSource source) throws CommandSyntaxException {
+        int version = source.getVersion();
+        long seed = source.getSeed().getSecond();
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment parameters = OreVeinParameters.allocate(arena);
+            Cubiomes.initOreVeinNoise(parameters, seed, version);
+            ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
+            BlockPos[] pos = {null};
+            SpiralLoop.spiral(center.x, center.z, 6400, (chunkX, chunkZ) -> {
+                int minX = chunkX << 4;
+                int minZ = chunkZ << 4;
+
+                for (int x = 0; x < LevelChunkSection.SECTION_WIDTH; x++) {
+                    for (int z = 0; z < LevelChunkSection.SECTION_WIDTH; z++) {
+                        for (int y = -60; y <= 50; y++) {
+                            int block = Cubiomes.getOreVeinBlockAt(minX + x, y, minZ + z, parameters);
+                            if (block == -1) {
+                                continue;
+                            }
+                            pos[0] = new BlockPos(minX + x, y, minZ + z);
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            });
+            if (pos[0] == null) {
+                throw CommandExceptions.NO_ORE_VEIN_FOUND_EXCEPTION.create(6400);
+            }
+
+            source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt",
+                copy(
+                    hover(
+                        accent("x: %d, y: %d, z: %d".formatted(pos[0].getX(), pos[0].getY(), pos[0].getZ())),
+                        base(Component.translatable("command.locate.oreVein.copy"))
+                    ),
+                    "%d %d %d".formatted(pos[0].getX(), pos[0].getY(), pos[0].getZ())
+                )
+            ));
+
             return Command.SINGLE_SUCCESS;
         }
     }
