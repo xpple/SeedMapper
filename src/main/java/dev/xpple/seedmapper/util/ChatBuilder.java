@@ -7,9 +7,8 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 public final class ChatBuilder {
 
@@ -24,27 +23,36 @@ public final class ChatBuilder {
     private static final ChatFormatting ERROR = ChatFormatting.RED;
 
     public static MutableComponent chain(Component... components) {
-        return chain(Arrays.asList(components));
+        return chain(List.of(components));
     }
 
-    public static MutableComponent chain(List<Component> components) {
-        return ComponentUtils.appendAll(Component.empty(), components);
+    public static MutableComponent chain(List<? extends Component> components) {
+        MutableComponent result = Component.empty();
+        components.forEach(result::append);
+        return result;
     }
 
     public static MutableComponent join(Component delimiter, Component... components) {
-        return join(delimiter, Arrays.asList(components));
+        return join(delimiter, List.of(components));
     }
 
-    public static MutableComponent join(Component delimiter, List<Component> components) {
-        List<Component> elements = new ArrayList<>();
+    public static MutableComponent join(Component delimiter, Stream<? extends Component> components) {
+        return join(delimiter, components.toList());
+    }
 
-        for (int i = 0; i < components.size(); i++) {
-            elements.add(components.get(i));
-
-            if (i != components.size() - 1) elements.add(delimiter);
+    public static MutableComponent join(Component delimiter, List<? extends Component> components) {
+        MutableComponent result = Component.empty();
+        if (components.isEmpty()) {
+            return result;
+        }
+        if (components.size() == 1) {
+            return result.append(components.getFirst());
+        }
+        for (int i = 0; i < components.size() - 1; i++) {
+            result.append(components.get(i)).append(delimiter);
         }
 
-        return chain(elements);
+        return result.append(components.getLast());
     }
 
     public static MutableComponent format(MutableComponent component, ChatFormatting... formatting) {

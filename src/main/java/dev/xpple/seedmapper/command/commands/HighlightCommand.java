@@ -3,22 +3,26 @@ package dev.xpple.seedmapper.command.commands;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.OreConfig;
+import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Pos3;
 import com.github.cubiomes.Pos3List;
 import com.github.cubiomes.SurfaceNoise;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
+import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.OreTypes;
 import dev.xpple.seedmapper.render.RenderManager;
+import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.lang.foreign.Arena;
@@ -27,6 +31,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
@@ -43,7 +49,11 @@ public class HighlightCommand {
                 .then(argument("block", block())
                     .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block")))
                     .then(argument("chunks", integer(0, 20))
-                        .executes(ctx -> submit(() -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block"), getInteger(ctx, "chunks"))))))));
+                        .executes(ctx -> submit(() -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block"), getInteger(ctx, "chunks")))))))
+            .then(literal("orevein")
+                .executes(ctx -> submit(() -> highlightOreVein(CustomClientCommandSource.of(ctx.getSource()))))
+                .then(argument("chunks", integer(0, 20))
+                    .executes(ctx -> submit(() -> highlightOreVein(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks")))))));
     }
 
     private static int highlightBlock(CustomClientCommandSource source, Pair<Integer, Integer> blockPair) throws CommandSyntaxException {
@@ -130,19 +140,74 @@ public class HighlightCommand {
                 count[0] += blockOres.size();
                 source.getClient().schedule(() -> {
                     RenderManager.drawBoxes(blockOres, colour);
-                    source.sendFeedback(Component.translatable("command.highlight.chunkSuccess", accent(String.valueOf(blockOres.size())), copy(
-                        hover(
-                            accent("%d %d".formatted(chunkX, chunkZ)),
-                            base(Component.translatable("chat.copy.click"))
-                        ),
-                        "%d %d".formatted(chunkX, chunkZ)
-                    )));
+                    source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ComponentUtils.formatXZ(chunkX, chunkZ)));
                 });
 
                 return false;
             });
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.success", accent(String.valueOf(count[0])))));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.block.success", accent(String.valueOf(count[0])))));
+            return count[0];
+        }
+    }
+
+    private static int highlightOreVein(CustomClientCommandSource source) throws CommandSyntaxException {
+        return highlightOreVein(source, 0);
+    }
+
+    private static int highlightOreVein(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
+        int version = source.getVersion();
+        long seed = source.getSeed().getSecond();
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment parameters = OreVeinParameters.allocate(arena);
+            if (Cubiomes.initOreVeinNoise(parameters, seed, version) == 0) {
+                throw CommandExceptions.ORE_VEIN_WRONG_VERSION_EXCEPTION.create();
+            }
+
+            ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
+            Map<BlockPos, Integer> blocks = new HashMap<>();
+            SpiralLoop.spiral(center.x, center.z, chunkRange, (chunkX, chunkZ) -> {
+                LevelChunk chunk = source.getWorld().getChunkSource().getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
+                boolean doAirCheck = Configs.OreAirCheck && chunk != null;
+                int minX = chunkX << 4;
+                int minZ = chunkZ << 4;
+
+                for (int x = 0; x < LevelChunkSection.SECTION_WIDTH; x++) {
+                    for (int z = 0; z < LevelChunkSection.SECTION_WIDTH; z++) {
+                        for (int y = -60; y <= 50; y++) {
+                            int block = Cubiomes.getOreVeinBlockAt(minX + x, y, minZ + z, parameters);
+                            if (block == -1) {
+                                continue;
+                            }
+                            BlockPos pos = new BlockPos(minX + x, y, minZ + z);
+                            if (doAirCheck && chunk.getBlockState(pos).isAir()) {
+                                continue;
+                            }
+                            blocks.put(pos, block);
+                        }
+                    }
+                }
+                return false;
+            });
+
+            int[] count = {0};
+            blocks.entrySet().stream()
+                .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())))
+                .forEach((block, positions) -> {
+                    if (block == Cubiomes.GRANITE() || block == Cubiomes.TUFF()) {
+                        return;
+                    }
+                    count[0] += positions.size();
+                    int colour = BLOCKS.values().stream().filter(pair -> Objects.equals(block, pair.getFirst())).findAny().orElseThrow().getSecond();
+                    RenderManager.drawBoxes(positions, colour);
+                    if (block == Cubiomes.RAW_COPPER_BLOCK() || block == Cubiomes.RAW_IRON_BLOCK()) {
+                        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", join(Component.literal(", "), positions.stream().map(pos -> {
+                            return ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ());
+                        })))));
+                    }
+                });
+
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.success", accent(String.valueOf(count[0])))));
             return count[0];
         }
     }

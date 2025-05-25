@@ -12,9 +12,9 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public final class RenderManager {
@@ -24,7 +24,7 @@ public final class RenderManager {
 
     private static final Set<Line> lines = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<Line, Boolean>build().asMap());;
 
-    public static void drawBoxes(List<BlockPos> posBatch, int colour) {
+    public static void drawBoxes(Collection<BlockPos> posBatch, int colour) {
         Set<Line> lines = new HashSet<>();
 
         posBatch.forEach(pos -> {

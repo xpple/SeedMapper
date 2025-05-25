@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
+import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Piece;
 import com.github.cubiomes.Pos;
 import com.github.cubiomes.Pos3;
@@ -16,6 +17,7 @@ import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
+import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.TwoDTree;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -26,6 +28,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 import java.lang.foreign.Arena;
@@ -37,7 +40,6 @@ import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
 import static dev.xpple.seedmapper.command.arguments.StructurePredicateArgument.*;
 import static dev.xpple.seedmapper.thread.ThreadingHelper.*;
-import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class LocateCommand {
@@ -62,7 +64,9 @@ public class LocateCommand {
                 .then(literal("slimechunk")
                     .executes(ctx -> submit(() -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))))
             .then(literal("spawn")
-                .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource()))))));
+                .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource())))))
+            .then(literal("orevein")
+                .executes(ctx -> submit(() -> locateOreVein(CustomClientCommandSource.of(ctx.getSource()))))));
     }
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
@@ -84,15 +88,7 @@ public class LocateCommand {
                 throw CommandExceptions.NO_BIOME_FOUND_EXCEPTION.create(BIOME_SEARCH_RADIUS);
             }
 
-            source.sendFeedback(Component.translatable("command.locate.biome.foundAt",
-                copy(
-                    hover(
-                        accent("x: %d, z: %d".formatted(pos.x(), pos.z())),
-                        base(Component.translatable("chat.copy.click"))
-                    ),
-                    "%d ~ %d".formatted(pos.x(), pos.z())
-                )
-            ));
+            source.sendFeedback(Component.translatable("command.locate.biome.foundAt", ComponentUtils.formatXZ(pos.x(), pos.z())));
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -153,15 +149,7 @@ public class LocateCommand {
                 throw CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE);
             }
 
-            source.sendFeedback(Component.translatable("command.locate.feature.structure.foundAt",
-                copy(
-                    hover(
-                        accent("x: %d, z: %d".formatted(Pos.x(structurePos), Pos.z(structurePos))),
-                        base(Component.translatable("chat.copy.click"))
-                    ),
-                    "%d ~ %d".formatted(Pos.x(structurePos), Pos.z(structurePos))
-                )
-            ));
+            source.sendFeedback(Component.translatable("command.locate.feature.structure.foundAt", ComponentUtils.formatXZ(Pos.x(structurePos), Pos.z(structurePos))));
 
             if (structure == Cubiomes.End_City()) {
                 int numPieces = Cubiomes.getEndCityPieces(pieces, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
@@ -171,14 +159,8 @@ public class LocateCommand {
                     .findAny() // only one ship per end city
                     .map(Piece::pos)
                     .map(city -> new BlockPos(Pos3.x(city), Pos3.y(city) + 60, Pos3.z(city)))
-                    .ifPresent(city -> source.sendFeedback(Component.literal(" - ").append(Component.translatable("command.locate.feature.structure.endCity.hasShip",
-                        copy(
-                            hover(
-                                accent("x: %d, y: %d, z: %d".formatted(city.getX(), city.getY(), city.getZ())),
-                                base(Component.translatable("chat.copy.click"))
-                            ),
-                            "%d %d %d".formatted(city.getX(), city.getY(), city.getZ())
-                        )))));
+                    .ifPresent(city -> source.sendFeedback(Component.literal(" - ")
+                        .append(Component.translatable("command.locate.feature.structure.endCity.hasShip", ComponentUtils.formatXYZ(city.getX(), city.getY(), city.getZ())))));
             } else if (structure == Cubiomes.Fortress()) {
                 int numPieces = Cubiomes.getFortressPieces(pieces, 400, version, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
                 IntStream.range(0, numPieces)
@@ -186,14 +168,8 @@ public class LocateCommand {
                     .filter(piece -> Piece.type(piece) == Cubiomes.BRIDGE_SPAWNER())
                     .map(Piece::pos)
                     .map(monsterThrone -> new BlockPos(Pos3.x(monsterThrone), Pos3.y(monsterThrone) + 10, Pos3.z(monsterThrone)))
-                    .forEach(spawnerPos -> source.sendFeedback(Component.literal(" - ").append(Component.translatable("command.locate.feature.structure.fortress.hasSpawner",
-                        copy(
-                            hover(
-                                accent("x: %d, y: %d, z: %d".formatted(spawnerPos.getX(), spawnerPos.getY(), spawnerPos.getZ())),
-                                base(Component.translatable("chat.copy.click"))
-                            ),
-                            "%d %d %d".formatted(spawnerPos.getX(), spawnerPos.getY(), spawnerPos.getZ())
-                        )))));
+                    .forEach(spawnerPos -> source.sendFeedback(Component.literal(" - ")
+                        .append(Component.translatable("command.locate.feature.structure.fortress.hasSpawner", ComponentUtils.formatXYZ(spawnerPos.getX(), spawnerPos.getY(), spawnerPos.getZ())))));
             }
 
             if (!variantData) {
@@ -244,15 +220,7 @@ public class LocateCommand {
 
         BlockPos pos = tree.nearestTo(position.atY(0));
 
-        source.sendFeedback(chain(
-            highlight(Component.translatable("command.locate.feature.stronghold.success", copy(
-                hover(
-                    accent("x: %d, z: %d".formatted(pos.getX(), pos.getZ())),
-                    base(Component.translatable("chat.copy.click"))
-                ),
-                "%d ~ %d".formatted(pos.getX(), pos.getZ())
-            )))
-        ));
+        source.sendFeedback(Component.translatable("command.locate.feature.stronghold.success", ComponentUtils.formatXZ(pos.getX(), pos.getZ())));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -271,20 +239,8 @@ public class LocateCommand {
         int blockPosX = (pos.x() << 4) + 9;
         int blockPosZ = (pos.z() << 4) + 9;
         source.sendFeedback(Component.translatable("command.locate.feature.slimeChunk.foundAt",
-            copy(
-                hover(
-                    accent("x: %d, z: %d".formatted(blockPosX, blockPosZ)),
-                    base(Component.translatable("command.locate.feature.slimeChunk.copy"))
-                ),
-                "%d ~ %d".formatted(blockPosX, blockPosZ)
-            ),
-            copy(
-                hover(
-                    accent(pos.x() + " " + pos.z()),
-                    base(Component.translatable("command.locate.feature.slimeChunk.copyChunk"))
-                ),
-                "%d %d".formatted(pos.x(), pos.z())
-            )
+            ComponentUtils.formatXZ(blockPosX, blockPosZ, Component.translatable("command.locate.feature.slimeChunk.copy")),
+            ComponentUtils.formatXZ(pos.x(), pos.z(), Component.translatable("command.locate.feature.slimeChunk.copyChunk"))
         ));
         return Command.SINGLE_SUCCESS;
     }
@@ -296,15 +252,45 @@ public class LocateCommand {
             Cubiomes.applySeed(generator, source.getDimension(), source.getSeed().getSecond());
             MemorySegment pos = Cubiomes.getSpawn(arena, generator);
 
-            source.sendFeedback(chain(
-                highlight(Component.translatable("command.locate.spawn.success", copy(
-                    hover(
-                        accent("x: %d, z: %d".formatted(Pos.x(pos), Pos.z(pos))),
-                        base(Component.translatable("chat.copy.click"))
-                    ),
-                    "%d ~ %d".formatted(Pos.x(pos), Pos.z(pos))
-                )))
-            ));
+            source.sendFeedback(Component.translatable("command.locate.spawn.success", ComponentUtils.formatXZ(Pos.x(pos), Pos.z(pos))));
+            return Command.SINGLE_SUCCESS;
+        }
+    }
+
+    private static int locateOreVein(CustomClientCommandSource source) throws CommandSyntaxException {
+        int version = source.getVersion();
+        long seed = source.getSeed().getSecond();
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment parameters = OreVeinParameters.allocate(arena);
+            if (Cubiomes.initOreVeinNoise(parameters, seed, version) == 0) {
+                throw CommandExceptions.ORE_VEIN_WRONG_VERSION_EXCEPTION.create();
+            }
+            ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
+            BlockPos[] pos = {null};
+            SpiralLoop.spiral(center.x, center.z, 6400, (chunkX, chunkZ) -> {
+                int minX = chunkX << 4;
+                int minZ = chunkZ << 4;
+
+                for (int x = 0; x < LevelChunkSection.SECTION_WIDTH; x++) {
+                    for (int z = 0; z < LevelChunkSection.SECTION_WIDTH; z++) {
+                        for (int y = -60; y <= 50; y++) {
+                            int block = Cubiomes.getOreVeinBlockAt(minX + x, y, minZ + z, parameters);
+                            if (block == -1) {
+                                continue;
+                            }
+                            pos[0] = new BlockPos(minX + x, y, minZ + z);
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            });
+            if (pos[0] == null) {
+                throw CommandExceptions.NO_ORE_VEIN_FOUND_EXCEPTION.create(6400);
+            }
+
+            source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt", ComponentUtils.formatXYZ(pos[0].getX(), pos[0].getY(), pos[0].getZ(), Component.translatable("command.locate.oreVein.copy"))));
+
             return Command.SINGLE_SUCCESS;
         }
     }

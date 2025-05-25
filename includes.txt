@@ -310,6 +310,7 @@
 --include-constant ClayOre
 --include-constant CoalOre
 --include-constant CopperOre
+--include-constant CopperVein
 --include-constant DEEPSLATE
 --include-constant DIAMOND_ORE
 --include-constant DIORITE
@@ -353,6 +354,7 @@
 --include-constant IRON_ORE
 --include-constant Igloo
 --include-constant IronOre
+--include-constant IronVein
 --include-constant Jungle_Pyramid
 --include-constant Jungle_Temple
 --include-constant LAPIS_ORE
@@ -384,6 +386,8 @@
 --include-constant Ocean_Ruin
 --include-constant Outpost
 --include-constant PIECE_COUNT
+--include-constant RAW_COPPER_BLOCK
+--include-constant RAW_IRON_BLOCK
 --include-constant REDSTONE_ORE
 --include-constant RedstoneOre
 --include-constant Ruined_Portal
@@ -446,6 +450,8 @@
 --include-function getMineshafts
 --include-function getOreConfig
 --include-function getOreYPos
+--include-function getOreVeinBlockAt
+--include-function getOreVeinConfig
 --include-function getParaDescent
 --include-function getParaRange
 --include-function getPossibleBiomesForLimits
@@ -454,6 +460,7 @@
 --include-function getStructurePos
 --include-function getVariant
 --include-function initFirstStronghold
+--include-function initOreVeinNoise
 --include-function isEndChunkEmpty
 --include-function isViableEndCityTerrain
 --include-function isViableFeatureBiome
@@ -468,6 +475,8 @@
 --include-struct BiomeFilter
 --include-struct EndIsland
 --include-struct OreConfig
+--include-struct OreVeinConfig
+--include-struct OreVeinParameters
 --include-struct Piece
 --include-struct Pos
 --include-struct Pos3

@@ -45,6 +45,8 @@ public class BlockArgument implements ArgumentType<Pair<Integer, Integer>> {
         .put("netherrack", Pair.of(Cubiomes.NETHERRACK(), MapColor.NETHER.col))
         .put("nether_gold_ore", Pair.of(Cubiomes.NETHER_GOLD_ORE(), MapColor.GOLD.col))
         .put("nether_quartz_ore", Pair.of(Cubiomes.NETHER_QUARTZ_ORE(), MapColor.QUARTZ.col))
+        .put("raw_copper_block", Pair.of(Cubiomes.RAW_COPPER_BLOCK(), MapColor.COLOR_YELLOW.col))
+        .put("raw_iron_block", Pair.of(Cubiomes.RAW_IRON_BLOCK(), MapColor.COLOR_YELLOW.col))
         .put("redstone_ore", Pair.of(Cubiomes.REDSTONE_ORE(), MapColor.FIRE.col))
         .put("soul_sand", Pair.of(Cubiomes.SOUL_SAND(), MapColor.COLOR_BROWN.col))
         .put("stone", Pair.of(Cubiomes.STONE(), MapColor.STONE.col))
