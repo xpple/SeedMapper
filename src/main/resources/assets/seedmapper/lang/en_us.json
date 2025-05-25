@@ -16,6 +16,7 @@
   "commands.exceptions.noOreVeinFound": "Couldn't locate an ore vein within %s chunks.",
   "commands.exceptions.unknownOre": "Unknown block \"%s\".",
   "commands.exceptions.incompatibleParameters": "Incompatible parameters.",
+  "commands.exceptions.oreVeinWrongVersion": "Ore veins only exist after version 1.18!",
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\".",
 
   "command.checkSeed.using": "SeedMapper is using the seed %s from %s.",

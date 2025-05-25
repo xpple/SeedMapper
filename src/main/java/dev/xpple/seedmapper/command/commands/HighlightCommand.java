@@ -10,6 +10,7 @@ import com.github.cubiomes.SurfaceNoise;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
+import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.OreTypes;
@@ -159,7 +160,9 @@ public class HighlightCommand {
         long seed = source.getSeed().getSecond();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment parameters = OreVeinParameters.allocate(arena);
-            Cubiomes.initOreVeinNoise(parameters, seed, version);
+            if (Cubiomes.initOreVeinNoise(parameters, seed, version) == 0) {
+                throw CommandExceptions.ORE_VEIN_WRONG_VERSION_EXCEPTION.create();
+            }
 
             ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
             Map<BlockPos, Integer> blocks = new HashMap<>();

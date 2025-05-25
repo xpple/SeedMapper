@@ -262,7 +262,9 @@ public class LocateCommand {
         long seed = source.getSeed().getSecond();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment parameters = OreVeinParameters.allocate(arena);
-            Cubiomes.initOreVeinNoise(parameters, seed, version);
+            if (Cubiomes.initOreVeinNoise(parameters, seed, version) == 0) {
+                throw CommandExceptions.ORE_VEIN_WRONG_VERSION_EXCEPTION.create();
+            }
             ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
             BlockPos[] pos = {null};
             SpiralLoop.spiral(center.x, center.z, 6400, (chunkX, chunkZ) -> {
