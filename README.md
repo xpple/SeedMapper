@@ -34,10 +34,20 @@ Usage: `/sm:locate feature structure <structure>[<pieces>]{<variants>}`.
 
 Locates a given structure closest to the player. All structures in all dimensions are supported. However, due to limitations in the underlying library, some structures (in particular desert pyramids, jungle temples and woodland mansions) may result in occasional false positives. For more advanced querying you can also use piece and variant data to further restrict the search. For example, the following command will search for end cities with ships: `/sm:locate feature structure end_city[end_ship]`.
 
+### Ore vein locating
+Usage: `/sm:locate orevein`.
+
+Locates an [ore vein](https://minecraft.wiki/w/Ore_vein) closest to the player. The coordinates of the first ore vein block found will be returned. After this, you can use [`/sm:highlight orevein [chunks]`](#ore-vein-highlighting) to highlight the other ores.
+
 ### Ore highlighting
 Usage: `/sm:highlight block <block> [chunks]`.
 
 Highlights the specified block in the world. All versions from 1.13 onwards are supported. Due to high dependence on the [`OCEAN_FLOOR_WG`](https://minecraft.wiki/w/Heightmap#OCEAN_FLOOR_WG) heightmap, coal, copper and emerald ore locations may be off.
+
+### Ore vein highlighting
+Usage: `/sm:highlight orevein [chunks]`.
+
+Highlights ore veins in the world. Raw ore blocks that generate as part of the ore vein are highlighted distinctly. Filler blocks are ignored.
 
 ### Slime chunk locating
 Usage: `/sm:locate feature slimechunk`.
