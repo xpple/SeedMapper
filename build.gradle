@@ -76,9 +76,11 @@ processResources {
 		rename {"${it}_${project.base.archivesName.get()}"}
 	}
 
-	from("src/main/c/LICENSE") {
+	from("src/main/c/cubiomes/LICENSE") {
 		rename {"${it}_cubiomes"}
 	}
+
+	from("src/main/c/cubiomes/loot/LICENSE_loot_library.h.txt")
 
 	from generateBuildInfo
 }

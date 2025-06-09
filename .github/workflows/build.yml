@@ -14,6 +14,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      SRC_FILES: noise.c biomes.c layers.c biomenoise.c generator.c finders.c util.c quadbase.c loot/loot_functions.c loot/loot_tables.c loot/loot_table_context.c loot/loot_table_parser.c loot/loot_tables/buried_treasure_1_13.c loot/loot_tables/buried_treasure_1_18.c loot/loot_tables/desert_pyramid_1_13.c loot/loot_tables/desert_pyramid_1_20.c loot/loot_tables/end_city_treasure_1_13.c loot/loot_tables/end_city_treasure_1_20.c loot/loot_tables/igloo_chest_1_13.c loot/loot_tables/nether_bridge_1_13.c loot/loot_tables/nether_bridge_1_20.c loot/loot_tables/ruined_portal_1_16_1.c loot/loot_tables/ruined_portal_1_21_5.c loot/cjson/cJSON.c
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,16 +24,21 @@ jobs:
 
       - name: Compile shared library (ubuntu-latest)
         if: matrix.os == 'ubuntu-latest'
-        run: gcc -shared -o src/main/resources/libcubiomes.so src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3 -fPIC
+        working-directory: src/main/c/cubiomes
+        run: gcc -shared -o ../../resources/libcubiomes.so $SRC_FILES -O3 -fPIC
       - name: Compile shared library (macos-latest)
         if: matrix.os == 'macos-latest'
+        working-directory: src/main/c/cubiomes
         run: |
-          gcc -shared -o src/main/resources/libcubiomes_arm64.dylib -arch arm64 src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3 -fPIC
-          gcc -shared -o src/main/resources/libcubiomes_x86_64.dylib -arch x86_64 src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3 -fPIC
-          lipo -create -output src/main/resources/libcubiomes.dylib src/main/resources/libcubiomes_arm64.dylib src/main/resources/libcubiomes_x86_64.dylib
+          gcc -shared -o ../../resources/libcubiomes_arm64.dylib -arch arm64 $SRC_FILES -O3 -fPIC
+          gcc -shared -o ../../resources/libcubiomes_x86_64.dylib -arch x86_64 $SRC_FILES -O3 -fPIC
+          lipo -create -output ../../resources/libcubiomes.dylib ../../resources/libcubiomes_arm64.dylib ../../resources/libcubiomes_x86_64.dylib
       - name: Compile shared library (windows-latest)
         if: matrix.os == 'windows-latest'
-        run: gcc -shared -o src/main/resources/cubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+        working-directory: src/main/c/cubiomes
+        run: |
+          $src = $env:SRC_FILES.Split(" ")
+          gcc -shared -o ../../resources/cubiomes.dll $src -O3
 
       - name: Compute SHA256 hash (ubuntu-latest)
         if: matrix.os == 'ubuntu-latest'

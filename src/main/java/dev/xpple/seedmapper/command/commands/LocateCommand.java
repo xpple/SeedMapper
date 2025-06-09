@@ -2,12 +2,16 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
+import com.github.cubiomes.ItemStack;
+import com.github.cubiomes.LootFunction;
+import com.github.cubiomes.LootTableContext;
 import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Piece;
 import com.github.cubiomes.Pos;
 import com.github.cubiomes.Pos3;
 import com.github.cubiomes.StrongholdIter;
 import com.github.cubiomes.StructureConfig;
+import com.github.cubiomes.StructureSaltConfig;
 import com.github.cubiomes.StructureVariant;
 import com.github.cubiomes.SurfaceNoise;
 import com.mojang.brigadier.Command;
@@ -37,6 +41,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
 import static dev.xpple.seedmapper.command.arguments.StructurePredicateArgument.*;
 import static dev.xpple.seedmapper.thread.ThreadingHelper.*;
@@ -63,6 +68,9 @@ public class LocateCommand {
                     .executes(ctx -> submit(() -> locateStronghold(CustomClientCommandSource.of(ctx.getSource())))))
                 .then(literal("slimechunk")
                     .executes(ctx -> submit(() -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))))
+            .then(literal("loot")
+                .then(argument("amount", integer(1))
+                    .executes(ctx -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount")))))
             .then(literal("spawn")
                 .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource())))))
             .then(literal("orevein")
@@ -162,7 +170,7 @@ public class LocateCommand {
                     .ifPresent(city -> source.sendFeedback(Component.literal(" - ")
                         .append(Component.translatable("command.locate.feature.structure.endCity.hasShip", ComponentUtils.formatXYZ(city.getX(), city.getY(), city.getZ())))));
             } else if (structure == Cubiomes.Fortress()) {
-                int numPieces = Cubiomes.getFortressPieces(pieces, 400, version, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
+                int numPieces = Cubiomes.getFortressPieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, version, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
                 IntStream.range(0, numPieces)
                     .mapToObj(i -> Piece.asSlice(pieces, i))
                     .filter(piece -> Piece.type(piece) == Cubiomes.BRIDGE_SPAWNER())
@@ -243,6 +251,90 @@ public class LocateCommand {
             ComponentUtils.formatXZ(pos.x(), pos.z(), Component.translatable("command.locate.feature.slimeChunk.copyChunk"))
         ));
         return Command.SINGLE_SUCCESS;
+    }
+
+    private static int locateLoot(CustomClientCommandSource source, int amount) throws CommandSyntaxException {
+        int version = source.getVersion();
+        int dimension = source.getDimension();
+        long seed = source.getSeed().getSecond();
+
+        // TODO use all loot-supported structures
+        int structure = Cubiomes.Desert_Pyramid();
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment lootFunction = LootFunction.allocate(arena);
+            Cubiomes.create_no_op(lootFunction);
+            MemorySegment structureConfig = StructureConfig.allocate(arena);
+            int config = Cubiomes.getStructureConfig(structure, version, structureConfig);
+            if (config == 0) {
+                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
+            }
+            if (StructureConfig.dim(structureConfig) != dimension) {
+                throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+            }
+
+            MemorySegment generator = Generator.allocate(arena);
+            Cubiomes.setupGenerator(generator, version, 0);
+            Cubiomes.applySeed(generator, dimension, seed);
+
+            // currently only used for end cities
+            MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
+            Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed);
+
+            StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
+
+            BlockPos center = BlockPos.containing(source.getPosition());
+            int regionSize = StructureConfig.regionSize(structureConfig) << 4;
+            MemorySegment structurePos = Pos.allocate(arena);
+            MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
+            MemorySegment structureVariant = StructureVariant.allocate(arena);
+            MemorySegment structureSaltConfig = StructureSaltConfig.allocate(arena);
+            int[] found = {0};
+            SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
+                if (!generationCheck.check(generator, surfaceNoise, x, z, structurePos)) {
+                    return false;
+                }
+                int posX = Pos.x(structurePos);
+                int posZ = Pos.z(structurePos);
+                int biome = Cubiomes.getBiomeAt(generator, 4, posX >> 2, 320 >> 2, posZ >> 2);
+                if (Cubiomes.getVariant(structureVariant, structure, version, seed, posX, posZ, biome) == 0) {
+                    return false;
+                }
+                biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
+                if (Cubiomes.getStructureSaltConfig(structure, version, biome, structureSaltConfig) == 0) {
+                    return false;
+                }
+                int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, version, seed, posX, posZ);
+                if (numPieces < 0) {
+                    return false;
+                }
+                for (int i = 0; i < numPieces; i++) {
+                    MemorySegment piece = Piece.asSlice(pieces, i);
+                    int chestCount = Piece.chestCount(piece);
+                    if (chestCount == 0) {
+                        continue;
+                    }
+                    MemorySegment lootTableContext = LootTableContext.allocate(arena);
+                    if (Cubiomes.init_loot_table_name(lootTableContext, Piece.lootTable(piece), version) == 0) {
+                        continue;
+                    }
+                    for (int j = 0; j < chestCount; j++) {
+                        Cubiomes.set_loot_seed(lootTableContext, Piece.lootSeeds(piece).getAtIndex(Cubiomes.C_LONG_LONG, j));
+                        Cubiomes.generate_loot(lootTableContext);
+                        int lootCount = LootTableContext.generated_item_count(lootTableContext);
+                        for (int k = 0; k < lootCount; k++) {
+                            MemorySegment itemStack = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), k);
+                            String itemName = Cubiomes.get_item_name(lootTableContext, ItemStack.item(itemStack)).getString(0);
+                            source.sendFeedback(Component.literal(itemName));
+                            found[0] += ItemStack.count(itemStack);
+                        }
+                    }
+                    Cubiomes.free_loot_table_pools(lootTableContext);
+                }
+                return found[0] >= amount;
+            });
+            return found[0];
+        }
     }
 
     private static int locateSpawn(CustomClientCommandSource source) throws CommandSyntaxException {
