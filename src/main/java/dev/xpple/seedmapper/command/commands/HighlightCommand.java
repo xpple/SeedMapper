@@ -201,9 +201,7 @@ public class HighlightCommand {
                     int colour = BLOCKS.values().stream().filter(pair -> Objects.equals(block, pair.getFirst())).findAny().orElseThrow().getSecond();
                     RenderManager.drawBoxes(positions, colour);
                     if (block == Cubiomes.RAW_COPPER_BLOCK() || block == Cubiomes.RAW_IRON_BLOCK()) {
-                        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", join(Component.literal(", "), positions.stream().map(pos -> {
-                            return ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ());
-                        })))));
+                        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", ComponentUtils.formatXYZCollection(positions))));
                     }
                 });
 

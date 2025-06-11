@@ -19,6 +19,7 @@ public final class CommandExceptions {
     public static final DynamicCommandExceptionType UNKNOWN_VARIANT_KEY_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownVariantKey", arg));
     public static final DynamicCommandExceptionType UNKNOWN_VARIANT_VALUE_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownVariantValue", arg));
     public static final DynamicCommandExceptionType UNKNOWN_BLOCK_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownOre", arg));
+    public static final DynamicCommandExceptionType UNKNOWN_ITEM_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownItem", arg));
     public static final SimpleCommandExceptionType NO_SEED_AVAILABLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.noSeedAvailable"));
     public static final DynamicCommandExceptionType NO_BIOME_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.noBiomeFound", arg));
     public static final DynamicCommandExceptionType NO_STRUCTURE_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.noStructureFound", arg));
@@ -26,4 +27,5 @@ public final class CommandExceptions {
     public static final SimpleCommandExceptionType INVALID_DIMENSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.invalidDimension"));
     public static final SimpleCommandExceptionType INCOMPATIBLE_PARAMETERS_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.incompatibleParameters"));
     public static final SimpleCommandExceptionType ORE_VEIN_WRONG_VERSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.oreVeinWrongVersion"));
+    public static final SimpleCommandExceptionType LOOT_NOT_SUPPORTED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.lootNotSupported"));
 }

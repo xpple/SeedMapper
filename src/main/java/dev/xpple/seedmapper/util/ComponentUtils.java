@@ -1,7 +1,10 @@
 package dev.xpple.seedmapper.util;
 
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+
+import java.util.Collection;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
@@ -46,5 +49,29 @@ public final class ComponentUtils {
             ),
             "%d %d %d".formatted(x, y, z)
         );
+    }
+
+    public static MutableComponent formatXZCollection(Collection<? extends Vec3i> collection) {
+        return join(Component.literal(", "), collection.stream().map(pos -> {
+            return ComponentUtils.formatXZ(pos.getX(), pos.getZ());
+        }));
+    }
+
+    public static MutableComponent formatXZCollection(Collection<? extends Vec3i> collection, MutableComponent copyText) {
+        return join(Component.literal(", "), collection.stream().map(pos -> {
+            return ComponentUtils.formatXZ(pos.getX(), pos.getZ(), copyText);
+        }));
+    }
+
+    public static MutableComponent formatXYZCollection(Collection<? extends Vec3i> collection) {
+        return join(Component.literal(", "), collection.stream().map(pos -> {
+            return ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ());
+        }));
+    }
+
+    public static MutableComponent formatXYZCollection(Collection<? extends Vec3i> collection, MutableComponent copyText) {
+        return join(Component.literal(", "), collection.stream().map(pos -> {
+            return ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ(), copyText);
+        }));
     }
 }
