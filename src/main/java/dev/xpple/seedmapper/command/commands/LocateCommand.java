@@ -48,7 +48,7 @@ import java.util.stream.IntStream;
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
-import static dev.xpple.seedmapper.command.arguments.ItemArgument.*;
+import static dev.xpple.seedmapper.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
 import static dev.xpple.seedmapper.command.arguments.StructurePredicateArgument.*;
 import static dev.xpple.seedmapper.thread.ThreadingHelper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
@@ -78,10 +78,9 @@ public class LocateCommand {
                 .then(literal("slimechunk")
                     .executes(ctx -> submit(() -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))))
             .then(literal("loot")
-                .then(argument("item", item())
-                    .executes(ctx -> submit(() -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getItem(ctx, "item"))))
-                    .then(argument("amount", integer(1))
-                        .executes(ctx -> submit(() -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getItem(ctx, "item"), getInteger(ctx, "amount")))))))
+                .then(argument("amount", integer(1))
+                    .then(argument("item", itemAndEnchantments())
+                        .executes(ctx -> submit(() -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getItemAndEnchantments(ctx, "item")))))))
             .then(literal("spawn")
                 .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource())))))
             .then(literal("orevein")
@@ -264,11 +263,7 @@ public class LocateCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int locateLoot(CustomClientCommandSource source, int item) throws CommandSyntaxException {
-        return locateLoot(source, item, 1);
-    }
-
-    private static int locateLoot(CustomClientCommandSource source, int item, int amount) throws CommandSyntaxException {
+    private static int locateLoot(CustomClientCommandSource source, int amount, EnchantedItem itemPredicate) throws CommandSyntaxException {
         int version = source.getVersion();
         if (version <= Cubiomes.MC_1_12()) {
             throw CommandExceptions.LOOT_NOT_SUPPORTED_EXCEPTION.create();
@@ -354,7 +349,7 @@ public class LocateCommand {
                             return;
                         }
                         int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, version, seed, posX, posZ);
-                        if (numPieces < 0) {
+                        if (numPieces <= 0) {
                             return;
                         }
                         int foundInStructure = 0;
@@ -372,7 +367,7 @@ public class LocateCommand {
                             if (Cubiomes.init_loot_table_name(lootTableContext, Piece.lootTable(piece), version) == 0) {
                                 continue;
                             }
-                            if (Cubiomes.has_item(lootTableContext, item) == 0) {
+                            if (Cubiomes.has_item(lootTableContext, itemPredicate.item()) == 0) {
                                 ignoredPieces.add(Piece.name(piece).getString(0));
                                 Cubiomes.free_loot_table_pools(lootTableContext);
                                 continue;
@@ -383,7 +378,7 @@ public class LocateCommand {
                                 int lootCount = LootTableContext.generated_item_count(lootTableContext);
                                 for (int k = 0; k < lootCount; k++) {
                                     MemorySegment itemStack = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), k);
-                                    if (Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStack)) == item) {
+                                    if (Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStack)) == itemPredicate.item() && itemPredicate.enchantmensPredicate().test(itemStack)) {
                                         foundInStructure += ItemStack.count(itemStack);
                                     }
                                 }
@@ -412,7 +407,7 @@ public class LocateCommand {
                     break;
                 }
             }
-            String itemName = Cubiomes.global_id2item_name(item).getString(0);
+            String itemName = Cubiomes.global_id2item_name(itemPredicate.item()).getString(0);
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.loot.totalFound", accent(String.valueOf(found[0])), itemName)));
             return found[0];
         }
