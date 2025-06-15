@@ -330,8 +330,8 @@ public class LocateCommand {
                 int previouslyFound = found[0];
                 List<BlockPos> aggregatedLootPositions = new ArrayList<>();
                 while (true) {
-                    if (state.iterator.getX() * regionSize > (center.getX() + radius) * maxRegionSize
-                        || state.iterator.getZ() * regionSize > (center.getZ() + radius) * maxRegionSize) {
+                    if (state.iterator.getX() * regionSize > center.getX() + radius * maxRegionSize
+                        || state.iterator.getZ() * regionSize > center.getZ() + radius * maxRegionSize) {
                         break;
                     }
 
