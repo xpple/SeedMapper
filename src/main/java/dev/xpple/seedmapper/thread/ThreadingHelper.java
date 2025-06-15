@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.thread;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.logging.LogUtils;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.util.CheckedSupplier;
 import net.minecraft.ChatFormatting;
@@ -9,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
+import org.slf4j.Logger;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,6 +21,8 @@ import static dev.xpple.seedmapper.util.ChatBuilder.*;
 public final class ThreadingHelper {
     private ThreadingHelper() {
     }
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final ExecutorService locatingExecutor = Executors.newCachedThreadPool();
     private static Future<Integer> currentTask = null;
@@ -48,6 +52,9 @@ public final class ThreadingHelper {
                 if (player != null) {
                     Minecraft.getInstance().schedule(() -> player.displayClientMessage(format((MutableComponent) e.getRawMessage(), ChatFormatting.RED), false));
                 }
+                return 0;
+            } catch (Throwable e) {
+                LOGGER.error("An error occurred while executing one of SeedMapper's tasks!", e);
                 return 0;
             }
         });
