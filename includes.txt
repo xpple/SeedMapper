@@ -819,6 +819,7 @@
 --include-constant SKIP_ENCHANTMENTS
 --include-constant STOP_AT_PREDICATE_MATCH
 
+--include-function free_loot_function
 --include-function get_enchantment_from_name
 --include-function get_item_type
 

@@ -221,9 +221,10 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
                 readWhitespace();
                 int enchantmentLevel = parseLevel();
                 predicate = predicate.and(itemStack -> {
+                    MemorySegment enchantments = ItemStack.enchantments(itemStack);
                     int enchantmentCount = ItemStack.enchantment_count(itemStack);
                     for (int i = 0; i < enchantmentCount; i++) {
-                        MemorySegment enchantInstance = ItemStack.enchantments(itemStack).asSlice(i);
+                        MemorySegment enchantInstance = EnchantInstance.asSlice(enchantments, i);
                         int itemEnchantment = EnchantInstance.enchantment(enchantInstance);
                         if (itemEnchantment != enchantment) {
                             continue;
