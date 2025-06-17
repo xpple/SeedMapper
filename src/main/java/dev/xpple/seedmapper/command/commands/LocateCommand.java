@@ -60,7 +60,7 @@ public class LocateCommand {
 
     private static final Long2ObjectMap<TwoDTree> cachedStrongholds = new Long2ObjectOpenHashMap<>();
 
-    private static final Set<Integer> LOOT_SUPPORTED_STRUCTURES = Set.of(Cubiomes.Treasure(), Cubiomes.Desert_Pyramid(), Cubiomes.End_City(), Cubiomes.Igloo(), Cubiomes.Fortress(), Cubiomes.Ruined_Portal(), Cubiomes.Ruined_Portal_N());
+    private static final Set<Integer> LOOT_SUPPORTED_STRUCTURES = Set.of(Cubiomes.Treasure(), Cubiomes.Desert_Pyramid(), Cubiomes.End_City(), Cubiomes.Igloo(), Cubiomes.Ruined_Portal(), Cubiomes.Ruined_Portal_N());
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("sm:locate")

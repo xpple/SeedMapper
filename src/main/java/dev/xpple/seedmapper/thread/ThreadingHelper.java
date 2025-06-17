@@ -47,14 +47,18 @@ public final class ThreadingHelper {
         currentTask = locatingExecutor.submit(() -> {
             try {
                 return task.get();
-            } catch (CommandSyntaxException e) {
-                Player player = Minecraft.getInstance().player;
-                if (player != null) {
-                    Minecraft.getInstance().schedule(() -> player.displayClientMessage(format((MutableComponent) e.getRawMessage(), ChatFormatting.RED), false));
-                }
-                return 0;
             } catch (Throwable e) {
-                LOGGER.error("An error occurred while executing one of SeedMapper's tasks!", e);
+                Player player = Minecraft.getInstance().player;
+                if (e instanceof CommandSyntaxException cse) {
+                    if (player != null) {
+                        Minecraft.getInstance().schedule(() -> player.displayClientMessage(error((MutableComponent) cse.getRawMessage()), false));
+                    }
+                } else {
+                    LOGGER.error("An error occurred while executing one of SeedMapper's tasks!", e);
+                    if (player != null) {
+                        Minecraft.getInstance().schedule(() -> player.displayClientMessage(error(Component.translatable("commands.exceptions.unknownError")), false));
+                    }
+                }
                 return 0;
             }
         });
