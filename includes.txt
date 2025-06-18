@@ -286,7 +286,6 @@
 --include-function createPos3List
 --include-function estimateSpawn
 --include-function freePos3List
---include-function freeStructurePieces
 --include-function genPotential
 --include-function generateBaseOrePosition
 --include-function generateOrePositions
