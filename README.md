@@ -39,6 +39,11 @@ Usage: `/sm:locate orevein`.
 
 Locates an [ore vein](https://minecraft.wiki/w/Ore_vein) closest to the player. The coordinates of the first ore vein block found will be returned. After this, you can use [`/sm:highlight orevein [chunks]`](#ore-vein-highlighting) to highlight the other ores.
 
+### Loot locating
+Usage: `/sm:locate loot <amount> <item> [<enchantment conditions>]`.
+
+Locates chest loot closest to the player. All versions from 1.13 onwards are supported. SeedMapper will search through the chest loot of structures to find loot that matches the item and enchantment conditions. Note that queries for unobtainable loot and illegal enchantment combinations are not prevented by the command. If a search is taking too long, you should probably cancel it using `/sm:stoptask`.
+
 ### Ore highlighting
 Usage: `/sm:highlight block <block> [chunks]`.
 

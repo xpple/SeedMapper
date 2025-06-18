@@ -9,7 +9,6 @@ import dev.xpple.seedmapper.command.arguments.VersionArgument;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.util.SeedDatabaseHelper;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -23,6 +22,8 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
 public class CustomClientCommandSource extends ClientSuggestionProvider implements FabricClientCommandSource {
 
@@ -59,7 +60,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
 
     @Override
     public void sendError(Component message) {
-        this.sendFeedback(Component.empty().append(message).withStyle(ChatFormatting.RED));
+        this.sendFeedback(error(Component.empty().append(message)));
     }
 
     @Override
