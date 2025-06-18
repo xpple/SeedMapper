@@ -27,14 +27,7 @@ public final class ThreadingHelper {
     private static final ExecutorService locatingExecutor = Executors.newCachedThreadPool();
     private static Future<Integer> currentTask = null;
 
-    public static final Component STOP_TASK_COMPONENT = run(hover(format(Component.translatable("commands.exceptions.alreadyBusyLocating.stopTask"), ChatFormatting.UNDERLINE), base(Component.translatable("commands.exceptions.alreadyBusyLocating.clickToStop"))), () -> {
-        if (currentTask != null && !currentTask.isDone()) {
-            currentTask.cancel(true);
-            Minecraft.getInstance().player.displayClientMessage(Component.translatable("command.locate.taskStopped"), false);
-        } else {
-            Minecraft.getInstance().player.displayClientMessage(format(Component.translatable("command.locate.noTaskRunning"), ChatFormatting.RED), false);
-        }
-    });
+    public static final Component STOP_TASK_COMPONENT = run(hover(format(Component.translatable("commands.exceptions.alreadyBusyLocating.stopTask"), ChatFormatting.UNDERLINE), base(Component.translatable("commands.exceptions.alreadyBusyLocating.clickToStop"))), ThreadingHelper::stop);
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(locatingExecutor::shutdownNow));
@@ -64,5 +57,14 @@ public final class ThreadingHelper {
         });
         Minecraft.getInstance().player.displayClientMessage(Component.translatable("command.locate.taskStarted"), false);
         return Command.SINGLE_SUCCESS;
+    }
+
+    public static void stop() {
+        if (currentTask != null && !currentTask.isDone()) {
+            currentTask.cancel(true);
+            Minecraft.getInstance().player.displayClientMessage(Component.translatable("command.locate.taskStopped"), false);
+        } else {
+            Minecraft.getInstance().player.displayClientMessage(error(Component.translatable("command.locate.noTaskRunning")), false);
+        }
     }
 }
