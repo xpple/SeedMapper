@@ -134,7 +134,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         .put("power", Cubiomes.POWER())
         .put("punch", Cubiomes.PUNCH())
         .put("flame", Cubiomes.FLAME())
-        .put("infinity_enchantment", Cubiomes.INFINITY_ENCHANTMENT())
+        .put("infinity", Cubiomes.INFINITY_ENCHANTMENT())
         .put("quick_charge", Cubiomes.QUICK_CHARGE())
         .put("multishot", Cubiomes.MULTISHOT())
         .put("piercing", Cubiomes.PIERCING())
