@@ -21,7 +21,7 @@ public class BiomeArgument implements ArgumentType<Integer> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("desert", "crimson_forest", "giant_spruce_taiga_hills");
 
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> BIOMES;">
+    //<editor-fold defaultstate="collapsed" desc="static final Map<String, Integer> BIOMES;">
     static final Map<String, Integer> BIOMES = ImmutableMap.<String, Integer>builder()
         .put("ocean", Cubiomes.ocean())
         .put("plains", Cubiomes.plains())

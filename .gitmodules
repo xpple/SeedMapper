@@ -1,5 +1,5 @@
-[submodule "src/main/c"]
-	path = src/main/c
+[submodule "src/main/c/cubiomes"]
+	path = src/main/c/cubiomes
 	url = https://github.com/xpple/cubiomes
 [submodule "jextract"]
 	path = jextract
