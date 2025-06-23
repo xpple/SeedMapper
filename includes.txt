@@ -304,6 +304,7 @@
 --include-function getLargestRec
 --include-function getLinkedGatewayChunk
 --include-function getLinkedGatewayPos
+--include-function getLootTableCountForStructure
 --include-function getMineshafts
 --include-function getOreConfig
 --include-function getOreVeinBlockAt

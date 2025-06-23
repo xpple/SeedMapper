@@ -38,9 +38,12 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -299,7 +302,11 @@ public class LocateCommand {
                 })
                 .collect(Collectors.toList());
 
-            Set<String> ignoredPieces = new HashSet<>();
+            // count how many loot tables each structure has
+            Map<Integer, Integer> lootTableCount = structureStates.stream()
+                .collect(Collectors.toMap(state -> (int) StructureConfig.structType(state.structureConfig), state -> Cubiomes.getLootTableCountForStructure(StructureConfig.structType(state.structureConfig), version)));
+            // ignore chests with loot tables that do not contain the desired item
+            Map<Integer, Set<String>> ignoredLootTables = new HashMap<>();
 
             MemorySegment structurePos = Pos.allocate(arena);
             MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
@@ -324,6 +331,8 @@ public class LocateCommand {
                 }
                 StructureIterationState state = structureStates.get(stateIndex);
                 MemorySegment structureConfig = state.structureConfig;
+                int structure = StructureConfig.structType(structureConfig);
+
                 int regionSize = StructureConfig.regionSize(structureConfig) << 4;
                 int maxRegionSize = StructureConfig.regionSize(structureStates.getLast().structureConfig) << 4;
 
@@ -341,7 +350,6 @@ public class LocateCommand {
                         }
                         int posX = Pos.x(structurePos);
                         int posZ = Pos.z(structurePos);
-                        int structure = StructureConfig.structType(structureConfig);
                         int biome = Cubiomes.getBiomeAt(generator, 4, posX >> 2, 320 >> 2, posZ >> 2);
                         Cubiomes.getVariant(structureVariant, structure, version, seed, posX, posZ, biome);
                         biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
@@ -355,11 +363,11 @@ public class LocateCommand {
                         int foundInStructure = 0;
                         for (int i = 0; i < numPieces; i++) {
                             MemorySegment piece = Piece.asSlice(pieces, i);
-                            if (ignoredPieces.contains(Piece.name(piece).getString(0))) {
-                                continue;
-                            }
                             int chestCount = Piece.chestCount(piece);
                             if (chestCount == 0) {
+                                continue;
+                            }
+                            if (ignoredLootTables.getOrDefault(structure, Collections.emptySet()).contains(Piece.lootTable(piece).getString(0))) {
                                 continue;
                             }
                             MemorySegment lootTableContext = LootTableContext.allocate(arena);
@@ -368,8 +376,13 @@ public class LocateCommand {
                                 continue;
                             }
                             if (Cubiomes.has_item(lootTableContext, itemPredicate.item()) == 0) {
-                                ignoredPieces.add(Piece.name(piece).getString(0));
                                 Cubiomes.free_loot_table_pools(lootTableContext);
+                                Set<String> structureIgnoredLootTables = ignoredLootTables.computeIfAbsent(structure, _ -> new HashSet<>());
+                                structureIgnoredLootTables.add(Piece.lootTable(piece).getString(0));
+                                // if structure has no loot tables with the desired item, remove structure from state loop
+                                if (structureIgnoredLootTables.size() == lootTableCount.get(structure)) {
+                                    return;
+                                }
                                 continue;
                             }
                             for (int j = 0; j < chestCount; j++) {
@@ -391,6 +404,10 @@ public class LocateCommand {
                         }
                     });
                     if (exhausted) {
+                        structureStates.remove(stateIndex);
+                        break;
+                    }
+                    if (ignoredLootTables.getOrDefault(structure, Collections.emptySet()).size() == lootTableCount.get(structure)) {
                         structureStates.remove(stateIndex);
                         break;
                     }
