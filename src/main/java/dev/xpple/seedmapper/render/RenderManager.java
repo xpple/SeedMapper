@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.level.ChunkPos;
@@ -57,7 +56,7 @@ public final class RenderManager {
     }
 
     public static void registerEvents() {
-        WorldRenderEvents.AFTER_TRANSLUCENT.register(RenderManager::renderLines);
+        EndMainPassEvent.END_MAIN_PASS.register(RenderManager::renderLines);
     }
 
     private static void renderLines(WorldRenderContext context) {
