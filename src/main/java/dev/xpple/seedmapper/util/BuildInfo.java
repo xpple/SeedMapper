@@ -3,6 +3,7 @@ package dev.xpple.seedmapper.util;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.logging.LogUtils;
+import dev.xpple.seedmapper.SeedMapper;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 
@@ -25,7 +26,7 @@ public final class BuildInfo {
         String version, branch, shortCommitHash, commitHash;
         version = branch = shortCommitHash = commitHash = "unknown";
         try (BufferedReader reader = Files.newBufferedReader(FabricLoader.getInstance()
-            .getModContainer("seedmapper").orElseThrow()
+            .getModContainer(SeedMapper.MOD_ID).orElseThrow()
             .findPath("build_info.json").orElseThrow())
         ) {
             JsonObject object = JsonParser.parseReader(reader).getAsJsonObject();

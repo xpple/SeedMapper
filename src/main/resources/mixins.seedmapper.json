@@ -6,6 +6,7 @@
   ],
   "client": [
     "ClientPacketListenerMixin",
+    "betterconfig.ConfigCommandClientMixin",
     "LevelRendererMixin",
     "ScreenMixin"
   ],
