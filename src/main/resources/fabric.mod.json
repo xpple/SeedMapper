@@ -31,7 +31,7 @@
     "java": ">=23",
     "fabricloader": ">=${loader_version}",
     "fabric-api": ">=0.128.0",
-    "minecraft": ">=1.21.6 <1.22",
+    "minecraft": "${minecraft_version_dependency}",
     "betterconfig": "*",
     "clientarguments": "*"
   }

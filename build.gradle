@@ -64,7 +64,7 @@ tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
 }
 
 processResources {
-	def props = [version: project.mod_version, loader_version: project.fabric_loader_version]
+	def props = [version: project.mod_version, minecraft_version_dependency: project.minecraft_version_dependency, loader_version: project.fabric_loader_version]
 	inputs.properties props
 	filteringCharset "UTF-8"
 

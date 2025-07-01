@@ -325,6 +325,9 @@ public class LocateCommand {
              * often.
              */
             for (int stateIndex = 0, radius = 0;; stateIndex++) {
+                if (structureStates.isEmpty()) {
+                    throw CommandExceptions.LOOT_NOT_AVAILABLE_EXCEPTION.create();
+                }
                 if (stateIndex >= structureStates.size()) {
                     stateIndex = 0;
                     radius++;

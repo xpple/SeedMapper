@@ -22,6 +22,7 @@
   "commands.exceptions.incompatibleParameters": "Incompatible parameters.",
   "commands.exceptions.oreVeinWrongVersion": "Ore veins only exist after version 1.18!",
   "commands.exceptions.lootNotSupported": "Loot is not supported before version 1.13!",
+  "commands.exceptions.lootNotAvailable": "This loot is not available in this dimension!",
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\".",
 
   "command.checkSeed.using": "SeedMapper is using the seed %s from %s.",
