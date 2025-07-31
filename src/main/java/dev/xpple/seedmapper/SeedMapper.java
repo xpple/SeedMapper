@@ -8,6 +8,7 @@ import dev.xpple.seedmapper.command.commands.CheckSeedCommand;
 import dev.xpple.seedmapper.command.commands.ClearCommand;
 import dev.xpple.seedmapper.command.commands.HighlightCommand;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
+import dev.xpple.seedmapper.command.commands.SeedMapCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
 import dev.xpple.seedmapper.command.commands.StopTaskCommand;
 import dev.xpple.seedmapper.config.Configs;
@@ -65,5 +66,6 @@ public class SeedMapper implements ClientModInitializer {
         HighlightCommand.register(dispatcher);
         ClearCommand.register(dispatcher);
         StopTaskCommand.register(dispatcher);
+        SeedMapCommand.register(dispatcher);
     }
 }
