@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.util;
 
+import dev.xpple.seedmapper.seedmap.TilePos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.ChunkPos;
@@ -19,6 +20,10 @@ public record QuartPos2(int x, int z) {
 
     public ChunkPos toChunkPos() {
         return new ChunkPos(QuartPos.toSection(this.x), QuartPos.toSection(this.z));
+    }
+
+    public static QuartPos2 fromTilePos(TilePos tilePos) {
+        return new QuartPos2(QuartPos.fromSection(TilePos.TILE_SIZE_CHUNKS * tilePos.x()), QuartPos.fromSection(TilePos.TILE_SIZE_CHUNKS * tilePos.z()));
     }
 
     public static QuartPos2 fromRegionPos(RegionPos regionPos) {
