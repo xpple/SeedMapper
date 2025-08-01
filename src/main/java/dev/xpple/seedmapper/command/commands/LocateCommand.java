@@ -53,7 +53,7 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BiomeArgument.*;
 import static dev.xpple.seedmapper.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
 import static dev.xpple.seedmapper.command.arguments.StructurePredicateArgument.*;
-import static dev.xpple.seedmapper.thread.ThreadingHelper.*;
+import static dev.xpple.seedmapper.thread.LocatorThreadHelper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 

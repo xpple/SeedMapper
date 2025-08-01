@@ -18,8 +18,8 @@ import java.util.concurrent.Future;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
-public final class ThreadingHelper {
-    private ThreadingHelper() {
+public final class LocatorThreadHelper {
+    private LocatorThreadHelper() {
     }
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -27,7 +27,7 @@ public final class ThreadingHelper {
     private static final ExecutorService locatingExecutor = Executors.newCachedThreadPool();
     private static Future<Integer> currentTask = null;
 
-    public static final Component STOP_TASK_COMPONENT = run(hover(format(Component.translatable("commands.exceptions.alreadyBusyLocating.stopTask"), ChatFormatting.UNDERLINE), base(Component.translatable("commands.exceptions.alreadyBusyLocating.clickToStop"))), ThreadingHelper::stop);
+    public static final Component STOP_TASK_COMPONENT = run(hover(format(Component.translatable("commands.exceptions.alreadyBusyLocating.stopTask"), ChatFormatting.UNDERLINE), base(Component.translatable("commands.exceptions.alreadyBusyLocating.clickToStop"))), LocatorThreadHelper::stop);
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(locatingExecutor::shutdownNow));

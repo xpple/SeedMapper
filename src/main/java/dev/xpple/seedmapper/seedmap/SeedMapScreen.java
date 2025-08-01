@@ -9,6 +9,7 @@ import com.github.cubiomes.SurfaceNoise;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.StructureChecks;
+import dev.xpple.seedmapper.thread.SeedMapThreadingHelper;
 import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.RegionPos;
 import dev.xpple.seedmapper.util.SpiralLoop;
@@ -17,7 +18,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
+import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
@@ -59,13 +64,25 @@ public class SeedMapScreen extends Screen {
      * initially done at this scale.
      */
 
-    // unsigned char color[3]
-    private static final MemoryLayout RGB_LAYOUT = MemoryLayout.sequenceLayout(3, Cubiomes.C_CHAR);
-    private static final MemorySegment biomeColours;
+    // unsigned char biomeColors[256][3]
+    private static final int[] biomeColours = new int[256];
 
     static {
-        biomeColours = Arena.global().allocate(RGB_LAYOUT, 256);
-        Cubiomes.initBiomeColors(biomeColours);
+        // unsigned char color[3]
+        MemoryLayout rgbLayout = MemoryLayout.sequenceLayout(3, Cubiomes.C_CHAR);
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment biomeColoursInternal = arena.allocate(rgbLayout, biomeColours.length);
+            Cubiomes.initBiomeColors(biomeColoursInternal);
+            for (int biome = 0; biome < biomeColours.length; biome++) {
+                MemorySegment colourArray = biomeColoursInternal.asSlice(biome * rgbLayout.byteSize());
+                int red = colourArray.getAtIndex(Cubiomes.C_CHAR, 0) & 0xFF;
+                int green = colourArray.getAtIndex(Cubiomes.C_CHAR, 1) & 0xFF;
+                int blue = colourArray.getAtIndex(Cubiomes.C_CHAR, 2) & 0xFF;
+                int colour = ARGB.color(red, green, blue);
+                biomeColours[biome] = colour;
+            }
+        }
     }
 
     public static final int BIOME_SCALE = 4;
@@ -92,7 +109,7 @@ public class SeedMapScreen extends Screen {
     private static final Long2ObjectMap<Int2ObjectMap<Object2ObjectMap<TilePos, int[]>>> biomeDataCache = new Long2ObjectOpenHashMap<>();
     private static final Long2ObjectMap<Int2ObjectMap<Object2ObjectMap<ChunkPos, StructureData>>> structureDataCache = new Long2ObjectOpenHashMap<>();
 
-    private final Arena arena = Arena.ofConfined();
+    private final Arena arena = Arena.ofShared();
 
     private final long seed;
     private final int dimension;
@@ -102,6 +119,7 @@ public class SeedMapScreen extends Screen {
     private final MemorySegment surfaceNoise;
 
     private final Object2ObjectMap<TilePos, Tile> tileCache = new Object2ObjectOpenHashMap<>();
+    private final ObjectSet<TilePos> pendingBiomeCalculations = ObjectSets.synchronize(new ObjectOpenHashSet<>());
     private final Object2ObjectMap<TilePos, int[]> biomeCache;
     private final Object2ObjectMap<ChunkPos, StructureData> structureCache;
 
@@ -133,9 +151,9 @@ public class SeedMapScreen extends Screen {
         this.surfaceNoise = SurfaceNoise.allocate(this.arena);
         Cubiomes.initSurfaceNoise(this.surfaceNoise, this.dimension, this.seed);
 
-        this.biomeCache = biomeDataCache
+        this.biomeCache = Object2ObjectMaps.synchronize(biomeDataCache
             .computeIfAbsent(this.seed, _ -> new Int2ObjectArrayMap<>(3))
-            .computeIfAbsent(this.dimension, _ -> new Object2ObjectOpenHashMap<>());
+            .computeIfAbsent(this.dimension, _ -> new Object2ObjectOpenHashMap<>()));
         this.structureCache = structureDataCache
             .computeIfAbsent(this.seed, _ -> new Int2ObjectArrayMap<>(3))
             .computeIfAbsent(this.dimension, _ -> new Object2ObjectOpenHashMap<>());
@@ -181,7 +199,22 @@ public class SeedMapScreen extends Screen {
             }
 
             // first pass, compute biomes and store in texture
-            Tile tile = this.tileCache.computeIfAbsent(tilePos, _ -> this.fillTile(tilePos));
+            int[] biomeData = this.biomeCache.get(tilePos);
+            if (biomeData == null) {
+                if (!this.pendingBiomeCalculations.add(tilePos)) {
+                    return false;
+                }
+                SeedMapThreadingHelper.submitBiomeCalculation(() -> this.calculateBiomeData(tilePos))
+                    .thenAccept(data -> {
+                        if (data != null) {
+                            this.biomeCache.put(tilePos, data);
+                            this.pendingBiomeCalculations.remove(tilePos);
+                        }
+                    });
+                return false;
+            }
+
+            Tile tile = this.tileCache.computeIfAbsent(tilePos, _ -> this.createTile(tilePos, biomeData));
 
             QuartPos2 relQuartPos = QuartPos2.fromTilePos(tilePos).subtract(this.centerQuart);
             int minX = this.centerX + Configs.PixelsPerBiome * relQuartPos.x();
@@ -274,9 +307,12 @@ public class SeedMapScreen extends Screen {
 
         // draw player position
         int playerMinX = this.centerX + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getX()) - this.centerQuart.x()) - 10;
-        int playerMinZ = this.centerY + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getZ()) - this.centerQuart.z()) - 10;
-        PlayerFaceRenderer.draw(guiGraphics, this.minecraft.player.getSkin(), playerMinX, playerMinZ, 20);
-
+        int playerMinY = this.centerY + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getZ()) - this.centerQuart.z()) - 10;
+        int playerMaxX = playerMinX + 20;
+        int playerMaxY = playerMinY + 20;
+        if (playerMinX >= HORIZONTAL_PADDING && playerMaxX <= HORIZONTAL_PADDING + this.seedMapWidth && playerMinY >= VERTICAL_PADDING && playerMaxY <= VERTICAL_PADDING + this.seedMapHeight) {
+            PlayerFaceRenderer.draw(guiGraphics, this.minecraft.player.getSkin(), playerMinX, playerMinY, 20);
+        }
         // draw hovered coordinates
         Component coordinates = accent("x: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
         if (this.displayCoordinatesCopiedTicks > 0) {
@@ -285,26 +321,17 @@ public class SeedMapScreen extends Screen {
         guiGraphics.drawString(this.font, coordinates , HORIZONTAL_PADDING, VERTICAL_PADDING + this.seedMapHeight + 1, -1);
     }
 
-    private Tile fillTile(TilePos tilePos) {
+    private Tile createTile(TilePos tilePos, int[] biomeData) {
         Tile tile = new Tile(tilePos, this.seed, this.dimension);
-        int[] biomeData = this.biomeCache.computeIfAbsent(tilePos, _ -> this.calculateBiomeData(tilePos));
-
         DynamicTexture texture = tile.texture();
         int width = texture.getPixels().getWidth();
         int height = texture.getPixels().getHeight();
         for (int relX = 0; relX < width; relX++) {
             for (int relZ = 0; relZ < height; relZ++) {
-                long biome = biomeData[relX + relZ * width];
-                MemorySegment colourArray = biomeColours.asSlice(biome * RGB_LAYOUT.byteSize());
-                int red = colourArray.getAtIndex(Cubiomes.C_CHAR, 0) & 0xFF;
-                int green = colourArray.getAtIndex(Cubiomes.C_CHAR, 1) & 0xFF;
-                int blue = colourArray.getAtIndex(Cubiomes.C_CHAR, 2) & 0xFF;
-                int colour = ARGB.color(red, green, blue);
-
-                texture.getPixels().setPixel(relX, relZ, colour);
+                int biome = biomeData[relX + relZ * width];
+                texture.getPixels().setPixel(relX, relZ, biomeColours[biome]);
             }
         }
-
         texture.upload();
         return tile;
     }
@@ -335,7 +362,7 @@ public class SeedMapScreen extends Screen {
             structureToggleRow.add(structureIcon);
             int colour = -1;
             if (!Configs.ToggledStructures.contains(structure)) {
-                colour = ARGB.color(255 / 2, 255, 255, 255);
+                colour = ARGB.color(255 >> 1, 255, 255, 255);
             }
             drawStructureIcon(guiGraphics, structureIcon, toggleMinX, toggleMinY, colour);
             toggleMinX += structureIcon.width() + HORIZONTAL_STRUCTURE_TOGGLE_SPACING;
@@ -358,12 +385,14 @@ public class SeedMapScreen extends Screen {
 
         long cacheSize = Cubiomes.getMinCacheSize(this.generator, Range.scale(range), Range.sx(range), Range.sy(range), Range.sz(range));
         MemorySegment biomeIds = this.arena.allocate(Cubiomes.C_INT, cacheSize);
-        Cubiomes.genBiomes(this.generator, biomeIds, range);
+        if (Cubiomes.genBiomes(this.generator, biomeIds, range) == 0) {
+            return biomeIds.toArray(Cubiomes.C_INT);
+        }
 
-        return biomeIds.toArray(Cubiomes.C_INT);
+        throw new RuntimeException("Cubiomes.genBiomes() failed!");
     }
 
-    private StructureData.@Nullable Structure calculateStructurePos(RegionPos regionPos, int structure, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
+    private @Nullable StructureData.Structure calculateStructurePos(RegionPos regionPos, int structure, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
         if (!generationCheck.check(this.generator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
             return null;
         }
@@ -496,8 +525,8 @@ public class SeedMapScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        this.arena.close();
         this.tileCache.values().forEach(Tile::close);
+        SeedMapThreadingHelper.close(this.arena::close);
         Configs.save();
     }
 }
