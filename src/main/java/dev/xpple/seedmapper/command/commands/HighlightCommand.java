@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BlockArgument.*;
-import static dev.xpple.seedmapper.thread.ThreadingHelper.*;
+import static dev.xpple.seedmapper.thread.LocatorThreadHelper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
