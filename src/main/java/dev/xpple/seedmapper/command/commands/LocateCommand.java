@@ -20,12 +20,12 @@ import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
+import dev.xpple.seedmapper.seedmap.SeedMapScreen;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.SpiralSpliterator;
 import dev.xpple.seedmapper.util.TwoDTree;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import dev.xpple.seedmapper.util.WorldIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -60,8 +60,6 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class LocateCommand {
 
     private static final int BIOME_SEARCH_RADIUS = 6400;
-
-    private static final Long2ObjectMap<TwoDTree> cachedStrongholds = new Long2ObjectOpenHashMap<>();
 
     private static final Set<Integer> LOOT_SUPPORTED_STRUCTURES = Set.of(Cubiomes.Treasure(), Cubiomes.Desert_Pyramid(), Cubiomes.End_City(), Cubiomes.Igloo(), Cubiomes.Ruined_Portal(), Cubiomes.Ruined_Portal_N());
 
@@ -215,34 +213,38 @@ public class LocateCommand {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         int version = source.getVersion();
+
         long seed = source.getSeed().getSecond();
 
         BlockPos position = BlockPos.containing(source.getPosition());
 
-        TwoDTree tree = cachedStrongholds.computeIfAbsent(seed, _ -> new TwoDTree());
-        if (tree.isEmpty()) {
-            try (Arena arena = Arena.ofConfined()) {
-                MemorySegment strongholdIter = StrongholdIter.allocate(arena);
-                Cubiomes.initFirstStronghold(arena, strongholdIter, version, seed);
-                MemorySegment generator = Generator.allocate(arena);
-                Cubiomes.setupGenerator(generator, version, 0);
-                Cubiomes.applySeed(generator, dimension, seed);
-
-                final int count = source.getVersion() <= Cubiomes.MC_1_8() ? 3 : 128;
-                for (int i = 0; i < count; i++) {
-                    if (Cubiomes.nextStronghold(strongholdIter, generator) == 0) {
-                        break;
-                    }
-                    MemorySegment pos = StrongholdIter.pos(strongholdIter);
-                    tree.insert(new BlockPos(Pos.x(pos), 0, Pos.z(pos)));
-                }
-            }
-        }
+        TwoDTree tree = SeedMapScreen.strongholdDataCache.computeIfAbsent(new WorldIdentifier(seed, dimension, version), _ -> calculateStrongholds(seed, dimension, version));
 
         BlockPos pos = tree.nearestTo(position.atY(0));
 
         source.sendFeedback(Component.translatable("command.locate.feature.stronghold.success", ComponentUtils.formatXZ(pos.getX(), pos.getZ())));
         return Command.SINGLE_SUCCESS;
+    }
+
+    public static TwoDTree calculateStrongholds(long seed, int dimension, int version) {
+        TwoDTree tree = new TwoDTree();
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment strongholdIter = StrongholdIter.allocate(arena);
+            Cubiomes.initFirstStronghold(arena, strongholdIter, version, seed);
+            MemorySegment generator = Generator.allocate(arena);
+            Cubiomes.setupGenerator(generator, version, 0);
+            Cubiomes.applySeed(generator, dimension, seed);
+
+            final int count = version <= Cubiomes.MC_1_8() ? 3 : 128;
+            for (int i = 0; i < count; i++) {
+                if (Cubiomes.nextStronghold(strongholdIter, generator) == 0) {
+                    break;
+                }
+                MemorySegment pos = StrongholdIter.pos(strongholdIter);
+                tree.insert(new BlockPos(Pos.x(pos), 0, Pos.z(pos)));
+            }
+        }
+        return tree;
     }
 
     private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {

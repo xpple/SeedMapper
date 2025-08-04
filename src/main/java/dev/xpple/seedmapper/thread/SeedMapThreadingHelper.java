@@ -1,6 +1,7 @@
 package dev.xpple.seedmapper.thread;
 
 import com.mojang.logging.LogUtils;
+import dev.xpple.seedmapper.util.TwoDTree;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public final class SeedMapThreadingHelper {
     private static final int MAX_THREADS = Math.min(Runtime.getRuntime().availableProcessors(), 5);
 
     private static final ExecutorService seedMapExecutor = Executors.newFixedThreadPool(MAX_THREADS);
-    private static final List<CompletableFuture<int[]>> futures = new ArrayList<>();
+    private static final List<CompletableFuture<?>> futures = new ArrayList<>();
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(seedMapExecutor::shutdownNow));
@@ -31,6 +32,19 @@ public final class SeedMapThreadingHelper {
                 return task.get();
             } catch (Throwable t) {
                 LOGGER.error("An error occurred while executing biome calculations!", t);
+                return null;
+            }
+        }, seedMapExecutor);
+        futures.add(future);
+        return future;
+    }
+
+    public static CompletableFuture<TwoDTree> submitStrongholdCalculation(Supplier<TwoDTree> task) {
+        CompletableFuture<TwoDTree> future = CompletableFuture.supplyAsync(() -> {
+            try {
+                return task.get();
+            } catch (Throwable t) {
+                LOGGER.error("An error occurred while executing stronghold calculations!", t);
                 return null;
             }
         }, seedMapExecutor);

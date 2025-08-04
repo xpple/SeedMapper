@@ -7,16 +7,16 @@ import com.github.cubiomes.Range;
 import com.github.cubiomes.StructureConfig;
 import com.github.cubiomes.SurfaceNoise;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.thread.SeedMapThreadingHelper;
 import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.RegionPos;
 import dev.xpple.seedmapper.util.SpiralLoop;
+import dev.xpple.seedmapper.util.TwoDTree;
+import dev.xpple.seedmapper.util.WorldIdentifier;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -44,6 +44,8 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.IntSupplier;
 
@@ -94,26 +96,28 @@ public class SeedMapScreen extends Screen {
     public static final int MIN_PIXELS_PER_BIOME = 1;
     public static final int MAX_PIXELS_PER_BIOME = 100;
 
-    private static final int HORIZONTAL_STRUCTURE_TOGGLE_SPACING = 5;
-    private static final int VERTICAL_STRUCTURE_TOGGLE_SPACING = 1;
-    private static final int STRUCTURE_TOGGLE_HEIGHT = 20;
+    private static final int HORIZONTAL_FEATURE_TOGGLE_SPACING = 5;
+    private static final int VERTICAL_FEATURE_TOGGLE_SPACING = 1;
+    private static final int FEATURE_TOGGLE_HEIGHT = 20;
 
     private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
 
-    private static final int[] toggleStructures = StructureData.Structure.STRUCTURE_ICONS.keySet().intStream().sorted().toArray();
+    private static final List<MapFeature> TOGGLEABLE_FEATURES = Arrays.stream(MapFeature.values()).sorted(Comparator.comparing(MapFeature::getName)).toList();
 
-    private static final int STRUCTURE_ICONS_COMBINED_WIDTH = StructureData.Structure.STRUCTURE_ICONS.values().stream()
-        .map(StructureData.Structure.Texture::width)
-        .collect(() -> new MutableInt(0), MutableInt::add, (l, r) -> l.add(r.addAndGet(HORIZONTAL_STRUCTURE_TOGGLE_SPACING))).intValue();
+    private static final int FEATURE_ICONS_COMBINED_WIDTH = Arrays.stream(MapFeature.values())
+        .map(feature -> feature.getTexture().width())
+        .collect(() -> new MutableInt(0), MutableInt::add, (l, r) -> l.add(r.addAndGet(HORIZONTAL_FEATURE_TOGGLE_SPACING))).intValue();
 
-    private static final Long2ObjectMap<Int2ObjectMap<Object2ObjectMap<TilePos, int[]>>> biomeDataCache = new Long2ObjectOpenHashMap<>();
-    private static final Long2ObjectMap<Int2ObjectMap<Object2ObjectMap<ChunkPos, StructureData>>> structureDataCache = new Long2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, StructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
+    public static final Object2ObjectMap<WorldIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
 
     private final Arena arena = Arena.ofShared();
 
     private final long seed;
     private final int dimension;
     private final int version;
+    private final WorldIdentifier worldIdentifier;
 
     private final MemorySegment generator;
     private final MemorySegment surfaceNoise;
@@ -132,7 +136,7 @@ public class SeedMapScreen extends Screen {
     private int seedMapWidth;
     private int seedMapHeight;
 
-    private List<List<StructureData.Structure.Texture>> structureToggleLocations;
+    private List<List<MapFeature.Texture>> featureToggleLocations;
 
     private QuartPos2 mouseQuart;
 
@@ -143,6 +147,7 @@ public class SeedMapScreen extends Screen {
         this.seed = seed;
         this.dimension = dimension;
         this.version = version;
+        this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version);
 
         this.generator = Generator.allocate(this.arena);
         Cubiomes.setupGenerator(this.generator, this.version, 0);
@@ -151,12 +156,17 @@ public class SeedMapScreen extends Screen {
         this.surfaceNoise = SurfaceNoise.allocate(this.arena);
         Cubiomes.initSurfaceNoise(this.surfaceNoise, this.dimension, this.seed);
 
-        this.biomeCache = Object2ObjectMaps.synchronize(biomeDataCache
-            .computeIfAbsent(this.seed, _ -> new Int2ObjectArrayMap<>(3))
-            .computeIfAbsent(this.dimension, _ -> new Object2ObjectOpenHashMap<>()));
-        this.structureCache = structureDataCache
-            .computeIfAbsent(this.seed, _ -> new Int2ObjectArrayMap<>(3))
-            .computeIfAbsent(this.dimension, _ -> new Object2ObjectOpenHashMap<>());
+        this.biomeCache = Object2ObjectMaps.synchronize(biomeDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>()));
+        this.structureCache = structureDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
+
+        if (!strongholdDataCache.containsKey(this.worldIdentifier)) {
+            SeedMapThreadingHelper.submitStrongholdCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
+                .thenAccept(tree -> {
+                    if (tree != null) {
+                        strongholdDataCache.put(this.worldIdentifier, tree);
+                    }
+                });
+        }
 
         this.playerPos = playerPos;
 
@@ -183,7 +193,7 @@ public class SeedMapScreen extends Screen {
         Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(this.seed)));
         guiGraphics.drawString(this.font, seedComponent, HORIZONTAL_PADDING, VERTICAL_PADDING - this.font.lineHeight - 1, -1);
 
-        this.structureToggleLocations = this.drawStructureToggles(guiGraphics);
+        this.featureToggleLocations = this.drawFeatureToggles(guiGraphics);
 
         int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
         int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
@@ -255,55 +265,54 @@ public class SeedMapScreen extends Screen {
         int verChunkRadius = Math.ceilDiv(this.seedMapHeight / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
 
         // second pass, compute structures
-        Configs.ToggledStructures.forEach(structure -> {
-            MemorySegment structureConfig = StructureConfig.allocate(this.arena);
-            if (Cubiomes.getStructureConfig(structure, this.version, structureConfig) == 0) {
-                return;
-            }
-            if (StructureConfig.dim(structureConfig) != this.dimension) {
-                return;
-            }
-            int regionSize = StructureConfig.regionSize(structureConfig);
-            RegionPos centerRegion = RegionPos.fromQuartPos(this.centerQuart, regionSize);
-            int horRegionRadius = Math.ceilDiv(horChunkRadius, regionSize);
-            int verRegionRadius = Math.ceilDiv(verChunkRadius, regionSize);
-            // currently only used for end cities
-            StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
-            MemorySegment structurePos = Pos.allocate(this.arena);
-            SpiralLoop.spiral(centerRegion.x(), centerRegion.z(), Math.max(horRegionRadius, verRegionRadius), (regionX, regionZ) -> {
-                RegionPos regionPos = new RegionPos(regionX, regionZ, regionSize);
-                RegionPos relRegion = regionPos.subtract(centerRegion);
-                if (relRegion.x() < -horRegionRadius || relRegion.x() > horRegionRadius || relRegion.z() < -verRegionRadius || relRegion.z() > verRegionRadius) {
-                    return false;
+        Configs.ToggledFeatures.stream()
+            .filter(f -> f.getStructureId() != -1)
+            .forEach(feature -> {
+                int structure = feature.getStructureId();
+                MemorySegment structureConfig = StructureConfig.allocate(this.arena);
+                if (Cubiomes.getStructureConfig(structure, this.version, structureConfig) == 0) {
+                    return;
                 }
-                if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionPos.x(), regionPos.z(), structurePos) == 0) {
-                    return false;
+                if (StructureConfig.dim(structureConfig) != this.dimension) {
+                    return;
                 }
-                ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
+                int regionSize = StructureConfig.regionSize(structureConfig);
+                RegionPos centerRegion = RegionPos.fromQuartPos(this.centerQuart, regionSize);
+                int horRegionRadius = Math.ceilDiv(horChunkRadius, regionSize);
+                int verRegionRadius = Math.ceilDiv(verChunkRadius, regionSize);
+                // currently only used for end cities
+                StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
+                MemorySegment structurePos = Pos.allocate(this.arena);
+                SpiralLoop.spiral(centerRegion.x(), centerRegion.z(), Math.max(horRegionRadius, verRegionRadius), (regionX, regionZ) -> {
+                    RegionPos regionPos = new RegionPos(regionX, regionZ, regionSize);
+                    RegionPos relRegion = regionPos.subtract(centerRegion);
+                    if (relRegion.x() < -horRegionRadius || relRegion.x() > horRegionRadius || relRegion.z() < -verRegionRadius || relRegion.z() > verRegionRadius) {
+                        return false;
+                    }
+                    if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionPos.x(), regionPos.z(), structurePos) == 0) {
+                        return false;
+                    }
+                    ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
 
-                StructureData structureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new StructureData(chunkPos, new Int2ObjectArrayMap<>()));
-                StructureData.Structure structures = structureData.structures().computeIfAbsent(structure, _ -> this.calculateStructurePos(regionPos, structure, structurePos, generationCheck));
-                if (structures == null) {
+                    StructureData structureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new StructureData(chunkPos, new Int2ObjectArrayMap<>()));
+                    BlockPos pos = structureData.structures().computeIfAbsent(structure, _ -> this.calculateStructurePos(regionPos, structurePos, generationCheck));
+                    if (pos == null) {
+                        return false;
+                    }
+                    this.drawMapFeature(guiGraphics, feature, pos);
                     return false;
-                }
-                StructureData.Structure.Texture structureIcon = structures.texture();
-                QuartPos2 relQuartPos = QuartPos2.fromBlockPos(structures.blockPos()).subtract(this.centerQuart);
-                int minX = this.centerX + Configs.PixelsPerBiome * relQuartPos.x() - structureIcon.width() / 2;
-                int minY = this.centerY + Configs.PixelsPerBiome * relQuartPos.z() - structureIcon.height() / 2;
-                int maxX = minX + structureIcon.width();
-                int maxY = minY + structureIcon.height();
-
-                if (maxX >= HORIZONTAL_PADDING + this.seedMapWidth || maxY >= VERTICAL_PADDING + this.seedMapHeight) {
-                    return false;
-                }
-                if (minX < HORIZONTAL_PADDING || minY < VERTICAL_PADDING) {
-                    return false;
-                }
-
-                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, structureIcon.resourceLocation(), minX, minY, 0, 0, structureIcon.width(), structureIcon.height(), structureIcon.width(), structureIcon.height());
-                return false;
+                });
             });
-        });
+
+        // third pass, strongholds
+        if (Configs.ToggledFeatures.contains(MapFeature.STRONGHOLD)) {
+            TwoDTree tree = strongholdDataCache.get(this.worldIdentifier);
+            if (tree != null) {
+                for (BlockPos strongholdPos : tree) {
+                    this.drawMapFeature(guiGraphics, MapFeature.STRONGHOLD, strongholdPos);
+                }
+            }
+        }
 
         // draw player position
         int playerMinX = this.centerX + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getX()) - this.centerQuart.x()) - 10;
@@ -336,38 +345,56 @@ public class SeedMapScreen extends Screen {
         return tile;
     }
 
-    private List<List<StructureData.Structure.Texture>> drawStructureToggles(GuiGraphics guiGraphics) {
-        // TODO: replace with Gatherers API?
-        // TODO: only calculate on resize?
-        int rows = Math.ceilDiv(STRUCTURE_ICONS_COMBINED_WIDTH, this.seedMapWidth);
-        List<List<StructureData.Structure.Texture>> structureToggleLocations = new ArrayList<>(rows);
-        int togglesPerRow = Math.ceilDiv(StructureData.Structure.STRUCTURE_ICONS.size(), rows);
-        int toggleMinY = 1;
-        for (int row = 0; row < rows - 1; row++) {
-            List<StructureData.Structure.Texture> structureToggleRow = drawStructureTogglesInner(guiGraphics, row, togglesPerRow, togglesPerRow, HORIZONTAL_PADDING, toggleMinY);
-            structureToggleLocations.add(structureToggleRow);
-            toggleMinY += STRUCTURE_TOGGLE_HEIGHT + VERTICAL_STRUCTURE_TOGGLE_SPACING;
+    private void drawMapFeature(GuiGraphics guiGraphics, MapFeature feature, BlockPos pos) {
+        MapFeature.Texture featureIcon = feature.getTexture();
+        QuartPos2 relQuartPos = QuartPos2.fromBlockPos(pos).subtract(this.centerQuart);
+        int minX = this.centerX + Configs.PixelsPerBiome * relQuartPos.x() - featureIcon.width() / 2;
+        int minY = this.centerY + Configs.PixelsPerBiome * relQuartPos.z() - featureIcon.height() / 2;
+        int maxX = minX + featureIcon.width();
+        int maxY = minY + featureIcon.height();
+
+        if (maxX >= HORIZONTAL_PADDING + this.seedMapWidth || maxY >= VERTICAL_PADDING + this.seedMapHeight) {
+            return;
         }
-        int togglesInLastRow = StructureData.Structure.STRUCTURE_ICONS.size() - togglesPerRow * (rows - 1);
-        List<StructureData.Structure.Texture> lastStructureToggleRow = drawStructureTogglesInner(guiGraphics, rows - 1, togglesPerRow, togglesInLastRow, HORIZONTAL_PADDING, toggleMinY);
-        structureToggleLocations.add(lastStructureToggleRow);
-        return structureToggleLocations;
+        if (minX < HORIZONTAL_PADDING || minY < VERTICAL_PADDING) {
+            return;
+        }
+
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, featureIcon.resourceLocation(), minX, minY, 0, 0, featureIcon.width(), featureIcon.height(), featureIcon.width(), featureIcon.height());
     }
 
-    private static List<StructureData.Structure.Texture> drawStructureTogglesInner(GuiGraphics guiGraphics, int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
-        List<StructureData.Structure.Texture> structureToggleRow = new ArrayList<>(maxToggles);
+    private List<List<MapFeature.Texture>> drawFeatureToggles(GuiGraphics guiGraphics) {
+        // TODO: replace with Gatherers API?
+        // TODO: only calculate on resize?
+        int rows = Math.ceilDiv(FEATURE_ICONS_COMBINED_WIDTH, this.seedMapWidth);
+        List<List<MapFeature.Texture>> featureToggleLocations = new ArrayList<>(rows);
+        int togglesPerRow = Math.ceilDiv(MapFeature.values().length, rows);
+        int toggleMinY = 1;
+        for (int row = 0; row < rows - 1; row++) {
+            List<MapFeature.Texture> featureToggleRow = drawFeatureTogglesInner(guiGraphics, row, togglesPerRow, togglesPerRow, HORIZONTAL_PADDING, toggleMinY);
+            featureToggleLocations.add(featureToggleRow);
+            toggleMinY += FEATURE_TOGGLE_HEIGHT + VERTICAL_FEATURE_TOGGLE_SPACING;
+        }
+        int togglesInLastRow = MapFeature.values().length - togglesPerRow * (rows - 1);
+        List<MapFeature.Texture> lastFeatureToggleRow = drawFeatureTogglesInner(guiGraphics, rows - 1, togglesPerRow, togglesInLastRow, HORIZONTAL_PADDING, toggleMinY);
+        featureToggleLocations.add(lastFeatureToggleRow);
+        return featureToggleLocations;
+    }
+
+    private static List<MapFeature.Texture> drawFeatureTogglesInner(GuiGraphics guiGraphics, int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
+        List<MapFeature.Texture> featureToggleRow = new ArrayList<>(maxToggles);
         for (int toggle = 0; toggle < maxToggles; toggle++) {
-            int structure = toggleStructures[row * togglesPerRow + toggle];
-            StructureData.Structure.Texture structureIcon = StructureData.Structure.STRUCTURE_ICONS.get(structure);
-            structureToggleRow.add(structureIcon);
+            MapFeature feature = TOGGLEABLE_FEATURES.get(row * togglesPerRow + toggle);
+            MapFeature.Texture featureIcon = feature.getTexture();
+            featureToggleRow.add(featureIcon);
             int colour = -1;
-            if (!Configs.ToggledStructures.contains(structure)) {
+            if (!Configs.ToggledFeatures.contains(feature)) {
                 colour = ARGB.color(255 >> 1, 255, 255, 255);
             }
-            drawStructureIcon(guiGraphics, structureIcon, toggleMinX, toggleMinY, colour);
-            toggleMinX += structureIcon.width() + HORIZONTAL_STRUCTURE_TOGGLE_SPACING;
+            drawFeatureIcon(guiGraphics, featureIcon, toggleMinX, toggleMinY, colour);
+            toggleMinX += featureIcon.width() + HORIZONTAL_FEATURE_TOGGLE_SPACING;
         }
-        return structureToggleRow;
+        return featureToggleRow;
     }
 
     private int[] calculateBiomeData(TilePos tilePos) {
@@ -392,19 +419,18 @@ public class SeedMapScreen extends Screen {
         throw new RuntimeException("Cubiomes.genBiomes() failed!");
     }
 
-    private @Nullable StructureData.Structure calculateStructurePos(RegionPos regionPos, int structure, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
+    private @Nullable BlockPos calculateStructurePos(RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
         if (!generationCheck.check(this.generator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
             return null;
         }
 
-        BlockPos blockPos = new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));
-        return new StructureData.Structure(structure, blockPos);
+        return new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));
     }
 
-    private static void drawStructureIcon(GuiGraphics guiGraphics, StructureData.Structure.Texture structureIcon, int minX, int minY, int colour) {
-        int iconWidth = structureIcon.width();
-        int iconHeight = structureIcon.height();
-        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, structureIcon.resourceLocation(), minX, minY, 0, 0, iconWidth, iconHeight, iconWidth, iconHeight, iconWidth, iconHeight, colour);
+    private static void drawFeatureIcon(GuiGraphics guiGraphics, MapFeature.Texture featureIcon, int minX, int minY, int colour) {
+        int iconWidth = featureIcon.width();
+        int iconHeight = featureIcon.height();
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, featureIcon.resourceLocation(), minX, minY, 0, 0, iconWidth, iconHeight, iconWidth, iconHeight, iconWidth, iconHeight, colour);
     }
 
     @Override
@@ -486,38 +512,38 @@ public class SeedMapScreen extends Screen {
             return false;
         }
         int minY = 1;
-        int structureToggleRowCount = this.structureToggleLocations.size();
+        int featureToggleRowCount = this.featureToggleLocations.size();
         int clickedRowIndex = -1;
-        for (int rowIndex = 0; rowIndex < structureToggleRowCount; rowIndex++) {
-            minY += STRUCTURE_TOGGLE_HEIGHT;
+        for (int rowIndex = 0; rowIndex < featureToggleRowCount; rowIndex++) {
+            minY += FEATURE_TOGGLE_HEIGHT;
             if (minY > mouseY) {
                 clickedRowIndex = rowIndex;
                 break;
             }
-            minY += VERTICAL_STRUCTURE_TOGGLE_SPACING;
+            minY += VERTICAL_FEATURE_TOGGLE_SPACING;
         }
         if (clickedRowIndex == -1) {
             return false;
         }
         int minX = HORIZONTAL_PADDING;
-        List<StructureData.Structure.Texture> structureToggleRow = this.structureToggleLocations.get(clickedRowIndex);
-        int structureToggleRowSize = structureToggleRow.size();
+        List<MapFeature.Texture> featureToggleRow = this.featureToggleLocations.get(clickedRowIndex);
+        int featureToggleRowSize = featureToggleRow.size();
         int clickedToggleIndex = -1;
-        for (int toggleIndex = 0; toggleIndex < structureToggleRowSize; toggleIndex++) {
-            StructureData.Structure.Texture structureIcon = structureToggleRow.get(toggleIndex);
-            minX += structureIcon.width();
+        for (int toggleIndex = 0; toggleIndex < featureToggleRowSize; toggleIndex++) {
+            MapFeature.Texture featureIcon = featureToggleRow.get(toggleIndex);
+            minX += featureIcon.width();
             if (minX > mouseX) {
                 clickedToggleIndex = toggleIndex;
                 break;
             }
-            minX += HORIZONTAL_STRUCTURE_TOGGLE_SPACING;
+            minX += HORIZONTAL_FEATURE_TOGGLE_SPACING;
         }
         if (clickedToggleIndex == -1) {
             return false;
         }
-        int structure = toggleStructures[clickedRowIndex * this.structureToggleLocations.getFirst().size() + clickedToggleIndex];
-        if (!Configs.ToggledStructures.remove(structure)) {
-            Configs.ToggledStructures.add(structure);
+        MapFeature feature = TOGGLEABLE_FEATURES.get(clickedRowIndex * this.featureToggleLocations.getFirst().size() + clickedToggleIndex);
+        if (!Configs.ToggledFeatures.remove(feature)) {
+            Configs.ToggledFeatures.add(feature);
         }
         return true;
     }

@@ -2,7 +2,10 @@ package dev.xpple.seedmapper.util;
 
 import net.minecraft.core.BlockPos;
 
-public class TwoDTree {
+import java.util.Iterator;
+import java.util.Stack;
+
+public class TwoDTree implements Iterable<BlockPos> {
     private Node root;
 
     public boolean isEmpty() {
@@ -67,6 +70,39 @@ public class TwoDTree {
         }
 
         return bestResult;
+    }
+
+    @Override
+    public Iterator<BlockPos> iterator() {
+        return new Iterator<>() {
+            private final Stack<Node> stack = new Stack<>();
+
+            {
+                this.pushLeft(root);
+            }
+
+            private void pushLeft(Node node) {
+                while (node != null) {
+                    this.stack.push(node);
+                    node = node.left;
+                }
+            }
+
+            @Override
+            public boolean hasNext() {
+                return !this.stack.isEmpty();
+            }
+
+            @Override
+            public BlockPos next() {
+                Node current = this.stack.pop();
+                BlockPos result = current.pos;
+                if (current.right != null) {
+                    this.pushLeft(current.right);
+                }
+                return result;
+            }
+        };
     }
 
     private static class Node {

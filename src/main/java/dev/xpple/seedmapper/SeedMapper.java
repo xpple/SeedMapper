@@ -2,6 +2,7 @@ package dev.xpple.seedmapper;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.seedmapper.command.arguments.MapFeatureArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.command.commands.BuildInfoCommand;
 import dev.xpple.seedmapper.command.commands.CheckSeedCommand;
@@ -12,8 +13,10 @@ import dev.xpple.seedmapper.command.commands.SeedMapCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
 import dev.xpple.seedmapper.command.commands.StopTaskCommand;
 import dev.xpple.seedmapper.config.Configs;
+import dev.xpple.seedmapper.config.MapFeatureAdapter;
 import dev.xpple.seedmapper.config.SeedResolutionAdapter;
 import dev.xpple.seedmapper.render.RenderManager;
+import dev.xpple.seedmapper.seedmap.MapFeature;
 import dev.xpple.seedmapper.util.SeedDatabaseHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -50,6 +53,7 @@ public class SeedMapper implements ClientModInitializer {
     public void onInitializeClient() {
         new ModConfigBuilder<>(MOD_ID, Configs.class)
             .registerType(SeedResolutionArgument.SeedResolution.class, new SeedResolutionAdapter(), SeedResolutionArgument::seedResolution)
+            .registerType(MapFeature.class, new MapFeatureAdapter(), MapFeatureArgument::mapFeature)
             .build();
 
         SeedDatabaseHelper.fetchSeeds();

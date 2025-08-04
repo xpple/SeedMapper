@@ -19,6 +19,7 @@
   "commands.exceptions.unknownItem": "Unknown item \"%s\".",
   "commands.exceptions.expectedWithWithout": "Expected \"with\" or \"without\".",
   "commands.exceptions.unknownEnchantment": "Unknown enchantment \"%s\".",
+  "commands.exceptions.unknownMapFeature": "Unknown map feature \"%s\".",
   "commands.exceptions.incompatibleParameters": "Incompatible parameters.",
   "commands.exceptions.oreVeinWrongVersion": "Ore veins only exist after version 1.18!",
   "commands.exceptions.lootNotSupported": "Loot is not supported before version 1.13!",
