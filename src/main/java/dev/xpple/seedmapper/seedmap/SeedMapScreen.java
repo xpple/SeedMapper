@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.seedmap;
 
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
+import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Pos;
 import com.github.cubiomes.Range;
 import com.github.cubiomes.StructureConfig;
@@ -16,7 +17,10 @@ import dev.xpple.seedmapper.util.RegionPos;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.TwoDTree;
 import dev.xpple.seedmapper.util.WorldIdentifier;
+import it.unimi.dsi.fastutil.ints.AbstractIntCollection;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -47,7 +51,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.IntSupplier;
+import java.util.stream.IntStream;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
@@ -119,8 +125,10 @@ public class SeedMapScreen extends Screen {
     private final int version;
     private final WorldIdentifier worldIdentifier;
 
+    private final ReentrantReadWriteLock generatorLock = new ReentrantReadWriteLock();
     private final MemorySegment generator;
     private final MemorySegment surfaceNoise;
+    private final MemorySegment oreVeinParameters;
 
     private final Object2ObjectMap<TilePos, Tile> tileCache = new Object2ObjectOpenHashMap<>();
     private final ObjectSet<TilePos> pendingBiomeCalculations = ObjectSets.synchronize(new ObjectOpenHashSet<>());
@@ -155,6 +163,9 @@ public class SeedMapScreen extends Screen {
 
         this.surfaceNoise = SurfaceNoise.allocate(this.arena);
         Cubiomes.initSurfaceNoise(this.surfaceNoise, this.dimension, this.seed);
+
+        this.oreVeinParameters = OreVeinParameters.allocate(this.arena);
+        Cubiomes.initOreVeinNoise(this.oreVeinParameters, this.seed, this.version);
 
         this.biomeCache = Object2ObjectMaps.synchronize(biomeDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>()));
         this.structureCache = structureDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
@@ -208,19 +219,25 @@ public class SeedMapScreen extends Screen {
                 return false;
             }
 
-            // first pass, compute biomes and store in texture
+            // compute biomes and store in texture
             int[] biomeData = this.biomeCache.get(tilePos);
             if (biomeData == null) {
                 if (!this.pendingBiomeCalculations.add(tilePos)) {
                     return false;
                 }
-                SeedMapThreadingHelper.submitBiomeCalculation(() -> this.calculateBiomeData(tilePos))
-                    .thenAccept(data -> {
-                        if (data != null) {
-                            this.biomeCache.put(tilePos, data);
-                            this.pendingBiomeCalculations.remove(tilePos);
-                        }
-                    });
+                SeedMapThreadingHelper.submitBiomeCalculation(() -> {
+                    try {
+                        this.generatorLock.readLock().lock();
+                        return this.calculateBiomeData(tilePos);
+                    } finally {
+                        this.generatorLock.readLock().unlock();
+                    }
+                }).thenAccept(data -> {
+                    if (data != null) {
+                        this.biomeCache.put(tilePos, data);
+                        this.pendingBiomeCalculations.remove(tilePos);
+                    }
+                });
                 return false;
             }
 
@@ -264,7 +281,7 @@ public class SeedMapScreen extends Screen {
         int horChunkRadius = Math.ceilDiv(this.seedMapWidth / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
         int verChunkRadius = Math.ceilDiv(this.seedMapHeight / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
 
-        // second pass, compute structures
+        // compute structures
         Configs.ToggledFeatures.stream()
             .filter(f -> f.getStructureId() != -1)
             .forEach(feature -> {
@@ -304,7 +321,7 @@ public class SeedMapScreen extends Screen {
                 });
             });
 
-        // third pass, strongholds
+        // compute strongholds
         if (Configs.ToggledFeatures.contains(MapFeature.STRONGHOLD)) {
             TwoDTree tree = strongholdDataCache.get(this.worldIdentifier);
             if (tree != null) {
@@ -420,8 +437,13 @@ public class SeedMapScreen extends Screen {
     }
 
     private @Nullable BlockPos calculateStructurePos(RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
-        if (!generationCheck.check(this.generator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
-            return null;
+        try {
+            this.generatorLock.writeLock().lock();
+            if (!generationCheck.check(this.generator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
+                return null;
+            }
+        } finally {
+            this.generatorLock.writeLock().unlock();
         }
 
         return new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));

@@ -27,8 +27,8 @@ public enum MapFeature {
     MINESHAFT("mineshaft", Cubiomes.Mineshaft(), 20, 19),
     DESERT_WELL("desert_well", Cubiomes.Desert_Well(), 20, 20),
     GEODE("geode", Cubiomes.Geode(), 20, 20),
-    IRON_ORE_VEIN("iron_ore_vein", -1, 20, 20),
     COPPER_ORE_VEIN("copper_ore_vein", -1, 20, 20),
+    IRON_ORE_VEIN("iron_ore_vein", -1, 20, 20),
     FORTRESS("fortress", Cubiomes.Fortress(), 20, 20),
     BASTION("bastion_remnant", Cubiomes.Bastion(), 20, 20),
     END_CITY("end_city", Cubiomes.End_City(), 20, 20),
@@ -46,7 +46,11 @@ public enum MapFeature {
     MapFeature(String name, int structureId, int textureWidth, int textureHeight) {
         this.name = name;
         this.structureId = structureId;
-        this.texture = new Texture(name, textureWidth, textureHeight);
+        if (this.structureId != -1) {
+            this.texture = Texture.structureTexture(name, textureWidth, textureHeight);
+        } else {
+            this.texture = Texture.featureTexture(name, textureWidth, textureHeight);
+        }
     }
 
     public String getName() {
@@ -62,8 +66,12 @@ public enum MapFeature {
     }
 
     public record Texture(ResourceLocation resourceLocation, int width, int height) {
-        private Texture(String structureName, int width, int height) {
-            this(ResourceLocation.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/structure_icons/" + structureName + ".png"), width, height);
+        private static Texture structureTexture(String structureName, int width, int height) {
+            return new Texture(ResourceLocation.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/structure_icons/" + structureName + ".png"), width, height);
+        }
+
+        private static Texture featureTexture(String featureName, int width, int height) {
+            return new Texture(ResourceLocation.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/feature_icons/" + featureName + ".png"), width, height);
         }
     }
 }
