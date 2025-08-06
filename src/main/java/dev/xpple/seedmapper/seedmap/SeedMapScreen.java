@@ -173,11 +173,17 @@ public class SeedMapScreen extends Screen {
         this.oreVeinParameters = OreVeinParameters.allocate(this.arena);
         Cubiomes.initOreVeinNoise(this.oreVeinParameters, this.seed, this.version);
 
+        this.toggleableFeatures = Arrays.stream(MapFeature.values())
+            .filter(feature -> feature.getDimension() == this.dimension)
+            .filter(feature -> this.version >= feature.availableSince())
+            .sorted(Comparator.comparing(MapFeature::getName))
+            .toList();
+
         this.biomeCache = Object2ObjectMaps.synchronize(biomeDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>()));
         this.structureCache = structureDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
         this.oreVeinCache = oreVeinDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
 
-        if (!strongholdDataCache.containsKey(this.worldIdentifier)) {
+        if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.containsKey(this.worldIdentifier)) {
             SeedMapThreadingHelper.submitStrongholdCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
                 .thenAccept(tree -> {
                     if (tree != null) {
@@ -186,11 +192,6 @@ public class SeedMapScreen extends Screen {
                 });
         }
 
-        this.toggleableFeatures = Arrays.stream(MapFeature.values())
-            .filter(feature -> feature.getDimension() == this.dimension)
-            .filter(feature -> this.version >= feature.availableSince())
-            .sorted(Comparator.comparing(MapFeature::getName))
-            .toList();
         this.featureIconsCombinedWidth = this.toggleableFeatures.stream()
             .map(feature -> feature.getTexture().width())
             .reduce((l, r) -> l + HORIZONTAL_FEATURE_TOGGLE_SPACING + r)
@@ -325,7 +326,7 @@ public class SeedMapScreen extends Screen {
             });
 
         // compute strongholds
-        if (Configs.ToggledFeatures.contains(MapFeature.STRONGHOLD)) {
+        if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && Configs.ToggledFeatures.contains(MapFeature.STRONGHOLD)) {
             TwoDTree tree = strongholdDataCache.get(this.worldIdentifier);
             if (tree != null) {
                 for (BlockPos strongholdPos : tree) {
