@@ -8,6 +8,7 @@ import com.github.cubiomes.Range;
 import com.github.cubiomes.StructureConfig;
 import com.github.cubiomes.SurfaceNoise;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.StructureChecks;
@@ -36,10 +37,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
@@ -115,6 +120,7 @@ public class SeedMapScreen extends Screen {
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, StructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
     public static final Object2ObjectMap<WorldIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
 
     private final Arena arena = Arena.ofShared();
 
@@ -126,12 +132,14 @@ public class SeedMapScreen extends Screen {
     private final MemorySegment biomeGenerator; // thread safe
     private final MemorySegment structureGenerator; // NOT thread safe
     private final MemorySegment surfaceNoise;
+    private final PositionalRandomFactory oreVeinRandom;
     private final MemorySegment oreVeinParameters;
 
     private final Object2ObjectMap<TilePos, Tile> tileCache = new Object2ObjectOpenHashMap<>();
     private final ObjectSet<TilePos> pendingBiomeCalculations = ObjectSets.synchronize(new ObjectOpenHashSet<>());
     private final Object2ObjectMap<TilePos, int[]> biomeCache;
     private final Object2ObjectMap<ChunkPos, StructureData> structureCache;
+    private final Object2ObjectMap<TilePos, OreVeinData> oreVeinCache;
 
     private final BlockPos playerPos;
 
@@ -165,11 +173,13 @@ public class SeedMapScreen extends Screen {
         this.surfaceNoise = SurfaceNoise.allocate(this.arena);
         Cubiomes.initSurfaceNoise(this.surfaceNoise, this.dimension, this.seed);
 
+        this.oreVeinRandom = new XoroshiroRandomSource(this.seed).forkPositional().fromHashOf(ResourceLocation.fromNamespaceAndPath(SeedMapper.MOD_ID, "ore_vein_feature")).forkPositional();
         this.oreVeinParameters = OreVeinParameters.allocate(this.arena);
         Cubiomes.initOreVeinNoise(this.oreVeinParameters, this.seed, this.version);
 
         this.biomeCache = Object2ObjectMaps.synchronize(biomeDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>()));
         this.structureCache = structureDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
+        this.oreVeinCache = oreVeinDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
 
         if (!strongholdDataCache.containsKey(this.worldIdentifier)) {
             SeedMapThreadingHelper.submitStrongholdCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
@@ -317,6 +327,22 @@ public class SeedMapScreen extends Screen {
             }
         }
 
+        // compute ore veins
+        if (Configs.ToggledFeatures.contains(MapFeature.IRON_ORE_VEIN) || Configs.ToggledFeatures.contains(MapFeature.COPPER_ORE_VEIN)) {
+            for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
+                for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
+                    TilePos tilePos = new TilePos(centerTile.x() + relTileX, centerTile.z() + relTileZ);
+                    OreVeinData oreVeinData = this.oreVeinCache.computeIfAbsent(tilePos, _ -> this.calculateOreVein(tilePos));
+                    if (oreVeinData == null) {
+                        continue;
+                    }
+                    if (Configs.ToggledFeatures.contains(oreVeinData.oreVeinType())) {
+                        this.drawMapFeature(guiGraphics, oreVeinData.oreVeinType(), oreVeinData.blockPos());
+                    }
+                }
+            }
+        }
+
         // draw player position
         int playerMinX = this.centerX + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getX()) - this.centerQuart.x()) - 10;
         int playerMinY = this.centerY + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getZ()) - this.centerQuart.z()) - 10;
@@ -428,6 +454,36 @@ public class SeedMapScreen extends Screen {
         }
 
         return new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));
+    }
+
+    private @Nullable OreVeinData calculateOreVein(TilePos tilePos) {
+        ChunkPos chunkPos = tilePos.toChunkPos();
+        for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
+            for (int relChunkZ = 0; relChunkZ < SCALED_CHUNK_SIZE; relChunkZ++) {
+                int minBlockX = SectionPos.sectionToBlockCoord(chunkPos.x + relChunkZ);
+                int minBlockZ = SectionPos.sectionToBlockCoord(chunkPos.z + relChunkZ);
+                RandomSource rnd = this.oreVeinRandom.at(minBlockX, 0, minBlockZ);
+                BlockPos pos = new BlockPos(minBlockX + rnd.nextInt(LevelChunkSection.SECTION_WIDTH), 0, minBlockZ + rnd.nextInt(LevelChunkSection.SECTION_WIDTH));
+                IntSet blocks = IntStream.rangeClosed(0, (50 - -60) / 4)
+                    .map(y -> 4 * y + -60)
+                    .map(y -> Cubiomes.getOreVeinBlockAt(pos.getX(), y, pos.getZ(), this.oreVeinParameters))
+                    .collect(IntArraySet::new, IntArraySet::add, AbstractIntCollection::addAll);
+                if (blocks.contains(Cubiomes.RAW_COPPER_BLOCK())) {
+                    return new OreVeinData(tilePos, MapFeature.COPPER_ORE_VEIN, pos);
+                } else if (blocks.contains(Cubiomes.RAW_IRON_BLOCK())) {
+                    return new OreVeinData(tilePos, MapFeature.IRON_ORE_VEIN, pos);
+                } else if (blocks.contains(Cubiomes.COPPER_ORE())) {
+                    return new OreVeinData(tilePos, MapFeature.COPPER_ORE_VEIN, pos);
+                } else if (blocks.contains(Cubiomes.IRON_ORE())) {
+                    return new OreVeinData(tilePos, MapFeature.IRON_ORE_VEIN, pos);
+                } else if (blocks.contains(Cubiomes.GRANITE())) {
+                    return new OreVeinData(tilePos, MapFeature.COPPER_ORE_VEIN, pos);
+                } else if (blocks.contains(Cubiomes.TUFF())) {
+                    return new OreVeinData(tilePos, MapFeature.IRON_ORE_VEIN, pos);
+                }
+            }
+        }
+        return null;
     }
 
     private static void drawFeatureIcon(GuiGraphics guiGraphics, MapFeature.Texture featureIcon, int minX, int minY, int colour) {
