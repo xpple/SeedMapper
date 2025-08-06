@@ -22,7 +22,7 @@ You need to have Java 23 installed to use this mod. I recommend to get Java 23 f
 If you run into issues, contact your launcher's support.
 
 ## Features
-Before using any of these commands, make sure the seed has been configured using `/cconfig seedmapper Seed set <seed>`.
+Before using any of these commands, make sure the seed has been configured using `/sm:config Seed set <seed>`.
 
 ### Biome locating
 Usage: `/sm:locate biome <biome>`.
