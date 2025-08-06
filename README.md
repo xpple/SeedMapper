@@ -24,6 +24,11 @@ If you run into issues, contact your launcher's support.
 ## Features
 Before using any of these commands, make sure the seed has been configured using `/sm:config Seed set <seed>`.
 
+### Seed map
+Usage: `/sm:seedmap`
+
+Opens an explorable seed map based on the configured seed. You can move the map by dragging the mouse, and zoom in or out by using the scroll wheel. You can toggle what features are visible by clicking the feature toggles at the top of the screen. This command is especially useful in combination with the `/sm:source` command!
+
 ### Biome locating
 Usage: `/sm:locate biome <biome>`.
 

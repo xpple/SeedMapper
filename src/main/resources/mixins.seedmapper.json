@@ -6,9 +6,9 @@
   ],
   "client": [
     "ClientPacketListenerMixin",
-    "betterconfig.ConfigCommandClientMixin",
     "LevelRendererMixin",
-    "ScreenMixin"
+    "ScreenMixin",
+    "betterconfig.ConfigCommandClientMixin",
   ],
   "injectors": {
     "defaultRequire": 1
