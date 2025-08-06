@@ -46,7 +46,8 @@ public enum MapFeature {
     MapFeature(String name, int structureId, int textureWidth, int textureHeight) {
         this.name = name;
         this.structureId = structureId;
-        if (this.structureId != -1) {
+        // stronghold is the only Cubiomes structure without a numeric id
+        if (this.structureId != -1 || name.equals("stronghold")) {
             this.texture = Texture.structureTexture(name, textureWidth, textureHeight);
         } else {
             this.texture = Texture.featureTexture(name, textureWidth, textureHeight);
