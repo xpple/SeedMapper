@@ -32,16 +32,22 @@ public record RegionPos(int x, int z, int regionSizeChunks) {
     }
 
     public RegionPos add(RegionPos regionPos) {
-        if (this.regionSizeChunks != regionPos.regionSizeChunks) {
-            throw new IllegalArgumentException("Region sizes must match (%d != %d)".formatted(this.regionSizeChunks, regionPos.regionSizeChunks));
-        }
-        return new RegionPos(this.x + regionPos.x, this.z + regionPos.z, this.regionSizeChunks);
+        checkRegionSize(regionPos.regionSizeChunks);
+        return this.add(regionPos.x, regionPos.z);
+    }
+
+    public RegionPos add(int regionX, int regionZ) {
+        return new RegionPos(this.x + regionX, this.z + regionZ, this.regionSizeChunks);
     }
 
     public RegionPos subtract(RegionPos regionPos) {
-        if (this.regionSizeChunks != regionPos.regionSizeChunks) {
-            throw new IllegalArgumentException("Region sizes must match (%d != %d)".formatted(this.regionSizeChunks, regionPos.regionSizeChunks));
+        checkRegionSize(regionPos.regionSizeChunks);
+        return this.add(-regionPos.x, -regionPos.z);
+    }
+
+    private void checkRegionSize(int regionSizeChunks) {
+        if (this.regionSizeChunks != regionSizeChunks) {
+            throw new IllegalArgumentException("Region sizes must match (expected %d , got %d)".formatted(this.regionSizeChunks, regionSizeChunks));
         }
-        return new RegionPos(this.x - regionPos.x, this.z - regionPos.z, this.regionSizeChunks);
     }
 }

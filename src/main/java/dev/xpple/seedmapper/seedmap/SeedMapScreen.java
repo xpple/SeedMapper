@@ -14,7 +14,6 @@ import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.thread.SeedMapThreadingHelper;
 import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.RegionPos;
-import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.TwoDTree;
 import dev.xpple.seedmapper.util.WorldIdentifier;
 import it.unimi.dsi.fastutil.ints.AbstractIntCollection;
@@ -51,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.IntSupplier;
 import java.util.stream.IntStream;
 
@@ -125,8 +123,8 @@ public class SeedMapScreen extends Screen {
     private final int version;
     private final WorldIdentifier worldIdentifier;
 
-    private final ReentrantReadWriteLock generatorLock = new ReentrantReadWriteLock();
-    private final MemorySegment generator;
+    private final MemorySegment biomeGenerator; // thread safe
+    private final MemorySegment structureGenerator; // NOT thread safe
     private final MemorySegment surfaceNoise;
     private final MemorySegment oreVeinParameters;
 
@@ -157,9 +155,12 @@ public class SeedMapScreen extends Screen {
         this.version = version;
         this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version);
 
-        this.generator = Generator.allocate(this.arena);
-        Cubiomes.setupGenerator(this.generator, this.version, 0);
-        Cubiomes.applySeed(this.generator, this.dimension, this.seed);
+        this.biomeGenerator = Generator.allocate(this.arena);
+        Cubiomes.setupGenerator(this.biomeGenerator, this.version, 0);
+        Cubiomes.applySeed(this.biomeGenerator, this.dimension, this.seed);
+
+        this.structureGenerator = Generator.allocate(this.arena);
+        this.structureGenerator.copyFrom(this.biomeGenerator);
 
         this.surfaceNoise = SurfaceNoise.allocate(this.arena);
         Cubiomes.initSurfaceNoise(this.surfaceNoise, this.dimension, this.seed);
@@ -211,72 +212,61 @@ public class SeedMapScreen extends Screen {
         int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
 
         TilePos centerTile = TilePos.fromQuartPos(this.centerQuart);
-        SpiralLoop.spiral(centerTile.x(), centerTile.z(), Math.max(horTileRadius, verTileRadius), (tileX, tileZ) -> {
-            TilePos tilePos = new TilePos(tileX, tileZ);
-            int relTileX = tilePos.x() - centerTile.x();
-            int relTileZ = tilePos.z() - centerTile.z();
-            if (relTileX < -horTileRadius || relTileX > horTileRadius || relTileZ < -verTileRadius || relTileZ > verTileRadius) {
-                return false;
-            }
+        for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
+            for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
+                TilePos tilePos = centerTile.add(relTileX, relTileZ);
 
-            // compute biomes and store in texture
-            int[] biomeData = this.biomeCache.get(tilePos);
-            if (biomeData == null) {
-                if (!this.pendingBiomeCalculations.add(tilePos)) {
-                    return false;
+                // compute biomes and store in texture
+                int[] biomeData = this.biomeCache.get(tilePos);
+                if (biomeData == null) {
+                    if (!this.pendingBiomeCalculations.add(tilePos)) {
+                        continue;
+                    }
+                    SeedMapThreadingHelper.submitBiomeCalculation(() -> this.calculateBiomeData(tilePos)).thenAccept(data -> {
+                        if (data != null) {
+                            this.biomeCache.put(tilePos, data);
+                            this.pendingBiomeCalculations.remove(tilePos);
+                        }
+                    });
+                    continue;
                 }
-                SeedMapThreadingHelper.submitBiomeCalculation(() -> {
-                    try {
-                        this.generatorLock.readLock().lock();
-                        return this.calculateBiomeData(tilePos);
-                    } finally {
-                        this.generatorLock.readLock().unlock();
-                    }
-                }).thenAccept(data -> {
-                    if (data != null) {
-                        this.biomeCache.put(tilePos, data);
-                        this.pendingBiomeCalculations.remove(tilePos);
-                    }
-                });
-                return false;
+
+                Tile tile = this.tileCache.computeIfAbsent(tilePos, _ -> this.createTile(tilePos, biomeData));
+
+                QuartPos2 relQuartPos = QuartPos2.fromTilePos(tilePos).subtract(this.centerQuart);
+                int minX = this.centerX + Configs.PixelsPerBiome * relQuartPos.x();
+                int minY = this.centerY + Configs.PixelsPerBiome * relQuartPos.z();
+                int maxX = minX + tileSizePixels;
+                int maxY = minY + tileSizePixels;
+
+                if (maxX < HORIZONTAL_PADDING || minX > HORIZONTAL_PADDING + this.seedMapWidth) {
+                    continue;
+                }
+                if (maxY < VERTICAL_PADDING || minY > VERTICAL_PADDING + this.seedMapHeight) {
+                    continue;
+                }
+
+                float u0, u1, v0, v1;
+                if (minX < HORIZONTAL_PADDING) {
+                    u0 = (float) (HORIZONTAL_PADDING - minX) / tileSizePixels;
+                    minX = HORIZONTAL_PADDING;
+                } else u0 = 0;
+                if (maxX > HORIZONTAL_PADDING + this.seedMapWidth) {
+                    u1 = 1 - ((float) (maxX - HORIZONTAL_PADDING - this.seedMapWidth) / tileSizePixels);
+                    maxX = HORIZONTAL_PADDING + this.seedMapWidth;
+                } else u1 = 1;
+                if (minY < VERTICAL_PADDING) {
+                    v0 = (float) (VERTICAL_PADDING - minY) / tileSizePixels;
+                    minY = VERTICAL_PADDING;
+                } else v0 = 0;
+                if (maxY > VERTICAL_PADDING + this.seedMapHeight) {
+                    v1 = 1 - ((float) (maxY - VERTICAL_PADDING - this.seedMapHeight) / tileSizePixels);
+                    maxY = VERTICAL_PADDING + this.seedMapHeight;
+                } else v1 = 1;
+
+                guiGraphics.submitBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), minX, minY, maxX, maxY, u0, u1, v0, v1, -1);
             }
-
-            Tile tile = this.tileCache.computeIfAbsent(tilePos, _ -> this.createTile(tilePos, biomeData));
-
-            QuartPos2 relQuartPos = QuartPos2.fromTilePos(tilePos).subtract(this.centerQuart);
-            int minX = this.centerX + Configs.PixelsPerBiome * relQuartPos.x();
-            int minY = this.centerY + Configs.PixelsPerBiome * relQuartPos.z();
-            int maxX = minX + tileSizePixels;
-            int maxY = minY + tileSizePixels;
-
-            if (maxX < HORIZONTAL_PADDING || minX > HORIZONTAL_PADDING + this.seedMapWidth) {
-                return false;
-            }
-            if (maxY < VERTICAL_PADDING || minY > VERTICAL_PADDING + this.seedMapHeight) {
-                return false;
-            }
-
-            float u0, u1, v0, v1;
-            if (minX < HORIZONTAL_PADDING) {
-                u0 = (float) (HORIZONTAL_PADDING - minX) / tileSizePixels;
-                minX = HORIZONTAL_PADDING;
-            } else u0 = 0;
-            if (maxX > HORIZONTAL_PADDING + this.seedMapWidth) {
-                u1 = 1 - ((float) (maxX - HORIZONTAL_PADDING - this.seedMapWidth) / tileSizePixels);
-                maxX = HORIZONTAL_PADDING + this.seedMapWidth;
-            } else u1 = 1;
-            if (minY < VERTICAL_PADDING) {
-                v0 = (float) (VERTICAL_PADDING - minY) / tileSizePixels;
-                minY = VERTICAL_PADDING;
-            } else v0 = 0;
-            if (maxY > VERTICAL_PADDING + this.seedMapHeight) {
-                v1 = 1 - ((float) (maxY - VERTICAL_PADDING - this.seedMapHeight) / tileSizePixels);
-                maxY = VERTICAL_PADDING + this.seedMapHeight;
-            } else v1 = 1;
-
-            guiGraphics.submitBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), minX, minY, maxX, maxY, u0, u1, v0, v1, -1);
-            return false;
-        });
+        }
 
         int horChunkRadius = Math.ceilDiv(this.seedMapWidth / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
         int verChunkRadius = Math.ceilDiv(this.seedMapHeight / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
@@ -297,28 +287,24 @@ public class SeedMapScreen extends Screen {
                 RegionPos centerRegion = RegionPos.fromQuartPos(this.centerQuart, regionSize);
                 int horRegionRadius = Math.ceilDiv(horChunkRadius, regionSize);
                 int verRegionRadius = Math.ceilDiv(verChunkRadius, regionSize);
-                // currently only used for end cities
                 StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
                 MemorySegment structurePos = Pos.allocate(this.arena);
-                SpiralLoop.spiral(centerRegion.x(), centerRegion.z(), Math.max(horRegionRadius, verRegionRadius), (regionX, regionZ) -> {
-                    RegionPos regionPos = new RegionPos(regionX, regionZ, regionSize);
-                    RegionPos relRegion = regionPos.subtract(centerRegion);
-                    if (relRegion.x() < -horRegionRadius || relRegion.x() > horRegionRadius || relRegion.z() < -verRegionRadius || relRegion.z() > verRegionRadius) {
-                        return false;
-                    }
-                    if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionPos.x(), regionPos.z(), structurePos) == 0) {
-                        return false;
-                    }
-                    ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
+                for (int relRegionX = -horRegionRadius; relRegionX <= horRegionRadius; relRegionX++) {
+                    for (int relRegionZ = -verRegionRadius; relRegionZ <= verRegionRadius; relRegionZ++) {
+                        RegionPos regionPos = centerRegion.add(relRegionX, relRegionZ);
+                        if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionPos.x(), regionPos.z(), structurePos) == 0) {
+                            continue;
+                        }
+                        ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
 
-                    StructureData structureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new StructureData(chunkPos, new Int2ObjectArrayMap<>()));
-                    BlockPos pos = structureData.structures().computeIfAbsent(structure, _ -> this.calculateStructurePos(regionPos, structurePos, generationCheck));
-                    if (pos == null) {
-                        return false;
+                        StructureData structureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new StructureData(chunkPos, new Int2ObjectArrayMap<>()));
+                        BlockPos pos = structureData.structures().computeIfAbsent(structure, _ -> this.calculateStructurePos(regionPos, structurePos, generationCheck));
+                        if (pos == null) {
+                            continue;
+                        }
+                        this.drawMapFeature(guiGraphics, feature, pos);
                     }
-                    this.drawMapFeature(guiGraphics, feature, pos);
-                    return false;
-                });
+                }
             });
 
         // compute strongholds
@@ -427,9 +413,9 @@ public class SeedMapScreen extends Screen {
         Range.y(range, 63 / Range.scale(range)); // sea level
         Range.sy(range, 1);
 
-        long cacheSize = Cubiomes.getMinCacheSize(this.generator, Range.scale(range), Range.sx(range), Range.sy(range), Range.sz(range));
+        long cacheSize = Cubiomes.getMinCacheSize(this.biomeGenerator, Range.scale(range), Range.sx(range), Range.sy(range), Range.sz(range));
         MemorySegment biomeIds = this.arena.allocate(Cubiomes.C_INT, cacheSize);
-        if (Cubiomes.genBiomes(this.generator, biomeIds, range) == 0) {
+        if (Cubiomes.genBiomes(this.biomeGenerator, biomeIds, range) == 0) {
             return biomeIds.toArray(Cubiomes.C_INT);
         }
 
@@ -437,13 +423,8 @@ public class SeedMapScreen extends Screen {
     }
 
     private @Nullable BlockPos calculateStructurePos(RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
-        try {
-            this.generatorLock.writeLock().lock();
-            if (!generationCheck.check(this.generator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
-                return null;
-            }
-        } finally {
-            this.generatorLock.writeLock().unlock();
+        if (!generationCheck.check(this.structureGenerator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
+            return null;
         }
 
         return new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));

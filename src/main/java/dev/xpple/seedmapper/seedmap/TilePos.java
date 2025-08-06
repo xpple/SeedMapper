@@ -18,4 +18,16 @@ public record TilePos(int x, int z) {
     public ChunkPos toChunkPos() {
         return new ChunkPos(this.x * TILE_SIZE_CHUNKS, this.z * TILE_SIZE_CHUNKS);
     }
+
+    public TilePos add(TilePos tilePos) {
+        return this.add(tilePos.x, tilePos.z);
+    }
+
+    public TilePos add(int tileX, int tileZ) {
+        return new TilePos(this.x + tileX, this.z + tileZ);
+    }
+
+    public TilePos subtract(TilePos tilePos) {
+        return this.add(-tilePos.x, -tilePos.z);
+    }
 }
