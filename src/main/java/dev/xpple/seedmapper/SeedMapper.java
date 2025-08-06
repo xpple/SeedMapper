@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
 import dev.xpple.seedmapper.command.arguments.MapFeatureArgument;
@@ -21,8 +22,11 @@ import dev.xpple.seedmapper.util.SeedDatabaseHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.commands.CommandBuildContext;
 
 import java.io.IOException;
@@ -57,6 +61,13 @@ public class SeedMapper implements ClientModInitializer {
             .build();
 
         SeedDatabaseHelper.fetchSeeds();
+
+        KeyMapping keyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.seedMap", InputConstants.KEY_M, KeyMapping.CATEGORY_GAMEPLAY));
+        ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+            while (keyMapping.consumeClick()) {
+                minecraft.player.connection.sendCommand("sm:seedmap");
+            }
+        });
 
         ClientCommandRegistrationCallback.EVENT.register(SeedMapper::registerCommands);
         RenderManager.registerEvents();

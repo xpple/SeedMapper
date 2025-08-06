@@ -3,14 +3,12 @@
   "package": "dev.xpple.seedmapper.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "seedmap.MinecraftMixin"
   ],
   "client": [
     "ClientPacketListenerMixin",
     "LevelRendererMixin",
     "ScreenMixin",
     "betterconfig.ConfigCommandClientMixin",
-    "seedmap.OptionsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
