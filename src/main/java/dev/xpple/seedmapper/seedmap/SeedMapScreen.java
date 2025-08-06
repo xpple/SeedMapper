@@ -110,13 +110,6 @@ public class SeedMapScreen extends Screen {
 
     private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
 
-    private static final List<MapFeature> TOGGLEABLE_FEATURES = Arrays.stream(MapFeature.values()).sorted(Comparator.comparing(MapFeature::getName)).toList();
-
-    private static final int FEATURE_ICONS_COMBINED_WIDTH = Arrays.stream(MapFeature.values())
-        .map(feature -> feature.getTexture().width())
-        .reduce((l, r) -> l + HORIZONTAL_FEATURE_TOGGLE_SPACING + r)
-        .orElseThrow();
-
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, StructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
     public static final Object2ObjectMap<WorldIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
@@ -149,6 +142,9 @@ public class SeedMapScreen extends Screen {
     private int centerY;
     private int seedMapWidth;
     private int seedMapHeight;
+
+    private final List<MapFeature> toggleableFeatures;
+    private final int featureIconsCombinedWidth;
 
     private List<List<MapFeature.Texture>> featureToggleLocations;
 
@@ -189,6 +185,16 @@ public class SeedMapScreen extends Screen {
                     }
                 });
         }
+
+        this.toggleableFeatures = Arrays.stream(MapFeature.values())
+            .filter(feature -> feature.getDimension() == this.dimension)
+            .filter(feature -> this.version >= feature.availableSince())
+            .sorted(Comparator.comparing(MapFeature::getName))
+            .toList();
+        this.featureIconsCombinedWidth = this.toggleableFeatures.stream()
+            .map(feature -> feature.getTexture().width())
+            .reduce((l, r) -> l + HORIZONTAL_FEATURE_TOGGLE_SPACING + r)
+            .orElseThrow();
 
         this.playerPos = playerPos;
 
@@ -283,6 +289,7 @@ public class SeedMapScreen extends Screen {
 
         // compute structures
         Configs.ToggledFeatures.stream()
+            .filter(this.toggleableFeatures::contains)
             .filter(f -> f.getStructureId() != -1)
             .forEach(feature -> {
                 int structure = feature.getStructureId();
@@ -328,7 +335,8 @@ public class SeedMapScreen extends Screen {
         }
 
         // compute ore veins
-        if (Configs.ToggledFeatures.contains(MapFeature.IRON_ORE_VEIN) || Configs.ToggledFeatures.contains(MapFeature.COPPER_ORE_VEIN)) {
+        if ((this.toggleableFeatures.contains(MapFeature.COPPER_ORE_VEIN) || this.toggleableFeatures.contains(MapFeature.IRON_ORE_VEIN))
+            && (Configs.ToggledFeatures.contains(MapFeature.COPPER_ORE_VEIN) || Configs.ToggledFeatures.contains(MapFeature.IRON_ORE_VEIN))) {
             for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
                 for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
                     TilePos tilePos = new TilePos(centerTile.x() + relTileX, centerTile.z() + relTileZ);
@@ -395,25 +403,25 @@ public class SeedMapScreen extends Screen {
     private List<List<MapFeature.Texture>> drawFeatureToggles(GuiGraphics guiGraphics) {
         // TODO: replace with Gatherers API?
         // TODO: only calculate on resize?
-        int rows = Math.ceilDiv(FEATURE_ICONS_COMBINED_WIDTH, this.seedMapWidth);
+        int rows = Math.ceilDiv(this.featureIconsCombinedWidth, this.seedMapWidth);
         List<List<MapFeature.Texture>> featureToggleLocations = new ArrayList<>(rows);
-        int togglesPerRow = Math.ceilDiv(MapFeature.values().length, rows);
+        int togglesPerRow = Math.ceilDiv(this.toggleableFeatures.size(), rows);
         int toggleMinY = 1;
         for (int row = 0; row < rows - 1; row++) {
             List<MapFeature.Texture> featureToggleRow = drawFeatureTogglesInner(guiGraphics, row, togglesPerRow, togglesPerRow, HORIZONTAL_PADDING, toggleMinY);
             featureToggleLocations.add(featureToggleRow);
             toggleMinY += FEATURE_TOGGLE_HEIGHT + VERTICAL_FEATURE_TOGGLE_SPACING;
         }
-        int togglesInLastRow = MapFeature.values().length - togglesPerRow * (rows - 1);
+        int togglesInLastRow = this.toggleableFeatures.size() - togglesPerRow * (rows - 1);
         List<MapFeature.Texture> lastFeatureToggleRow = drawFeatureTogglesInner(guiGraphics, rows - 1, togglesPerRow, togglesInLastRow, HORIZONTAL_PADDING, toggleMinY);
         featureToggleLocations.add(lastFeatureToggleRow);
         return featureToggleLocations;
     }
 
-    private static List<MapFeature.Texture> drawFeatureTogglesInner(GuiGraphics guiGraphics, int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
+    private List<MapFeature.Texture> drawFeatureTogglesInner(GuiGraphics guiGraphics, int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
         List<MapFeature.Texture> featureToggleRow = new ArrayList<>(maxToggles);
         for (int toggle = 0; toggle < maxToggles; toggle++) {
-            MapFeature feature = TOGGLEABLE_FEATURES.get(row * togglesPerRow + toggle);
+            MapFeature feature = this.toggleableFeatures.get(row * togglesPerRow + toggle);
             MapFeature.Texture featureIcon = feature.getTexture();
             featureToggleRow.add(featureIcon);
             int colour = -1;
@@ -600,7 +608,7 @@ public class SeedMapScreen extends Screen {
         if (clickedToggleIndex == -1) {
             return false;
         }
-        MapFeature feature = TOGGLEABLE_FEATURES.get(clickedRowIndex * this.featureToggleLocations.getFirst().size() + clickedToggleIndex);
+        MapFeature feature = this.toggleableFeatures.get(clickedRowIndex * this.featureToggleLocations.getFirst().size() + clickedToggleIndex);
         if (!Configs.ToggledFeatures.remove(feature)) {
             Configs.ToggledFeatures.add(feature);
         }
