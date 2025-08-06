@@ -45,7 +45,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.foreign.Arena;
@@ -115,7 +114,8 @@ public class SeedMapScreen extends Screen {
 
     private static final int FEATURE_ICONS_COMBINED_WIDTH = Arrays.stream(MapFeature.values())
         .map(feature -> feature.getTexture().width())
-        .collect(() -> new MutableInt(0), MutableInt::add, (l, r) -> l.add(r.addAndGet(HORIZONTAL_FEATURE_TOGGLE_SPACING))).intValue();
+        .reduce((l, r) -> l + HORIZONTAL_FEATURE_TOGGLE_SPACING + r)
+        .orElseThrow();
 
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, StructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
