@@ -477,7 +477,7 @@ public class SeedMapScreen extends Screen {
     private @Nullable OreVeinData calculateOreVein(TilePos tilePos) {
         ChunkPos chunkPos = tilePos.toChunkPos();
         for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
-            for (int relChunkZ = 0; relChunkZ < SCALED_CHUNK_SIZE; relChunkZ++) {
+            for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
                 int minBlockX = SectionPos.sectionToBlockCoord(chunkPos.x + relChunkZ);
                 int minBlockZ = SectionPos.sectionToBlockCoord(chunkPos.z + relChunkZ);
                 RandomSource rnd = this.oreVeinRandom.at(minBlockX, 0, minBlockZ);
