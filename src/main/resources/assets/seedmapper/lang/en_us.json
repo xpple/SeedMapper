@@ -85,6 +85,6 @@
 
   "key.seedMap": "Seed map",
 
-  "seedMap.seed": "Seed: %s",
+  "seedMap.seedAndVersion": "Seed: %s (%s)",
   "seedMap.coordinatesCopied": "%s (coordinates copied!)"
 }

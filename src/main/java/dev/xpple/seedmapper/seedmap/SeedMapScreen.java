@@ -219,8 +219,8 @@ public class SeedMapScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        // draw seed
-        Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(this.seed)));
+        // draw seed + version
+        Component seedComponent = Component.translatable("seedMap.seedAndVersion", accent(Long.toString(this.seed)), Cubiomes.mc2str(this.version).getString(0));
         guiGraphics.drawString(this.font, seedComponent, HORIZONTAL_PADDING, VERTICAL_PADDING - this.font.lineHeight - 1, -1);
 
         this.featureToggleLocations = this.drawFeatureToggles(guiGraphics);
