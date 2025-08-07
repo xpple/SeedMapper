@@ -29,6 +29,7 @@ import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -38,6 +39,7 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -107,6 +109,8 @@ public class SeedMapScreen extends Screen {
     private static final int VERTICAL_FEATURE_TOGGLE_SPACING = 1;
     private static final int FEATURE_TOGGLE_HEIGHT = 20;
 
+    private static final int TELEPORT_FIELD_WIDTH = 70;
+
     private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
 
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
@@ -149,6 +153,9 @@ public class SeedMapScreen extends Screen {
     private QuartPos2 mouseQuart;
 
     private int displayCoordinatesCopiedTicks = 0;
+
+    private EditBox editBoxX;
+    private EditBox editBoxZ;
 
     public SeedMapScreen(long seed, int dimension, int version, BlockPos playerPos) {
         super(Component.empty());
@@ -212,6 +219,7 @@ public class SeedMapScreen extends Screen {
         this.seedMapHeight = 2 * (this.centerY - VERTICAL_PADDING);
 
         this.createFeatureToggles();
+        this.createTeleportField();
     }
 
     @Override
@@ -494,6 +502,15 @@ public class SeedMapScreen extends Screen {
         return null;
     }
 
+    private void createTeleportField() {
+        this.editBoxX = new EditBox(this.font, this.width / 2 - TELEPORT_FIELD_WIDTH, VERTICAL_PADDING + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.editBoxX"));
+        this.editBoxX.setMaxLength(9);
+        this.addRenderableWidget(this.editBoxX);
+        this.editBoxZ = new EditBox(this.font, this.width / 2, VERTICAL_PADDING + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.editBoxZ"));
+        this.editBoxZ.setMaxLength(9);
+        this.addRenderableWidget(this.editBoxZ);
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -565,6 +582,38 @@ public class SeedMapScreen extends Screen {
         }
         this.minecraft.keyboardHandler.setClipboard("%d ~ %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
         this.displayCoordinatesCopiedTicks = SharedConstants.TICKS_PER_SECOND;
+        return true;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        return this.handleTeleportFieldEnter(keyCode, scanCode, modifiers);
+    }
+
+    private boolean handleTeleportFieldEnter(int keyCode, int scanCode, int modifiers) {
+        if (keyCode != InputConstants.KEY_RETURN) {
+            return false;
+        }
+        if (!this.editBoxX.isActive() && !this.editBoxZ.isActive()) {
+            return false;
+        }
+        int x, z;
+        try {
+            x = Integer.parseInt(this.editBoxX.getValue());
+            z = Integer.parseInt(this.editBoxZ.getValue());
+        } catch (NumberFormatException _) {
+            return false;
+        }
+        if (x < -MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE || x > MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE) {
+            return false;
+        }
+        if (z < -MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE || z > MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE) {
+            return false;
+        }
+        this.centerQuart = new QuartPos2(QuartPos.fromBlock(x), QuartPos.fromBlock(z));
         return true;
     }
 
