@@ -24,7 +24,7 @@ public class SeedMapCache<K, V> {
      * else computes it asynchronously using the mapping function.
      * @param key the key
      * @param mappingFunction the key to value function
-     * @return the value if present, {@code null} otherwise
+     * @return the nonnull value iff present
      */
     public @Nullable V computeIfAbsent(K key, Function<K, V> mappingFunction) {
         V value = this.cache.get(key);
