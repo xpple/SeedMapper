@@ -46,6 +46,14 @@ public class Configs {
         return Component.translatable("config.oreAirCheck.comment");
     }
 
+    private static final int MAX_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
+    @Config(setter = @Config.Setter("setSeedMapThreads"))
+    public static int SeedMapThreads = MAX_THREADS;
+
+    private static void setSeedMapThreads(int seedMapThreads) {
+        SeedMapThreads = Math.clamp(seedMapThreads, 1, MAX_THREADS);
+    }
+
     @Config(setter = @Config.Setter("setPixelsPerBiome"))
     public static int PixelsPerBiome = 4;
 

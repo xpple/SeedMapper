@@ -119,6 +119,8 @@ public class SeedMapScreen extends Screen {
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, BlockPos> spawnDataCache = new Object2ObjectOpenHashMap<>();
 
+    private final SeedMapThreadingHelper threadingHelper = new SeedMapThreadingHelper();
+
     private final Arena arena = Arena.ofShared();
 
     private final long seed;
@@ -189,7 +191,7 @@ public class SeedMapScreen extends Screen {
         this.oreVeinCache = oreVeinDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
 
         if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.containsKey(this.worldIdentifier)) {
-            SeedMapThreadingHelper.submitStrongholdCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
+            this.threadingHelper.submitStrongholdCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
                 .thenAccept(tree -> {
                     if (tree != null) {
                         strongholdDataCache.put(this.worldIdentifier, tree);
@@ -245,7 +247,7 @@ public class SeedMapScreen extends Screen {
                     if (!this.pendingBiomeCalculations.add(tilePos)) {
                         continue;
                     }
-                    SeedMapThreadingHelper.submitBiomeCalculation(() -> this.calculateBiomeData(tilePos)).thenAccept(data -> {
+                    this.threadingHelper.submitBiomeCalculation(() -> this.calculateBiomeData(tilePos)).thenAccept(data -> {
                         if (data != null) {
                             this.biomeCache.put(tilePos, data);
                             this.pendingBiomeCalculations.remove(tilePos);
@@ -621,7 +623,7 @@ public class SeedMapScreen extends Screen {
     public void onClose() {
         super.onClose();
         this.tileCache.values().forEach(Tile::close);
-        SeedMapThreadingHelper.close(this.arena::close);
+        this.threadingHelper.close(this.arena::close);
         Configs.save();
     }
 }
