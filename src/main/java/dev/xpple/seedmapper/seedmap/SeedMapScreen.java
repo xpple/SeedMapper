@@ -50,7 +50,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -147,8 +146,6 @@ public class SeedMapScreen extends Screen {
     private final List<MapFeature> toggleableFeatures;
     private final int featureIconsCombinedWidth;
 
-    private List<List<MapFeature.Texture>> featureToggleLocations;
-
     private QuartPos2 mouseQuart;
 
     private int displayCoordinatesCopiedTicks = 0;
@@ -213,6 +210,8 @@ public class SeedMapScreen extends Screen {
 
         this.seedMapWidth = 2 * (this.centerX - HORIZONTAL_PADDING);
         this.seedMapHeight = 2 * (this.centerY - VERTICAL_PADDING);
+
+        this.createFeatureToggles();
     }
 
     @Override
@@ -222,8 +221,6 @@ public class SeedMapScreen extends Screen {
         // draw seed + version
         Component seedComponent = Component.translatable("seedMap.seedAndVersion", accent(Long.toString(this.seed)), Cubiomes.mc2str(this.version).getString(0));
         guiGraphics.drawString(this.font, seedComponent, HORIZONTAL_PADDING, VERTICAL_PADDING - this.font.lineHeight - 1, -1);
-
-        this.featureToggleLocations = this.drawFeatureToggles(guiGraphics);
 
         int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
         int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
@@ -414,38 +411,27 @@ public class SeedMapScreen extends Screen {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, featureIcon.resourceLocation(), minX, minY, 0, 0, featureIcon.width(), featureIcon.height(), featureIcon.width(), featureIcon.height());
     }
 
-    private List<List<MapFeature.Texture>> drawFeatureToggles(GuiGraphics guiGraphics) {
+    private void createFeatureToggles() {
         // TODO: replace with Gatherers API?
         // TODO: only calculate on resize?
         int rows = Math.ceilDiv(this.featureIconsCombinedWidth, this.seedMapWidth);
-        List<List<MapFeature.Texture>> featureToggleLocations = new ArrayList<>(rows);
         int togglesPerRow = Math.ceilDiv(this.toggleableFeatures.size(), rows);
         int toggleMinY = 1;
         for (int row = 0; row < rows - 1; row++) {
-            List<MapFeature.Texture> featureToggleRow = drawFeatureTogglesInner(guiGraphics, row, togglesPerRow, togglesPerRow, HORIZONTAL_PADDING, toggleMinY);
-            featureToggleLocations.add(featureToggleRow);
+            this.createFeatureTogglesInner(row, togglesPerRow, togglesPerRow, HORIZONTAL_PADDING, toggleMinY);
             toggleMinY += FEATURE_TOGGLE_HEIGHT + VERTICAL_FEATURE_TOGGLE_SPACING;
         }
         int togglesInLastRow = this.toggleableFeatures.size() - togglesPerRow * (rows - 1);
-        List<MapFeature.Texture> lastFeatureToggleRow = drawFeatureTogglesInner(guiGraphics, rows - 1, togglesPerRow, togglesInLastRow, HORIZONTAL_PADDING, toggleMinY);
-        featureToggleLocations.add(lastFeatureToggleRow);
-        return featureToggleLocations;
+        this.createFeatureTogglesInner(rows - 1, togglesPerRow, togglesInLastRow, HORIZONTAL_PADDING, toggleMinY);
     }
 
-    private List<MapFeature.Texture> drawFeatureTogglesInner(GuiGraphics guiGraphics, int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
-        List<MapFeature.Texture> featureToggleRow = new ArrayList<>(maxToggles);
+    private void createFeatureTogglesInner(int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
         for (int toggle = 0; toggle < maxToggles; toggle++) {
             MapFeature feature = this.toggleableFeatures.get(row * togglesPerRow + toggle);
             MapFeature.Texture featureIcon = feature.getTexture();
-            featureToggleRow.add(featureIcon);
-            int colour = -1;
-            if (!Configs.ToggledFeatures.contains(feature)) {
-                colour = ARGB.color(255 >> 1, 255, 255, 255);
-            }
-            drawFeatureIcon(guiGraphics, featureIcon, toggleMinX, toggleMinY, colour);
+            this.addRenderableWidget(new FeatureToggleWidget(feature, toggleMinX, toggleMinY));
             toggleMinX += featureIcon.width() + HORIZONTAL_FEATURE_TOGGLE_SPACING;
         }
-        return featureToggleRow;
     }
 
     private int[] calculateBiomeData(TilePos tilePos) {
@@ -508,12 +494,6 @@ public class SeedMapScreen extends Screen {
         return null;
     }
 
-    private static void drawFeatureIcon(GuiGraphics guiGraphics, MapFeature.Texture featureIcon, int minX, int minY, int colour) {
-        int iconWidth = featureIcon.width();
-        int iconHeight = featureIcon.height();
-        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, featureIcon.resourceLocation(), minX, minY, 0, 0, iconWidth, iconHeight, iconWidth, iconHeight, iconWidth, iconHeight, colour);
-    }
-
     @Override
     public void tick() {
         super.tick();
@@ -567,10 +547,10 @@ public class SeedMapScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.handleMapClicked(mouseX, mouseY, button)) {
+        if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        if (this.handleToggleClicked(mouseX, mouseY, button)) {
+        if (this.handleMapClicked(mouseX, mouseY, button)) {
             return true;
         }
         return false;
@@ -585,47 +565,6 @@ public class SeedMapScreen extends Screen {
         }
         this.minecraft.keyboardHandler.setClipboard("%d ~ %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
         this.displayCoordinatesCopiedTicks = SharedConstants.TICKS_PER_SECOND;
-        return true;
-    }
-
-    private boolean handleToggleClicked(double mouseX, double mouseY, int button) {
-        if (mouseX < HORIZONTAL_PADDING || mouseX > HORIZONTAL_PADDING + this.seedMapWidth || mouseY < 1 || mouseY > VERTICAL_PADDING) {
-            return false;
-        }
-        int minY = 1;
-        int featureToggleRowCount = this.featureToggleLocations.size();
-        int clickedRowIndex = -1;
-        for (int rowIndex = 0; rowIndex < featureToggleRowCount; rowIndex++) {
-            minY += FEATURE_TOGGLE_HEIGHT;
-            if (minY > mouseY) {
-                clickedRowIndex = rowIndex;
-                break;
-            }
-            minY += VERTICAL_FEATURE_TOGGLE_SPACING;
-        }
-        if (clickedRowIndex == -1) {
-            return false;
-        }
-        int minX = HORIZONTAL_PADDING;
-        List<MapFeature.Texture> featureToggleRow = this.featureToggleLocations.get(clickedRowIndex);
-        int featureToggleRowSize = featureToggleRow.size();
-        int clickedToggleIndex = -1;
-        for (int toggleIndex = 0; toggleIndex < featureToggleRowSize; toggleIndex++) {
-            MapFeature.Texture featureIcon = featureToggleRow.get(toggleIndex);
-            minX += featureIcon.width();
-            if (minX > mouseX) {
-                clickedToggleIndex = toggleIndex;
-                break;
-            }
-            minX += HORIZONTAL_FEATURE_TOGGLE_SPACING;
-        }
-        if (clickedToggleIndex == -1) {
-            return false;
-        }
-        MapFeature feature = this.toggleableFeatures.get(clickedRowIndex * this.featureToggleLocations.getFirst().size() + clickedToggleIndex);
-        if (!Configs.ToggledFeatures.remove(feature)) {
-            Configs.ToggledFeatures.add(feature);
-        }
         return true;
     }
 
