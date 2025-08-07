@@ -8,6 +8,7 @@ import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.seedmap.MapFeature;
 import dev.xpple.seedmapper.seedmap.SeedMapScreen;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
@@ -62,7 +63,11 @@ public class Configs {
     }
 
     @Config(chatRepresentation = "listToggledFeatures")
-    public static EnumSet<MapFeature> ToggledFeatures = EnumSet.allOf(MapFeature.class);
+    public static EnumSet<MapFeature> ToggledFeatures = Util.make(() -> {
+        EnumSet<MapFeature> toggledFeatures = EnumSet.allOf(MapFeature.class);
+        toggledFeatures.remove(MapFeature.SLIME_CHUNK);
+        return toggledFeatures;
+    });
 
     public static Component listToggledFeatures() {
         return join(Component.literal(", "), ToggledFeatures.stream()

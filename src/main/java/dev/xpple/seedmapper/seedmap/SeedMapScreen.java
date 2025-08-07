@@ -12,7 +12,8 @@ import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.StructureChecks;
-import dev.xpple.seedmapper.thread.SeedMapThreadingHelper;
+import dev.xpple.seedmapper.thread.SeedMapCache;
+import dev.xpple.seedmapper.thread.SeedMapExecutor;
 import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.RegionPos;
 import dev.xpple.seedmapper.util.TwoDTree;
@@ -24,9 +25,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
-import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -46,6 +44,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,6 +52,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.IntSupplier;
@@ -117,9 +117,10 @@ public class SeedMapScreen extends Screen {
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, StructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
     public static final Object2ObjectMap<WorldIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, BitSet>> slimeChunkDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, BlockPos> spawnDataCache = new Object2ObjectOpenHashMap<>();
 
-    private final SeedMapThreadingHelper threadingHelper = new SeedMapThreadingHelper();
+    private final SeedMapExecutor seedMapExecutor = new SeedMapExecutor();
 
     private final Arena arena = Arena.ofShared();
 
@@ -134,11 +135,12 @@ public class SeedMapScreen extends Screen {
     private final PositionalRandomFactory oreVeinRandom;
     private final MemorySegment oreVeinParameters;
 
-    private final Object2ObjectMap<TilePos, Tile> tileCache = new Object2ObjectOpenHashMap<>();
-    private final ObjectSet<TilePos> pendingBiomeCalculations = ObjectSets.synchronize(new ObjectOpenHashSet<>());
-    private final Object2ObjectMap<TilePos, int[]> biomeCache;
+    private final Object2ObjectMap<TilePos, Tile> biomeTileCache = new Object2ObjectOpenHashMap<>();
+    private final SeedMapCache<TilePos, int[]> biomeCache;
     private final Object2ObjectMap<ChunkPos, StructureData> structureCache;
     private final Object2ObjectMap<TilePos, OreVeinData> oreVeinCache;
+    private final Object2ObjectMap<TilePos, Tile> slimeChunkTileCache = new Object2ObjectOpenHashMap<>();
+    private final SeedMapCache<TilePos, BitSet> slimeChunkCache;
 
     private final BlockPos playerPos;
 
@@ -186,12 +188,13 @@ public class SeedMapScreen extends Screen {
             .sorted(Comparator.comparing(MapFeature::getName))
             .toList();
 
-        this.biomeCache = Object2ObjectMaps.synchronize(biomeDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>()));
+        this.biomeCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(biomeDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
         this.structureCache = structureDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
+        this.slimeChunkCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(slimeChunkDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
         this.oreVeinCache = oreVeinDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
 
         if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.containsKey(this.worldIdentifier)) {
-            this.threadingHelper.submitStrongholdCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
+            this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
                 .thenAccept(tree -> {
                     if (tree != null) {
                         strongholdDataCache.put(this.worldIdentifier, tree);
@@ -242,54 +245,20 @@ public class SeedMapScreen extends Screen {
                 TilePos tilePos = centerTile.add(relTileX, relTileZ);
 
                 // compute biomes and store in texture
-                int[] biomeData = this.biomeCache.get(tilePos);
-                if (biomeData == null) {
-                    if (!this.pendingBiomeCalculations.add(tilePos)) {
-                        continue;
+                int[] biomeData = this.biomeCache.computeIfAbsent(tilePos, this::calculateBiomeData);
+                if (biomeData != null) {
+                    Tile tile = this.biomeTileCache.computeIfAbsent(tilePos, _ -> this.createBiomeTile(tilePos, biomeData));
+                    this.drawTile(guiGraphics, tile);
+                }
+
+                // compute slime chunks and store in texture
+                if (this.toggleableFeatures.contains(MapFeature.SLIME_CHUNK) && Configs.ToggledFeatures.contains(MapFeature.STRONGHOLD)) {
+                    BitSet slimeChunkData = this.slimeChunkCache.computeIfAbsent(tilePos, this::calculateSlimeChunkData);
+                    if (slimeChunkData != null) {
+                        Tile tile = this.slimeChunkTileCache.computeIfAbsent(tilePos, _ -> this.createSlimeChunkTile(tilePos, slimeChunkData));
+                        this.drawTile(guiGraphics, tile);
                     }
-                    this.threadingHelper.submitBiomeCalculation(() -> this.calculateBiomeData(tilePos)).thenAccept(data -> {
-                        if (data != null) {
-                            this.biomeCache.put(tilePos, data);
-                            this.pendingBiomeCalculations.remove(tilePos);
-                        }
-                    });
-                    continue;
                 }
-
-                Tile tile = this.tileCache.computeIfAbsent(tilePos, _ -> this.createTile(tilePos, biomeData));
-
-                QuartPos2 relQuartPos = QuartPos2.fromTilePos(tilePos).subtract(this.centerQuart);
-                int minX = this.centerX + Configs.PixelsPerBiome * relQuartPos.x();
-                int minY = this.centerY + Configs.PixelsPerBiome * relQuartPos.z();
-                int maxX = minX + tileSizePixels;
-                int maxY = minY + tileSizePixels;
-
-                if (maxX < HORIZONTAL_PADDING || minX > HORIZONTAL_PADDING + this.seedMapWidth) {
-                    continue;
-                }
-                if (maxY < VERTICAL_PADDING || minY > VERTICAL_PADDING + this.seedMapHeight) {
-                    continue;
-                }
-
-                float u0, u1, v0, v1;
-                if (minX < HORIZONTAL_PADDING) {
-                    u0 = (float) (HORIZONTAL_PADDING - minX) / tileSizePixels;
-                    minX = HORIZONTAL_PADDING;
-                } else u0 = 0;
-                if (maxX > HORIZONTAL_PADDING + this.seedMapWidth) {
-                    u1 = 1 - ((float) (maxX - HORIZONTAL_PADDING - this.seedMapWidth) / tileSizePixels);
-                    maxX = HORIZONTAL_PADDING + this.seedMapWidth;
-                } else u1 = 1;
-                if (minY < VERTICAL_PADDING) {
-                    v0 = (float) (VERTICAL_PADDING - minY) / tileSizePixels;
-                    minY = VERTICAL_PADDING;
-                } else v0 = 0;
-                if (maxY > VERTICAL_PADDING + this.seedMapHeight) {
-                    v1 = 1 - ((float) (maxY - VERTICAL_PADDING - this.seedMapHeight) / tileSizePixels);
-                    maxY = VERTICAL_PADDING + this.seedMapHeight;
-                } else v1 = 1;
-
-                guiGraphics.submitBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), minX, minY, maxX, maxY, u0, u1, v0, v1, -1);
             }
         }
 
@@ -383,12 +352,44 @@ public class SeedMapScreen extends Screen {
         guiGraphics.drawString(this.font, coordinates , HORIZONTAL_PADDING, VERTICAL_PADDING + this.seedMapHeight + 1, -1);
     }
 
-    private BlockPos calculateSpawnData() {
-        MemorySegment pos = Cubiomes.getSpawn(this.arena, this.biomeGenerator);
-        return new BlockPos(Pos.x(pos), 0, Pos.z(pos));
+    private void drawTile(GuiGraphics guiGraphics, Tile tile) {
+        TilePos tilePos = tile.pos();
+        QuartPos2 relQuartPos = QuartPos2.fromTilePos(tilePos).subtract(this.centerQuart);
+        int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
+        int minX = this.centerX + Configs.PixelsPerBiome * relQuartPos.x();
+        int minY = this.centerY + Configs.PixelsPerBiome * relQuartPos.z();
+        int maxX = minX + tileSizePixels;
+        int maxY = minY + tileSizePixels;
+
+        if (maxX < HORIZONTAL_PADDING || minX > HORIZONTAL_PADDING + this.seedMapWidth) {
+            return;
+        }
+        if (maxY < VERTICAL_PADDING || minY > VERTICAL_PADDING + this.seedMapHeight) {
+            return;
+        }
+
+        float u0, u1, v0, v1;
+        if (minX < HORIZONTAL_PADDING) {
+            u0 = (float) (HORIZONTAL_PADDING - minX) / tileSizePixels;
+            minX = HORIZONTAL_PADDING;
+        } else u0 = 0;
+        if (maxX > HORIZONTAL_PADDING + this.seedMapWidth) {
+            u1 = 1 - ((float) (maxX - HORIZONTAL_PADDING - this.seedMapWidth) / tileSizePixels);
+            maxX = HORIZONTAL_PADDING + this.seedMapWidth;
+        } else u1 = 1;
+        if (minY < VERTICAL_PADDING) {
+            v0 = (float) (VERTICAL_PADDING - minY) / tileSizePixels;
+            minY = VERTICAL_PADDING;
+        } else v0 = 0;
+        if (maxY > VERTICAL_PADDING + this.seedMapHeight) {
+            v1 = 1 - ((float) (maxY - VERTICAL_PADDING - this.seedMapHeight) / tileSizePixels);
+            maxY = VERTICAL_PADDING + this.seedMapHeight;
+        } else v1 = 1;
+
+        guiGraphics.submitBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), minX, minY, maxX, maxY, u0, u1, v0, v1, -1);
     }
 
-    private Tile createTile(TilePos tilePos, int[] biomeData) {
+    private Tile createBiomeTile(TilePos tilePos, int[] biomeData) {
         Tile tile = new Tile(tilePos, this.seed, this.dimension);
         DynamicTexture texture = tile.texture();
         int width = texture.getPixels().getWidth();
@@ -397,6 +398,21 @@ public class SeedMapScreen extends Screen {
             for (int relZ = 0; relZ < height; relZ++) {
                 int biome = biomeData[relX + relZ * width];
                 texture.getPixels().setPixel(relX, relZ, biomeColours[biome]);
+            }
+        }
+        texture.upload();
+        return tile;
+    }
+
+    private Tile createSlimeChunkTile(TilePos tilePos, BitSet slimeChunkData) {
+        Tile tile = new Tile(tilePos, this.seed, this.dimension);
+        DynamicTexture texture = tile.texture();
+        for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
+            for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
+                boolean isSlimeChunk = slimeChunkData.get(relChunkX + relChunkZ * TilePos.TILE_SIZE_CHUNKS);
+                if (isSlimeChunk) {
+                    texture.getPixels().fillRect(SCALED_CHUNK_SIZE * relChunkX, SCALED_CHUNK_SIZE * relChunkZ, SCALED_CHUNK_SIZE, SCALED_CHUNK_SIZE, 0xFF_00FF00);
+                }
             }
         }
         texture.upload();
@@ -466,6 +482,18 @@ public class SeedMapScreen extends Screen {
         throw new RuntimeException("Cubiomes.genBiomes() failed!");
     }
 
+    private BitSet calculateSlimeChunkData(TilePos tilePos) {
+        BitSet slimeChunks = new BitSet(TilePos.TILE_SIZE_CHUNKS * TilePos.TILE_SIZE_CHUNKS);
+        ChunkPos chunkPos = tilePos.toChunkPos();
+        for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
+            for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
+                RandomSource random = WorldgenRandom.seedSlimeChunk(chunkPos.x + relChunkX, chunkPos.z + relChunkZ, this.seed, 987234911L);
+                slimeChunks.set(relChunkX + relChunkZ * TilePos.TILE_SIZE_CHUNKS, random.nextInt(10) == 0);
+            }
+        }
+        return slimeChunks;
+    }
+
     private @Nullable BlockPos calculateStructurePos(RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
         if (!generationCheck.check(this.structureGenerator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
             return null;
@@ -502,6 +530,11 @@ public class SeedMapScreen extends Screen {
             }
         }
         return null;
+    }
+
+    private BlockPos calculateSpawnData() {
+        MemorySegment pos = Cubiomes.getSpawn(this.arena, this.biomeGenerator);
+        return new BlockPos(Pos.x(pos), 0, Pos.z(pos));
     }
 
     private void createTeleportField() {
@@ -622,8 +655,9 @@ public class SeedMapScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        this.tileCache.values().forEach(Tile::close);
-        this.threadingHelper.close(this.arena::close);
+        this.biomeTileCache.values().forEach(Tile::close);
+        this.slimeChunkTileCache.values().forEach(Tile::close);
+        this.seedMapExecutor.close(this.arena::close);
         Configs.save();
     }
 }
