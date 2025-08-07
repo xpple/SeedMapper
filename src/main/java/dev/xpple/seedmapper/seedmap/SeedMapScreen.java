@@ -114,6 +114,7 @@ public class SeedMapScreen extends Screen {
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, StructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
     public static final Object2ObjectMap<WorldIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<WorldIdentifier, BlockPos> spawnDataCache = new Object2ObjectOpenHashMap<>();
 
     private final Arena arena = Arena.ofShared();
 
@@ -325,7 +326,7 @@ public class SeedMapScreen extends Screen {
                 }
             });
 
-        // compute strongholds
+        // draw strongholds
         if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && Configs.ToggledFeatures.contains(MapFeature.STRONGHOLD)) {
             TwoDTree tree = strongholdDataCache.get(this.worldIdentifier);
             if (tree != null) {
@@ -360,12 +361,24 @@ public class SeedMapScreen extends Screen {
         if (playerMinX >= HORIZONTAL_PADDING && playerMaxX <= HORIZONTAL_PADDING + this.seedMapWidth && playerMinY >= VERTICAL_PADDING && playerMaxY <= VERTICAL_PADDING + this.seedMapHeight) {
             PlayerFaceRenderer.draw(guiGraphics, this.minecraft.player.getSkin(), playerMinX, playerMinY, 20);
         }
+
+        // calculate spawn point
+        if (this.toggleableFeatures.contains(MapFeature.WORLD_SPAWN) && Configs.ToggledFeatures.contains(MapFeature.WORLD_SPAWN)) {
+            BlockPos spawnPoint = spawnDataCache.computeIfAbsent(this.worldIdentifier, _ -> this.calculateSpawnData());
+            this.drawMapFeature(guiGraphics, MapFeature.WORLD_SPAWN, spawnPoint);
+        }
+
         // draw hovered coordinates
         Component coordinates = accent("x: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
         if (this.displayCoordinatesCopiedTicks > 0) {
             coordinates = Component.translatable("seedMap.coordinatesCopied", coordinates);
         }
         guiGraphics.drawString(this.font, coordinates , HORIZONTAL_PADDING, VERTICAL_PADDING + this.seedMapHeight + 1, -1);
+    }
+
+    private BlockPos calculateSpawnData() {
+        MemorySegment pos = Cubiomes.getSpawn(this.arena, this.biomeGenerator);
+        return new BlockPos(Pos.x(pos), 0, Pos.z(pos));
     }
 
     private Tile createTile(TilePos tilePos, int[] biomeData) {
