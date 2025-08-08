@@ -722,7 +722,9 @@ public class SeedMapScreen extends Screen {
                 }
                 Cubiomes.free_loot_table_pools(lootTableContext);
             }
-            this.chestLootWidget.setContent(widget.x + widget.width() / 2, widget.y + widget.height() / 2, Cubiomes.struct2str(structure).getString(0), containers);
+            if (!containers.isEmpty()) {
+                this.chestLootWidget.setContent(widget.x + widget.width() / 2, widget.y + widget.height() / 2, Cubiomes.struct2str(structure).getString(0), containers);
+            }
         }
     }
 
