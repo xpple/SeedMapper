@@ -131,6 +131,7 @@ public class SeedMapScreen extends Screen {
 
     private final MemorySegment biomeGenerator; // thread safe
     private final MemorySegment structureGenerator; // NOT thread safe
+    private final MemorySegment[] structureConfigs;
     private final MemorySegment surfaceNoise;
     private final PositionalRandomFactory oreVeinRandom;
     private final MemorySegment oreVeinParameters;
@@ -174,6 +175,19 @@ public class SeedMapScreen extends Screen {
 
         this.structureGenerator = Generator.allocate(this.arena);
         this.structureGenerator.copyFrom(this.biomeGenerator);
+
+        this.structureConfigs = IntStream.range(0, Cubiomes.FEATURE_NUM())
+            .mapToObj(structure -> {
+                MemorySegment structureConfig = StructureConfig.allocate(this.arena);
+                if (Cubiomes.getStructureConfig(structure, this.version, structureConfig) == 0) {
+                    return null;
+                }
+                if (StructureConfig.dim(structureConfig) != this.dimension) {
+                    return null;
+                }
+                return structureConfig;
+            })
+            .toArray(MemorySegment[]::new);
 
         this.surfaceNoise = SurfaceNoise.allocate(this.arena);
         Cubiomes.initSurfaceNoise(this.surfaceNoise, this.dimension, this.seed);
@@ -271,11 +285,8 @@ public class SeedMapScreen extends Screen {
             .filter(f -> f.getStructureId() != -1)
             .forEach(feature -> {
                 int structure = feature.getStructureId();
-                MemorySegment structureConfig = StructureConfig.allocate(this.arena);
-                if (Cubiomes.getStructureConfig(structure, this.version, structureConfig) == 0) {
-                    return;
-                }
-                if (StructureConfig.dim(structureConfig) != this.dimension) {
+                MemorySegment structureConfig = this.structureConfigs[structure];
+                if (structureConfig == null) {
                     return;
                 }
                 int regionSize = StructureConfig.regionSize(structureConfig);
