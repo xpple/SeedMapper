@@ -3,7 +3,6 @@ package dev.xpple.seedmapper.seedmap;
 import dev.xpple.seedmapper.config.Configs;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 
@@ -22,7 +21,7 @@ public class FeatureToggleWidget extends Button {
         if (!Configs.ToggledFeatures.contains(this.feature)) {
             colour = ARGB.color(255 >> 1, 255, 255, 255);
         }
-        this.drawFeatureIcon(guiGraphics, this.getX(), this.getY(), colour);
+        SeedMapScreen.FeatureWidget.drawFeatureIcon(guiGraphics, this.feature.getTexture(), this.getX(), this.getY(), colour);
     }
 
     @Override
@@ -30,11 +29,5 @@ public class FeatureToggleWidget extends Button {
         if (!Configs.ToggledFeatures.remove(this.feature)) {
             Configs.ToggledFeatures.add(this.feature);
         }
-    }
-
-    private void drawFeatureIcon(GuiGraphics guiGraphics, int minX, int minY, int colour) {
-        int iconWidth = this.feature.getTexture().width();
-        int iconHeight = this.feature.getTexture().height();
-        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, this.feature.getTexture().resourceLocation(), minX, minY, 0, 0, iconWidth, iconHeight, iconWidth, iconHeight, iconWidth, iconHeight, colour);
     }
 }

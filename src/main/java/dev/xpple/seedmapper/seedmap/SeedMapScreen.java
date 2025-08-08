@@ -2,13 +2,19 @@ package dev.xpple.seedmapper.seedmap;
 
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
+import com.github.cubiomes.ItemStack;
+import com.github.cubiomes.LootTableContext;
 import com.github.cubiomes.OreVeinParameters;
+import com.github.cubiomes.Piece;
 import com.github.cubiomes.Pos;
 import com.github.cubiomes.Range;
 import com.github.cubiomes.StructureConfig;
+import com.github.cubiomes.StructureSaltConfig;
+import com.github.cubiomes.StructureVariant;
 import com.github.cubiomes.SurfaceNoise;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.xpple.seedmapper.SeedMapper;
+import dev.xpple.seedmapper.command.arguments.ItemAndEnchantmentsPredicateArgument;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.StructureChecks;
@@ -25,7 +31,10 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
@@ -41,6 +50,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
@@ -51,10 +62,13 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.IntSupplier;
 import java.util.stream.IntStream;
 
@@ -155,12 +169,16 @@ public class SeedMapScreen extends Screen {
     private final List<MapFeature> toggleableFeatures;
     private final int featureIconsCombinedWidth;
 
+    private final ObjectSet<FeatureWidget> featureWidgets = new ObjectOpenHashSet<>();
+
     private QuartPos2 mouseQuart;
 
     private int displayCoordinatesCopiedTicks = 0;
 
     private EditBox editBoxX;
     private EditBox editBoxZ;
+
+    private final ChestLootWidget chestLootWidget = new ChestLootWidget();
 
     public SeedMapScreen(long seed, int dimension, int version, BlockPos playerPos) {
         super(Component.empty());
@@ -308,7 +326,7 @@ public class SeedMapScreen extends Screen {
                         if (pos == null) {
                             continue;
                         }
-                        this.drawMapFeature(guiGraphics, feature, pos);
+                        this.addFeatureWidget(guiGraphics, feature, pos);
                     }
                 }
             });
@@ -318,7 +336,7 @@ public class SeedMapScreen extends Screen {
             TwoDTree tree = strongholdDataCache.get(this.worldIdentifier);
             if (tree != null) {
                 for (BlockPos strongholdPos : tree) {
-                    this.drawMapFeature(guiGraphics, MapFeature.STRONGHOLD, strongholdPos);
+                    this.addFeatureWidget(guiGraphics, MapFeature.STRONGHOLD, strongholdPos);
                 }
             }
         }
@@ -334,7 +352,7 @@ public class SeedMapScreen extends Screen {
                         continue;
                     }
                     if (Configs.ToggledFeatures.contains(oreVeinData.oreVeinType())) {
-                        this.drawMapFeature(guiGraphics, oreVeinData.oreVeinType(), oreVeinData.blockPos());
+                        this.addFeatureWidget(guiGraphics, oreVeinData.oreVeinType(), oreVeinData.blockPos());
                     }
                 }
             }
@@ -352,8 +370,11 @@ public class SeedMapScreen extends Screen {
         // calculate spawn point
         if (this.toggleableFeatures.contains(MapFeature.WORLD_SPAWN) && Configs.ToggledFeatures.contains(MapFeature.WORLD_SPAWN)) {
             BlockPos spawnPoint = spawnDataCache.computeIfAbsent(this.worldIdentifier, _ -> this.calculateSpawnData());
-            this.drawMapFeature(guiGraphics, MapFeature.WORLD_SPAWN, spawnPoint);
+            this.addFeatureWidget(guiGraphics, MapFeature.WORLD_SPAWN, spawnPoint);
         }
+
+        // draw chest loot widget
+        this.chestLootWidget.render(guiGraphics, mouseX, mouseY, this.font);
 
         // draw hovered coordinates
         Component coordinates = accent("x: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
@@ -430,22 +451,14 @@ public class SeedMapScreen extends Screen {
         return tile;
     }
 
-    private void drawMapFeature(GuiGraphics guiGraphics, MapFeature feature, BlockPos pos) {
-        MapFeature.Texture featureIcon = feature.getTexture();
-        QuartPos2 relQuartPos = QuartPos2.fromBlockPos(pos).subtract(this.centerQuart);
-        int minX = this.centerX + Configs.PixelsPerBiome * relQuartPos.x() - featureIcon.width() / 2;
-        int minY = this.centerY + Configs.PixelsPerBiome * relQuartPos.z() - featureIcon.height() / 2;
-        int maxX = minX + featureIcon.width();
-        int maxY = minY + featureIcon.height();
-
-        if (maxX >= HORIZONTAL_PADDING + this.seedMapWidth || maxY >= VERTICAL_PADDING + this.seedMapHeight) {
-            return;
-        }
-        if (minX < HORIZONTAL_PADDING || minY < VERTICAL_PADDING) {
+    private void addFeatureWidget(GuiGraphics guiGraphics, MapFeature feature, BlockPos pos) {
+        FeatureWidget widget = new FeatureWidget(feature, pos);
+        if (!widget.withinBounds()) {
             return;
         }
 
-        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, featureIcon.resourceLocation(), minX, minY, 0, 0, featureIcon.width(), featureIcon.height(), featureIcon.width(), featureIcon.height());
+        this.featureWidgets.add(widget);
+        FeatureWidget.drawFeatureIcon(guiGraphics, feature.getTexture(), widget.x, widget.y, 0xFF_FFFFFF);
     }
 
     private void createFeatureToggles() {
@@ -557,6 +570,15 @@ public class SeedMapScreen extends Screen {
         this.addRenderableWidget(this.editBoxZ);
     }
 
+    private void moveCenter(QuartPos2 newCenter) {
+        this.centerQuart = newCenter;
+
+        this.featureWidgets.removeIf(widget -> {
+            widget.updatePosition();
+            return !widget.withinBounds();
+        });
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -564,6 +586,13 @@ public class SeedMapScreen extends Screen {
         if (this.displayCoordinatesCopiedTicks > 0) {
             this.displayCoordinatesCopiedTicks--;
         }
+    }
+
+    @Override
+    public void resize(Minecraft minecraft, int width, int height) {
+        super.resize(minecraft, width, height);
+        this.moveCenter(this.centerQuart);
+        this.chestLootWidget.clear();
     }
 
     @Override
@@ -604,7 +633,7 @@ public class SeedMapScreen extends Screen {
         int relXQuart = (int) (-dragX / Configs.PixelsPerBiome);
         int relZQuart = (int) (-dragY / Configs.PixelsPerBiome);
 
-        this.centerQuart = this.centerQuart.add(relXQuart, relZQuart);
+        this.moveCenter(this.centerQuart.add(relXQuart, relZQuart));
         return true;
     }
 
@@ -613,13 +642,91 @@ public class SeedMapScreen extends Screen {
         if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        if (this.handleMapClicked(mouseX, mouseY, button)) {
+        if (this.chestLootWidget.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        } else if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+            this.chestLootWidget.clear();
+        }
+        if (this.handleMapFeatureLeftClicked(mouseX, mouseY, button)) {
+            return true;
+        }
+        if (this.handleMapRightClicked(mouseX, mouseY, button)) {
             return true;
         }
         return false;
     }
 
-    private boolean handleMapClicked(double mouseX, double mouseY, int button) {
+    private boolean handleMapFeatureLeftClicked(double mouseX, double mouseY, int button) {
+        if (button != InputConstants.MOUSE_BUTTON_LEFT) {
+            return false;
+        }
+        if (mouseX < HORIZONTAL_PADDING || mouseX > HORIZONTAL_PADDING + this.seedMapWidth || mouseY < VERTICAL_PADDING || mouseY > VERTICAL_PADDING + this.seedMapHeight) {
+            return false;
+        }
+        Optional<FeatureWidget> optionalFeatureWidget = this.featureWidgets.stream()
+            .filter(widget -> mouseX >= widget.x && mouseX <= widget.x + widget.width() && mouseY >= widget.y && mouseY <= widget.y + widget.height())
+            .findAny();
+        if (optionalFeatureWidget.isEmpty()) {
+            return false;
+        }
+        FeatureWidget widget = optionalFeatureWidget.get();
+        this.showLoot(widget);
+        return true;
+    }
+
+    private void showLoot(FeatureWidget widget) {
+        MapFeature feature = widget.feature;
+        int structure = feature.getStructureId();
+        if (!LocateCommand.LOOT_SUPPORTED_STRUCTURES.contains(structure)) {
+            return;
+        }
+        BlockPos pos = widget.featureLocation;
+        int biome = Cubiomes.getBiomeAt(this.biomeGenerator, BIOME_SCALE, QuartPos.fromBlock(pos.getX()), QuartPos.fromBlock(320), QuartPos.fromBlock(pos.getZ()));
+        // temporary arena so that everything will be deallocated after the loot is calculated
+        try (Arena tempArena = Arena.ofConfined()) {
+            MemorySegment structureVariant = StructureVariant.allocate(tempArena);
+            Cubiomes.getVariant(structureVariant, structure, this.version, this.seed, pos.getX(), pos.getZ(), biome);
+            biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
+            MemorySegment structureSaltConfig = StructureSaltConfig.allocate(tempArena);
+            if (Cubiomes.getStructureSaltConfig(structure, this.version, biome, structureSaltConfig) == 0) {
+                return;
+            }
+            MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, tempArena);
+            int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, this.version, this.seed, pos.getX(), pos.getZ());
+            if (numPieces <= 0) {
+                return;
+            }
+            List<SimpleContainer> containers = new ArrayList<>();
+            for (int pieceIdx = 0; pieceIdx < numPieces; pieceIdx++) {
+                MemorySegment piece = Piece.asSlice(pieces, pieceIdx);
+                int chestCount = Piece.chestCount(piece);
+                if (chestCount == 0) {
+                    continue;
+                }
+                MemorySegment lootTableContext = LootTableContext.allocate(tempArena);
+                if (Cubiomes.init_loot_table_name(lootTableContext, Piece.lootTable(piece), this.version) == 0) {
+                    continue;
+                }
+                for (int chestIdx = 0; chestIdx < chestCount; chestIdx++) {
+                    SimpleContainer container = new SimpleContainer(3 * 9);
+                    Cubiomes.set_loot_seed(lootTableContext, Piece.lootSeeds(piece).getAtIndex(Cubiomes.C_LONG_LONG, chestIdx));
+                    Cubiomes.generate_loot(lootTableContext);
+                    int lootCount = LootTableContext.generated_item_count(lootTableContext);
+                    for (int lootIdx = 0; lootIdx < lootCount; lootIdx++) {
+                        MemorySegment itemStack = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), lootIdx);
+                        int itemId = Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStack));
+                        Item item = ItemAndEnchantmentsPredicateArgument.ID_TO_MC.get(itemId);
+                        container.addItem(new net.minecraft.world.item.ItemStack(item, ItemStack.count(itemStack)));
+                    }
+                    containers.add(container);
+                }
+                Cubiomes.free_loot_table_pools(lootTableContext);
+            }
+            this.chestLootWidget.setContent(widget.x + widget.width() / 2, widget.y + widget.height() / 2, Cubiomes.struct2str(structure).getString(0), containers);
+        }
+    }
+
+    private boolean handleMapRightClicked(double mouseX, double mouseY, int button) {
         if (button != InputConstants.MOUSE_BUTTON_RIGHT) {
             return false;
         }
@@ -659,7 +766,7 @@ public class SeedMapScreen extends Screen {
         if (z < -MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE || z > MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE) {
             return false;
         }
-        this.centerQuart = new QuartPos2(QuartPos.fromBlock(x), QuartPos.fromBlock(z));
+        this.moveCenter(new QuartPos2(QuartPos.fromBlock(x), QuartPos.fromBlock(z)));
         return true;
     }
 
@@ -670,5 +777,66 @@ public class SeedMapScreen extends Screen {
         this.slimeChunkTileCache.values().forEach(Tile::close);
         this.seedMapExecutor.close(this.arena::close);
         Configs.save();
+    }
+
+    class FeatureWidget {
+        private int x;
+        private int y;
+        private final MapFeature feature;
+        private final BlockPos featureLocation;
+
+        public FeatureWidget(MapFeature feature, BlockPos featureLocation) {
+            this.feature = feature;
+            this.featureLocation = featureLocation;
+            this.updatePosition();
+        }
+
+        private void updatePosition() {
+            this.x = centerX + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.featureLocation.getX()) - centerQuart.x()) - this.feature.getTexture().width() / 2;
+            this.y = centerY + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.featureLocation.getZ()) - centerQuart.z()) - this.feature.getTexture().height() / 2;
+        }
+
+        private int width() {
+            return this.feature.getTexture().width();
+        }
+
+        private int height() {
+            return this.feature.getTexture().height();
+        }
+
+        private boolean withinBounds() {
+            int minX = this.x;
+            int minY = this.y;
+            int maxX = minX + this.width();
+            int maxY = minY + this.height();
+
+            if (maxX >= HORIZONTAL_PADDING + seedMapWidth || maxY >= VERTICAL_PADDING + seedMapHeight) {
+                return false;
+            }
+            if (minX < HORIZONTAL_PADDING || minY < VERTICAL_PADDING) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.feature, this.featureLocation);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            FeatureWidget that = (FeatureWidget) o;
+            return this.feature == that.feature && Objects.equals(this.featureLocation, that.featureLocation);
+        }
+
+        static void drawFeatureIcon(GuiGraphics guiGraphics, MapFeature.Texture texture, int minX, int minY, int colour) {
+            int iconWidth = texture.width();
+            int iconHeight = texture.height();
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture.resourceLocation(), minX, minY, 0, 0, iconWidth, iconHeight, iconWidth, iconHeight, colour);
+        }
     }
 }
