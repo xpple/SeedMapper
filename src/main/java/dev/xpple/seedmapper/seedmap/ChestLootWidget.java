@@ -25,11 +25,13 @@ public class ChestLootWidget {
     private static final int BUTTON_WIDTH = 10;
     private static final int BUTTON_HEIGHT = 12;
 
+    private static final int ITEM_SLOT_SIZE = 18;
+
     private boolean active = false;
 
     private int x = 0;
     private int y = 0;
-    private String structure = "";
+    private String structure = null;
     private int containerIndex = 0;
     private List<SimpleContainer> containers = new ArrayList<>();
 
@@ -47,7 +49,7 @@ public class ChestLootWidget {
 
         this.x = 0;
         this.y = 0;
-        this.structure = "";
+        this.structure = null;
         this.containerIndex = 0;
         this.containers.clear();
     }
@@ -64,10 +66,18 @@ public class ChestLootWidget {
         SimpleContainer container = this.containers.get(this.containerIndex);
         minY += 12;
         for (int row = 0; row < 3; row++) {
+            int y = minY + row * ITEM_SLOT_SIZE;
             for (int column = 0; column < 9; column++) {
                 ItemStack item = container.getItem(row * 9 + column);
-                guiGraphics.renderItem(item, minX + column * 18, minY + row * 18);
-                guiGraphics.renderItemDecorations(font, item, minX + column * 18, minY + row * 18);
+                if (item == ItemStack.EMPTY) {
+                    continue;
+                }
+                int x = minX + column * ITEM_SLOT_SIZE;
+                guiGraphics.renderItem(item, x, y);
+                guiGraphics.renderItemDecorations(font, item, x, y);
+                if (mouseX >= x && mouseX <= x + ITEM_SLOT_SIZE && mouseY >= y && mouseY <= y + ITEM_SLOT_SIZE) {
+                    guiGraphics.setTooltipForNextFrame(font, item, mouseX, mouseY);
+                }
             }
         }
 

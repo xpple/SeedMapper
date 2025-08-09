@@ -16,8 +16,11 @@ import dev.xpple.seedmapper.command.CommandExceptions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.lang.foreign.MemorySegment;
 import java.util.Arrays;
@@ -108,7 +111,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="public static final Map<Integer, Item> ID_TO_MC;">
-    public static final Map<Integer, Item> ID_TO_MC = ImmutableMap.<Integer, Item>builder()
+    public static final Map<Integer, Item> ITEM_ID_TO_MC = ImmutableMap.<Integer, Item>builder()
         .put(Cubiomes.ITEM_APPLE(), Items.APPLE)
         .put(Cubiomes.ITEM_BEETROOT_SEEDS(), Items.BEETROOT_SEEDS)
         .put(Cubiomes.ITEM_BELL(), Items.BELL)
@@ -225,6 +228,53 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         .put("unbreaking", Cubiomes.UNBREAKING())
         .put("curse_of_vanishing", Cubiomes.CURSE_OF_VANISHING())
         .put("curse_of_binding", Cubiomes.CURSE_OF_BINDING())
+        .build();
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="public static final Map<Integer, ResourceKey<Enchantment>> ENCHANTMENT_ID_TO_MC;">
+    public static final Map<Integer, ResourceKey<Enchantment>> ENCHANTMENT_ID_TO_MC = ImmutableMap.<Integer, ResourceKey<Enchantment>>builder()
+        .put(Cubiomes.PROTECTION(), Enchantments.PROTECTION)
+        .put(Cubiomes.FIRE_PROTECTION(), Enchantments.FIRE_PROTECTION)
+        .put(Cubiomes.BLAST_PROTECTION(), Enchantments.BLAST_PROTECTION)
+        .put(Cubiomes.PROJECTILE_PROTECTION(), Enchantments.PROJECTILE_PROTECTION)
+        .put(Cubiomes.RESPIRATION(), Enchantments.RESPIRATION)
+        .put(Cubiomes.AQUA_AFFINITY(), Enchantments.AQUA_AFFINITY)
+        .put(Cubiomes.THORNS(), Enchantments.THORNS)
+        .put(Cubiomes.SWIFT_SNEAK(), Enchantments.SWIFT_SNEAK)
+        .put(Cubiomes.FEATHER_FALLING(), Enchantments.FEATHER_FALLING)
+        .put(Cubiomes.DEPTH_STRIDER(), Enchantments.DEPTH_STRIDER)
+        .put(Cubiomes.FROST_WALKER(), Enchantments.FROST_WALKER)
+        .put(Cubiomes.SOUL_SPEED(), Enchantments.SOUL_SPEED)
+        .put(Cubiomes.SHARPNESS(), Enchantments.SHARPNESS)
+        .put(Cubiomes.SMITE(), Enchantments.SMITE)
+        .put(Cubiomes.BANE_OF_ARTHROPODS(), Enchantments.BANE_OF_ARTHROPODS)
+        .put(Cubiomes.KNOCKBACK(), Enchantments.KNOCKBACK)
+        .put(Cubiomes.FIRE_ASPECT(), Enchantments.FIRE_ASPECT)
+        .put(Cubiomes.LOOTING(), Enchantments.LOOTING)
+        .put(Cubiomes.SWEEPING_EDGE(), Enchantments.SWEEPING_EDGE)
+        .put(Cubiomes.EFFICIENCY(), Enchantments.EFFICIENCY)
+        .put(Cubiomes.SILK_TOUCH(), Enchantments.SILK_TOUCH)
+        .put(Cubiomes.FORTUNE(), Enchantments.FORTUNE)
+        .put(Cubiomes.LUCK_OF_THE_SEA(), Enchantments.LUCK_OF_THE_SEA)
+        .put(Cubiomes.LURE(), Enchantments.LURE)
+        .put(Cubiomes.POWER(), Enchantments.POWER)
+        .put(Cubiomes.PUNCH(), Enchantments.PUNCH)
+        .put(Cubiomes.FLAME(), Enchantments.FLAME)
+        .put(Cubiomes.INFINITY_ENCHANTMENT(), Enchantments.INFINITY)
+        .put(Cubiomes.QUICK_CHARGE(), Enchantments.QUICK_CHARGE)
+        .put(Cubiomes.MULTISHOT(), Enchantments.MULTISHOT)
+        .put(Cubiomes.PIERCING(), Enchantments.PIERCING)
+        .put(Cubiomes.IMPALING(), Enchantments.IMPALING)
+        .put(Cubiomes.RIPTIDE(), Enchantments.RIPTIDE)
+        .put(Cubiomes.LOYALTY(), Enchantments.LOYALTY)
+        .put(Cubiomes.CHANNELING(), Enchantments.CHANNELING)
+        .put(Cubiomes.DENSITY(), Enchantments.DENSITY)
+        .put(Cubiomes.BREACH(), Enchantments.BREACH)
+        .put(Cubiomes.WIND_BURST(), Enchantments.WIND_BURST)
+        .put(Cubiomes.MENDING(), Enchantments.MENDING)
+        .put(Cubiomes.UNBREAKING(), Enchantments.UNBREAKING)
+        .put(Cubiomes.CURSE_OF_VANISHING(), Enchantments.VANISHING_CURSE)
+        .put(Cubiomes.CURSE_OF_BINDING(), Enchantments.BINDING_CURSE)
         .build();
     //</editor-fold>
 

@@ -1,6 +1,7 @@
 package dev.xpple.seedmapper.seedmap;
 
 import com.github.cubiomes.Cubiomes;
+import com.github.cubiomes.EnchantInstance;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.ItemStack;
 import com.github.cubiomes.LootTableContext;
@@ -42,9 +43,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ARGB;
@@ -52,6 +57,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
@@ -180,6 +186,8 @@ public class SeedMapScreen extends Screen {
 
     private final ChestLootWidget chestLootWidget = new ChestLootWidget();
 
+    private Registry<Enchantment> enchantmentsRegistry;
+
     public SeedMapScreen(long seed, int dimension, int version, BlockPos playerPos) {
         super(Component.empty());
         this.seed = seed;
@@ -257,6 +265,8 @@ public class SeedMapScreen extends Screen {
 
         this.createFeatureToggles();
         this.createTeleportField();
+
+        this.enchantmentsRegistry = this.minecraft.player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
     }
 
     @Override
@@ -597,6 +607,10 @@ public class SeedMapScreen extends Screen {
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
+        this.handleMapMouseMoved(mouseX, mouseY);
+    }
+
+    private void handleMapMouseMoved(double mouseX, double mouseY) {
         if (mouseX < HORIZONTAL_PADDING || mouseX > HORIZONTAL_PADDING + this.seedMapWidth || mouseY < VERTICAL_PADDING || mouseY > VERTICAL_PADDING + this.seedMapHeight) {
             return;
         }
@@ -713,10 +727,20 @@ public class SeedMapScreen extends Screen {
                     Cubiomes.generate_loot(lootTableContext);
                     int lootCount = LootTableContext.generated_item_count(lootTableContext);
                     for (int lootIdx = 0; lootIdx < lootCount; lootIdx++) {
-                        MemorySegment itemStack = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), lootIdx);
-                        int itemId = Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStack));
-                        Item item = ItemAndEnchantmentsPredicateArgument.ID_TO_MC.get(itemId);
-                        container.addItem(new net.minecraft.world.item.ItemStack(item, ItemStack.count(itemStack)));
+                        MemorySegment itemStackInternal = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), lootIdx);
+                        int itemId = Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStackInternal));
+                        Item item = ItemAndEnchantmentsPredicateArgument.ITEM_ID_TO_MC.get(itemId);
+                        net.minecraft.world.item.ItemStack itemStack = new net.minecraft.world.item.ItemStack(item, ItemStack.count(itemStackInternal));
+                        MemorySegment enchantments = ItemStack.enchantments(itemStackInternal);
+                        int enchantmentCount = ItemStack.enchantment_count(itemStackInternal);
+                        for (int enchantmentIdx = 0; enchantmentIdx < enchantmentCount; enchantmentIdx++) {
+                            MemorySegment enchantInstance = EnchantInstance.asSlice(enchantments, enchantmentIdx);
+                            int itemEnchantment = EnchantInstance.enchantment(enchantInstance);
+                            ResourceKey<Enchantment> enchantmentResourceKey = ItemAndEnchantmentsPredicateArgument.ENCHANTMENT_ID_TO_MC.get(itemEnchantment);
+                            Holder.Reference<Enchantment> enchantmentReference = this.enchantmentsRegistry.getOrThrow(enchantmentResourceKey);
+                            itemStack.enchant(enchantmentReference, EnchantInstance.level(enchantInstance));
+                        }
+                        container.addItem(itemStack);
                     }
                     containers.add(container);
                 }
