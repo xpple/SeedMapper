@@ -650,14 +650,18 @@
 --include-function global_id2item_name
 --include-function item_name2global_id
 --include-constant ITEM_APPLE
+--include-constant ITEM_ARROW
 --include-constant ITEM_BEETROOT_SEEDS
 --include-constant ITEM_BELL
 --include-constant ITEM_BONE
 --include-constant ITEM_BOOK
+--include-constant ITEM_CARROT
 --include-constant ITEM_CLOCK
 --include-constant ITEM_COAL
 --include-constant ITEM_COOKED_COD
 --include-constant ITEM_COOKED_SALMON
+--include-constant ITEM_CROSSBOW
+--include-constant ITEM_DARK_OAK_LOG
 --include-constant ITEM_DIAMOND
 --include-constant ITEM_DIAMOND_BOOTS
 --include-constant ITEM_DIAMOND_CHESTPLATE
@@ -670,10 +674,12 @@
 --include-constant ITEM_DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
 --include-constant ITEM_EMERALD
 --include-constant ITEM_ENCHANTED_GOLDEN_APPLE
+--include-constant ITEM_EXPERIENCE_BOTTLE
 --include-constant ITEM_FIRE_CHARGE
 --include-constant ITEM_FLINT
 --include-constant ITEM_FLINT_AND_STEEL
 --include-constant ITEM_GLISTERING_MELON_SLICE
+--include-constant ITEM_GOAT_HORN
 --include-constant ITEM_GOLDEN_APPLE
 --include-constant ITEM_GOLDEN_AXE
 --include-constant ITEM_GOLDEN_BOOTS
@@ -707,16 +713,19 @@
 --include-constant ITEM_NETHER_WART
 --include-constant ITEM_OBSIDIAN
 --include-constant ITEM_POTION
+--include-constant ITEM_POTATO
 --include-constant ITEM_PRISMARINE_CRYSTALS
 --include-constant ITEM_RIB_ARMOR_TRIM_SMITHING_TEMPLATE
 --include-constant ITEM_ROTTEN_FLESH
 --include-constant ITEM_SADDLE
 --include-constant ITEM_SAND
+--include-constant ITEM_SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE
 --include-constant ITEM_SPIDER_EYE
 --include-constant ITEM_SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE
 --include-constant ITEM_STONE_AXE
 --include-constant ITEM_STRING
 --include-constant ITEM_TNT
+--include-constant ITEM_TRIPWIRE_HOOK
 --include-constant ITEM_UNKNOWN
 --include-constant ITEM_WHEAT
 
@@ -802,6 +811,7 @@
 --include-function init_igloo_chest
 --include-function init_loot_table_name
 --include-function init_nether_bridge
+--include-function init_pillager_outpost
 --include-function init_ruined_portal
 
 --include-struct LootPool
