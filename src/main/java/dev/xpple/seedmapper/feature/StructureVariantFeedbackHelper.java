@@ -108,6 +108,11 @@ public final class StructureVariantFeedbackHelper {
             }
             return components;
         });
+        temp.put(Cubiomes.Outpost(), variant -> {
+            List<Component> components = new ArrayList<>();
+            components.add(Component.translatable("command.locate.feature.structure.rotation_" + StructureVariant.rotation(variant)));
+            return components;
+        });
         temp.put(Cubiomes.Desert_Pyramid(), variant -> {
             List<Component> components = new ArrayList<>();
             components.add(Component.translatable("command.locate.feature.structure.rotation_" + StructureVariant.rotation(variant)));
