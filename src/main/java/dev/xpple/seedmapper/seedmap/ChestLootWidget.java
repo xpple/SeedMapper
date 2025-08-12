@@ -1,17 +1,22 @@
 package dev.xpple.seedmapper.seedmap;
 
+import com.github.cubiomes.Cubiomes;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.xpple.seedmapper.SeedMapper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
 public class ChestLootWidget {
 
@@ -31,17 +36,32 @@ public class ChestLootWidget {
 
     private int x = 0;
     private int y = 0;
-    private String structure = null;
-    private int containerIndex = 0;
-    private List<SimpleContainer> containers = new ArrayList<>();
 
-    public void setContent(int x, int y, String structure, List<SimpleContainer> containers) {
+    private int chestIndex = 0;
+    private List<ChestLootData> chestDataList = new ArrayList<>();
+
+    private List<List<ClientTooltipComponent>> extraChestInfo = new ArrayList<>();
+
+    public void setContent(int x, int y, List<ChestLootData> chestDataList) {
         this.active = true;
 
         this.x = x;
         this.y = y;
-        this.structure = structure;
-        this.containers = containers;
+
+        this.chestDataList = chestDataList;
+        for (ChestLootData chestData : this.chestDataList) {
+            List<ClientTooltipComponent> tooltips = new ArrayList<>();
+            BlockPos chestPos = chestData.chestPos();
+            Component chestPosComponent = Component.translatable("seedMap.chestLoot.extraInfo.chestPos", accent("x: %d, z: %d".formatted(chestPos.getX(), chestPos.getZ())));
+            tooltips.add(ClientTooltipComponent.create(chestPosComponent.getVisualOrderText()));
+            String lootTable = chestData.lootTable();
+            Component lootTableComponent = Component.translatable("seedMap.chestLoot.extraInfo.lootTable", accent(lootTable));
+            tooltips.add(ClientTooltipComponent.create(lootTableComponent.getVisualOrderText()));
+            long lootSeed = chestData.lootSeed();
+            Component lootSeedComponent = Component.translatable("seedMap.chestLoot.extraInfo.lootSeed", accent(Long.toString(lootSeed)));
+            tooltips.add(ClientTooltipComponent.create(lootSeedComponent.getVisualOrderText()));
+            this.extraChestInfo.add(tooltips);
+        }
     }
 
     public void clear() {
@@ -49,9 +69,9 @@ public class ChestLootWidget {
 
         this.x = 0;
         this.y = 0;
-        this.structure = null;
-        this.containerIndex = 0;
-        this.containers.clear();
+        this.chestIndex = 0;
+        this.chestDataList.clear();
+        this.extraChestInfo.clear();
     }
 
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, Font font) {
@@ -59,16 +79,26 @@ public class ChestLootWidget {
             return;
         }
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CHEST_CONTAINER, this.x, this.y, 0, 0, CHEST_CONTAINER_WIDTH, CHEST_CONTAINER_HEIGHT, CHEST_CONTAINER_WIDTH, CHEST_CONTAINER_HEIGHT);
-        Component title = Component.translatable("seedMap.chestLoot", this.structure, this.containerIndex + 1, containers.size());
+
+        ChestLootData chestData = this.chestDataList.get(this.chestIndex);
+        String structure = Cubiomes.struct2str(chestData.structure()).getString(0);
+        Component title = Component.translatable("seedMap.chestLoot.title", structure, this.chestIndex + 1, this.chestDataList.size());
+
         int minX = this.x + 8;
         int minY = this.y + 6;
         guiGraphics.drawString(font, title, minX, minY, -1);
-        SimpleContainer container = this.containers.get(this.containerIndex);
+
+        int titleWidth = font.width(title.getVisualOrderText());
+        if (mouseX >= minX && mouseX <= minX + titleWidth && mouseY >= minY && mouseY <= minY + font.lineHeight) {
+            List<ClientTooltipComponent> tooltips = this.extraChestInfo.get(this.chestIndex);
+            guiGraphics.renderTooltip(font, tooltips, minX - 4 - 12, this.y - tooltips.size() * font.lineHeight - 8 + 12, DefaultTooltipPositioner.INSTANCE, null);
+        }
+
         minY += 12;
         for (int row = 0; row < 3; row++) {
             int y = minY + row * ITEM_SLOT_SIZE;
             for (int column = 0; column < 9; column++) {
-                ItemStack item = container.getItem(row * 9 + column);
+                ItemStack item = chestData.container().getItem(row * 9 + column);
                 if (item == ItemStack.EMPTY) {
                     continue;
                 }
@@ -97,13 +127,13 @@ public class ChestLootWidget {
         int maxX = minX + BUTTON_WIDTH;
         int maxY = minY + BUTTON_HEIGHT;
         if (mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY) {
-            this.containerIndex = Math.max(0, this.containerIndex - 1);
+            this.chestIndex = Math.max(0, this.chestIndex - 1);
             return true;
         }
         minX = minX + BUTTON_WIDTH;
         maxX = maxX + BUTTON_WIDTH;
         if (mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY) {
-            this.containerIndex = Math.min(this.containers.size() - 1, this.containerIndex + 1);
+            this.chestIndex = Math.min(this.chestDataList.size() - 1, this.chestIndex + 1);
             return true;
         }
         return false;

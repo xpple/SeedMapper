@@ -710,22 +710,29 @@ public class SeedMapScreen extends Screen {
             if (numPieces <= 0) {
                 return;
             }
-            List<SimpleContainer> containers = new ArrayList<>();
+            List<ChestLootData> chestLootDataList = new ArrayList<>();
             for (int pieceIdx = 0; pieceIdx < numPieces; pieceIdx++) {
                 MemorySegment piece = Piece.asSlice(pieces, pieceIdx);
                 int chestCount = Piece.chestCount(piece);
                 if (chestCount == 0) {
                     continue;
                 }
+                MemorySegment lootTableInternal = Piece.lootTable(piece);
+                String lootTable = lootTableInternal.getString(0);
                 MemorySegment lootTableContext = LootTableContext.allocate(tempArena);
-                if (Cubiomes.init_loot_table_name(lootTableContext, Piece.lootTable(piece), this.version) == 0) {
+                if (Cubiomes.init_loot_table_name(lootTableContext, lootTableInternal, this.version) == 0) {
                     continue;
                 }
+                MemorySegment chestPoses = Piece.chestPoses(piece);
+                MemorySegment lootSeeds = Piece.lootSeeds(piece);
                 for (int chestIdx = 0; chestIdx < chestCount; chestIdx++) {
-                    SimpleContainer container = new SimpleContainer(3 * 9);
-                    Cubiomes.set_loot_seed(lootTableContext, Piece.lootSeeds(piece).getAtIndex(Cubiomes.C_LONG_LONG, chestIdx));
+                    MemorySegment chestPosInternal = Pos.asSlice(chestPoses, chestIdx);
+                    BlockPos chestPos = new BlockPos(Pos.x(chestPosInternal), 0, Pos.z(chestPosInternal));
+                    long lootSeed = lootSeeds.getAtIndex(Cubiomes.C_LONG_LONG, chestIdx);
+                    Cubiomes.set_loot_seed(lootTableContext, lootSeed);
                     Cubiomes.generate_loot(lootTableContext);
                     int lootCount = LootTableContext.generated_item_count(lootTableContext);
+                    SimpleContainer container = new SimpleContainer(3 * 9);
                     for (int lootIdx = 0; lootIdx < lootCount; lootIdx++) {
                         MemorySegment itemStackInternal = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), lootIdx);
                         int itemId = Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStackInternal));
@@ -742,12 +749,12 @@ public class SeedMapScreen extends Screen {
                         }
                         container.addItem(itemStack);
                     }
-                    containers.add(container);
+                    chestLootDataList.add(new ChestLootData(structure, chestPos, lootSeed, lootTable, container));
                 }
                 Cubiomes.free_loot_table_pools(lootTableContext);
             }
-            if (!containers.isEmpty()) {
-                this.chestLootWidget.setContent(widget.x + widget.width() / 2, widget.y + widget.height() / 2, Cubiomes.struct2str(structure).getString(0), containers);
+            if (!chestLootDataList.isEmpty()) {
+                this.chestLootWidget.setContent(widget.x + widget.width() / 2, widget.y + widget.height() / 2, chestLootDataList);
             }
         }
     }

@@ -86,7 +86,10 @@
   "key.seedMap": "Seed map",
 
   "seedMap.seedAndVersion": "Seed: %s (%s)",
-  "seedMap.chestLoot": "%s loot (%d/%d)",
+  "seedMap.chestLoot.title": "%s loot (%d/%d)",
+  "seedMap.chestLoot.extraInfo.chestPos": "Chest position: %s",
+  "seedMap.chestLoot.extraInfo.lootTable": "Loot table: %s",
+  "seedMap.chestLoot.extraInfo.lootSeed": "Loot seed: %s",
   "seedMap.coordinatesCopied": "%s (coordinates copied!)",
   "seedMap.editBoxX": "Edit box X coordinate",
   "seedMap.editBoxZ": "Edit box Z coordinate"

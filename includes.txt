@@ -649,18 +649,23 @@
 
 --include-function global_id2item_name
 --include-function item_name2global_id
+--include-constant ITEM_ANCIENT_DEBRIS
 --include-constant ITEM_APPLE
 --include-constant ITEM_ARROW
 --include-constant ITEM_BEETROOT_SEEDS
 --include-constant ITEM_BELL
 --include-constant ITEM_BONE
+--include-constant ITEM_BONE_BLOCK
 --include-constant ITEM_BOOK
 --include-constant ITEM_CARROT
+--include-constant ITEM_CHAIN
 --include-constant ITEM_CLOCK
 --include-constant ITEM_COAL
 --include-constant ITEM_COOKED_COD
+--include-constant ITEM_COOKED_PORKCHOP
 --include-constant ITEM_COOKED_SALMON
 --include-constant ITEM_CROSSBOW
+--include-constant ITEM_CRYING_OBSIDIAN
 --include-constant ITEM_DARK_OAK_LOG
 --include-constant ITEM_DIAMOND
 --include-constant ITEM_DIAMOND_BOOTS
@@ -678,6 +683,7 @@
 --include-constant ITEM_FIRE_CHARGE
 --include-constant ITEM_FLINT
 --include-constant ITEM_FLINT_AND_STEEL
+--include-constant ITEM_GILDED_BLACKSTONE
 --include-constant ITEM_GLISTERING_MELON_SLICE
 --include-constant ITEM_GOAT_HORN
 --include-constant ITEM_GOLDEN_APPLE
@@ -697,6 +703,7 @@
 --include-constant ITEM_GOLD_NUGGET
 --include-constant ITEM_GUNPOWDER
 --include-constant ITEM_HEART_OF_THE_SEA
+--include-constant ITEM_IRON_BLOCK
 --include-constant ITEM_IRON_BOOTS
 --include-constant ITEM_IRON_CHESTPLATE
 --include-constant ITEM_IRON_HELMET
@@ -707,11 +714,17 @@
 --include-constant ITEM_IRON_PICKAXE
 --include-constant ITEM_IRON_SHOVEL
 --include-constant ITEM_IRON_SWORD
+--include-constant ITEM_LEATHER
 --include-constant ITEM_LEATHER_CHESTPLATE
 --include-constant ITEM_LIGHT_WEIGHTED_PRESSURE_PLATE
 --include-constant ITEM_LODESTONE
+--include-constant ITEM_MAGMA_CREAM
+--include-constant ITEM_MUSIC_DISC_PIGSTEP
+--include-constant ITEM_NETHERITE_SCRAP
+--include-constant ITEM_NETHERITE_UPGRADE_SMITHING_TEMPLATE
 --include-constant ITEM_NETHER_WART
 --include-constant ITEM_OBSIDIAN
+--include-constant ITEM_PIGLIN_BANNER_PATTERN
 --include-constant ITEM_POTION
 --include-constant ITEM_POTATO
 --include-constant ITEM_PRISMARINE_CRYSTALS
@@ -720,6 +733,8 @@
 --include-constant ITEM_SADDLE
 --include-constant ITEM_SAND
 --include-constant ITEM_SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE
+--include-constant ITEM_SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE
+--include-constant ITEM_SPECTRAL_ARROW
 --include-constant ITEM_SPIDER_EYE
 --include-constant ITEM_SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE
 --include-constant ITEM_STONE_AXE
