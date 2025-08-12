@@ -717,6 +717,7 @@ public class SeedMapScreen extends Screen {
                 if (chestCount == 0) {
                     continue;
                 }
+                String pieceName = Piece.name(piece).getString(0);
                 MemorySegment lootTableInternal = Piece.lootTable(piece);
                 String lootTable = lootTableInternal.getString(0);
                 MemorySegment lootTableContext = LootTableContext.allocate(tempArena);
@@ -749,7 +750,7 @@ public class SeedMapScreen extends Screen {
                         }
                         container.addItem(itemStack);
                     }
-                    chestLootDataList.add(new ChestLootData(structure, chestPos, lootSeed, lootTable, container));
+                    chestLootDataList.add(new ChestLootData(structure, pieceName, chestPos, lootSeed, lootTable, container));
                 }
                 Cubiomes.free_loot_table_pools(lootTableContext);
             }

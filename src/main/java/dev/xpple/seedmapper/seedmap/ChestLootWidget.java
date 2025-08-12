@@ -51,6 +51,8 @@ public class ChestLootWidget {
         this.chestDataList = chestDataList;
         for (ChestLootData chestData : this.chestDataList) {
             List<ClientTooltipComponent> tooltips = new ArrayList<>();
+            Component pieceNameComponent = Component.translatable("seedMap.chestLoot.extraInfo.pieceName", accent(chestData.pieceName()));
+            tooltips.add(ClientTooltipComponent.create(pieceNameComponent.getVisualOrderText()));
             BlockPos chestPos = chestData.chestPos();
             Component chestPosComponent = Component.translatable("seedMap.chestLoot.extraInfo.chestPos", accent("x: %d, z: %d".formatted(chestPos.getX(), chestPos.getZ())));
             tooltips.add(ClientTooltipComponent.create(chestPosComponent.getVisualOrderText()));
