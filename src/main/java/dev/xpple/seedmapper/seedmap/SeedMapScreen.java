@@ -25,6 +25,8 @@ import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.RegionPos;
 import dev.xpple.seedmapper.util.TwoDTree;
 import dev.xpple.seedmapper.util.WorldIdentifier;
+import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
+import dev.xpple.simplewaypoints.api.Waypoint;
 import it.unimi.dsi.fastutil.ints.AbstractIntCollection;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
@@ -51,7 +53,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -59,6 +60,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -73,6 +75,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntSupplier;
@@ -223,7 +226,7 @@ public class SeedMapScreen extends Screen {
         Cubiomes.initOreVeinNoise(this.oreVeinParameters, this.seed, this.version);
 
         this.toggleableFeatures = Arrays.stream(MapFeature.values())
-            .filter(feature -> feature.getDimension() == this.dimension)
+            .filter(feature -> feature.getDimension() == this.dimension || feature.getDimension() == Cubiomes.DIM_UNDEF())
             .filter(feature -> this.version >= feature.availableSince())
             .sorted(Comparator.comparing(MapFeature::getName))
             .toList();
@@ -368,6 +371,33 @@ public class SeedMapScreen extends Screen {
             }
         }
 
+        // draw waypoints
+        if (this.toggleableFeatures.contains(MapFeature.WAYPOINT) && Configs.ToggledFeatures.contains(MapFeature.WAYPOINT)) {
+            SimpleWaypointsAPI waypointsApi = SimpleWaypointsAPI.getInstance();
+            String identifier = waypointsApi.getWorldIdentifier(this.minecraft);
+            Map<String, Waypoint> worldWaypoints = waypointsApi.getWorldWaypoints(identifier);
+            worldWaypoints.forEach((name, waypoint) -> {
+                boolean correctDimension;
+                if (waypoint.dimension().equals(Level.OVERWORLD)) {
+                    correctDimension = this.dimension == Cubiomes.DIM_OVERWORLD();
+                } else if (waypoint.dimension().equals(Level.NETHER)) {
+                    correctDimension = this.dimension == Cubiomes.DIM_NETHER();
+                } else if (waypoint.dimension().equals(Level.END)) {
+                    correctDimension = this.dimension == Cubiomes.DIM_END();
+                } else {
+                    throw new IllegalStateException();
+                }
+                if (!correctDimension) {
+                    return;
+                }
+                FeatureWidget widget = this.addFeatureWidget(guiGraphics, MapFeature.WAYPOINT, waypoint.location());
+                if (widget == null) {
+                    return;
+                }
+                guiGraphics.drawCenteredString(this.font, name, widget.x + widget.width() / 2, widget.y + widget.height(), ARGB.color(255, waypoint.color()));
+            });
+        }
+
         // draw player position
         int playerMinX = this.centerX + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getX()) - this.centerQuart.x()) - 10;
         int playerMinY = this.centerY + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getZ()) - this.centerQuart.z()) - 10;
@@ -391,7 +421,7 @@ public class SeedMapScreen extends Screen {
         if (this.displayCoordinatesCopiedTicks > 0) {
             coordinates = Component.translatable("seedMap.coordinatesCopied", coordinates);
         }
-        guiGraphics.drawString(this.font, coordinates , HORIZONTAL_PADDING, VERTICAL_PADDING + this.seedMapHeight + 1, -1);
+        guiGraphics.drawString(this.font, coordinates, HORIZONTAL_PADDING, VERTICAL_PADDING + this.seedMapHeight + 1, -1);
     }
 
     private void drawTile(GuiGraphics guiGraphics, Tile tile) {
@@ -461,14 +491,15 @@ public class SeedMapScreen extends Screen {
         return tile;
     }
 
-    private void addFeatureWidget(GuiGraphics guiGraphics, MapFeature feature, BlockPos pos) {
+    private @Nullable FeatureWidget addFeatureWidget(GuiGraphics guiGraphics, MapFeature feature, BlockPos pos) {
         FeatureWidget widget = new FeatureWidget(feature, pos);
         if (!widget.withinBounds()) {
-            return;
+            return null;
         }
 
         this.featureWidgets.add(widget);
         FeatureWidget.drawFeatureIcon(guiGraphics, feature.getTexture(), widget.x, widget.y, 0xFF_FFFFFF);
+        return widget;
     }
 
     private void createFeatureToggles() {
@@ -794,10 +825,10 @@ public class SeedMapScreen extends Screen {
         } catch (NumberFormatException _) {
             return false;
         }
-        if (x < -MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE || x > MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE) {
+        if (x < -Level.MAX_LEVEL_SIZE || x > Level.MAX_LEVEL_SIZE) {
             return false;
         }
-        if (z < -MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE || z > MinecraftServer.ABSOLUTE_MAX_WORLD_SIZE) {
+        if (z < -Level.MAX_LEVEL_SIZE || z > Level.MAX_LEVEL_SIZE) {
             return false;
         }
         this.moveCenter(new QuartPos2(QuartPos.fromBlock(x), QuartPos.fromBlock(z)));

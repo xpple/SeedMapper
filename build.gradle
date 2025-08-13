@@ -46,6 +46,7 @@ dependencies {
 
 	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 	include modImplementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
+	include modImplementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
 
 	modRuntimeOnly('me.djtheredstoner:DevAuth-fabric:1.1.0') {
 		exclude group: 'net.fabricmc', module: 'fabric-loader'
