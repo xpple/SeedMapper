@@ -41,6 +41,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         .put("ancient_debris", Cubiomes.ITEM_ANCIENT_DEBRIS())
         .put("apple", Cubiomes.ITEM_APPLE())
         .put("arrow", Cubiomes.ITEM_ARROW())
+        .put("bamboo", Cubiomes.ITEM_BAMBOO())
         .put("beetroot_seeds", Cubiomes.ITEM_BEETROOT_SEEDS())
         .put("bell", Cubiomes.ITEM_BELL())
         .put("bone", Cubiomes.ITEM_BONE())
@@ -131,6 +132,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         .put("tnt", Cubiomes.ITEM_TNT())
         .put("tripwire_hook", Cubiomes.ITEM_TRIPWIRE_HOOK())
         .put("wheat", Cubiomes.ITEM_WHEAT())
+        .put("wild_armor_trim_smithing_template", Cubiomes.ITEM_WILD_ARMOR_TRIM_SMITHING_TEMPLATE())
         .build();
     //</editor-fold>
 
@@ -139,6 +141,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         .put(Cubiomes.ITEM_ANCIENT_DEBRIS(), Items.ANCIENT_DEBRIS)
         .put(Cubiomes.ITEM_APPLE(), Items.APPLE)
         .put(Cubiomes.ITEM_ARROW(), Items.ARROW)
+        .put(Cubiomes.ITEM_BAMBOO(), Items.BAMBOO)
         .put(Cubiomes.ITEM_BEETROOT_SEEDS(), Items.BEETROOT_SEEDS)
         .put(Cubiomes.ITEM_BELL(), Items.BELL)
         .put(Cubiomes.ITEM_BONE(), Items.BONE)
@@ -229,6 +232,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         .put(Cubiomes.ITEM_TNT(), Items.TNT)
         .put(Cubiomes.ITEM_TRIPWIRE_HOOK(), Items.TRIPWIRE_HOOK)
         .put(Cubiomes.ITEM_WHEAT(), Items.WHEAT)
+        .put(Cubiomes.ITEM_WILD_ARMOR_TRIM_SMITHING_TEMPLATE(), Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE)
         .build();
     //</editor-fold>
 

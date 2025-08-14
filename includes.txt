@@ -652,6 +652,7 @@
 --include-constant ITEM_ANCIENT_DEBRIS
 --include-constant ITEM_APPLE
 --include-constant ITEM_ARROW
+--include-constant ITEM_BAMBOO
 --include-constant ITEM_BEETROOT_SEEDS
 --include-constant ITEM_BELL
 --include-constant ITEM_BONE
@@ -743,6 +744,7 @@
 --include-constant ITEM_TRIPWIRE_HOOK
 --include-constant ITEM_UNKNOWN
 --include-constant ITEM_WHEAT
+--include-constant ITEM_WILD_ARMOR_TRIM_SMITHING_TEMPLATE
 
 --include-struct EnchantInstance
 --include-struct ItemStack
