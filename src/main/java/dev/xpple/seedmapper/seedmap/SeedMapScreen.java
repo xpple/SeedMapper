@@ -13,7 +13,10 @@ import com.github.cubiomes.StructureConfig;
 import com.github.cubiomes.StructureSaltConfig;
 import com.github.cubiomes.StructureVariant;
 import com.github.cubiomes.SurfaceNoise;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.arguments.ItemAndEnchantmentsPredicateArgument;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
@@ -42,6 +45,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
@@ -51,6 +55,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
@@ -133,6 +138,7 @@ public class SeedMapScreen extends Screen {
     private static final int FEATURE_TOGGLE_HEIGHT = 20;
 
     private static final int TELEPORT_FIELD_WIDTH = 70;
+    private static final int WAYPOINT_NAME_FIELD_WIDTH = 100;
 
     private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
 
@@ -184,10 +190,13 @@ public class SeedMapScreen extends Screen {
 
     private int displayCoordinatesCopiedTicks = 0;
 
-    private EditBox editBoxX;
-    private EditBox editBoxZ;
+    private EditBox teleportEditBoxX;
+    private EditBox teleportEditBoxZ;
 
-    private final ChestLootWidget chestLootWidget = new ChestLootWidget();
+    private EditBox waypointNameEditBox;
+
+    private @Nullable FeatureWidget markerWidget = null;
+    private @Nullable ChestLootWidget chestLootWidget = null;
 
     private Registry<Enchantment> enchantmentsRegistry;
 
@@ -268,6 +277,7 @@ public class SeedMapScreen extends Screen {
 
         this.createFeatureToggles();
         this.createTeleportField();
+        this.createWaypointNameField();
 
         this.enchantmentsRegistry = this.minecraft.player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
     }
@@ -377,17 +387,7 @@ public class SeedMapScreen extends Screen {
             String identifier = waypointsApi.getWorldIdentifier(this.minecraft);
             Map<String, Waypoint> worldWaypoints = waypointsApi.getWorldWaypoints(identifier);
             worldWaypoints.forEach((name, waypoint) -> {
-                boolean correctDimension;
-                if (waypoint.dimension().equals(Level.OVERWORLD)) {
-                    correctDimension = this.dimension == Cubiomes.DIM_OVERWORLD();
-                } else if (waypoint.dimension().equals(Level.NETHER)) {
-                    correctDimension = this.dimension == Cubiomes.DIM_NETHER();
-                } else if (waypoint.dimension().equals(Level.END)) {
-                    correctDimension = this.dimension == Cubiomes.DIM_END();
-                } else {
-                    throw new IllegalStateException();
-                }
-                if (!correctDimension) {
+                if (!waypoint.dimension().equals(DIM_ID_TO_MC.get(this.dimension))) {
                     return;
                 }
                 FeatureWidget widget = this.addFeatureWidget(guiGraphics, MapFeature.WAYPOINT, waypoint.location());
@@ -413,8 +413,15 @@ public class SeedMapScreen extends Screen {
             this.addFeatureWidget(guiGraphics, MapFeature.WORLD_SPAWN, spawnPoint);
         }
 
+        // draw marker
+        if (this.markerWidget != null) {
+            FeatureWidget.drawFeatureIcon(guiGraphics, this.markerWidget.feature.getTexture(), this.markerWidget.x, this.markerWidget.y, -1);
+        }
+
         // draw chest loot widget
-        this.chestLootWidget.render(guiGraphics, mouseX, mouseY, this.font);
+        if (this.chestLootWidget != null) {
+            this.chestLootWidget.render(guiGraphics, mouseX, mouseY, this.font);
+        }
 
         // draw hovered coordinates
         Component coordinates = accent("x: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
@@ -603,12 +610,17 @@ public class SeedMapScreen extends Screen {
     }
 
     private void createTeleportField() {
-        this.editBoxX = new EditBox(this.font, this.width / 2 - TELEPORT_FIELD_WIDTH, VERTICAL_PADDING + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.editBoxX"));
-        this.editBoxX.setMaxLength(9);
-        this.addRenderableWidget(this.editBoxX);
-        this.editBoxZ = new EditBox(this.font, this.width / 2, VERTICAL_PADDING + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.editBoxZ"));
-        this.editBoxZ.setMaxLength(9);
-        this.addRenderableWidget(this.editBoxZ);
+        this.teleportEditBoxX = new EditBox(this.font, this.width / 2 - TELEPORT_FIELD_WIDTH, VERTICAL_PADDING + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.teleportEditBoxX"));
+        this.teleportEditBoxX.setMaxLength(9);
+        this.addRenderableWidget(this.teleportEditBoxX);
+        this.teleportEditBoxZ = new EditBox(this.font, this.width / 2, VERTICAL_PADDING + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.teleportEditBoxZ"));
+        this.teleportEditBoxZ.setMaxLength(9);
+        this.addRenderableWidget(this.teleportEditBoxZ);
+    }
+
+    private void createWaypointNameField() {
+        this.waypointNameEditBox = new EditBox(this.font, HORIZONTAL_PADDING + this.seedMapWidth - WAYPOINT_NAME_FIELD_WIDTH, VERTICAL_PADDING + this.seedMapHeight + 1, WAYPOINT_NAME_FIELD_WIDTH, 20, Component.translatable("seedMap.waypointNameEditBox"));
+        this.addRenderableWidget(this.waypointNameEditBox);
     }
 
     private void moveCenter(QuartPos2 newCenter) {
@@ -618,6 +630,10 @@ public class SeedMapScreen extends Screen {
             widget.updatePosition();
             return !widget.withinBounds();
         });
+
+        if (this.markerWidget != null) {
+            this.markerWidget.updatePosition();
+        }
     }
 
     @Override
@@ -633,7 +649,7 @@ public class SeedMapScreen extends Screen {
     public void resize(Minecraft minecraft, int width, int height) {
         super.resize(minecraft, width, height);
         this.moveCenter(this.centerQuart);
-        this.chestLootWidget.clear();
+        this.chestLootWidget = null;
     }
 
     @Override
@@ -687,12 +703,15 @@ public class SeedMapScreen extends Screen {
         if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        if (this.chestLootWidget.mouseClicked(mouseX, mouseY, button)) {
+        if (this.chestLootWidget != null && this.chestLootWidget.mouseClicked(mouseX, mouseY, button)) {
             return true;
         } else if (button == InputConstants.MOUSE_BUTTON_LEFT) {
-            this.chestLootWidget.clear();
+            this.chestLootWidget = null;
         }
         if (this.handleMapFeatureLeftClicked(mouseX, mouseY, button)) {
+            return true;
+        }
+        if (this.handleMapMiddleClicked(mouseX, mouseY, button)) {
             return true;
         }
         if (this.handleMapRightClicked(mouseX, mouseY, button)) {
@@ -786,13 +805,13 @@ public class SeedMapScreen extends Screen {
                 Cubiomes.free_loot_table_pools(lootTableContext);
             }
             if (!chestLootDataList.isEmpty()) {
-                this.chestLootWidget.setContent(widget.x + widget.width() / 2, widget.y + widget.height() / 2, chestLootDataList);
+                this.chestLootWidget = new ChestLootWidget(widget.x + widget.width() / 2, widget.y + widget.height() / 2, chestLootDataList);
             }
         }
     }
 
-    private boolean handleMapRightClicked(double mouseX, double mouseY, int button) {
-        if (button != InputConstants.MOUSE_BUTTON_RIGHT) {
+    private boolean handleMapMiddleClicked(double mouseX, double mouseY, int button) {
+        if (button != InputConstants.MOUSE_BUTTON_MIDDLE) {
             return false;
         }
         if (mouseX < HORIZONTAL_PADDING || mouseX > HORIZONTAL_PADDING + this.seedMapWidth || mouseY < VERTICAL_PADDING || mouseY > VERTICAL_PADDING + this.seedMapHeight) {
@@ -803,25 +822,43 @@ public class SeedMapScreen extends Screen {
         return true;
     }
 
+    private boolean handleMapRightClicked(double mouseX, double mouseY, int button) {
+        if (button != InputConstants.MOUSE_BUTTON_RIGHT) {
+            return false;
+        }
+        if (mouseX < HORIZONTAL_PADDING || mouseX > HORIZONTAL_PADDING + this.seedMapWidth || mouseY < VERTICAL_PADDING || mouseY > VERTICAL_PADDING + this.seedMapHeight) {
+            return false;
+        }
+
+        this.markerWidget = new FeatureWidget(MapFeature.WAYPOINT, this.mouseQuart.toBlockPos().atY(63));
+        return true;
+    }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }
-        return this.handleTeleportFieldEnter(keyCode, scanCode, modifiers);
+        if (this.handleTeleportFieldEnter(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        if (this.handleWaypointNameFieldEnter(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        return false;
     }
 
     private boolean handleTeleportFieldEnter(int keyCode, int scanCode, int modifiers) {
         if (keyCode != InputConstants.KEY_RETURN) {
             return false;
         }
-        if (!this.editBoxX.isActive() && !this.editBoxZ.isActive()) {
+        if (!this.teleportEditBoxX.isActive() && !this.teleportEditBoxZ.isActive()) {
             return false;
         }
         int x, z;
         try {
-            x = Integer.parseInt(this.editBoxX.getValue());
-            z = Integer.parseInt(this.editBoxZ.getValue());
+            x = Integer.parseInt(this.teleportEditBoxX.getValue());
+            z = Integer.parseInt(this.teleportEditBoxZ.getValue());
         } catch (NumberFormatException _) {
             return false;
         }
@@ -832,6 +869,40 @@ public class SeedMapScreen extends Screen {
             return false;
         }
         this.moveCenter(new QuartPos2(QuartPos.fromBlock(x), QuartPos.fromBlock(z)));
+        this.teleportEditBoxX.setValue("");
+        this.teleportEditBoxZ.setValue("");
+        return true;
+    }
+
+    private boolean handleWaypointNameFieldEnter(int keyCode, int scanCode, int modifiers) {
+        if (keyCode != InputConstants.KEY_RETURN) {
+            return false;
+        }
+        if (this.markerWidget == null) {
+            return false;
+        }
+        if (!this.waypointNameEditBox.isActive()) {
+            return false;
+        }
+        String waypointName = this.waypointNameEditBox.getValue().trim();
+        if (waypointName.isEmpty()) {
+            return false;
+        }
+        SimpleWaypointsAPI waypointsApi = SimpleWaypointsAPI.getInstance();
+        String identifier = waypointsApi.getWorldIdentifier(this.minecraft);
+        if (identifier == null) {
+            return false;
+        }
+        try {
+            waypointsApi.addWaypoint(identifier, DIM_ID_TO_MC.get(this.dimension), waypointName, this.markerWidget.featureLocation);
+        } catch (CommandSyntaxException e) {
+            LocalPlayer player = this.minecraft.player;
+            if (player != null) {
+                player.displayClientMessage(error((MutableComponent) e.getRawMessage()), false);
+            }
+            return false;
+        }
+        this.waypointNameEditBox.setValue("");
         return true;
     }
 
@@ -904,4 +975,10 @@ public class SeedMapScreen extends Screen {
             guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture.resourceLocation(), minX, minY, 0, 0, iconWidth, iconHeight, iconWidth, iconHeight, colour);
         }
     }
+
+    private static final BiMap<Integer, ResourceKey<Level>> DIM_ID_TO_MC = ImmutableBiMap.of(
+        Cubiomes.DIM_OVERWORLD(), Level.OVERWORLD,
+        Cubiomes.DIM_NETHER(), Level.NETHER,
+        Cubiomes.DIM_END(), Level.END
+    );
 }

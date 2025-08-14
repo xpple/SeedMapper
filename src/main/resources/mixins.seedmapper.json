@@ -6,8 +6,7 @@
     "ClientPacketListenerMixin",
     "LevelRendererMixin",
     "ScreenMixin",
-    "betterconfig.ConfigCommandClientMixin",
-    "simplewaypoints.WaypointCommandMixin"
+    "betterconfig.ConfigCommandClientMixin"
   ],
   "injectors": {
     "defaultRequire": 1

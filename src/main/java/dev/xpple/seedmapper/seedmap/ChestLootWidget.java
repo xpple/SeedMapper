@@ -32,19 +32,15 @@ public class ChestLootWidget {
 
     private static final int ITEM_SLOT_SIZE = 18;
 
-    private boolean active = false;
-
-    private int x = 0;
-    private int y = 0;
+    private final int x;
+    private final int y;
 
     private int chestIndex = 0;
-    private List<ChestLootData> chestDataList = new ArrayList<>();
+    private final List<ChestLootData> chestDataList;
 
-    private List<List<ClientTooltipComponent>> extraChestInfo = new ArrayList<>();
+    private final List<List<ClientTooltipComponent>> extraChestInfo = new ArrayList<>();
 
-    public void setContent(int x, int y, List<ChestLootData> chestDataList) {
-        this.active = true;
-
+    public ChestLootWidget(int x, int y, List<ChestLootData> chestDataList) {
         this.x = x;
         this.y = y;
 
@@ -66,20 +62,7 @@ public class ChestLootWidget {
         }
     }
 
-    public void clear() {
-        this.active = false;
-
-        this.x = 0;
-        this.y = 0;
-        this.chestIndex = 0;
-        this.chestDataList.clear();
-        this.extraChestInfo.clear();
-    }
-
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, Font font) {
-        if (!this.active) {
-            return;
-        }
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CHEST_CONTAINER, this.x, this.y, 0, 0, CHEST_CONTAINER_WIDTH, CHEST_CONTAINER_HEIGHT, CHEST_CONTAINER_WIDTH, CHEST_CONTAINER_HEIGHT);
 
         ChestLootData chestData = this.chestDataList.get(this.chestIndex);
@@ -118,9 +101,6 @@ public class ChestLootWidget {
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (!this.active) {
-            return false;
-        }
         if (button != InputConstants.MOUSE_BUTTON_LEFT) {
             return false;
         }

@@ -92,6 +92,7 @@
   "seedMap.chestLoot.extraInfo.lootTable": "Loot table: %s",
   "seedMap.chestLoot.extraInfo.lootSeed": "Loot seed: %s",
   "seedMap.coordinatesCopied": "%s (coordinates copied!)",
-  "seedMap.editBoxX": "Edit box X coordinate",
-  "seedMap.editBoxZ": "Edit box Z coordinate"
+  "seedMap.teleportEditBoxX": "Edit box X coordinate",
+  "seedMap.teleportEditBoxZ": "Edit box Z coordinate",
+  "seedMap.waypointNameEditBox": "Waypoint name edit box"
 }

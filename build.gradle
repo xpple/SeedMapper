@@ -1,5 +1,6 @@
 import dev.xpple.seedmapper.buildscript.CreateJavaBindingsTask
 import dev.xpple.seedmapper.buildscript.GenerateBuildInfoTask
+import net.fabricmc.loom.task.prod.ClientProductionRunTask
 
 plugins {
 	id 'fabric-loom' version "${fabric_loom_version}"
@@ -43,12 +44,16 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	productionRuntimeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 	include modImplementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
 	include modImplementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
 
-	modRuntimeOnly('me.djtheredstoner:DevAuth-fabric:1.1.0') {
+	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+		exclude group: 'net.fabricmc', module: 'fabric-loader'
+	}
+	productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
 		exclude group: 'net.fabricmc', module: 'fabric-loader'
 	}
 
@@ -62,6 +67,16 @@ compileJava.dependsOn('createJavaBindings')
 
 tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
 	outputFile = new File(temporaryDir, "build_info.json")
+}
+
+tasks.register("prodClient", ClientProductionRunTask) {
+	runDir = file("run")
+
+	jvmArgs.add("-Ddevauth.enabled=true")
+
+	javaLauncher = javaToolchains.launcherFor {
+		languageVersion = JavaLanguageVersion.of(23)
+	}
 }
 
 processResources {
