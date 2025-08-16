@@ -194,6 +194,7 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
                 .build(), m -> (int) StructureVariant.size(m)))
             .put("basement", Pair.of(Map.of("true", 1, "false", 0), m -> (int) StructureVariant.basement(m)))
             .build())
+        .put(Cubiomes.Shipwreck(), Collections.emptyMap())
         .put(Cubiomes.Outpost(), Collections.emptyMap())
         .put(Cubiomes.Desert_Pyramid(), Collections.emptyMap())
         .put(Cubiomes.Jungle_Temple(), Collections.emptyMap())

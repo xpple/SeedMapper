@@ -108,6 +108,55 @@ public final class StructureVariantFeedbackHelper {
             }
             return components;
         });
+        temp.put(Cubiomes.Shipwreck(), variant -> {
+            List<Component> components = new ArrayList<>();
+            String variantName;
+            int biome = StructureVariant.biome(variant);
+            if (Cubiomes.isOceanic(biome) == 0) {
+                // isBeached
+                variantName = switch (StructureVariant.start(variant)) {
+                    case 0 -> "shipwreck/with_mast";
+                    case 1 -> "shipwreck/sideways_full";
+                    case 2 -> "shipwreck/sideways_fronthalf";
+                    case 3 -> "shipwreck/sideways_backhalf";
+                    case 4 -> "shipwreck/rightsideup_full";
+                    case 5 -> "shipwreck/rightsideup_fronthalf";
+                    case 6 -> "shipwreck/rightsideup_backhalf";
+                    case 7 -> "shipwreck/with_mast_degraded";
+                    case 8 -> "shipwreck/rightsideup_full_degraded";
+                    case 9 -> "shipwreck/rightsideup_fronthalf_degraded";
+                    case 10 -> "shipwreck/rightsideup_backhalf_degraded";
+                    default -> "shipwreck/isBeached/error";
+                };
+            } else {
+                variantName = switch (StructureVariant.start(variant)) {
+                    case 0 -> "shipwreck/with_mast";
+                    case 1 -> "shipwreck/upsidedown_full";
+                    case 2 -> "shipwreck/upsidedown_fronthalf";
+                    case 3 -> "shipwreck/upsidedown_backhalf";
+                    case 4 -> "shipwreck/sideways_full";
+                    case 5 -> "shipwreck/sideways_fronthalf";
+                    case 6 -> "shipwreck/sideways_backhalf";
+                    case 7 -> "shipwreck/rightsideup_full";
+                    case 8 -> "shipwreck/rightsideup_fronthalf";
+                    case 9 -> "shipwreck/rightsideup_backhalf";
+                    case 10 -> "shipwreck/with_mast_degraded";
+                    case 11 -> "shipwreck/upsidedown_full_degraded";
+                    case 12 -> "shipwreck/upsidedown_fronthalf_degraded";
+                    case 13 -> "shipwreck/upsidedown_backhalf_degraded";
+                    case 14 -> "shipwreck/sideways_full_degraded";
+                    case 15 -> "shipwreck/sideways_fronthalf_degraded";
+                    case 16 -> "shipwreck/sideways_backhalf_degraded";
+                    case 17 -> "shipwreck/rightsideup_full_degraded";
+                    case 18 -> "shipwreck/rightsideup_fronthalf_degraded";
+                    case 19 -> "shipwreck/rightsideup_backhalf_degraded";
+                    default -> "shipwreck/isOcean/error";
+                };
+            }
+            components.add(Component.translatable("command.locate.feature.structure.start", variantName));
+            components.add(Component.translatable("command.locate.feature.structure.rotation_" + StructureVariant.rotation(variant)));
+            return components;
+        });
         temp.put(Cubiomes.Outpost(), variant -> {
             List<Component> components = new ArrayList<>();
             components.add(Component.translatable("command.locate.feature.structure.rotation_" + StructureVariant.rotation(variant)));
