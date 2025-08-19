@@ -771,38 +771,41 @@ public class SeedMapScreen extends Screen {
                 MemorySegment lootTableInternal = Piece.lootTable(piece);
                 String lootTable = lootTableInternal.getString(0);
                 MemorySegment lootTableContext = LootTableContext.allocate(tempArena);
-                if (Cubiomes.init_loot_table_name(lootTableContext, lootTableInternal, this.version) == 0) {
-                    continue;
-                }
-                MemorySegment chestPoses = Piece.chestPoses(piece);
-                MemorySegment lootSeeds = Piece.lootSeeds(piece);
-                for (int chestIdx = 0; chestIdx < chestCount; chestIdx++) {
-                    MemorySegment chestPosInternal = Pos.asSlice(chestPoses, chestIdx);
-                    BlockPos chestPos = new BlockPos(Pos.x(chestPosInternal), 0, Pos.z(chestPosInternal));
-                    long lootSeed = lootSeeds.getAtIndex(Cubiomes.C_LONG_LONG, chestIdx);
-                    Cubiomes.set_loot_seed(lootTableContext, lootSeed);
-                    Cubiomes.generate_loot(lootTableContext);
-                    int lootCount = LootTableContext.generated_item_count(lootTableContext);
-                    SimpleContainer container = new SimpleContainer(3 * 9);
-                    for (int lootIdx = 0; lootIdx < lootCount; lootIdx++) {
-                        MemorySegment itemStackInternal = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), lootIdx);
-                        int itemId = Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStackInternal));
-                        Item item = ItemAndEnchantmentsPredicateArgument.ITEM_ID_TO_MC.get(itemId);
-                        net.minecraft.world.item.ItemStack itemStack = new net.minecraft.world.item.ItemStack(item, ItemStack.count(itemStackInternal));
-                        MemorySegment enchantments = ItemStack.enchantments(itemStackInternal);
-                        int enchantmentCount = ItemStack.enchantment_count(itemStackInternal);
-                        for (int enchantmentIdx = 0; enchantmentIdx < enchantmentCount; enchantmentIdx++) {
-                            MemorySegment enchantInstance = EnchantInstance.asSlice(enchantments, enchantmentIdx);
-                            int itemEnchantment = EnchantInstance.enchantment(enchantInstance);
-                            ResourceKey<Enchantment> enchantmentResourceKey = ItemAndEnchantmentsPredicateArgument.ENCHANTMENT_ID_TO_MC.get(itemEnchantment);
-                            Holder.Reference<Enchantment> enchantmentReference = this.enchantmentsRegistry.getOrThrow(enchantmentResourceKey);
-                            itemStack.enchant(enchantmentReference, EnchantInstance.level(enchantInstance));
-                        }
-                        container.addItem(itemStack);
+                try {
+                    if (Cubiomes.init_loot_table_name(lootTableContext, lootTableInternal, this.version) == 0) {
+                        continue;
                     }
-                    chestLootDataList.add(new ChestLootData(structure, pieceName, chestPos, lootSeed, lootTable, container));
+                    MemorySegment chestPoses = Piece.chestPoses(piece);
+                    MemorySegment lootSeeds = Piece.lootSeeds(piece);
+                    for (int chestIdx = 0; chestIdx < chestCount; chestIdx++) {
+                        MemorySegment chestPosInternal = Pos.asSlice(chestPoses, chestIdx);
+                        BlockPos chestPos = new BlockPos(Pos.x(chestPosInternal), 0, Pos.z(chestPosInternal));
+                        long lootSeed = lootSeeds.getAtIndex(Cubiomes.C_LONG_LONG, chestIdx);
+                        Cubiomes.set_loot_seed(lootTableContext, lootSeed);
+                        Cubiomes.generate_loot(lootTableContext);
+                        int lootCount = LootTableContext.generated_item_count(lootTableContext);
+                        SimpleContainer container = new SimpleContainer(3 * 9);
+                        for (int lootIdx = 0; lootIdx < lootCount; lootIdx++) {
+                            MemorySegment itemStackInternal = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), lootIdx);
+                            int itemId = Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStackInternal));
+                            Item item = ItemAndEnchantmentsPredicateArgument.ITEM_ID_TO_MC.get(itemId);
+                            net.minecraft.world.item.ItemStack itemStack = new net.minecraft.world.item.ItemStack(item, ItemStack.count(itemStackInternal));
+                            MemorySegment enchantments = ItemStack.enchantments(itemStackInternal);
+                            int enchantmentCount = ItemStack.enchantment_count(itemStackInternal);
+                            for (int enchantmentIdx = 0; enchantmentIdx < enchantmentCount; enchantmentIdx++) {
+                                MemorySegment enchantInstance = EnchantInstance.asSlice(enchantments, enchantmentIdx);
+                                int itemEnchantment = EnchantInstance.enchantment(enchantInstance);
+                                ResourceKey<Enchantment> enchantmentResourceKey = ItemAndEnchantmentsPredicateArgument.ENCHANTMENT_ID_TO_MC.get(itemEnchantment);
+                                Holder.Reference<Enchantment> enchantmentReference = this.enchantmentsRegistry.getOrThrow(enchantmentResourceKey);
+                                itemStack.enchant(enchantmentReference, EnchantInstance.level(enchantInstance));
+                            }
+                            container.addItem(itemStack);
+                        }
+                        chestLootDataList.add(new ChestLootData(structure, pieceName, chestPos, lootSeed, lootTable, container));
+                    }
+                } finally {
+                    Cubiomes.free_loot_table_pools(lootTableContext);
                 }
-                Cubiomes.free_loot_table_pools(lootTableContext);
             }
             if (!chestLootDataList.isEmpty()) {
                 this.chestLootWidget = new ChestLootWidget(widget.x + widget.width() / 2, widget.y + widget.height() / 2, chestLootDataList);

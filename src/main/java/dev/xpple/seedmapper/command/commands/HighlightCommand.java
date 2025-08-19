@@ -106,29 +106,32 @@ public class HighlightCommand {
                         MemorySegment pos3List = Cubiomes.generateOres(arena, generator, surfaceNoise, oreConfig, chunkX, chunkZ);
                         int size = Pos3List.size(pos3List);
                         MemorySegment pos3s = Pos3List.pos3s(pos3List);
-                        for (int i = 0; i < size; i++) {
-                            MemorySegment pos3 = Pos3.asSlice(pos3s, i);
-                            BlockPos pos = new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3));
-                            if (doAirCheck && chunk.getBlockState(pos).isAir()) {
-                                continue;
-                            }
-                            Integer previouslyGeneratedOre = generatedOres.get(pos);
-                            if (previouslyGeneratedOre != null) {
-                                boolean contains = false;
-                                for (int j = 0; j < numReplaceBlocks; j++) {
-                                    int replaceBlock = replaceBlocks.getAtIndex(Cubiomes.C_INT, j);
-                                    if (replaceBlock == previouslyGeneratedOre) {
-                                        contains = true;
-                                        break;
-                                    }
-                                }
-                                if (!contains) {
+                        try {
+                            for (int i = 0; i < size; i++) {
+                                MemorySegment pos3 = Pos3.asSlice(pos3s, i);
+                                BlockPos pos = new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3));
+                                if (doAirCheck && chunk.getBlockState(pos).isAir()) {
                                     continue;
                                 }
+                                Integer previouslyGeneratedOre = generatedOres.get(pos);
+                                if (previouslyGeneratedOre != null) {
+                                    boolean contains = false;
+                                    for (int j = 0; j < numReplaceBlocks; j++) {
+                                        int replaceBlock = replaceBlocks.getAtIndex(Cubiomes.C_INT, j);
+                                        if (replaceBlock == previouslyGeneratedOre) {
+                                            contains = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!contains) {
+                                        continue;
+                                    }
+                                }
+                                generatedOres.put(pos, oreBlock);
                             }
-                            generatedOres.put(pos, oreBlock);
+                        } finally {
+                            Cubiomes.freePos3List(pos3List);
                         }
-                        Cubiomes.freePos3List(pos3List);
                     });
 
                 int block = blockPair.getFirst();

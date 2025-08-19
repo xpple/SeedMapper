@@ -376,32 +376,34 @@ public class LocateCommand {
                                 continue;
                             }
                             MemorySegment lootTableContext = LootTableContext.allocate(arena);
-                            // it seems caching the loot tables is not faster
-                            if (Cubiomes.init_loot_table_name(lootTableContext, Piece.lootTable(piece), version) == 0) {
-                                continue;
-                            }
-                            if (Cubiomes.has_item(lootTableContext, itemPredicate.item()) == 0) {
-                                Cubiomes.free_loot_table_pools(lootTableContext);
-                                Set<String> structureIgnoredLootTables = ignoredLootTables.computeIfAbsent(structure, _ -> new HashSet<>());
-                                structureIgnoredLootTables.add(Piece.lootTable(piece).getString(0));
-                                // if structure has no loot tables with the desired item, remove structure from state loop
-                                if (structureIgnoredLootTables.size() == lootTableCount.get(structure)) {
-                                    return;
+                            try {
+                                // it seems caching the loot tables is not faster
+                                if (Cubiomes.init_loot_table_name(lootTableContext, Piece.lootTable(piece), version) == 0) {
+                                    continue;
                                 }
-                                continue;
-                            }
-                            for (int j = 0; j < chestCount; j++) {
-                                Cubiomes.set_loot_seed(lootTableContext, Piece.lootSeeds(piece).getAtIndex(Cubiomes.C_LONG_LONG, j));
-                                Cubiomes.generate_loot(lootTableContext);
-                                int lootCount = LootTableContext.generated_item_count(lootTableContext);
-                                for (int k = 0; k < lootCount; k++) {
-                                    MemorySegment itemStack = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), k);
-                                    if (Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStack)) == itemPredicate.item() && itemPredicate.enchantmensPredicate().test(itemStack)) {
-                                        foundInStructure += ItemStack.count(itemStack);
+                                if (Cubiomes.has_item(lootTableContext, itemPredicate.item()) == 0) {
+                                    Set<String> structureIgnoredLootTables = ignoredLootTables.computeIfAbsent(structure, _ -> new HashSet<>());
+                                    structureIgnoredLootTables.add(Piece.lootTable(piece).getString(0));
+                                    // if structure has no loot tables with the desired item, remove structure from state loop
+                                    if (structureIgnoredLootTables.size() == lootTableCount.get(structure)) {
+                                        return;
+                                    }
+                                    continue;
+                                }
+                                for (int j = 0; j < chestCount; j++) {
+                                    Cubiomes.set_loot_seed(lootTableContext, Piece.lootSeeds(piece).getAtIndex(Cubiomes.C_LONG_LONG, j));
+                                    Cubiomes.generate_loot(lootTableContext);
+                                    int lootCount = LootTableContext.generated_item_count(lootTableContext);
+                                    for (int k = 0; k < lootCount; k++) {
+                                        MemorySegment itemStack = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), k);
+                                        if (Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStack)) == itemPredicate.item() && itemPredicate.enchantmensPredicate().test(itemStack)) {
+                                            foundInStructure += ItemStack.count(itemStack);
+                                        }
                                     }
                                 }
+                            } finally {
+                                Cubiomes.free_loot_table_pools(lootTableContext);
                             }
-                            Cubiomes.free_loot_table_pools(lootTableContext);
                         }
                         if (foundInStructure > 0) {
                             found[0] += foundInStructure;
