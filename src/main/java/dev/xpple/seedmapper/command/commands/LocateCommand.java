@@ -37,6 +37,7 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -304,6 +305,7 @@ public class LocateCommand {
                 })
                 .collect(Collectors.toList());
 
+            Map<String, MemorySegment> lootTableContextCache = new HashMap<>();
             // count how many loot tables each structure has
             Map<Integer, Integer> lootTableCount = structureStates.stream()
                 .collect(Collectors.toMap(state -> (int) StructureConfig.structType(state.structureConfig), state -> Cubiomes.getLootTableCountForStructure(StructureConfig.structType(state.structureConfig), version)));
@@ -316,82 +318,85 @@ public class LocateCommand {
             MemorySegment structureSaltConfig = StructureSaltConfig.allocate(arena);
             int[] found = {0};
 
-            /*
-             * To locate loot closest to the player, all structures
-             * must be considered. That means we must cycle over
-             * the structures and incrementally find the desired
-             * loot. However, structures have different region
-             * sizes. That means some structures appear more often
-             * than others. To this end, the below code intends to
-             * loop over structures with smaller region sizes more
-             * often.
-             */
-            for (int stateIndex = 0, radius = 0;; stateIndex++) {
-                if (structureStates.isEmpty()) {
-                    throw CommandExceptions.LOOT_NOT_AVAILABLE_EXCEPTION.create();
-                }
-                if (stateIndex >= structureStates.size()) {
-                    stateIndex = 0;
-                    radius++;
-                }
-                StructureIterationState state = structureStates.get(stateIndex);
-                MemorySegment structureConfig = state.structureConfig;
-                int structure = StructureConfig.structType(structureConfig);
-
-                int regionSize = StructureConfig.regionSize(structureConfig) << 4;
-                int maxRegionSize = StructureConfig.regionSize(structureStates.getLast().structureConfig) << 4;
-
-                int previouslyFound = found[0];
-                List<BlockPos> aggregatedLootPositions = new ArrayList<>();
-                while (true) {
-                    if (state.iterator.getX() * regionSize > center.getX() + radius * maxRegionSize
-                        || state.iterator.getZ() * regionSize > center.getZ() + radius * maxRegionSize) {
-                        break;
+            try {
+                /*
+                 * To locate loot closest to the player, all structures
+                 * must be considered. That means we must cycle over
+                 * the structures and incrementally find the desired
+                 * loot. However, structures have different region
+                 * sizes. That means some structures appear more often
+                 * than others. To this end, the below code intends to
+                 * loop over structures with smaller region sizes more
+                 * often.
+                 */
+                for (int stateIndex = 0, radius = 0;; stateIndex++) {
+                    if (structureStates.isEmpty()) {
+                        throw CommandExceptions.LOOT_NOT_AVAILABLE_EXCEPTION.create();
                     }
+                    if (stateIndex >= structureStates.size()) {
+                        stateIndex = 0;
+                        radius++;
+                    }
+                    StructureIterationState state = structureStates.get(stateIndex);
+                    MemorySegment structureConfig = state.structureConfig;
+                    int structure = StructureConfig.structType(structureConfig);
 
-                    boolean exhausted = !state.iterator.tryAdvance(pos -> {
-                        if (!state.generationCheck.check(generator, surfaceNoise, pos.x(), pos.z(), structurePos)) {
-                            return;
+                    int regionSize = StructureConfig.regionSize(structureConfig) << 4;
+                    int maxRegionSize = StructureConfig.regionSize(structureStates.getLast().structureConfig) << 4;
+
+                    int previouslyFound = found[0];
+                    List<BlockPos> aggregatedLootPositions = new ArrayList<>();
+                    while (true) {
+                        if (state.iterator.getX() * regionSize > center.getX() + radius * maxRegionSize
+                            || state.iterator.getZ() * regionSize > center.getZ() + radius * maxRegionSize) {
+                            break;
                         }
-                        int posX = Pos.x(structurePos);
-                        int posZ = Pos.z(structurePos);
-                        int biome = Cubiomes.getBiomeAt(generator, 4, posX >> 2, 320 >> 2, posZ >> 2);
-                        Cubiomes.getVariant(structureVariant, structure, version, seed, posX, posZ, biome);
-                        biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
-                        if (Cubiomes.getStructureSaltConfig(structure, version, biome, structureSaltConfig) == 0) {
-                            return;
-                        }
-                        int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, version, seed, posX, posZ);
-                        if (numPieces <= 0) {
-                            return;
-                        }
-                        int foundInStructure = 0;
-                        for (int i = 0; i < numPieces; i++) {
-                            MemorySegment piece = Piece.asSlice(pieces, i);
-                            int chestCount = Piece.chestCount(piece);
-                            if (chestCount == 0) {
-                                continue;
+
+                        boolean exhausted = !state.iterator.tryAdvance(pos -> {
+                            if (!state.generationCheck.check(generator, surfaceNoise, pos.x(), pos.z(), structurePos)) {
+                                return;
                             }
-                            if (ignoredLootTables.getOrDefault(structure, Collections.emptySet()).contains(Piece.lootTable(piece).getString(0))) {
-                                continue;
+                            int posX = Pos.x(structurePos);
+                            int posZ = Pos.z(structurePos);
+                            int biome = Cubiomes.getBiomeAt(generator, 4, posX >> 2, 320 >> 2, posZ >> 2);
+                            Cubiomes.getVariant(structureVariant, structure, version, seed, posX, posZ, biome);
+                            biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
+                            if (Cubiomes.getStructureSaltConfig(structure, version, biome, structureSaltConfig) == 0) {
+                                return;
                             }
-                            MemorySegment lootTableContext = LootTableContext.allocate(arena);
-                            try {
-                                // it seems caching the loot tables is not faster
-                                if (Cubiomes.init_loot_table_name(lootTableContext, Piece.lootTable(piece), version) == 0) {
+                            int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, version, seed, posX, posZ);
+                            if (numPieces <= 0) {
+                                return;
+                            }
+                            int foundInStructure = 0;
+                            for (int i = 0; i < numPieces; i++) {
+                                MemorySegment piece = Piece.asSlice(pieces, i);
+                                int chestCount = Piece.chestCount(piece);
+                                if (chestCount == 0) {
                                     continue;
                                 }
-                                if (Cubiomes.has_item(lootTableContext, itemPredicate.item()) == 0) {
-                                    Set<String> structureIgnoredLootTables = ignoredLootTables.computeIfAbsent(structure, _ -> new HashSet<>());
-                                    structureIgnoredLootTables.add(Piece.lootTable(piece).getString(0));
-                                    // if structure has no loot tables with the desired item, remove structure from state loop
-                                    if (structureIgnoredLootTables.size() == lootTableCount.get(structure)) {
-                                        return;
-                                    }
-                                    continue;
-                                }
+                                MemorySegment lootTables = Piece.lootTables(piece);
+                                MemorySegment lootSeeds = Piece.lootSeeds(piece);
                                 for (int j = 0; j < chestCount; j++) {
-                                    Cubiomes.set_loot_seed(lootTableContext, Piece.lootSeeds(piece).getAtIndex(Cubiomes.C_LONG_LONG, j));
+                                    MemorySegment lootTable = lootTables.getAtIndex(ValueLayout.ADDRESS, j).reinterpret(Long.MAX_VALUE);
+                                    String lootTableString = lootTable.getString(0);
+                                    MemorySegment lootTableContext = lootTableContextCache.computeIfAbsent(lootTableString, _ -> {
+                                        MemorySegment ltc = LootTableContext.allocate(arena);
+                                        if (Cubiomes.init_loot_table_name(ltc, lootTable, version) == 0) {
+                                            return null;
+                                        }
+                                        return ltc;
+                                    });
+                                    if (lootTableContext == null || Cubiomes.has_item(lootTableContext, itemPredicate.item()) == 0) {
+                                        Set<String> structureIgnoredLootTables = ignoredLootTables.computeIfAbsent(structure, _ -> new HashSet<>());
+                                        structureIgnoredLootTables.add(lootTableString);
+                                        // if structure has no loot tables with the desired item, remove structure from state loop
+                                        if (structureIgnoredLootTables.size() == lootTableCount.get(structure)) {
+                                            return;
+                                        }
+                                        continue;
+                                    }
+                                    Cubiomes.set_loot_seed(lootTableContext, lootSeeds.getAtIndex(Cubiomes.C_LONG_LONG, j));
                                     Cubiomes.generate_loot(lootTableContext);
                                     int lootCount = LootTableContext.generated_item_count(lootTableContext);
                                     for (int k = 0; k < lootCount; k++) {
@@ -401,35 +406,35 @@ public class LocateCommand {
                                         }
                                     }
                                 }
-                            } finally {
-                                Cubiomes.free_loot_table_pools(lootTableContext);
                             }
+                            if (foundInStructure > 0) {
+                                found[0] += foundInStructure;
+                                aggregatedLootPositions.add(new BlockPos(posX, 0, posZ));
+                            }
+                        });
+                        if (exhausted) {
+                            structureStates.remove(stateIndex);
+                            break;
                         }
-                        if (foundInStructure > 0) {
-                            found[0] += foundInStructure;
-                            aggregatedLootPositions.add(new BlockPos(posX, 0, posZ));
+                        if (ignoredLootTables.getOrDefault(structure, Collections.emptySet()).size() == lootTableCount.get(structure)) {
+                            structureStates.remove(stateIndex);
+                            break;
                         }
-                    });
-                    if (exhausted) {
-                        structureStates.remove(stateIndex);
-                        break;
+                        if (found[0] >= amount) {
+                            break;
+                        }
                     }
-                    if (ignoredLootTables.getOrDefault(structure, Collections.emptySet()).size() == lootTableCount.get(structure)) {
-                        structureStates.remove(stateIndex);
-                        break;
+                    int newlyFound = found[0] - previouslyFound;
+                    if (newlyFound > 0) {
+                        String structureName = Cubiomes.struct2str(StructureConfig.structType(structureConfig)).getString(0);
+                        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.loot.foundAtStructure", accent(String.valueOf(newlyFound)), structureName, ComponentUtils.formatXZCollection(aggregatedLootPositions))));
                     }
                     if (found[0] >= amount) {
                         break;
                     }
                 }
-                int newlyFound = found[0] - previouslyFound;
-                if (newlyFound > 0) {
-                    String structureName = Cubiomes.struct2str(StructureConfig.structType(structureConfig)).getString(0);
-                    source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.loot.foundAtStructure", accent(String.valueOf(newlyFound)), structureName, ComponentUtils.formatXZCollection(aggregatedLootPositions))));
-                }
-                if (found[0] >= amount) {
-                    break;
-                }
+            } finally {
+                lootTableContextCache.values().forEach(Cubiomes::free_loot_table_pools);
             }
             String itemName = Cubiomes.global_id2item_name(itemPredicate.item()).getString(0);
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.loot.totalFound", accent(String.valueOf(found[0])), itemName)));

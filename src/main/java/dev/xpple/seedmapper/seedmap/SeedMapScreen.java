@@ -75,6 +75,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -768,16 +769,17 @@ public class SeedMapScreen extends Screen {
                     continue;
                 }
                 String pieceName = Piece.name(piece).getString(0);
-                MemorySegment lootTableInternal = Piece.lootTable(piece);
-                String lootTable = lootTableInternal.getString(0);
-                MemorySegment lootTableContext = LootTableContext.allocate(tempArena);
-                try {
-                    if (Cubiomes.init_loot_table_name(lootTableContext, lootTableInternal, this.version) == 0) {
-                        continue;
-                    }
-                    MemorySegment chestPoses = Piece.chestPoses(piece);
-                    MemorySegment lootSeeds = Piece.lootSeeds(piece);
-                    for (int chestIdx = 0; chestIdx < chestCount; chestIdx++) {
+                MemorySegment chestPoses = Piece.chestPoses(piece);
+                MemorySegment lootTables = Piece.lootTables(piece);
+                MemorySegment lootSeeds = Piece.lootSeeds(piece);
+                for (int chestIdx = 0; chestIdx < chestCount; chestIdx++) {
+                    MemorySegment lootTable = lootTables.getAtIndex(ValueLayout.ADDRESS, chestIdx).reinterpret(Long.MAX_VALUE);
+                    String lootTableString = lootTable.getString(0);
+                    MemorySegment lootTableContext = LootTableContext.allocate(tempArena);
+                    try {
+                        if (Cubiomes.init_loot_table_name(lootTableContext, lootTable, this.version) == 0) {
+                            continue;
+                        }
                         MemorySegment chestPosInternal = Pos.asSlice(chestPoses, chestIdx);
                         BlockPos chestPos = new BlockPos(Pos.x(chestPosInternal), 0, Pos.z(chestPosInternal));
                         long lootSeed = lootSeeds.getAtIndex(Cubiomes.C_LONG_LONG, chestIdx);
@@ -801,10 +803,10 @@ public class SeedMapScreen extends Screen {
                             }
                             container.addItem(itemStack);
                         }
-                        chestLootDataList.add(new ChestLootData(structure, pieceName, chestPos, lootSeed, lootTable, container));
+                        chestLootDataList.add(new ChestLootData(structure, pieceName, chestPos, lootSeed, lootTableString, container));
+                    } finally {
+                        Cubiomes.free_loot_table_pools(lootTableContext);
                     }
-                } finally {
-                    Cubiomes.free_loot_table_pools(lootTableContext);
                 }
             }
             if (!chestLootDataList.isEmpty()) {
