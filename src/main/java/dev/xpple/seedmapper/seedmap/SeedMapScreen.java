@@ -612,15 +612,18 @@ public class SeedMapScreen extends Screen {
 
     private void createTeleportField() {
         this.teleportEditBoxX = new EditBox(this.font, this.width / 2 - TELEPORT_FIELD_WIDTH, VERTICAL_PADDING + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.teleportEditBoxX"));
+        this.teleportEditBoxX.setHint(Component.literal("X"));
         this.teleportEditBoxX.setMaxLength(9);
         this.addRenderableWidget(this.teleportEditBoxX);
         this.teleportEditBoxZ = new EditBox(this.font, this.width / 2, VERTICAL_PADDING + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.teleportEditBoxZ"));
+        this.teleportEditBoxZ.setHint(Component.literal("Z"));
         this.teleportEditBoxZ.setMaxLength(9);
         this.addRenderableWidget(this.teleportEditBoxZ);
     }
 
     private void createWaypointNameField() {
         this.waypointNameEditBox = new EditBox(this.font, HORIZONTAL_PADDING + this.seedMapWidth - WAYPOINT_NAME_FIELD_WIDTH, VERTICAL_PADDING + this.seedMapHeight + 1, WAYPOINT_NAME_FIELD_WIDTH, 20, Component.translatable("seedMap.waypointNameEditBox"));
+        this.waypointNameEditBox.setHint(Component.literal("Waypoint name"));
         this.addRenderableWidget(this.waypointNameEditBox);
     }
 
