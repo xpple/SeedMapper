@@ -8,6 +8,7 @@ import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.command.commands.BuildInfoCommand;
 import dev.xpple.seedmapper.command.commands.CheckSeedCommand;
 import dev.xpple.seedmapper.command.commands.ClearCommand;
+import dev.xpple.seedmapper.command.commands.DiscordCommand;
 import dev.xpple.seedmapper.command.commands.HighlightCommand;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.command.commands.SeedMapCommand;
@@ -85,5 +86,6 @@ public class SeedMapper implements ClientModInitializer {
         ClearCommand.register(dispatcher);
         StopTaskCommand.register(dispatcher);
         SeedMapCommand.register(dispatcher);
+        DiscordCommand.register(dispatcher);
     }
 }
