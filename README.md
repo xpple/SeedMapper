@@ -35,7 +35,7 @@ Usage: `/sm:locate biome <biome>`.
 Locates a given biome closest to the player. All biomes in all dimensions are supported.
 
 ### Structure locating
-Usage: `/sm:locate feature structure <structure>[<pieces>]{<variants>}`.
+Usage: `/sm:locate feature <structure>[<pieces>]{<variants>}`.
 
 Locates a given structure closest to the player. All structures in all dimensions are supported. However, due to limitations in the underlying library, some structures (in particular desert pyramids, jungle temples and woodland mansions) may result in occasional false positives. For more advanced querying you can also use piece and variant data to further restrict the search. For example, the following command will search for end cities with ships: `/sm:locate feature structure end_city[end_ship]`.
 
@@ -60,7 +60,7 @@ Usage: `/sm:highlight orevein [chunks]`.
 Highlights ore veins in the world. Raw ore blocks that generate as part of the ore vein are highlighted distinctly. Filler blocks are ignored.
 
 ### Slime chunk locating
-Usage: `/sm:locate feature slimechunk`.
+Usage: `/sm:locate slimechunk`.
 
 Locates a slime chunk closest to the player. This will always be accurate.
 
