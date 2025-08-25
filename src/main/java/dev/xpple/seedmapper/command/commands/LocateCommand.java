@@ -85,7 +85,10 @@ public class LocateCommand {
             .then(literal("spawn")
                 .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource())))))
             .then(literal("orevein")
-                .executes(ctx -> submit(() -> locateOreVein(CustomClientCommandSource.of(ctx.getSource()))))));
+                .then(literal("copper")
+                    .executes(ctx -> submit(() -> locateOreVein(CustomClientCommandSource.of(ctx.getSource()), true))))
+                .then(literal("iron")
+                    .executes(ctx -> submit(() -> locateOreVein(CustomClientCommandSource.of(ctx.getSource()), false))))));
     }
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
@@ -453,7 +456,7 @@ public class LocateCommand {
         }
     }
 
-    private static int locateOreVein(CustomClientCommandSource source) throws CommandSyntaxException {
+    private static int locateOreVein(CustomClientCommandSource source, boolean wantCopperVein) throws CommandSyntaxException {
         int version = source.getVersion();
         long seed = source.getSeed().getSecond();
         try (Arena arena = Arena.ofConfined()) {
@@ -474,8 +477,11 @@ public class LocateCommand {
                             if (block == -1) {
                                 continue;
                             }
-                            pos[0] = new BlockPos(minX + x, y, minZ + z);
-                            return true;
+                            boolean isCopperVein = block == Cubiomes.RAW_COPPER_BLOCK() || block == Cubiomes.COPPER_ORE() || block == Cubiomes.GRANITE();
+                            if (wantCopperVein == isCopperVein) {
+                                pos[0] = new BlockPos(minX + x, y, minZ + z);
+                                return true;
+                            }
                         }
                     }
                 }
