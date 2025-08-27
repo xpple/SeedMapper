@@ -40,7 +40,7 @@ Usage: `/sm:locate feature <structure>[<pieces>]{<variants>}`.
 Locates a given structure closest to the player. All structures in all dimensions are supported. However, due to limitations in the underlying library, some structures (in particular desert pyramids, jungle temples and woodland mansions) may result in occasional false positives. For more advanced querying you can also use piece and variant data to further restrict the search. For example, the following command will search for end cities with ships: `/sm:locate feature structure end_city[end_ship]`.
 
 ### Ore vein locating
-Usage: `/sm:locate orevein`.
+Usage: `/sm:locate orevein (copper|iron)`.
 
 Locates an [ore vein](https://minecraft.wiki/w/Ore_vein) closest to the player. The coordinates of the first ore vein block found will be returned. After this, you can use [`/sm:highlight orevein [chunks]`](#ore-vein-highlighting) to highlight the other ores.
 
