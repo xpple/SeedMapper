@@ -281,6 +281,7 @@
 --include-struct StructureVariant
 --include-function appendPos3List
 --include-function canBiomeGenerate
+--include-function checkCanyonStart
 --include-function checkForBiomes
 --include-function checkForBiomesAtLayer
 --include-function checkForTemps

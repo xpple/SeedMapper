@@ -28,6 +28,7 @@ import dev.xpple.seedmapper.util.TwoDTree;
 import dev.xpple.seedmapper.util.WorldIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
@@ -46,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.ToIntBiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -88,7 +90,9 @@ public class LocateCommand {
                 .then(literal("copper")
                     .executes(ctx -> submit(() -> locateOreVein(CustomClientCommandSource.of(ctx.getSource()), true))))
                 .then(literal("iron")
-                    .executes(ctx -> submit(() -> locateOreVein(CustomClientCommandSource.of(ctx.getSource()), false))))));
+                    .executes(ctx -> submit(() -> locateOreVein(CustomClientCommandSource.of(ctx.getSource()), false)))))
+            .then(literal("canyon")
+                .executes(ctx -> submit(() -> locateCanyon(CustomClientCommandSource.of(ctx.getSource()))))));
     }
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
@@ -493,6 +497,40 @@ public class LocateCommand {
 
             source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt", ComponentUtils.formatXYZ(pos[0].getX(), pos[0].getY(), pos[0].getZ(), Component.translatable("command.locate.oreVein.copy"))));
 
+            return Command.SINGLE_SUCCESS;
+        }
+    }
+
+    private static int locateCanyon(CustomClientCommandSource source) throws CommandSyntaxException {
+        int version = source.getVersion();
+        if (version < Cubiomes.MC_1_13()) {
+            throw CommandExceptions.CANYON_WRONG_VERSION_EXCEPTION.create();
+        }
+        int dimension = source.getDimension();
+        if (dimension != Cubiomes.DIM_OVERWORLD()) {
+            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+        }
+        long seed = source.getSeed().getSecond();
+        try (Arena arena = Arena.ofConfined()) {
+            ToIntBiFunction<Integer, Integer> biomeFunction;
+            if (version <= Cubiomes.MC_1_17()) {
+                MemorySegment generator = Generator.allocate(arena);
+                Cubiomes.setupGenerator(generator, version, 0);
+                Cubiomes.applySeed(generator, dimension, seed);
+                biomeFunction = (chunkX, chunkZ) -> Cubiomes.getBiomeAt(generator, 4, chunkX << 2, 0, chunkZ << 2);
+            } else {
+                biomeFunction = (_, _) -> -1;
+            }
+            ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
+            SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.x, center.z, 6400, (chunkX, chunkZ) -> {
+                int canyonStart = Cubiomes.checkCanyonStart(seed, biomeFunction.applyAsInt(chunkX, chunkZ), chunkX, chunkZ, version);
+                return (canyonStart & 0b11) != 0;
+            });
+            if (pos == null) {
+                throw CommandExceptions.NO_CANYON_FOUND_EXCEPTION.create(6400);
+            }
+
+            source.sendFeedback(Component.translatable("command.locate.canyon.foundAt", ComponentUtils.formatXZ(SectionPos.sectionToBlockCoord(pos.x()), SectionPos.sectionToBlockCoord(pos.z()), Component.translatable("command.locate.canyon.copy"))));
             return Command.SINGLE_SUCCESS;
         }
     }

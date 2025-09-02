@@ -21,7 +21,7 @@ public final class RenderManager {
     private RenderManager() {
     }
 
-    private static final Set<Line> lines = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<Line, Boolean>build().asMap());;
+    private static final Set<Line> lines = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<Line, Boolean>build().asMap());
 
     public static void drawBoxes(Collection<BlockPos> posBatch, int colour) {
         Set<Line> lines = new HashSet<>();

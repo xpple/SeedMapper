@@ -85,6 +85,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntSupplier;
+import java.util.function.ToIntBiFunction;
 import java.util.stream.IntStream;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
@@ -147,6 +148,7 @@ public class SeedMapScreen extends Screen {
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, StructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
     public static final Object2ObjectMap<WorldIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, BitSet>> canyonDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, BitSet>> slimeChunkDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, BlockPos> spawnDataCache = new Object2ObjectOpenHashMap<>();
 
@@ -170,6 +172,7 @@ public class SeedMapScreen extends Screen {
     private final SeedMapCache<TilePos, int[]> biomeCache;
     private final Object2ObjectMap<ChunkPos, StructureData> structureCache;
     private final SeedMapCache<TilePos, OreVeinData> oreVeinCache;
+    private final Object2ObjectMap<TilePos, BitSet> canyonCache;
     private final Object2ObjectMap<TilePos, Tile> slimeChunkTileCache = new Object2ObjectOpenHashMap<>();
     private final SeedMapCache<TilePos, BitSet> slimeChunkCache;
 
@@ -245,6 +248,7 @@ public class SeedMapScreen extends Screen {
         this.structureCache = structureDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
         this.slimeChunkCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(slimeChunkDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
         this.oreVeinCache = new SeedMapCache<>(oreVeinDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>()), this.seedMapExecutor);
+        this.canyonCache = canyonDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
 
         if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.containsKey(this.worldIdentifier)) {
             this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
@@ -371,13 +375,31 @@ public class SeedMapScreen extends Screen {
             for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
                 for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
                     TilePos tilePos = new TilePos(centerTile.x() + relTileX, centerTile.z() + relTileZ);
-                    OreVeinData oreVeinData = this.oreVeinCache.computeIfAbsent(tilePos, _ -> this.calculateOreVein(tilePos));
+                    OreVeinData oreVeinData = this.oreVeinCache.computeIfAbsent(tilePos, this::calculateOreVein);
                     if (oreVeinData == null) {
                         continue;
                     }
                     if (Configs.ToggledFeatures.contains(oreVeinData.oreVeinType())) {
                         this.addFeatureWidget(guiGraphics, oreVeinData.oreVeinType(), oreVeinData.blockPos());
                     }
+                }
+            }
+        }
+
+        // compute canyons
+        if ((this.toggleableFeatures.contains(MapFeature.CANYON)) && Configs.ToggledFeatures.contains(MapFeature.CANYON)) {
+            for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
+                for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
+                    TilePos tilePos = new TilePos(centerTile.x() + relTileX, centerTile.z() + relTileZ);
+                    ChunkPos chunkPos = tilePos.toChunkPos();
+                    BitSet canyonData = this.canyonCache.computeIfAbsent(tilePos, this::calculateCanyonData);
+                    canyonData.stream().forEach(i -> {
+                        int relChunkX = i % TilePos.TILE_SIZE_CHUNKS;
+                        int relChunkZ = i / TilePos.TILE_SIZE_CHUNKS;
+                        int chunkX = chunkPos.x + relChunkX;
+                        int chunkZ = chunkPos.z + relChunkZ;
+                        this.addFeatureWidget(guiGraphics, MapFeature.CANYON, new BlockPos(SectionPos.sectionToBlockCoord(chunkX), 0, SectionPos.sectionToBlockCoord(chunkZ)));
+                    });
                 }
             }
         }
@@ -603,6 +625,26 @@ public class SeedMapScreen extends Screen {
             }
         }
         return null;
+    }
+
+    private BitSet calculateCanyonData(TilePos tilePos) {
+        ToIntBiFunction<Integer, Integer> biomeFunction;
+        if (this.version <= Cubiomes.MC_1_17()) {
+            biomeFunction = (chunkX, chunkZ) -> Cubiomes.getBiomeAt(this.biomeGenerator, 4, chunkX << 2, 0, chunkZ << 2);
+        } else {
+            biomeFunction = (_, _) -> -1;
+        }
+        BitSet canyons = new BitSet(TilePos.TILE_SIZE_CHUNKS * TilePos.TILE_SIZE_CHUNKS);
+        ChunkPos chunkPos = tilePos.toChunkPos();
+        for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
+            for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
+                int chunkX = chunkPos.x + relChunkX;
+                int chunkZ = chunkPos.z + relChunkZ;
+                int canyonStart = Cubiomes.checkCanyonStart(this.seed, biomeFunction.applyAsInt(chunkX, chunkZ), chunkX, chunkZ, this.version);
+                canyons.set(relChunkX + relChunkZ * TilePos.TILE_SIZE_CHUNKS, (canyonStart & 0b11) != 0);
+            }
+        }
+        return canyons;
     }
 
     private BlockPos calculateSpawnData() {
