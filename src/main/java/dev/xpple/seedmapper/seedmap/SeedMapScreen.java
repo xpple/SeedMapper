@@ -437,7 +437,7 @@ public class SeedMapScreen extends Screen {
         }
 
         // draw marker
-        if (this.markerWidget != null) {
+        if (this.markerWidget != null && this.markerWidget.withinBounds()) {
             FeatureWidget.drawFeatureIcon(guiGraphics, this.markerWidget.feature.getTexture(), this.markerWidget.x, this.markerWidget.y, -1);
         }
 
@@ -724,6 +724,9 @@ public class SeedMapScreen extends Screen {
         currentScroll = Mth.clamp(currentScroll - (float) (-scrollY / MAX_PIXELS_PER_BIOME), 0.0F, 1.0F);
 
         Configs.PixelsPerBiome = Math.max((int) (currentScroll * MAX_PIXELS_PER_BIOME + 0.5), MIN_PIXELS_PER_BIOME);
+        if (this.markerWidget != null) {
+            this.markerWidget.updatePosition();
+        }
         return true;
     }
 
