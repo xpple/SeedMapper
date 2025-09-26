@@ -47,6 +47,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -747,10 +749,13 @@ public class SeedMapScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double dragX, double dragY) {
+        int button = mouseButtonEvent.button();
         if (button != InputConstants.MOUSE_BUTTON_LEFT) {
             return false;
         }
+        double mouseX = mouseButtonEvent.x();
+        double mouseY = mouseButtonEvent.y();
         if (mouseX < HORIZONTAL_PADDING || mouseX > HORIZONTAL_PADDING + this.seedMapWidth || mouseY < VERTICAL_PADDING || mouseY > VERTICAL_PADDING + this.seedMapHeight) {
             return false;
         }
@@ -764,31 +769,35 @@ public class SeedMapScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubleClick) {
+        if (super.mouseClicked(mouseButtonEvent, doubleClick)) {
             return true;
         }
-        if (this.chestLootWidget != null && this.chestLootWidget.mouseClicked(mouseX, mouseY, button)) {
+        int button = mouseButtonEvent.button();
+        if (this.chestLootWidget != null && this.chestLootWidget.mouseClicked(mouseButtonEvent, doubleClick)) {
             return true;
         } else if (button == InputConstants.MOUSE_BUTTON_LEFT) {
             this.chestLootWidget = null;
         }
-        if (this.handleMapFeatureLeftClicked(mouseX, mouseY, button)) {
+        if (this.handleMapFeatureLeftClicked(mouseButtonEvent, doubleClick)) {
             return true;
         }
-        if (this.handleMapMiddleClicked(mouseX, mouseY, button)) {
+        if (this.handleMapMiddleClicked(mouseButtonEvent, doubleClick)) {
             return true;
         }
-        if (this.handleMapRightClicked(mouseX, mouseY, button)) {
+        if (this.handleMapRightClicked(mouseButtonEvent, doubleClick)) {
             return true;
         }
         return false;
     }
 
-    private boolean handleMapFeatureLeftClicked(double mouseX, double mouseY, int button) {
+    private boolean handleMapFeatureLeftClicked(MouseButtonEvent mouseButtonEvent, boolean doubleClick) {
+        int button = mouseButtonEvent.button();
         if (button != InputConstants.MOUSE_BUTTON_LEFT) {
             return false;
         }
+        double mouseX = mouseButtonEvent.x();
+        double mouseY = mouseButtonEvent.y();
         if (mouseX < HORIZONTAL_PADDING || mouseX > HORIZONTAL_PADDING + this.seedMapWidth || mouseY < VERTICAL_PADDING || mouseY > VERTICAL_PADDING + this.seedMapHeight) {
             return false;
         }
@@ -879,10 +888,13 @@ public class SeedMapScreen extends Screen {
         }
     }
 
-    private boolean handleMapMiddleClicked(double mouseX, double mouseY, int button) {
+    private boolean handleMapMiddleClicked(MouseButtonEvent mouseButtonEvent, boolean doubleClick) {
+        int button = mouseButtonEvent.button();
         if (button != InputConstants.MOUSE_BUTTON_MIDDLE) {
             return false;
         }
+        double mouseX = mouseButtonEvent.x();
+        double mouseY = mouseButtonEvent.y();
         if (mouseX < HORIZONTAL_PADDING || mouseX > HORIZONTAL_PADDING + this.seedMapWidth || mouseY < VERTICAL_PADDING || mouseY > VERTICAL_PADDING + this.seedMapHeight) {
             return false;
         }
@@ -891,10 +903,13 @@ public class SeedMapScreen extends Screen {
         return true;
     }
 
-    private boolean handleMapRightClicked(double mouseX, double mouseY, int button) {
+    private boolean handleMapRightClicked(MouseButtonEvent mouseButtonEvent, boolean doubleClick) {
+        int button = mouseButtonEvent.button();
         if (button != InputConstants.MOUSE_BUTTON_RIGHT) {
             return false;
         }
+        double mouseX = mouseButtonEvent.x();
+        double mouseY = mouseButtonEvent.y();
         if (mouseX < HORIZONTAL_PADDING || mouseX > HORIZONTAL_PADDING + this.seedMapWidth || mouseY < VERTICAL_PADDING || mouseY > VERTICAL_PADDING + this.seedMapHeight) {
             return false;
         }
@@ -904,20 +919,21 @@ public class SeedMapScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+    public boolean keyPressed(KeyEvent keyEvent) {
+        if (super.keyPressed(keyEvent)) {
             return true;
         }
-        if (this.handleTeleportFieldEnter(keyCode, scanCode, modifiers)) {
+        if (this.handleTeleportFieldEnter(keyEvent)) {
             return true;
         }
-        if (this.handleWaypointNameFieldEnter(keyCode, scanCode, modifiers)) {
+        if (this.handleWaypointNameFieldEnter(keyEvent)) {
             return true;
         }
         return false;
     }
 
-    private boolean handleTeleportFieldEnter(int keyCode, int scanCode, int modifiers) {
+    private boolean handleTeleportFieldEnter(KeyEvent keyEvent) {
+        int keyCode = keyEvent.key();
         if (keyCode != InputConstants.KEY_RETURN) {
             return false;
         }
@@ -943,7 +959,8 @@ public class SeedMapScreen extends Screen {
         return true;
     }
 
-    private boolean handleWaypointNameFieldEnter(int keyCode, int scanCode, int modifiers) {
+    private boolean handleWaypointNameFieldEnter(KeyEvent keyEvent) {
+        int keyCode = keyEvent.key();
         if (keyCode != InputConstants.KEY_RETURN) {
             return false;
         }

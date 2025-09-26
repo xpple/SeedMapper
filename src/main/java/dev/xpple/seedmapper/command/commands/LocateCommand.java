@@ -444,7 +444,7 @@ public class LocateCommand {
             } finally {
                 lootTableContextCache.values().forEach(Cubiomes::free_loot_table_pools);
             }
-            String itemName = Cubiomes.global_id2item_name(itemPredicate.item()).getString(0);
+            String itemName = Cubiomes.global_id2item_name(itemPredicate.item(), version).getString(0);
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.loot.totalFound", accent(String.valueOf(found[0])), itemName)));
             return found[0];
         }

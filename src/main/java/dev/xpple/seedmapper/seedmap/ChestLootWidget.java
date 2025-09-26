@@ -7,6 +7,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -100,10 +101,13 @@ public class ChestLootWidget {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, BUTTON_TEXTURE, this.x + BUTTON_X_OFFSET + BUTTON_WIDTH, this.y + BUTTON_Y_OFFSET, BUTTON_WIDTH, 0, BUTTON_WIDTH, BUTTON_HEIGHT, 256, 256);
     }
 
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubleClick) {
+        int button = mouseButtonEvent.button();
         if (button != InputConstants.MOUSE_BUTTON_LEFT) {
             return false;
         }
+        double mouseX = mouseButtonEvent.x();
+        double mouseY = mouseButtonEvent.y();
         int minX = this.x + BUTTON_X_OFFSET;
         int minY = this.y + BUTTON_Y_OFFSET;
         int maxX = minX + BUTTON_WIDTH;

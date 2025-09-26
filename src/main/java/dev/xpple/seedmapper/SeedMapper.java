@@ -66,7 +66,7 @@ public class SeedMapper implements ClientModInitializer {
 
         SeedDatabaseHelper.fetchSeeds();
 
-        KeyMapping keyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.seedMap", InputConstants.KEY_M, KeyMapping.CATEGORY_GAMEPLAY));
+        KeyMapping keyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.seedMap", InputConstants.KEY_M, KeyMapping.Category.GAMEPLAY));
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
             while (keyMapping.consumeClick()) {
                 minecraft.player.connection.sendCommand("sm:seedmap");

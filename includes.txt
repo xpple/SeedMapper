@@ -101,6 +101,7 @@
 --include-constant MC_1_21_3
 --include-constant MC_1_21_4
 --include-constant MC_1_21_5
+--include-constant MC_1_21_9
 --include-constant MC_1_21_WD
 --include-constant MC_1_2_5
 --include-constant MC_1_3
@@ -725,6 +726,7 @@
 --include-constant ITEM_HEART_OF_THE_SEA
 --include-constant ITEM_IRON_BLOCK
 --include-constant ITEM_IRON_BOOTS
+--include-constant ITEM_IRON_CHAIN
 --include-constant ITEM_IRON_CHESTPLATE
 --include-constant ITEM_IRON_HELMET
 --include-constant ITEM_IRON_HORSE_ARMOR

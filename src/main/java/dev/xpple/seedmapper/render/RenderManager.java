@@ -3,7 +3,13 @@ package dev.xpple.seedmapper.render;
 import com.google.common.cache.CacheBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.level.ChunkPos;
@@ -20,6 +26,8 @@ public final class RenderManager {
 
     private RenderManager() {
     }
+
+    private static final RenderStateDataKey<Set<Line>> LINES_SET_KEY = RenderStateDataKey.create(() -> "SeedMapper lines set");
 
     private static final Set<Line> lines = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<Line, Boolean>build().asMap());
 
@@ -56,28 +64,43 @@ public final class RenderManager {
     }
 
     public static void registerEvents() {
+        ExtractStateEvent.EXTRACT_STATE.register(RenderManager::extractLines);
         EndMainPassEvent.END_MAIN_PASS.register(RenderManager::renderLines);
     }
 
-    private static void renderLines(WorldRenderContext context) {
-        lines.forEach(line -> {
+    private static void extractLines(LevelRenderState levelRenderState, Camera camera, DeltaTracker deltaTracker) {
+        Set<Line> extractedLines = new HashSet<>();
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) {
+            return;
+        }
+        RenderManager.lines.forEach(line -> {
             ChunkPos chunkPos = new ChunkPos(BlockPos.containing(line.start()));
-            if (context.world().getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false) == null) {
+            if (level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false) == null) {
                 return;
             }
-            Line relativeLine = line.offset(context.camera().getPosition().scale(-1));
-            Vec3 start = relativeLine.start();
-            Vec3 end = relativeLine.end();
+            extractedLines.add(line.offset(camera.getPosition().scale(-1)));
+        });
+        levelRenderState.setData(LINES_SET_KEY, extractedLines);
+    }
+
+    private static void renderLines(MultiBufferSource.BufferSource bufferSource, PoseStack poseStack, LevelRenderState levelRenderState) {
+        Set<Line> extractedLines = levelRenderState.getData(LINES_SET_KEY);
+        if (extractedLines == null) {
+            return;
+        }
+        extractedLines.forEach(line -> {
+            Vec3 start = line.start();
+            Vec3 end = line.end();
             Vec3 normal = end.subtract(start).normalize();
             int colour = line.colour();
             float red = ARGB.redFloat(colour);
             float green = ARGB.greenFloat(colour);
             float blue = ARGB.blueFloat(colour);
 
-            PoseStack stack = context.matrixStack();
-            stack.pushPose();
-            PoseStack.Pose pose = stack.last();
-            VertexConsumer buffer = context.consumers().getBuffer(NoDepthLayer.LINES_NO_DEPTH_LAYER);
+            poseStack.pushPose();
+            PoseStack.Pose pose = poseStack.last();
+            VertexConsumer buffer = bufferSource.getBuffer(NoDepthLayer.LINES_NO_DEPTH_LAYER);
             buffer
                 .addVertex(pose, (float) start.x, (float) start.y, (float) start.z)
                 .setColor(red, green, blue, 1.0F)
@@ -86,7 +109,7 @@ public final class RenderManager {
                 .addVertex(pose, (float) end.x, (float) end.y, (float) end.z)
                 .setColor(red, green, blue, 1.0F)
                 .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z);
-            stack.popPose();
+            poseStack.popPose();
         });
     }
 }
