@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.seedmap;
 
+import com.github.cubiomes.CanyonCarverConfig;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.EnchantInstance;
 import com.github.cubiomes.Generator;
@@ -18,6 +19,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.SeedMapper;
+import dev.xpple.seedmapper.command.arguments.CanyonCarverArgument;
 import dev.xpple.seedmapper.command.arguments.ItemAndEnchantmentsPredicateArgument;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.config.Configs;
@@ -634,14 +636,28 @@ public class SeedMapScreen extends Screen {
         } else {
             biomeFunction = (_, _) -> -1;
         }
+        MemorySegment ccc = CanyonCarverConfig.allocate(this.arena);
+        MemorySegment rnd = this.arena.allocate(Cubiomes.C_LONG_LONG);
         BitSet canyons = new BitSet(TilePos.TILE_SIZE_CHUNKS * TilePos.TILE_SIZE_CHUNKS);
         ChunkPos chunkPos = tilePos.toChunkPos();
         for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
             for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
                 int chunkX = chunkPos.x + relChunkX;
                 int chunkZ = chunkPos.z + relChunkZ;
-                int canyonStart = Cubiomes.checkCanyonStart(this.seed, biomeFunction.applyAsInt(chunkX, chunkZ), chunkX, chunkZ, this.version);
-                canyons.set(relChunkX + relChunkZ * TilePos.TILE_SIZE_CHUNKS, (canyonStart & 0b11) != 0);
+                for (int canyonCarver : CanyonCarverArgument.CANYON_CARVERS.values()) {
+                    if (Cubiomes.getCanyonCarverConfig(canyonCarver, this.version, ccc) == 0) {
+                        continue;
+                    }
+                    int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
+                    if (Cubiomes.isViableCanyonBiome(canyonCarver, biome) == 0) {
+                        continue;
+                    }
+                    if (Cubiomes.checkCanyonStart(this.seed, chunkX, chunkZ, ccc, rnd) == 0) {
+                        continue;
+                    }
+                    canyons.set(relChunkX + relChunkZ * TilePos.TILE_SIZE_CHUNKS);
+                    break;
+                }
             }
         }
         return canyons;

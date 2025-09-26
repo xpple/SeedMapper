@@ -21,6 +21,8 @@ public final class CommandExceptions {
     public static final DynamicCommandExceptionType UNKNOWN_BLOCK_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownOre", arg));
     public static final DynamicCommandExceptionType UNKNOWN_ITEM_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownItem", arg));
     public static final DynamicCommandExceptionType UNKNOWN_ENCHANTMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownEnchantment", arg));
+    public static final DynamicCommandExceptionType UNKNOWN_CANYON_CARVER_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownCanyonCarver", arg));
+    public static final DynamicCommandExceptionType UNKNOWN_CAVE_CARVER_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownCaveCarver", arg));
     public static final DynamicCommandExceptionType UNKNOWN_MAP_FEATURE_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownMapFeature", arg));
     public static final SimpleCommandExceptionType NO_SEED_AVAILABLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.noSeedAvailable"));
     public static final DynamicCommandExceptionType NO_BIOME_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.noBiomeFound", arg));
@@ -31,6 +33,7 @@ public final class CommandExceptions {
     public static final SimpleCommandExceptionType INCOMPATIBLE_PARAMETERS_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.incompatibleParameters"));
     public static final SimpleCommandExceptionType ORE_VEIN_WRONG_VERSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.oreVeinWrongVersion"));
     public static final SimpleCommandExceptionType CANYON_WRONG_VERSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.canyonWrongVersion"));
+    public static final SimpleCommandExceptionType CAVE_WRONG_VERSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.caveWrongVersion"));
     public static final SimpleCommandExceptionType LOOT_NOT_SUPPORTED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.lootNotSupported"));
     public static final SimpleCommandExceptionType LOOT_NOT_AVAILABLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.lootNotAvailable"));
 }

@@ -1,5 +1,7 @@
 package dev.xpple.seedmapper.command.commands;
 
+import com.github.cubiomes.CanyonCarverConfig;
+import com.github.cubiomes.CaveCarverConfig;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.OreConfig;
@@ -24,19 +26,25 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BlockArgument.*;
+import static dev.xpple.seedmapper.command.arguments.CanyonCarverArgument.*;
+import static dev.xpple.seedmapper.command.arguments.CaveCarverArgument.*;
 import static dev.xpple.seedmapper.thread.LocatorThreadHelper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
@@ -53,7 +61,19 @@ public class HighlightCommand {
             .then(literal("orevein")
                 .executes(ctx -> submit(() -> highlightOreVein(CustomClientCommandSource.of(ctx.getSource()))))
                 .then(argument("chunks", integer(0, 20))
-                    .executes(ctx -> submit(() -> highlightOreVein(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks")))))));
+                    .executes(ctx -> submit(() -> highlightOreVein(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks"))))))
+            .then(literal("canyon")
+                .requires(_ -> false) // TODO add config + client command tree updating
+                .then(argument("canyon", canyonCarver())
+                    .executes(ctx -> highlightCanyon(CustomClientCommandSource.of(ctx.getSource()), getCanyonCarver(ctx, "canyon")))
+                    .then(argument("chunks", integer(0, 20))
+                        .executes(ctx -> highlightCanyon(CustomClientCommandSource.of(ctx.getSource()), getCanyonCarver(ctx, "canyon"), getInteger(ctx, "chunks"))))))
+            .then(literal("cave")
+                .requires(_ -> false) // TODO
+                .then(argument("cave", caveCarver())
+                    .executes(ctx -> highlightCave(CustomClientCommandSource.of(ctx.getSource()), getCaveCarver(ctx, "cave")))
+                    .then(argument("chunks", integer(0, 20))
+                        .executes(ctx -> submit(() -> highlightCave(CustomClientCommandSource.of(ctx.getSource()), getCaveCarver(ctx, "cave"), getInteger(ctx, "chunks"))))))));
     }
 
     private static int highlightBlock(CustomClientCommandSource source, Pair<Integer, Integer> blockPair) throws CommandSyntaxException {
@@ -211,5 +231,83 @@ public class HighlightCommand {
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.success", accent(String.valueOf(count[0])))));
             return count[0];
         }
+    }
+
+    private static int highlightCanyon(CustomClientCommandSource source, int canyonCarver) throws CommandSyntaxException {
+        return highlightCanyon(source, canyonCarver, 0);
+    }
+
+    private static int highlightCanyon(CustomClientCommandSource source, int canyonCarver, int chunkRange) throws CommandSyntaxException {
+        long seed = source.getSeed().getSecond();
+        int dimension = source.getDimension();
+        int version = source.getVersion();
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment ccc = CanyonCarverConfig.allocate(arena);
+            if (Cubiomes.getCanyonCarverConfig(canyonCarver, version, ccc) == 0) {
+                throw CommandExceptions.CANYON_WRONG_VERSION_EXCEPTION.create();
+            }
+            if (CanyonCarverConfig.dim(ccc) != dimension) {
+                throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+            }
+            var biomeFunction = LocateCommand.getCarverBiomeFunction(arena, seed, dimension, version);
+            return highlightCarver(source, chunkRange, (chunkX, chunkZ) -> {
+                int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
+                if (Cubiomes.isViableCanyonBiome(canyonCarver, biome) == 0) {
+                    return null;
+                }
+                return Cubiomes.carveCanyon(arena, seed, chunkX, chunkZ, ccc);
+            });
+        }
+    }
+
+    private static int highlightCave(CustomClientCommandSource source, int caveCarver) throws CommandSyntaxException {
+        return highlightCave(source, caveCarver, 0);
+    }
+
+    private static int highlightCave(CustomClientCommandSource source, int caveCarver, int chunkRange) throws CommandSyntaxException {
+        long seed = source.getSeed().getSecond();
+        int dimension = source.getDimension();
+        int version = source.getVersion();
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment ccc = CaveCarverConfig.allocate(arena);
+            if (Cubiomes.getCaveCarverConfig(caveCarver, version, -1, ccc) == 0) {
+                throw CommandExceptions.CAVE_WRONG_VERSION_EXCEPTION.create();
+            }
+            if (CaveCarverConfig.dim(ccc) != dimension) {
+                throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+            }
+            var biomeFunction = LocateCommand.getCarverBiomeFunction(arena, seed, dimension, version);
+            return highlightCarver(source, chunkRange, (chunkX, chunkZ) -> {
+                int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
+                if (Cubiomes.isViableCaveBiome(caveCarver, biome) == 0) {
+                    return null;
+                }
+                return Cubiomes.carveCave(arena, seed, chunkX, chunkZ, ccc);
+            });
+        }
+    }
+
+    private static int highlightCarver(CustomClientCommandSource source, int chunkRange, BiFunction<Integer, Integer, @Nullable MemorySegment> carverFunction) {
+        ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
+        Set<BlockPos> blocks = new HashSet<>();
+        SpiralLoop.spiral(center.x, center.z, chunkRange, (chunkX, chunkZ) -> {
+            MemorySegment pos3List = carverFunction.apply(chunkX, chunkZ);
+            if (pos3List == null) {
+                return false;
+            }
+            int size = Pos3List.size(pos3List);
+            MemorySegment pos3s = Pos3List.pos3s(pos3List);
+            for (int i = 0; i < size; i++) {
+                MemorySegment pos3 = Pos3.asSlice(pos3s, i);
+                blocks.add(new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3)));
+            }
+
+            return false;
+        });
+        RenderManager.drawBoxes(blocks, 0xFF_FF0000);
+        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.carver.success", accent(String.valueOf(blocks.size())))));
+        return blocks.size();
     }
 }

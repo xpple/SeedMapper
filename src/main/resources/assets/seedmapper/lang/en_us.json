@@ -20,10 +20,13 @@
   "commands.exceptions.unknownItem": "Unknown item \"%s\".",
   "commands.exceptions.expectedWithWithout": "Expected \"with\" or \"without\".",
   "commands.exceptions.unknownEnchantment": "Unknown enchantment \"%s\".",
+  "commands.exceptions.unknownCanyonCarver": "Unknown canyon carver \"%s\".",
+  "commands.exceptions.unknownCaveCarver": "Unknown cave carver \"%s\".",
   "commands.exceptions.unknownMapFeature": "Unknown map feature \"%s\".",
   "commands.exceptions.incompatibleParameters": "Incompatible parameters.",
   "commands.exceptions.oreVeinWrongVersion": "Ore veins only exist after version 1.18!",
-  "commands.exceptions.canyonWrongVersion": "Canyons are only supported for 1.13 and above!",
+  "commands.exceptions.canyonWrongVersion": "Invalid version for canyon carver!",
+  "commands.exceptions.caveWrongVersion": "Invalid version for cave carver!",
   "commands.exceptions.lootNotSupported": "Loot is not supported before version 1.13!",
   "commands.exceptions.lootNotAvailable": "This loot is not available in this dimension!",
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\".",
@@ -34,7 +37,7 @@
   "command.checkSeed.fromSeed": "the \"Seed\" config",
   "command.checkSeed.fromSource": "the /sm:source command",
 
-  "command.locate.taskStarted": "Started locating...",
+  "command.locate.taskStarted": "Started task...",
   "command.locate.taskStopped": "Task stopped.",
   "command.locate.noTaskRunning": "No task is running.",
   "command.locate.biome.foundAt": "Biome found at %s.",
@@ -80,6 +83,7 @@
   "command.highlight.block.success": "Highlighted %s ores in total!",
   "command.highlight.oreVein.rawBlocks": "Raw ore blocks at: %s.",
   "command.highlight.oreVein.success": "Highlighted %s ore vein blocks!",
+  "command.highlight.carver.success": "Highlighted %s carved blocks!",
 
   "command.clear.success": "Cleared all renders.",
 

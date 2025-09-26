@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.command.commands;
 
+import com.github.cubiomes.CanyonCarverConfig;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.ItemStack;
@@ -18,6 +19,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
+import dev.xpple.seedmapper.command.arguments.CanyonCarverArgument;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
 import dev.xpple.seedmapper.seedmap.SeedMapScreen;
@@ -502,36 +504,51 @@ public class LocateCommand {
     }
 
     private static int locateCanyon(CustomClientCommandSource source) throws CommandSyntaxException {
-        int version = source.getVersion();
-        if (version < Cubiomes.MC_1_13()) {
-            throw CommandExceptions.CANYON_WRONG_VERSION_EXCEPTION.create();
-        }
+        long seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         if (dimension != Cubiomes.DIM_OVERWORLD()) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
-        long seed = source.getSeed().getSecond();
+        int version = source.getVersion();
+        if (version < Cubiomes.MC_1_13()) {
+            throw CommandExceptions.CANYON_WRONG_VERSION_EXCEPTION.create();
+        }
+        ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
         try (Arena arena = Arena.ofConfined()) {
-            ToIntBiFunction<Integer, Integer> biomeFunction;
-            if (version <= Cubiomes.MC_1_17()) {
-                MemorySegment generator = Generator.allocate(arena);
-                Cubiomes.setupGenerator(generator, version, 0);
-                Cubiomes.applySeed(generator, dimension, seed);
-                biomeFunction = (chunkX, chunkZ) -> Cubiomes.getBiomeAt(generator, 4, chunkX << 2, 0, chunkZ << 2);
-            } else {
-                biomeFunction = (_, _) -> -1;
-            }
-            ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
+            ToIntBiFunction<Integer, Integer> biomeFunction = getCarverBiomeFunction(arena, seed, dimension, version);
+            MemorySegment ccc = CanyonCarverConfig.allocate(arena);
+            MemorySegment rnd = arena.allocate(Cubiomes.C_LONG_LONG);
             SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.x, center.z, 6400, (chunkX, chunkZ) -> {
-                int canyonStart = Cubiomes.checkCanyonStart(seed, biomeFunction.applyAsInt(chunkX, chunkZ), chunkX, chunkZ, version);
-                return (canyonStart & 0b11) != 0;
+                for (int canyonCarver : CanyonCarverArgument.CANYON_CARVERS.values()) {
+                    if (Cubiomes.getCanyonCarverConfig(canyonCarver, version, ccc) == 0) {
+                        continue;
+                    }
+                    int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
+                    if (Cubiomes.isViableCanyonBiome(canyonCarver, biome) == 0) {
+                        continue;
+                    }
+                    if (Cubiomes.checkCanyonStart(seed, chunkX, chunkZ, ccc, rnd) == 0) {
+                        continue;
+                    }
+                    return true;
+                }
+                return false;
             });
             if (pos == null) {
                 throw CommandExceptions.NO_CANYON_FOUND_EXCEPTION.create(6400);
             }
-
             source.sendFeedback(Component.translatable("command.locate.canyon.foundAt", ComponentUtils.formatXZ(SectionPos.sectionToBlockCoord(pos.x()), SectionPos.sectionToBlockCoord(pos.z()), Component.translatable("command.locate.canyon.copy"))));
             return Command.SINGLE_SUCCESS;
         }
+    }
+
+    static ToIntBiFunction<Integer, Integer> getCarverBiomeFunction(Arena arena, long seed, int dimension, int version) {
+        if (version > Cubiomes.MC_1_17_1()) {
+            return (_, _) -> -1;
+        }
+        MemorySegment generator = Generator.allocate(arena);
+        Cubiomes.setupGenerator(generator, version, 0);
+        Cubiomes.applySeed(generator, dimension, seed);
+        return (chunkX, chunkZ) -> Cubiomes.getBiomeAt(generator, 4, chunkX << 2, 0, chunkZ << 2);
     }
 }

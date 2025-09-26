@@ -267,6 +267,8 @@
 --include-constant wooded_mountains
 
 --include-struct BiomeFilter
+--include-struct CanyonCarverConfig
+--include-struct CaveCarverConfig
 --include-struct EndIsland
 --include-struct OreConfig
 --include-struct OreVeinConfig
@@ -281,7 +283,10 @@
 --include-struct StructureVariant
 --include-function appendPos3List
 --include-function canBiomeGenerate
+--include-function carveCanyon
+--include-function carveCave
 --include-function checkCanyonStart
+--include-function checkCaveStart
 --include-function checkForBiomes
 --include-function checkForBiomesAtLayer
 --include-function checkForTemps
@@ -298,6 +303,8 @@
 --include-function getBiomeForOreGen
 --include-function getBiomeParaExtremes
 --include-function getBiomeParaLimits
+--include-function getCanyonCarverConfig
+--include-function getCaveCarverConfig
 --include-function getEndCityPieces
 --include-function getEndIslands
 --include-function getFixedEndGateways
@@ -310,7 +317,6 @@
 --include-function getMineshafts
 --include-function getOreConfig
 --include-function getOreVeinBlockAt
---include-function getOreYPos
 --include-function getParaDescent
 --include-function getParaRange
 --include-function getPopulationSeed
@@ -324,6 +330,8 @@
 --include-function initFirstStronghold
 --include-function initOreVeinNoise
 --include-function isEndChunkEmpty
+--include-function isViableCanyonBiome
+--include-function isViableCaveBiome
 --include-function isViableEndCityTerrain
 --include-function isViableFeatureBiome
 --include-function isViableOreBiome
@@ -360,6 +368,9 @@
 --include-constant BuriedDiamondOre
 --include-constant BuriedLapisOre
 --include-constant Butcher
+--include-constant CANYON_CARVER
+--include-constant CAVE_CARVER
+--include-constant CAVE_EXTRA_UNDERGROUND_CARVER
 --include-constant CLAY
 --include-constant COAL_ORE
 --include-constant COPPER_ORE
@@ -442,11 +453,13 @@
 --include-constant Mineshaft
 --include-constant Monument
 --include-constant NETHERRACK
+--include-constant NETHER_CAVE_CARVER
 --include-constant NETHER_GOLD_ORE
 --include-constant NETHER_QUARTZ_ORE
 --include-constant NetherGoldOre
 --include-constant NetherGravelOre
 --include-constant NetherQuartzOre
+--include-constant OCEAN_CAVE_CARVER
 --include-constant Ocean_Ruin
 --include-constant Outpost
 --include-constant PIECE_COUNT
@@ -478,6 +491,8 @@
 --include-constant Treasure
 --include-constant Trial_Chambers
 --include-constant TuffOre
+--include-constant UNDERWATER_CANYON_CARVER
+--include-constant UNDERWATER_CAVE_CARVER
 --include-constant UpperAndesiteOre
 --include-constant UpperCoalOre
 --include-constant UpperDioriteOre
