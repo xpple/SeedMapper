@@ -63,13 +63,13 @@ public class HighlightCommand {
                 .then(argument("chunks", integer(0, 20))
                     .executes(ctx -> submit(() -> highlightOreVein(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks"))))))
             .then(literal("canyon")
-                .requires(_ -> false) // TODO add config + client command tree updating
+                .requires(_ -> Configs.DevMode)
                 .then(argument("canyon", canyonCarver())
                     .executes(ctx -> highlightCanyon(CustomClientCommandSource.of(ctx.getSource()), getCanyonCarver(ctx, "canyon")))
                     .then(argument("chunks", integer(0, 20))
                         .executes(ctx -> highlightCanyon(CustomClientCommandSource.of(ctx.getSource()), getCanyonCarver(ctx, "canyon"), getInteger(ctx, "chunks"))))))
             .then(literal("cave")
-                .requires(_ -> false) // TODO
+                .requires(_ -> Configs.DevMode)
                 .then(argument("cave", caveCarver())
                     .executes(ctx -> highlightCave(CustomClientCommandSource.of(ctx.getSource()), getCaveCarver(ctx, "cave")))
                     .then(argument("chunks", integer(0, 20))

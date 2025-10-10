@@ -22,6 +22,7 @@ import dev.xpple.seedmapper.seedmap.MapFeature;
 import dev.xpple.seedmapper.util.SeedDatabaseHelper;
 import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -60,6 +61,14 @@ public class SeedMapper implements ClientModInitializer {
         new ModConfigBuilder<>(MOD_ID, Configs.class)
             .registerType(SeedResolutionArgument.SeedResolution.class, new SeedResolutionAdapter(), SeedResolutionArgument::seedResolution)
             .registerType(MapFeature.class, new MapFeatureAdapter(), MapFeatureArgument::mapFeature)
+            .registerGlobalChangeHook(event -> {
+                if (event.config().equals("DevMode")) {
+                    try {
+                        ClientCommandManager.refreshCommandCompletions();
+                    } catch (IllegalStateException _) {
+                    }
+                }
+            })
             .build();
 
         SimpleWaypointsAPI.getInstance().registerCommandAlias("sm:waypoint");

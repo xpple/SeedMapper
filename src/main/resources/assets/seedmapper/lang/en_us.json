@@ -90,6 +90,7 @@
   "command.buildInfo.success": "Running SeedMapper on version %s (%s@{%s}).",
 
   "config.oreAirCheck.comment": "Whether or not SeedMapper should use in-game air checks to invalidate ore positions.",
+  "config.devMode.comment": "Enables certain debug commands.",
 
   "key.seedMap": "Seed map",
 

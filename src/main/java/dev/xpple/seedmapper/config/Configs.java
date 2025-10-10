@@ -74,4 +74,11 @@ public class Configs {
             .map(MapFeature::getName)
             .map(Component::literal));
     }
+
+    @Config(comment = "getDevModeComment")
+    public static boolean DevMode = false;
+
+    public static Component getDevModeComment() {
+        return Component.translatable("config.devMode.comment");
+    }
 }

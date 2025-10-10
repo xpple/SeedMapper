@@ -85,9 +85,9 @@ public class LocateCommand {
                     .then(argument("item", itemAndEnchantments())
                         .executes(ctx -> submit(() -> locateLoot(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "amount"), getItemAndEnchantments(ctx, "item")))))))
             .then(literal("slimechunk")
-                .executes(ctx -> submit(() -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))))
+                .executes(ctx -> locateSlimeChunk(CustomClientCommandSource.of(ctx.getSource()))))
             .then(literal("spawn")
-                .executes(ctx -> submit(() -> locateSpawn(CustomClientCommandSource.of(ctx.getSource())))))
+                .executes(ctx -> locateSpawn(CustomClientCommandSource.of(ctx.getSource()))))
             .then(literal("orevein")
                 .then(literal("copper")
                     .executes(ctx -> submit(() -> locateOreVein(CustomClientCommandSource.of(ctx.getSource()), true))))
@@ -116,7 +116,7 @@ public class LocateCommand {
                 throw CommandExceptions.NO_BIOME_FOUND_EXCEPTION.create(BIOME_SEARCH_RADIUS);
             }
 
-            source.sendFeedback(Component.translatable("command.locate.biome.foundAt", ComponentUtils.formatXZ(pos.x(), pos.z())));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.biome.foundAt", ComponentUtils.formatXZ(pos.x(), pos.z()))));
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -177,41 +177,43 @@ public class LocateCommand {
                 throw CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE);
             }
 
-            source.sendFeedback(Component.translatable("command.locate.feature.structure.foundAt", ComponentUtils.formatXZ(Pos.x(structurePos), Pos.z(structurePos))));
+            int structureXPos = Pos.x(structurePos);
+            int structureZPos = Pos.z(structurePos);
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.feature.structure.foundAt", ComponentUtils.formatXZ(structureXPos, structureZPos))));
 
             if (structure == Cubiomes.End_City()) {
-                int numPieces = Cubiomes.getEndCityPieces(pieces, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
+                int numPieces = Cubiomes.getEndCityPieces(pieces, seed, structureXPos >> 4, structureZPos >> 4);
                 IntStream.range(0, numPieces)
                     .mapToObj(i -> Piece.asSlice(pieces, i))
                     .filter(piece -> Piece.type(piece) == Cubiomes.END_SHIP())
                     .findAny() // only one ship per end city
                     .map(Piece::pos)
                     .map(city -> new BlockPos(Pos3.x(city), Pos3.y(city) + 60, Pos3.z(city)))
-                    .ifPresent(city -> source.sendFeedback(Component.literal(" - ")
-                        .append(Component.translatable("command.locate.feature.structure.endCity.hasShip", ComponentUtils.formatXYZ(city.getX(), city.getY(), city.getZ())))));
+                    .ifPresent(city -> source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ")
+                        .append(Component.translatable("command.locate.feature.structure.endCity.hasShip", ComponentUtils.formatXYZ(city.getX(), city.getY(), city.getZ()))))));
             } else if (structure == Cubiomes.Fortress()) {
-                int numPieces = Cubiomes.getFortressPieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, version, seed, Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
+                int numPieces = Cubiomes.getFortressPieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, version, seed, structureXPos >> 4, structureZPos >> 4);
                 IntStream.range(0, numPieces)
                     .mapToObj(i -> Piece.asSlice(pieces, i))
                     .filter(piece -> Piece.type(piece) == Cubiomes.BRIDGE_SPAWNER())
                     .map(Piece::pos)
                     .map(monsterThrone -> new BlockPos(Pos3.x(monsterThrone), Pos3.y(monsterThrone) + 10, Pos3.z(monsterThrone)))
-                    .forEach(spawnerPos -> source.sendFeedback(Component.literal(" - ")
-                        .append(Component.translatable("command.locate.feature.structure.fortress.hasSpawner", ComponentUtils.formatXYZ(spawnerPos.getX(), spawnerPos.getY(), spawnerPos.getZ())))));
+                    .forEach(spawnerPos -> source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ")
+                        .append(Component.translatable("command.locate.feature.structure.fortress.hasSpawner", ComponentUtils.formatXYZ(spawnerPos.getX(), spawnerPos.getY(), spawnerPos.getZ()))))));
             }
 
             if (!variantData) {
                 return Command.SINGLE_SUCCESS;
             }
-            int biome = Cubiomes.getBiomeAt(generator, 4, Pos.x(structurePos) >> 2, 320 >> 2, Pos.z(structurePos) >> 2);
-            Cubiomes.getVariant(structureVariant, structure, version, seed, Pos.x(structurePos), Pos.z(structurePos), biome);
+            int biome = Cubiomes.getBiomeAt(generator, 4, structureXPos >> 2, 320 >> 2, structureZPos >> 2);
+            Cubiomes.getVariant(structureVariant, structure, version, seed, structureXPos, structureZPos, biome);
 
             List<Component> components = StructureVariantFeedbackHelper.get(structure, structureVariant);
             if (components.isEmpty()) {
                 return Command.SINGLE_SUCCESS;
             }
-            source.sendFeedback(Component.translatable("command.locate.feature.structure.variantData"));
-            components.forEach(component -> source.sendFeedback(Component.literal(" - ").append(component)));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.feature.structure.variantData")));
+            components.forEach(component -> source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ").append(component))));
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -231,7 +233,7 @@ public class LocateCommand {
 
         BlockPos pos = tree.nearestTo(position.atY(0));
 
-        source.sendFeedback(Component.translatable("command.locate.feature.stronghold.success", ComponentUtils.formatXZ(pos.getX(), pos.getZ())));
+        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.feature.stronghold.success", ComponentUtils.formatXZ(pos.getX(), pos.getZ()))));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -497,7 +499,7 @@ public class LocateCommand {
                 throw CommandExceptions.NO_ORE_VEIN_FOUND_EXCEPTION.create(6400);
             }
 
-            source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt", ComponentUtils.formatXYZ(pos[0].getX(), pos[0].getY(), pos[0].getZ(), Component.translatable("command.locate.oreVein.copy"))));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt", ComponentUtils.formatXYZ(pos[0].getX(), pos[0].getY(), pos[0].getZ(), Component.translatable("command.locate.oreVein.copy")))));
 
             return Command.SINGLE_SUCCESS;
         }
@@ -537,7 +539,7 @@ public class LocateCommand {
             if (pos == null) {
                 throw CommandExceptions.NO_CANYON_FOUND_EXCEPTION.create(6400);
             }
-            source.sendFeedback(Component.translatable("command.locate.canyon.foundAt", ComponentUtils.formatXZ(SectionPos.sectionToBlockCoord(pos.x()), SectionPos.sectionToBlockCoord(pos.z()), Component.translatable("command.locate.canyon.copy"))));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.canyon.foundAt", ComponentUtils.formatXZ(SectionPos.sectionToBlockCoord(pos.x()), SectionPos.sectionToBlockCoord(pos.z()), Component.translatable("command.locate.canyon.copy")))));
             return Command.SINGLE_SUCCESS;
         }
     }
