@@ -101,6 +101,7 @@
 --include-constant MC_1_21_3
 --include-constant MC_1_21_4
 --include-constant MC_1_21_5
+--include-constant MC_1_21_6
 --include-constant MC_1_21_9
 --include-constant MC_1_21_WD
 --include-constant MC_1_2_5
@@ -684,6 +685,7 @@
 --include-constant ITEM_COOKED_COD
 --include-constant ITEM_COOKED_PORKCHOP
 --include-constant ITEM_COOKED_SALMON
+--include-constant ITEM_COPPER_HORSE_ARMOR
 --include-constant ITEM_CROSSBOW
 --include-constant ITEM_CRYING_OBSIDIAN
 --include-constant ITEM_DARK_OAK_LOG
