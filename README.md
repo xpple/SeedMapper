@@ -1,9 +1,7 @@
-Always use the latest (stable) version!
+**Always** use the latest (stable) version of SeedMapper! If you want to play on an older version of Minecraft, use [ViaFabricPlus](https://modrinth.com/mod/viafabricplus). This mod allows you to use the latest features of SeedMapper, while still being able to play on older Minecraft versions.
+
 # SeedMapper
-In-game Minecraft Fabric mod that allows you to do various things with the world seed. For reference, have a look at the 
-[features](#features) this mod has. Keep in mind though, this mod requires you to have access to the seed. If the seed 
-is not known, you could crack it using [SeedCrackerX](https://github.com/19MisterX98/SeedcrackerX/) by 19MisterX98. For 
-questions and support please head to my [Discord](https://discord.xpple.dev/).
+In-game Minecraft Fabric mod that allows you to do various things with the world seed. For reference, have a look at the [features](#features) this mod has. Keep in mind though, this mod requires you to have access to the seed. If the seed is not known, you could crack it using [SeedCrackerX](https://github.com/19MisterX98/SeedcrackerX/) by 19MisterX98. For questions and support please head to my [Discord](https://discord.xpple.dev/).
 
 ## Installation
 1. Install the [Fabric Loader](https://fabricmc.net/use/).
@@ -13,11 +11,16 @@ questions and support please head to my [Discord](https://discord.xpple.dev/).
 3. Download SeedMapper from the [releases page](https://modrinth.com/mod/seedmapper/versions/) and move it to your mods folder.
 
 ## IMPORTANT
-You need to have Java 23 installed to use this mod. I recommend to get Java 23 from [adoptium.net](https://adoptium.net/temurin/releases/?version=23). Next, configure your Minecraft launcher to use this release of Java.
+You need to have at least Java 23 installed to use this mod. I recommend to get Java 23 (or higher) from [adoptium.net](https://adoptium.net/temurin/releases/?version=23). Next, configure your Minecraft launcher to use this release of Java.
+
 - Vanilla launcher: Go to `Installations` -> `Edit` -> `More options` -> `Java executable`.
 - MultiMC: Go to `Edit Instance` -> `Settings` -> `Java` -> `Java Installation`.
 - PrismLauncher: Go to `Settings` -> `Java` -> `Java Runtime` -> `Auto-Detect...`.
-  - Do not forget to enable "Skip Java compatibility checks".
+- Modrinth App: Go to `Instance settings` -> `Java and memory` -> `Custom Java installation` -> `Browse`
+
+Sometimes it may be necessary to click the option for skipping the Java compatibility check.
+
+If you are on Windows, make sure to select `javaw.exe`, not `java.exe`.
 
 If you run into issues, contact your launcher's support.
 
@@ -67,8 +70,7 @@ Locates a slime chunk closest to the player. This will always be accurate.
 ### Source mutation
 Usage: `/sm:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotation>)|(in <dimension>)|(versioned <version>)|(seeded <seed>)`.
 
-Executes a given command from a modified source. For example, modifying the source's position will execute the command 
-as if you were in that position. This command is really powerful, use it!
+Executes a given command from a modified source. For example, modifying the source's position will execute the command as if you were in that position. This command is really powerful, use it!
 
 ## Building from source
 This mod internally uses (a fork of) the C library [cubiomes](https://github.com/Cubitect/cubiomes) by Cubitect. Java bindings for this library were created with (also a fork of) [jextract](https://github.com/openjdk/jextract). The bindings use the [Foreign Function & Memory API](https://openjdk.org/jeps/454) from [Project Panama](https://openjdk.org/projects/panama/). See [CreateJavaBindingsTask.java](https://github.com/xpple/SeedMapper/blob/master/buildSrc/src/main/java/dev/xpple/seedmapper/buildscript/CreateJavaBindingsTask.java) for the Gradle task that automates this.
@@ -82,7 +84,7 @@ To build the mod locally, follow these steps:
    ```
 2. Compile cubiomes to a shared library. The following is for Windows:
    ```shell
-   gcc -shared -o src/main/resources/cubiomes.dll src/main/c/noise.c src/main/c/biomes.c src/main/c/layers.c src/main/c/biomenoise.c src/main/c/generator.c src/main/c/finders.c src/main/c/util.c src/main/c/quadbase.c -O3
+   gcc -shared -o src/main/resources/cubiomes.dll [...] -O3
    ```
 3. Install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed.
 4. Compile jextract. Again, the following is for Windows:
@@ -97,4 +99,4 @@ To build the mod locally, follow these steps:
    ```
    You should find the Java bindings in `src/main/java/com/github/cubiomes`.
 
-Lastly, you can also consult the [GitHub Actions workflow file](https://github.com/xpple/SeedMapper/blob/master/.github/workflows/build.yml), which contains build instructions for each major OS.
+Lastly, you can also consult the [GitHub Actions workflow file](https://github.com/xpple/SeedMapper/blob/master/.github/workflows/build.yml), which contains complete build instructions for each major OS.
