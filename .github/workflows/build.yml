@@ -40,6 +40,7 @@ jobs:
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
+          ls build
           cp build/cubiomes.dll ../../resources/cubiomes.dll
 
       - name: Compute SHA256 hash (ubuntu-latest)
