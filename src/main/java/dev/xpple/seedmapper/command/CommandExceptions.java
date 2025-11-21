@@ -23,6 +23,7 @@ public final class CommandExceptions {
     public static final DynamicCommandExceptionType UNKNOWN_ENCHANTMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownEnchantment", arg));
     public static final DynamicCommandExceptionType UNKNOWN_CANYON_CARVER_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownCanyonCarver", arg));
     public static final DynamicCommandExceptionType UNKNOWN_CAVE_CARVER_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownCaveCarver", arg));
+    public static final DynamicCommandExceptionType UNKNOWN_DENSITY_FUNCTION_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownDensityFunction", arg));
     public static final DynamicCommandExceptionType UNKNOWN_MAP_FEATURE_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownMapFeature", arg));
     public static final SimpleCommandExceptionType NO_SEED_AVAILABLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.noSeedAvailable"));
     public static final DynamicCommandExceptionType NO_BIOME_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.noBiomeFound", arg));

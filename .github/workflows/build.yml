@@ -14,8 +14,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    env:
-      SRC_FILES: noise.c biomes.c layers.c biomenoise.c generator.c finders.c util.c quadbase.c loot/items.c loot/loot_functions.c loot/loot_tables.c loot/loot_table_context.c loot/loot_table_parser.c loot/loot_tables/bastion_bridge_1_16_1.c loot/loot_tables/bastion_bridge_1_16_5.c loot/loot_tables/bastion_bridge_1_20.c loot/loot_tables/bastion_other_1_16_1.c loot/loot_tables/bastion_other_1_16_5.c loot/loot_tables/bastion_other_1_20.c loot/loot_tables/bastion_other_1_21_1.c loot/loot_tables/bastion_other_1_21_9.c loot/loot_tables/buried_treasure_1_13.c loot/loot_tables/buried_treasure_1_18.c loot/loot_tables/desert_pyramid_1_13.c loot/loot_tables/desert_pyramid_1_20.c loot/loot_tables/desert_pyramid_1_21_6.c loot/loot_tables/desert_pyramid_1_21_9.c loot/loot_tables/end_city_treasure_1_13.c loot/loot_tables/end_city_treasure_1_20.c loot/loot_tables/end_city_treasure_1_21_9.c loot/loot_tables/igloo_chest_1_13.c loot/loot_tables/jungle_temple_1_13.c loot/loot_tables/jungle_temple_1_14.c loot/loot_tables/jungle_temple_1_20.c loot/loot_tables/jungle_temple_1_21_6.c loot/loot_tables/jungle_temple_1_21_9.c loot/loot_tables/jungle_temple_dispenser_1_13.c loot/loot_tables/nether_bridge_1_13.c loot/loot_tables/nether_bridge_1_20.c loot/loot_tables/nether_bridge_1_21_9.c loot/loot_tables/pillager_outpost_1_14.c loot/loot_tables/pillager_outpost_1_19_2.c loot/loot_tables/pillager_outpost_1_20.c loot/loot_tables/ruined_portal_1_16_1.c loot/loot_tables/ruined_portal_1_21_5.c loot/loot_tables/shipwreck_map_1_13.c loot/loot_tables/shipwreck_map_1_18.c loot/loot_tables/shipwreck_map_1_20.c loot/loot_tables/shipwreck_supply_1_13.c loot/loot_tables/shipwreck_supply_1_14.c loot/loot_tables/shipwreck_supply_1_17.c loot/loot_tables/shipwreck_supply_1_20.c loot/loot_tables/shipwreck_treasure_1_13.c loot/loot_tables/shipwreck_treasure_1_20.c loot/cjson/cJSON.c
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,20 +23,24 @@ jobs:
       - name: Compile shared library (ubuntu-latest)
         if: matrix.os == 'ubuntu-latest'
         working-directory: src/main/c/cubiomes
-        run: gcc -shared -o ../../resources/libcubiomes.so $SRC_FILES -O3 -fPIC
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+          cp build/libcubiomes.so ../../resources/libcubiomes.so
       - name: Compile shared library (macos-latest)
         if: matrix.os == 'macos-latest'
         working-directory: src/main/c/cubiomes
         run: |
-          gcc -shared -o ../../resources/libcubiomes_arm64.dylib -arch arm64 $SRC_FILES -O3 -fPIC
-          gcc -shared -o ../../resources/libcubiomes_x86_64.dylib -arch x86_64 $SRC_FILES -O3 -fPIC
-          lipo -create -output ../../resources/libcubiomes.dylib ../../resources/libcubiomes_arm64.dylib ../../resources/libcubiomes_x86_64.dylib
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+          cmake --build build --config Release
+          cp build/libcubiomes.dylib ../../resources/libcubiomes.dylib
       - name: Compile shared library (windows-latest)
         if: matrix.os == 'windows-latest'
         working-directory: src/main/c/cubiomes
         run: |
-          $src = $env:SRC_FILES.Split(" ")
-          gcc -shared -o ../../resources/cubiomes.dll $src -O3
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+          cp build/libcubiomes.dll ../../resources/cubiomes.dll
 
       - name: Compute SHA256 hash (ubuntu-latest)
         if: matrix.os == 'ubuntu-latest'

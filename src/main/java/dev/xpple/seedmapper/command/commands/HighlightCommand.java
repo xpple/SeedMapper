@@ -9,6 +9,7 @@ import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Pos3;
 import com.github.cubiomes.Pos3List;
 import com.github.cubiomes.SurfaceNoise;
+import com.github.cubiomes.TerrainNoiseParameters;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
@@ -62,6 +63,11 @@ public class HighlightCommand {
                 .executes(ctx -> submit(() -> highlightOreVein(CustomClientCommandSource.of(ctx.getSource()))))
                 .then(argument("chunks", integer(0, 20))
                     .executes(ctx -> submit(() -> highlightOreVein(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks"))))))
+            .then(literal("terrain")
+                .requires(_ -> Configs.DevMode)
+                .executes(ctx -> highlightTerrain(CustomClientCommandSource.of(ctx.getSource())))
+                .then(argument("chunks", integer(0, 5))
+                    .executes(ctx -> submit(() -> highlightTerrain(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks"))))))
             .then(literal("canyon")
                 .requires(_ -> Configs.DevMode)
                 .then(argument("canyon", canyonCarver())
@@ -230,6 +236,46 @@ public class HighlightCommand {
 
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.success", accent(String.valueOf(count[0])))));
             return count[0];
+        }
+    }
+
+    private static int highlightTerrain(CustomClientCommandSource source) throws CommandSyntaxException {
+        return highlightTerrain(source, 0);
+    }
+
+    private static int highlightTerrain(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
+        long seed = source.getSeed().getSecond();
+        int version = source.getVersion();
+
+        ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment params = TerrainNoiseParameters.allocate(arena);
+            if (Cubiomes.initTerrainNoise(params, seed, version) == 0) {
+                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
+            }
+
+            Set<BlockPos> blocks = new HashSet<>();
+            SpiralLoop.spiral(center.x, center.z, chunkRange, (chunkX, chunkZ) -> {
+                final int minChunkX = chunkX << 4;
+                final int minChunkZ = chunkZ << 4;
+                for (int x = minChunkX; x < minChunkX + 16; x++) {
+                    for (int z = minChunkZ; z < minChunkZ + 16; z++) {
+                        for (int y = -64; y < 320; y++) {
+                            double spaghettiRoughness = Cubiomes.sampleSpaghettiRoughness(params, x, y, z);
+                            double entrances = Cubiomes.sampleEntrances(params, x, y, z, spaghettiRoughness);
+                            double slopedCheese = Cubiomes.sampleSlopedCheese(params, x, y, z);
+                            double sample = Cubiomes.sampleFinalDensity(params, x, y, z, spaghettiRoughness, entrances, slopedCheese);
+                            if (sample <= 0) {
+                                blocks.add(new BlockPos(x, y, z));
+                            }
+                        }
+                    }
+                }
+                return false;
+            });
+            RenderManager.drawBoxes(blocks, 0xFF_FF0000);
+            return blocks.size();
         }
     }
 

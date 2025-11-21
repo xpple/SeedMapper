@@ -22,6 +22,7 @@
   "commands.exceptions.unknownEnchantment": "Unknown enchantment \"%s\".",
   "commands.exceptions.unknownCanyonCarver": "Unknown canyon carver \"%s\".",
   "commands.exceptions.unknownCaveCarver": "Unknown cave carver \"%s\".",
+  "commands.exceptions.unknownDensityFunction": "Unknown density function \"%s\".",
   "commands.exceptions.unknownMapFeature": "Unknown map feature \"%s\".",
   "commands.exceptions.incompatibleParameters": "Incompatible parameters.",
   "commands.exceptions.oreVeinWrongVersion": "Ore veins only exist after version 1.18!",
@@ -88,6 +89,9 @@
   "command.clear.success": "Cleared all renders.",
 
   "command.buildInfo.success": "Running SeedMapper on version %s (%s@{%s}).",
+
+  "command.sample.sampleAll.success": "Sampled %s at %s: %s.",
+  "command.sample.sampleDensity.success": "Sampled density at %s: %s.",
 
   "config.oreAirCheck.comment": "Whether or not SeedMapper should use in-game air checks to invalidate ore positions.",
   "config.devMode.comment": "Enables certain debug commands.",
