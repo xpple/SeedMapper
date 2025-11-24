@@ -34,7 +34,7 @@ jobs:
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
           cmake --build build --config Release
           cp build/libcubiomes.dylib ../../resources/libcubiomes.dylib
-      - name: Set up MSYS2
+      - name: Set up MSYS2 (windows-latest)
         if: matrix.os == 'windows-latest'
         uses: msys2/setup-msys2@v2
         with:
