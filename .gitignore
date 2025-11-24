@@ -16,6 +16,9 @@ classes/
 *.ipr
 *.iws
 
+!.idea/scopes/
+!.idea/icon.png
+
 # vscode
 
 .settings/

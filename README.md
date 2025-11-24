@@ -82,9 +82,13 @@ To build the mod locally, follow these steps:
    git clone --recurse-submodules https://github.com/xpple/SeedMapper
    cd SeedMapper
    ```
-2. Compile cubiomes to a shared library. The following is for Windows:
+2. Compile cubiomes to a shared library. MSVC cannot be used to build the project! The following is for Windows:
    ```shell
-   gcc -shared -o src/main/resources/cubiomes.dll [...] -O3
+   cd src/main/c/cubiomes
+   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+   cmake --build build --config Release
+   cp build/cubiomes.dll ../../resources/cubiomes.dll
+   cd ../../../../
    ```
 3. Install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed.
 4. Compile jextract. Again, the following is for Windows:

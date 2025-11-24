@@ -13,13 +13,13 @@ public final class ComponentUtils {
     private ComponentUtils() {
     }
 
-    public static MutableComponent formatSeed(long seed) {
+    public static MutableComponent formatNumber(Number number) {
         return copy(
             hover(
-                accent(String.valueOf(seed)),
+                accent(String.valueOf(number)),
                 base(Component.translatable("chat.copy.click"))
             ),
-            String.valueOf(seed)
+            String.valueOf(number)
         );
     }
 
