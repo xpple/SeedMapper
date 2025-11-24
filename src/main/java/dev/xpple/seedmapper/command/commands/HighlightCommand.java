@@ -244,6 +244,10 @@ public class HighlightCommand {
     }
 
     private static int highlightTerrain(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
+        int dimension = source.getDimension();
+        if (dimension != Cubiomes.DIM_OVERWORLD()) {
+            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+        }
         long seed = source.getSeed().getSecond();
         int version = source.getVersion();
 

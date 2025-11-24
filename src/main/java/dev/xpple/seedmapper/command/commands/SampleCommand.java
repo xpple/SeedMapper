@@ -30,6 +30,10 @@ public class SampleCommand {
     }
 
     private static int sampleAll(CustomClientCommandSource source) throws CommandSyntaxException {
+        int dimension = source.getDimension();
+        if (dimension != Cubiomes.DIM_OVERWORLD()) {
+            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+        }
         int version = source.getVersion();
         long seed = source.getSeed().getSecond();
 
@@ -51,6 +55,10 @@ public class SampleCommand {
     }
 
     private static int sampleDensity(CustomClientCommandSource source, DensityFunction densityFunction) throws CommandSyntaxException {
+        int dimension = source.getDimension();
+        if (dimension != Cubiomes.DIM_OVERWORLD()) {
+            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+        }
         int version = source.getVersion();
         long seed = source.getSeed().getSecond();
 
