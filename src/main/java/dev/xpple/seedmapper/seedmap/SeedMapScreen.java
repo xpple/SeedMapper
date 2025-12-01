@@ -1067,6 +1067,9 @@ public class SeedMapScreen extends Screen {
             int iconWidth = texture.width();
             int iconHeight = texture.height();
 
+            // Skip intersection checks (GuiRenderState.hasIntersection) you would otherwise get when calling
+            // GuiGraphics.blit(RenderPipeline, ResourceLocation, int, int, float, float, int, int, int, int, int)
+            // as these checks incur a significant performance hit
             GpuTextureView gpuTextureView = Minecraft.getInstance().getTextureManager().getTexture(texture.resourceLocation()).getTextureView();
             BlitRenderState renderState = new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(gpuTextureView), new Matrix3x2f(guiGraphics.pose()), minX, minY, minX + iconWidth, minY + iconHeight, 0, 1, 0, 1, colour, guiGraphics.scissorStack.peek());
             guiGraphics.guiRenderState.submitBlitToCurrentLayer(renderState);
