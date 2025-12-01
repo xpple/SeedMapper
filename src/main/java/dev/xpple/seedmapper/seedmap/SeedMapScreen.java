@@ -27,6 +27,7 @@ import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.thread.SeedMapCache;
 import dev.xpple.seedmapper.thread.SeedMapExecutor;
 import dev.xpple.seedmapper.util.QuartPos2;
+import dev.xpple.seedmapper.util.QuartPos2f;
 import dev.xpple.seedmapper.util.RegionPos;
 import dev.xpple.seedmapper.util.TwoDTree;
 import dev.xpple.seedmapper.util.WorldIdentifier;
@@ -182,7 +183,7 @@ public class SeedMapScreen extends Screen {
 
     private final BlockPos playerPos;
 
-    private QuartPos2 centerQuart;
+    private QuartPos2f centerQuart;
 
     private int centerX;
     private int centerY;
@@ -270,8 +271,8 @@ public class SeedMapScreen extends Screen {
 
         this.playerPos = playerPos;
 
-        this.centerQuart = QuartPos2.fromBlockPos(playerPos);
-        this.mouseQuart = new QuartPos2(this.centerQuart.x(), this.centerQuart.z());
+        this.centerQuart = QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(this.playerPos));
+        this.mouseQuart = QuartPos2.fromQuartPos2f(this.centerQuart);
     }
 
     @Override
@@ -303,7 +304,7 @@ public class SeedMapScreen extends Screen {
         int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
         int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
 
-        TilePos centerTile = TilePos.fromQuartPos(this.centerQuart);
+        TilePos centerTile = TilePos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart));
         for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
             for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
                 TilePos tilePos = centerTile.add(relTileX, relTileZ);
@@ -340,7 +341,7 @@ public class SeedMapScreen extends Screen {
                     return;
                 }
                 int regionSize = StructureConfig.regionSize(structureConfig);
-                RegionPos centerRegion = RegionPos.fromQuartPos(this.centerQuart, regionSize);
+                RegionPos centerRegion = RegionPos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart), regionSize);
                 int horRegionRadius = Math.ceilDiv(horChunkRadius, regionSize);
                 int verRegionRadius = Math.ceilDiv(verChunkRadius, regionSize);
                 StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
@@ -426,8 +427,9 @@ public class SeedMapScreen extends Screen {
         }
 
         // draw player position
-        int playerMinX = this.centerX + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getX()) - this.centerQuart.x()) - 10;
-        int playerMinY = this.centerY + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.playerPos.getZ()) - this.centerQuart.z()) - 10;
+        QuartPos2f relPlayerQuart = QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(this.playerPos)).subtract(this.centerQuart);
+        int playerMinX = this.centerX + Mth.floor(Configs.PixelsPerBiome * relPlayerQuart.x()) - 10;
+        int playerMinY = this.centerY + Mth.floor(Configs.PixelsPerBiome * relPlayerQuart.z()) - 10;
         int playerMaxX = playerMinX + 20;
         int playerMaxY = playerMinY + 20;
         if (playerMinX >= HORIZONTAL_PADDING && playerMaxX <= HORIZONTAL_PADDING + this.seedMapWidth && playerMinY >= VERTICAL_PADDING && playerMaxY <= VERTICAL_PADDING + this.seedMapHeight) {
@@ -460,10 +462,10 @@ public class SeedMapScreen extends Screen {
 
     private void drawTile(GuiGraphics guiGraphics, Tile tile) {
         TilePos tilePos = tile.pos();
-        QuartPos2 relQuartPos = QuartPos2.fromTilePos(tilePos).subtract(this.centerQuart);
+        QuartPos2f relTileQuart = QuartPos2f.fromQuartPos(QuartPos2.fromTilePos(tilePos)).subtract(this.centerQuart);
         int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
-        int minX = this.centerX + Configs.PixelsPerBiome * relQuartPos.x();
-        int minY = this.centerY + Configs.PixelsPerBiome * relQuartPos.z();
+        int minX = this.centerX + Mth.floor(Configs.PixelsPerBiome * relTileQuart.x());
+        int minY = this.centerY + Mth.floor(Configs.PixelsPerBiome * relTileQuart.z());
         int maxX = minX + tileSizePixels;
         int maxY = minY + tileSizePixels;
 
@@ -687,7 +689,7 @@ public class SeedMapScreen extends Screen {
         this.addRenderableWidget(this.waypointNameEditBox);
     }
 
-    private void moveCenter(QuartPos2 newCenter) {
+    private void moveCenter(QuartPos2f newCenter) {
         this.centerQuart = newCenter;
 
         this.featureWidgets.removeIf(widget -> {
@@ -729,7 +731,7 @@ public class SeedMapScreen extends Screen {
         int relXQuart = (int) ((mouseX - this.centerX) / Configs.PixelsPerBiome);
         int relZQuart = (int) ((mouseY - this.centerY) / Configs.PixelsPerBiome);
 
-        this.mouseQuart = this.centerQuart.add(relXQuart, relZQuart);
+        this.mouseQuart = QuartPos2.fromQuartPos2f(this.centerQuart.add(relXQuart, relZQuart));
     }
 
     @Override
@@ -760,9 +762,8 @@ public class SeedMapScreen extends Screen {
             return false;
         }
 
-        // TODO: fix small drags not taking effect
-        int relXQuart = (int) (-dragX / Configs.PixelsPerBiome);
-        int relZQuart = (int) (-dragY / Configs.PixelsPerBiome);
+        float relXQuart = (float) (-dragX / Configs.PixelsPerBiome);
+        float relZQuart = (float) (-dragY / Configs.PixelsPerBiome);
 
         this.moveCenter(this.centerQuart.add(relXQuart, relZQuart));
         return true;
@@ -953,7 +954,7 @@ public class SeedMapScreen extends Screen {
         if (z < -Level.MAX_LEVEL_SIZE || z > Level.MAX_LEVEL_SIZE) {
             return false;
         }
-        this.moveCenter(new QuartPos2(QuartPos.fromBlock(x), QuartPos.fromBlock(z)));
+        this.moveCenter(new QuartPos2f(QuartPos.fromBlock(x), QuartPos.fromBlock(z)));
         this.teleportEditBoxX.setValue("");
         this.teleportEditBoxZ.setValue("");
         return true;
@@ -1014,8 +1015,9 @@ public class SeedMapScreen extends Screen {
         }
 
         private void updatePosition() {
-            this.x = centerX + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.featureLocation.getX()) - centerQuart.x()) - this.feature.getTexture().width() / 2;
-            this.y = centerY + Configs.PixelsPerBiome * (QuartPos.fromBlock(this.featureLocation.getZ()) - centerQuart.z()) - this.feature.getTexture().height() / 2;
+            QuartPos2f relFeatureQuart = QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(this.featureLocation)).subtract(centerQuart);
+            this.x = centerX + Mth.floor(Configs.PixelsPerBiome * relFeatureQuart.x()) - this.feature.getTexture().width() / 2;
+            this.y = centerY + Mth.floor(Configs.PixelsPerBiome * relFeatureQuart.z()) - this.feature.getTexture().height() / 2;
         }
 
         private int width() {

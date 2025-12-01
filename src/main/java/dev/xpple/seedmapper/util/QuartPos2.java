@@ -3,9 +3,14 @@ package dev.xpple.seedmapper.util;
 import dev.xpple.seedmapper.seedmap.TilePos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 
 public record QuartPos2(int x, int z) {
+    public static QuartPos2 fromQuartPos2f(QuartPos2f quartPos2f) {
+        return new QuartPos2(Mth.floor(quartPos2f.x()), Mth.floor(quartPos2f.z()));
+    }
+
     public static QuartPos2 fromBlockPos(BlockPos blockPos) {
         return new QuartPos2(QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getZ()));
     }
