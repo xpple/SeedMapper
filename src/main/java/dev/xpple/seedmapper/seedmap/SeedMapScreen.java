@@ -330,6 +330,8 @@ public class SeedMapScreen extends Screen {
             }
         }
 
+        guiGraphics.nextStratum();
+
         int horChunkRadius = Math.ceilDiv(this.seedMapWidth / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
         int verChunkRadius = Math.ceilDiv(this.seedMapHeight / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
 
