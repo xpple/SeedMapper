@@ -384,15 +384,11 @@ public class SeedMapScreen extends Screen {
                             continue;
                         }
 
-                        int biome = getBiome(QuartPos2.fromBlockPos(pos)).orElseGet(() -> Cubiomes.getBiomeAt(this.biomeGenerator, 4, pos.getX() >> 2, 320 >> 2, pos.getZ() >> 2));
-                        try (Arena tempArena = Arena.ofConfined()) {
-                            MemorySegment structureVariant = StructureVariant.allocate(tempArena);
-                            Cubiomes.getVariant(structureVariant, structure, this.version, this.seed, pos.getX(), pos.getZ(), biome);
-                            MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, tempArena);
-                            MemorySegment structureSaltConfig = StructureSaltConfig.allocate(tempArena);
-                            Cubiomes.getStructureSaltConfig(structure, this.version, biome, structureSaltConfig);
-                            int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, this.version, this.seed, pos.getX(), pos.getZ());
-                            MapFeature.Texture texture = feature.getVariantTexture(structureVariant, pieces, numPieces);
+                        OptionalInt optionalBiome = getBiome(QuartPos2.fromBlockPos(pos));
+                        if (optionalBiome.isEmpty()) {
+                            this.addFeatureWidget(guiGraphics, feature, pos);
+                        } else {
+                            MapFeature.Texture texture = feature.getVariantTexture(this.worldIdentifier, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
                             this.addFeatureWidget(guiGraphics, feature, texture, pos);
                         }
                     }
@@ -579,7 +575,7 @@ public class SeedMapScreen extends Screen {
         }
 
         this.featureWidgets.add(widget);
-        FeatureWidget.drawFeatureIcon(guiGraphics, feature.getDefaultTexture(), widget.x, widget.y, 0xFF_FFFFFF);
+        FeatureWidget.drawFeatureIcon(guiGraphics, variantTexture, widget.x, widget.y, 0xFF_FFFFFF);
         return widget;
     }
 
