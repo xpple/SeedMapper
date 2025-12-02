@@ -61,7 +61,7 @@ public class SeedMapper implements ClientModInitializer {
     public void onInitializeClient() {
         new ModConfigBuilder<>(MOD_ID, Configs.class)
             .registerType(SeedResolutionArgument.SeedResolution.class, new SeedResolutionAdapter(), SeedResolutionArgument::seedResolution)
-            .registerType(MapFeature.class, new MapFeatureAdapter(), MapFeatureArgument::mapFeature)
+            .registerTypeHierarchy(MapFeature.class, new MapFeatureAdapter(), MapFeatureArgument::mapFeature)
             .registerGlobalChangeHook(event -> {
                 if (event.config().equals("DevMode")) {
                     try {
