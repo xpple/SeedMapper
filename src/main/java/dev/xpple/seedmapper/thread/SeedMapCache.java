@@ -42,4 +42,14 @@ public class SeedMapCache<K, V> {
         });
         return null;
     }
+
+    /**
+     * Returns the value associated with the given key if the key is present,
+     * otherwise {@code null}.
+     * @param key the key
+     * @return the nullable value
+     */
+    public @Nullable V get(K key) {
+        return this.cache.get(key);
+    }
 }

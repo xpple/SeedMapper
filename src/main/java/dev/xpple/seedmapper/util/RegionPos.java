@@ -4,11 +4,12 @@ import dev.xpple.seedmapper.seedmap.TilePos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 
 public record RegionPos(int x, int z, int regionSizeChunks) {
     public static RegionPos fromBlockPos(BlockPos blockPos, int regionSizeChunks) {
-        return new RegionPos(SectionPos.blockToSectionCoord(blockPos.getX()) / regionSizeChunks, SectionPos.blockToSectionCoord(blockPos.getZ()) / regionSizeChunks, regionSizeChunks);
+        return new RegionPos(Mth.floorDiv(SectionPos.blockToSectionCoord(blockPos.getX()), regionSizeChunks), Mth.floorDiv(SectionPos.blockToSectionCoord(blockPos.getZ()), regionSizeChunks), regionSizeChunks);
     }
 
     public BlockPos toBlockPos() {
@@ -16,11 +17,11 @@ public record RegionPos(int x, int z, int regionSizeChunks) {
     }
 
     public static RegionPos fromQuartPos(QuartPos2 quartPos, int regionSizeChunks) {
-        return new RegionPos(QuartPos.toSection(quartPos.x()) / regionSizeChunks, QuartPos.toSection(quartPos.z()) / regionSizeChunks, regionSizeChunks);
+        return new RegionPos(Mth.floorDiv(QuartPos.toSection(quartPos.x()), regionSizeChunks), Mth.floorDiv(QuartPos.toSection(quartPos.z()), regionSizeChunks), regionSizeChunks);
     }
 
     public static RegionPos fromChunkPos(ChunkPos chunkPos, int regionSizeChunks) {
-        return new RegionPos(chunkPos.x / regionSizeChunks, chunkPos.z / regionSizeChunks, regionSizeChunks);
+        return new RegionPos(Mth.floorDiv(chunkPos.x, regionSizeChunks), Mth.floorDiv(chunkPos.z, regionSizeChunks), regionSizeChunks);
     }
 
     public ChunkPos toChunkPos() {
@@ -28,7 +29,7 @@ public record RegionPos(int x, int z, int regionSizeChunks) {
     }
 
     public static RegionPos fromTilePos(TilePos tilePos, int regionSize) {
-        return new RegionPos(TilePos.TILE_SIZE_CHUNKS * tilePos.x() / regionSize, TilePos.TILE_SIZE_CHUNKS * tilePos.z() / regionSize, regionSize);
+        return new RegionPos(Mth.floorDiv(TilePos.TILE_SIZE_CHUNKS * tilePos.x(), regionSize), Mth.floorDiv(TilePos.TILE_SIZE_CHUNKS * tilePos.z(), regionSize), regionSize);
     }
 
     public RegionPos add(RegionPos regionPos) {
