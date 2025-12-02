@@ -155,7 +155,7 @@ public class SeedMapScreen extends Screen {
     private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
 
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, StructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, ChunkStructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
     public static final Object2ObjectMap<WorldIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, BitSet>> canyonDataCache = new Object2ObjectOpenHashMap<>();
@@ -171,16 +171,23 @@ public class SeedMapScreen extends Screen {
     private final int version;
     private final WorldIdentifier worldIdentifier;
 
-    private final MemorySegment biomeGenerator; // thread safe
-    private final MemorySegment structureGenerator; // NOT thread safe
-    private final MemorySegment[] structureConfigs;
+    /**
+     * {@link Generator} to be used for biome calculations. This is thread safe.
+     */
+    private final MemorySegment biomeGenerator;
+    /**
+     * {@link Generator} to be used for structure calculations. This is NOT thread safe.
+     */
+    private final MemorySegment structureGenerator;
+    private final @Nullable MemorySegment[] structureConfigs;
     private final MemorySegment surfaceNoise;
     private final PositionalRandomFactory oreVeinRandom;
     private final MemorySegment oreVeinParameters;
+    private final @Nullable MemorySegment[] canyonCarverConfigs;
 
     private final Object2ObjectMap<TilePos, Tile> biomeTileCache = new Object2ObjectOpenHashMap<>();
     private final SeedMapCache<TilePos, int[]> biomeCache;
-    private final Object2ObjectMap<ChunkPos, StructureData> structureCache;
+    private final Object2ObjectMap<ChunkPos, ChunkStructureData> structureCache;
     private final SeedMapCache<TilePos, OreVeinData> oreVeinCache;
     private final Object2ObjectMap<TilePos, BitSet> canyonCache;
     private final Object2ObjectMap<TilePos, Tile> slimeChunkTileCache = new Object2ObjectOpenHashMap<>();
@@ -248,6 +255,16 @@ public class SeedMapScreen extends Screen {
         this.oreVeinParameters = OreVeinParameters.allocate(this.arena);
         Cubiomes.initOreVeinNoise(this.oreVeinParameters, this.seed, this.version);
 
+        this.canyonCarverConfigs = CanyonCarverArgument.CANYON_CARVERS.values().stream()
+            .map(canyonCarver -> {
+                MemorySegment ccc = CanyonCarverConfig.allocate(this.arena);
+                if (Cubiomes.getCanyonCarverConfig(canyonCarver, this.version, ccc) == 0) {
+                    return null;
+                }
+                return ccc;
+            })
+            .toArray(MemorySegment[]::new);
+
         this.toggleableFeatures = Arrays.stream(MapFeature.values())
             .filter(feature -> feature.getDimension() == this.dimension || feature.getDimension() == Cubiomes.DIM_UNDEF())
             .filter(feature -> this.version >= feature.availableSince())
@@ -270,7 +287,7 @@ public class SeedMapScreen extends Screen {
         }
 
         this.featureIconsCombinedWidth = this.toggleableFeatures.stream()
-            .map(feature -> feature.getTexture().width())
+            .map(feature -> feature.getDefaultTexture().width())
             .reduce((l, r) -> l + HORIZONTAL_FEATURE_TOGGLE_SPACING + r)
             .orElseThrow();
 
@@ -361,12 +378,12 @@ public class SeedMapScreen extends Screen {
                         }
                         ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
 
-                        StructureData structureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new StructureData(chunkPos, new Int2ObjectArrayMap<>()));
-                        BlockPos pos = structureData.structures().computeIfAbsent(structure, _ -> this.calculateStructurePos(regionPos, structurePos, generationCheck));
-                        if (pos == null) {
+                        ChunkStructureData chunkStructureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new ChunkStructureData(chunkPos, new Int2ObjectArrayMap<>()));
+                        StructureData data = chunkStructureData.structures().computeIfAbsent(structure, _ -> this.calculateStructureData(feature, regionPos, structurePos, generationCheck));
+                        if (data == null) {
                             continue;
                         }
-                        this.addFeatureWidget(guiGraphics, feature, pos);
+                        this.addFeatureWidget(guiGraphics, feature, data.texture(), data.pos());
                     }
                 }
             });
@@ -453,7 +470,7 @@ public class SeedMapScreen extends Screen {
 
         // draw marker
         if (this.markerWidget != null && this.markerWidget.withinBounds()) {
-            FeatureWidget.drawFeatureIcon(guiGraphics, this.markerWidget.feature.getTexture(), this.markerWidget.x, this.markerWidget.y, -1);
+            FeatureWidget.drawFeatureIcon(guiGraphics, this.markerWidget.featureTexture, this.markerWidget.x, this.markerWidget.y, -1);
         }
 
         // draw chest loot widget
@@ -541,13 +558,17 @@ public class SeedMapScreen extends Screen {
     }
 
     private @Nullable FeatureWidget addFeatureWidget(GuiGraphics guiGraphics, MapFeature feature, BlockPos pos) {
-        FeatureWidget widget = new FeatureWidget(feature, pos);
+        return this.addFeatureWidget(guiGraphics, feature, feature.getDefaultTexture(), pos);
+    }
+
+    private @Nullable FeatureWidget addFeatureWidget(GuiGraphics guiGraphics, MapFeature feature, MapFeature.Texture variantTexture, BlockPos pos) {
+        FeatureWidget widget = new FeatureWidget(feature, variantTexture, pos);
         if (!widget.withinBounds()) {
             return null;
         }
 
         this.featureWidgets.add(widget);
-        FeatureWidget.drawFeatureIcon(guiGraphics, feature.getTexture(), widget.x, widget.y, 0xFF_FFFFFF);
+        FeatureWidget.drawFeatureIcon(guiGraphics, variantTexture, widget.x, widget.y, 0xFF_FFFFFF);
         return widget;
     }
 
@@ -568,7 +589,7 @@ public class SeedMapScreen extends Screen {
     private void createFeatureTogglesInner(int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
         for (int toggle = 0; toggle < maxToggles; toggle++) {
             MapFeature feature = this.toggleableFeatures.get(row * togglesPerRow + toggle);
-            MapFeature.Texture featureIcon = feature.getTexture();
+            MapFeature.Texture featureIcon = feature.getDefaultTexture();
             this.addRenderableWidget(new FeatureToggleWidget(feature, toggleMinX, toggleMinY));
             toggleMinX += featureIcon.width() + HORIZONTAL_FEATURE_TOGGLE_SPACING;
         }
@@ -578,19 +599,22 @@ public class SeedMapScreen extends Screen {
         QuartPos2 quartPos = QuartPos2.fromTilePos(tilePos);
         int rangeSize = TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE;
 
-        MemorySegment range = Range.allocate(this.arena);
-        Range.scale(range, BIOME_SCALE);
-        Range.x(range, quartPos.x());
-        Range.z(range, quartPos.z());
-        Range.sx(range, rangeSize);
-        Range.sz(range, rangeSize);
-        Range.y(range, 63 / Range.scale(range)); // sea level
-        Range.sy(range, 1);
+        // temporary arena so that everything will be deallocated after the biomes are calculated
+        try (Arena tempArena = Arena.ofConfined()) {
+            MemorySegment range = Range.allocate(tempArena);
+            Range.scale(range, BIOME_SCALE);
+            Range.x(range, quartPos.x());
+            Range.z(range, quartPos.z());
+            Range.sx(range, rangeSize);
+            Range.sz(range, rangeSize);
+            Range.y(range, 63 / Range.scale(range)); // sea level
+            Range.sy(range, 1);
 
-        long cacheSize = Cubiomes.getMinCacheSize(this.biomeGenerator, Range.scale(range), Range.sx(range), Range.sy(range), Range.sz(range));
-        MemorySegment biomeIds = this.arena.allocate(Cubiomes.C_INT, cacheSize);
-        if (Cubiomes.genBiomes(this.biomeGenerator, biomeIds, range) == 0) {
-            return biomeIds.toArray(Cubiomes.C_INT);
+            long cacheSize = Cubiomes.getMinCacheSize(this.biomeGenerator, Range.scale(range), Range.sx(range), Range.sy(range), Range.sz(range));
+            MemorySegment biomeIds = tempArena.allocate(Cubiomes.C_INT, cacheSize);
+            if (Cubiomes.genBiomes(this.biomeGenerator, biomeIds, range) == 0) {
+                return biomeIds.toArray(Cubiomes.C_INT);
+            }
         }
 
         throw new RuntimeException("Cubiomes.genBiomes() failed!");
@@ -608,12 +632,20 @@ public class SeedMapScreen extends Screen {
         return slimeChunks;
     }
 
-    private @Nullable BlockPos calculateStructurePos(RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
+    private @Nullable StructureData calculateStructureData(MapFeature feature, RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
         if (!generationCheck.check(this.structureGenerator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
             return null;
         }
 
-        return new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));
+        BlockPos pos = new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));
+        OptionalInt optionalBiome = getBiome(QuartPos2.fromBlockPos(pos));
+        MapFeature.Texture texture;
+        if (optionalBiome.isEmpty()) {
+            texture = feature.getDefaultTexture();
+        } else {
+            texture = feature.getVariantTexture(this.worldIdentifier, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
+        }
+        return new StructureData(pos, texture);
     }
 
     private @Nullable OreVeinData calculateOreVein(TilePos tilePos) {
@@ -649,35 +681,37 @@ public class SeedMapScreen extends Screen {
     private BitSet calculateCanyonData(TilePos tilePos) {
         ToIntBiFunction<Integer, Integer> biomeFunction;
         if (this.version <= Cubiomes.MC_1_17()) {
-            biomeFunction = (chunkX, chunkZ) -> Cubiomes.getBiomeAt(this.biomeGenerator, 4, chunkX << 2, 0, chunkZ << 2);
+            biomeFunction = (chunkX, chunkZ) -> getBiome(new QuartPos2(QuartPos.fromSection(chunkX), QuartPos.fromSection(chunkZ))).orElseGet(() -> Cubiomes.getBiomeAt(this.biomeGenerator, 4, chunkX << 2, 0, chunkZ << 2));
         } else {
             biomeFunction = (_, _) -> -1;
         }
-        MemorySegment ccc = CanyonCarverConfig.allocate(this.arena);
-        MemorySegment rnd = this.arena.allocate(Cubiomes.C_LONG_LONG);
-        BitSet canyons = new BitSet(TilePos.TILE_SIZE_CHUNKS * TilePos.TILE_SIZE_CHUNKS);
-        ChunkPos chunkPos = tilePos.toChunkPos();
-        for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
-            for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
-                int chunkX = chunkPos.x + relChunkX;
-                int chunkZ = chunkPos.z + relChunkZ;
-                for (int canyonCarver : CanyonCarverArgument.CANYON_CARVERS.values()) {
-                    if (Cubiomes.getCanyonCarverConfig(canyonCarver, this.version, ccc) == 0) {
-                        continue;
+        try (Arena tempArena = Arena.ofConfined()) {
+            MemorySegment rnd = tempArena.allocate(Cubiomes.C_LONG_LONG);
+            BitSet canyons = new BitSet(TilePos.TILE_SIZE_CHUNKS * TilePos.TILE_SIZE_CHUNKS);
+            ChunkPos chunkPos = tilePos.toChunkPos();
+            for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
+                for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
+                    int chunkX = chunkPos.x + relChunkX;
+                    int chunkZ = chunkPos.z + relChunkZ;
+                    for (int canyonCarver : CanyonCarverArgument.CANYON_CARVERS.values()) {
+                        MemorySegment ccc = this.canyonCarverConfigs[canyonCarver];
+                        if (ccc == null) {
+                            continue;
+                        }
+                        int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
+                        if (Cubiomes.isViableCanyonBiome(canyonCarver, biome) == 0) {
+                            continue;
+                        }
+                        if (Cubiomes.checkCanyonStart(this.seed, chunkX, chunkZ, ccc, rnd) == 0) {
+                            continue;
+                        }
+                        canyons.set(relChunkX + relChunkZ * TilePos.TILE_SIZE_CHUNKS);
+                        break;
                     }
-                    int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
-                    if (Cubiomes.isViableCanyonBiome(canyonCarver, biome) == 0) {
-                        continue;
-                    }
-                    if (Cubiomes.checkCanyonStart(this.seed, chunkX, chunkZ, ccc, rnd) == 0) {
-                        continue;
-                    }
-                    canyons.set(relChunkX + relChunkZ * TilePos.TILE_SIZE_CHUNKS);
-                    break;
                 }
             }
+            return canyons;
         }
-        return canyons;
     }
 
     private OptionalInt getBiome(QuartPos2 pos) {
@@ -1030,26 +1064,32 @@ public class SeedMapScreen extends Screen {
         private int x;
         private int y;
         private final MapFeature feature;
+        private final MapFeature.Texture featureTexture;
         private final BlockPos featureLocation;
 
         public FeatureWidget(MapFeature feature, BlockPos featureLocation) {
+            this(feature, feature.getDefaultTexture(), featureLocation);
+        }
+
+        public FeatureWidget(MapFeature feature, MapFeature.Texture variantTexture, BlockPos featureLocation) {
             this.feature = feature;
+            this.featureTexture = variantTexture;
             this.featureLocation = featureLocation;
             this.updatePosition();
         }
 
         private void updatePosition() {
             QuartPos2f relFeatureQuart = QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(this.featureLocation)).subtract(centerQuart);
-            this.x = centerX + Mth.floor(Configs.PixelsPerBiome * relFeatureQuart.x()) - this.feature.getTexture().width() / 2;
-            this.y = centerY + Mth.floor(Configs.PixelsPerBiome * relFeatureQuart.z()) - this.feature.getTexture().height() / 2;
+            this.x = centerX + Mth.floor(Configs.PixelsPerBiome * relFeatureQuart.x()) - this.featureTexture.width() / 2;
+            this.y = centerY + Mth.floor(Configs.PixelsPerBiome * relFeatureQuart.z()) - this.featureTexture.height() / 2;
         }
 
         private int width() {
-            return this.feature.getTexture().width();
+            return this.featureTexture.width();
         }
 
         private int height() {
-            return this.feature.getTexture().height();
+            return this.featureTexture.height();
         }
 
         private boolean withinBounds() {
@@ -1069,7 +1109,7 @@ public class SeedMapScreen extends Screen {
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.feature, this.featureLocation);
+            return Objects.hash(this.feature, this.featureTexture, this.featureLocation);
         }
 
         @Override
@@ -1078,7 +1118,7 @@ public class SeedMapScreen extends Screen {
                 return false;
             }
             FeatureWidget that = (FeatureWidget) o;
-            return this.feature == that.feature && Objects.equals(this.featureLocation, that.featureLocation);
+            return this.feature == that.feature && Objects.equals(this.featureTexture, that.featureTexture) && Objects.equals(this.featureLocation, that.featureLocation);
         }
 
         static void drawFeatureIcon(GuiGraphics guiGraphics, MapFeature.Texture texture, int minX, int minY, int colour) {
