@@ -155,7 +155,7 @@ public class SeedMapScreen extends Screen {
     private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
 
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, StructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, ChunkStructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
     public static final Object2ObjectMap<WorldIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, BitSet>> canyonDataCache = new Object2ObjectOpenHashMap<>();
@@ -187,7 +187,7 @@ public class SeedMapScreen extends Screen {
 
     private final Object2ObjectMap<TilePos, Tile> biomeTileCache = new Object2ObjectOpenHashMap<>();
     private final SeedMapCache<TilePos, int[]> biomeCache;
-    private final Object2ObjectMap<ChunkPos, StructureData> structureCache;
+    private final Object2ObjectMap<ChunkPos, ChunkStructureData> structureCache;
     private final SeedMapCache<TilePos, OreVeinData> oreVeinCache;
     private final Object2ObjectMap<TilePos, BitSet> canyonCache;
     private final Object2ObjectMap<TilePos, Tile> slimeChunkTileCache = new Object2ObjectOpenHashMap<>();
@@ -378,19 +378,12 @@ public class SeedMapScreen extends Screen {
                         }
                         ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
 
-                        StructureData structureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new StructureData(chunkPos, new Int2ObjectArrayMap<>()));
-                        BlockPos pos = structureData.structures().computeIfAbsent(structure, _ -> this.calculateStructurePos(regionPos, structurePos, generationCheck));
-                        if (pos == null) {
+                        ChunkStructureData chunkStructureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new ChunkStructureData(chunkPos, new Int2ObjectArrayMap<>()));
+                        StructureData data = chunkStructureData.structures().computeIfAbsent(structure, _ -> this.calculateStructureData(feature, regionPos, structurePos, generationCheck));
+                        if (data == null) {
                             continue;
                         }
-
-                        OptionalInt optionalBiome = getBiome(QuartPos2.fromBlockPos(pos));
-                        if (optionalBiome.isEmpty()) {
-                            this.addFeatureWidget(guiGraphics, feature, pos);
-                        } else {
-                            MapFeature.Texture texture = feature.getVariantTexture(this.worldIdentifier, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
-                            this.addFeatureWidget(guiGraphics, feature, texture, pos);
-                        }
+                        this.addFeatureWidget(guiGraphics, feature, data.texture(), data.pos());
                     }
                 }
             });
@@ -639,12 +632,20 @@ public class SeedMapScreen extends Screen {
         return slimeChunks;
     }
 
-    private @Nullable BlockPos calculateStructurePos(RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
+    private @Nullable StructureData calculateStructureData(MapFeature feature, RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
         if (!generationCheck.check(this.structureGenerator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
             return null;
         }
 
-        return new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));
+        BlockPos pos = new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));
+        OptionalInt optionalBiome = getBiome(QuartPos2.fromBlockPos(pos));
+        MapFeature.Texture texture;
+        if (optionalBiome.isEmpty()) {
+            texture = feature.getDefaultTexture();
+        } else {
+            texture = feature.getVariantTexture(this.worldIdentifier, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
+        }
+        return new StructureData(pos, texture);
     }
 
     private @Nullable OreVeinData calculateOreVein(TilePos tilePos) {
