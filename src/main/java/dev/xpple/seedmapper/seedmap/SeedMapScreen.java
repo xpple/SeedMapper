@@ -78,6 +78,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 
@@ -194,6 +195,7 @@ public class SeedMapScreen extends Screen {
     private final SeedMapCache<TilePos, BitSet> slimeChunkCache;
 
     private final BlockPos playerPos;
+    private final Vec2 playerRotation;
 
     private QuartPos2f centerQuart;
 
@@ -219,9 +221,11 @@ public class SeedMapScreen extends Screen {
     private @Nullable FeatureWidget markerWidget = null;
     private @Nullable ChestLootWidget chestLootWidget = null;
 
+    private static final ResourceLocation DIRECTION_ARROW_TEXTURE = ResourceLocation.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/arrow.png");
+
     private Registry<Enchantment> enchantmentsRegistry;
 
-    public SeedMapScreen(long seed, int dimension, int version, BlockPos playerPos) {
+    public SeedMapScreen(long seed, int dimension, int version, BlockPos playerPos, Vec2 playerRotation) {
         super(Component.empty());
         this.seed = seed;
         this.dimension = dimension;
@@ -292,6 +296,7 @@ public class SeedMapScreen extends Screen {
             .orElseThrow();
 
         this.playerPos = playerPos;
+        this.playerRotation = playerRotation;
 
         this.centerQuart = QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(this.playerPos));
         this.mouseQuart = QuartPos2.fromQuartPos2f(this.centerQuart);
@@ -453,13 +458,27 @@ public class SeedMapScreen extends Screen {
         }
 
         // draw player position
-        QuartPos2f relPlayerQuart = QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(this.playerPos)).subtract(this.centerQuart);
-        int playerMinX = this.centerX + Mth.floor(Configs.PixelsPerBiome * relPlayerQuart.x()) - 10;
-        int playerMinY = this.centerY + Mth.floor(Configs.PixelsPerBiome * relPlayerQuart.z()) - 10;
-        int playerMaxX = playerMinX + 20;
-        int playerMaxY = playerMinY + 20;
-        if (playerMinX >= HORIZONTAL_PADDING && playerMaxX <= HORIZONTAL_PADDING + this.seedMapWidth && playerMinY >= VERTICAL_PADDING && playerMaxY <= VERTICAL_PADDING + this.seedMapHeight) {
-            PlayerFaceRenderer.draw(guiGraphics, this.minecraft.player.getSkin(), playerMinX, playerMinY, 20);
+        if (this.toggleableFeatures.contains(MapFeature.PLAYER_ICON) && Configs.ToggledFeatures.contains(MapFeature.PLAYER_ICON)) {
+            QuartPos2f relPlayerQuart = QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(this.playerPos)).subtract(this.centerQuart);
+            int playerMinX = this.centerX + Mth.floor(Configs.PixelsPerBiome * relPlayerQuart.x()) - 10;
+            int playerMinY = this.centerY + Mth.floor(Configs.PixelsPerBiome * relPlayerQuart.z()) - 10;
+            int playerMaxX = playerMinX + 20;
+            int playerMaxY = playerMinY + 20;
+            if (playerMinX >= HORIZONTAL_PADDING && playerMaxX <= HORIZONTAL_PADDING + this.seedMapWidth && playerMinY >= VERTICAL_PADDING && playerMaxY <= VERTICAL_PADDING + this.seedMapHeight) {
+                PlayerFaceRenderer.draw(guiGraphics, this.minecraft.player.getSkin(), playerMinX, playerMinY, 20);
+            }
+
+            // draw player direction arrow
+            guiGraphics.pose().pushMatrix();
+            guiGraphics.pose() // transformations are applied in reverse order
+                .translate(10, 10)
+                .translate(playerMinX, playerMinY)
+                .rotate((float) (Math.toRadians(this.playerRotation.y) + Math.PI))
+                .translate(-10, -10)
+                .translate(0, -30)
+            ;
+            drawIcon(guiGraphics, DIRECTION_ARROW_TEXTURE, 0, 0, 20, 20, 0xFF_FFFFFF);
+            guiGraphics.pose().popMatrix();
         }
 
         // calculate spawn point
@@ -1125,13 +1144,17 @@ public class SeedMapScreen extends Screen {
             int iconWidth = texture.width();
             int iconHeight = texture.height();
 
-            // Skip intersection checks (GuiRenderState.hasIntersection) you would otherwise get when calling
-            // GuiGraphics.blit(RenderPipeline, ResourceLocation, int, int, float, float, int, int, int, int, int)
-            // as these checks incur a significant performance hit
-            GpuTextureView gpuTextureView = Minecraft.getInstance().getTextureManager().getTexture(texture.resourceLocation()).getTextureView();
-            BlitRenderState renderState = new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(gpuTextureView), new Matrix3x2f(guiGraphics.pose()), minX, minY, minX + iconWidth, minY + iconHeight, 0, 1, 0, 1, colour, guiGraphics.scissorStack.peek());
-            guiGraphics.guiRenderState.submitBlitToCurrentLayer(renderState);
+            drawIcon(guiGraphics, texture.resourceLocation(), minX, minY, iconWidth, iconHeight, colour);
         }
+    }
+
+    private static void drawIcon(GuiGraphics guiGraphics, ResourceLocation resourceLocation, int minX, int minY, int iconWidth, int iconHeight, int colour) {
+        // Skip intersection checks (GuiRenderState.hasIntersection) you would otherwise get when calling
+        // GuiGraphics.blit(RenderPipeline, ResourceLocation, int, int, float, float, int, int, int, int, int)
+        // as these checks incur a significant performance hit
+        GpuTextureView gpuTextureView = Minecraft.getInstance().getTextureManager().getTexture(resourceLocation).getTextureView();
+        BlitRenderState renderState = new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(gpuTextureView), new Matrix3x2f(guiGraphics.pose()), minX, minY, minX + iconWidth, minY + iconHeight, 0, 1, 0, 1, colour, guiGraphics.scissorStack.peek());
+        guiGraphics.guiRenderState.submitBlitToCurrentLayer(renderState);
     }
 
     private static final BiMap<Integer, ResourceKey<Level>> DIM_ID_TO_MC = ImmutableBiMap.of(

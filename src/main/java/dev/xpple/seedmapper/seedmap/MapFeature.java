@@ -106,6 +106,7 @@ public enum MapFeature {
     SLIME_CHUNK("slime_chunk", -1, Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_B1_7(), "feature_icons", 20, 20),
     WORLD_SPAWN("world_spawn", -1, Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_B1_7(), "cubiomes_viewer_icons", 20, 20),
     WAYPOINT("waypoint", -1, Cubiomes.DIM_UNDEF(), Cubiomes.MC_B1_7(), "feature_icons", 20, 20),
+    PLAYER_ICON("player_icon", -1, Cubiomes.DIM_UNDEF(), Cubiomes.MC_B1_7(), "feature_icons", 20, 20),
     ;
 
     public static final Map<String, MapFeature> BY_NAME = Arrays.stream(values())
