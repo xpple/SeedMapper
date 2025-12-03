@@ -81,6 +81,7 @@ import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
+import org.joml.Vector2f;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
@@ -98,6 +99,7 @@ import java.util.OptionalInt;
 import java.util.function.IntSupplier;
 import java.util.function.ToIntBiFunction;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
@@ -466,19 +468,25 @@ public class SeedMapScreen extends Screen {
             int playerMaxY = playerMinY + 20;
             if (playerMinX >= HORIZONTAL_PADDING && playerMaxX <= HORIZONTAL_PADDING + this.seedMapWidth && playerMinY >= VERTICAL_PADDING && playerMaxY <= VERTICAL_PADDING + this.seedMapHeight) {
                 PlayerFaceRenderer.draw(guiGraphics, this.minecraft.player.getSkin(), playerMinX, playerMinY, 20);
-            }
 
-            // draw player direction arrow
-            guiGraphics.pose().pushMatrix();
-            guiGraphics.pose() // transformations are applied in reverse order
-                .translate(10, 10)
-                .translate(playerMinX, playerMinY)
-                .rotate((float) (Math.toRadians(this.playerRotation.y) + Math.PI))
-                .translate(-10, -10)
-                .translate(0, -30)
-            ;
-            drawIcon(guiGraphics, DIRECTION_ARROW_TEXTURE, 0, 0, 20, 20, 0xFF_FFFFFF);
-            guiGraphics.pose().popMatrix();
+                // draw player direction arrow
+                guiGraphics.pose().pushMatrix();
+                Matrix3x2f transform = guiGraphics.pose() // transformations are applied in reverse order
+                    .translate(10, 10)
+                    .translate(playerMinX, playerMinY)
+                    .rotate((float) (Math.toRadians(this.playerRotation.y) + Math.PI))
+                    .translate(-10, -10)
+                    .translate(0, -30)
+                ;
+                boolean withinBounds = Stream.of(new Vector2f(20, 0), new Vector2f(20, 20), new Vector2f(0, 20), new Vector2f(0, 0))
+                    .map(transform::transformPosition)
+                    .allMatch(v -> v.x >= HORIZONTAL_PADDING && v.x <= HORIZONTAL_PADDING + this.seedMapWidth &&
+                        v.y >= VERTICAL_PADDING && v.y <= VERTICAL_PADDING + this.seedMapHeight);
+                if (withinBounds) {
+                    drawIcon(guiGraphics, DIRECTION_ARROW_TEXTURE, 0, 0, 20, 20, 0xFF_FFFFFF);
+                }
+                guiGraphics.pose().popMatrix();
+            }
         }
 
         // calculate spawn point
