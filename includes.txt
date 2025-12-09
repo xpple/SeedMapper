@@ -881,15 +881,21 @@
 --include-constant UNBREAKING
 --include-constant WIND_BURST
 
---include-function free_loot_table_pools
+--include-function init_bastion_bridge
+--include-function init_bastion_other
 --include-function init_buried_treasure
 --include-function init_desert_pyramid
 --include-function init_end_city_treasure
 --include-function init_igloo_chest
+--include-function init_jungle_temple
+--include-function init_jungle_temple_dispenser
 --include-function init_loot_table_name
 --include-function init_nether_bridge
 --include-function init_pillager_outpost
 --include-function init_ruined_portal
+--include-function init_shipwreck_map
+--include-function init_shipwreck_supply
+--include-function init_shipwreck_treasure
 
 --include-struct LootPool
 --include-struct LootTableContext
