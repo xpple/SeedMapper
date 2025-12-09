@@ -16,7 +16,7 @@ public class FeatureToggleWidget extends Button {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         int colour = 0xff_ffffff;
         if (!Configs.ToggledFeatures.contains(this.feature)) {
             colour = ARGB.color(255 >> 1, 255, 255, 255);

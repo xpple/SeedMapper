@@ -6,7 +6,7 @@ import com.github.cubiomes.StructureVariant;
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.util.WorldIdentifier;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -150,9 +150,9 @@ public enum MapFeature {
         return this.getDefaultTexture();
     }
 
-    public record Texture(ResourceLocation resourceLocation, int width, int height) {
+    public record Texture(Identifier identifier, int width, int height) {
         private Texture(String name, String directory, int width, int height) {
-            this(ResourceLocation.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/%s/".formatted(directory) + name + ".png"), width, height);
+            this(Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/%s/".formatted(directory) + name + ".png"), width, height);
         }
     }
 }

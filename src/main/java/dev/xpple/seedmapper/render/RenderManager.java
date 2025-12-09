@@ -4,12 +4,11 @@ import com.google.common.cache.CacheBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
-import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldExtractionContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.level.ChunkPos;
@@ -64,11 +63,11 @@ public final class RenderManager {
     }
 
     public static void registerEvents() {
-        ExtractStateEvent.EXTRACT_STATE.register(RenderManager::extractLines);
-        EndMainPassEvent.END_MAIN_PASS.register(RenderManager::renderLines);
+        WorldRenderEvents.END_EXTRACTION.register(RenderManager::extractLines);
+        WorldRenderEvents.END_MAIN.register(RenderManager::renderLines);
     }
 
-    private static void extractLines(LevelRenderState levelRenderState, Camera camera, DeltaTracker deltaTracker) {
+    private static void extractLines(WorldExtractionContext worldExtractionContext) {
         Set<Line> extractedLines = new HashSet<>();
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null) {
@@ -79,13 +78,13 @@ public final class RenderManager {
             if (level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false) == null) {
                 return;
             }
-            extractedLines.add(line.offset(camera.getPosition().scale(-1)));
+            extractedLines.add(line.offset(worldExtractionContext.camera().position().scale(-1)));
         });
-        levelRenderState.setData(LINES_SET_KEY, extractedLines);
+        worldExtractionContext.worldState().setData(LINES_SET_KEY, extractedLines);
     }
 
-    private static void renderLines(MultiBufferSource.BufferSource bufferSource, PoseStack poseStack, LevelRenderState levelRenderState) {
-        Set<Line> extractedLines = levelRenderState.getData(LINES_SET_KEY);
+    private static void renderLines(WorldRenderContext worldRenderContext) {
+        Set<Line> extractedLines = worldRenderContext.worldState().getData(LINES_SET_KEY);
         if (extractedLines == null) {
             return;
         }
@@ -98,18 +97,20 @@ public final class RenderManager {
             float green = ARGB.greenFloat(colour);
             float blue = ARGB.blueFloat(colour);
 
-            poseStack.pushPose();
-            PoseStack.Pose pose = poseStack.last();
-            VertexConsumer buffer = bufferSource.getBuffer(NoDepthLayer.LINES_NO_DEPTH_LAYER);
+            worldRenderContext.matrices().pushPose();
+            PoseStack.Pose pose = worldRenderContext.matrices().last();
+            VertexConsumer buffer = worldRenderContext.consumers().getBuffer(NoDepthLayer.LINES_NO_DEPTH_LAYER);
             buffer
                 .addVertex(pose, (float) start.x, (float) start.y, (float) start.z)
                 .setColor(red, green, blue, 1.0F)
-                .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z);
+                .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
+                .setLineWidth(2);
             buffer
                 .addVertex(pose, (float) end.x, (float) end.y, (float) end.z)
                 .setColor(red, green, blue, 1.0F)
-                .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z);
-            poseStack.popPose();
+                .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
+                .setLineWidth(2);
+            worldRenderContext.matrices().popPose();
         });
     }
 }

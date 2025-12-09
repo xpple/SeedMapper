@@ -11,7 +11,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -21,11 +21,11 @@ import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
 public class ChestLootWidget {
 
-    private static final ResourceLocation CHEST_CONTAINER = ResourceLocation.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/chest_container.png");
+    private static final Identifier CHEST_CONTAINER = Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/chest_container.png");
     private static final int CHEST_CONTAINER_WIDTH = 176;
     private static final int CHEST_CONTAINER_HEIGHT = 78;
 
-    private static final ResourceLocation BUTTON_TEXTURE = ResourceLocation.fromNamespaceAndPath("fabric", "textures/gui/creative_buttons.png");
+    private static final Identifier BUTTON_TEXTURE = Identifier.fromNamespaceAndPath("fabric", "textures/gui/creative_buttons.png");
     private static final int BUTTON_X_OFFSET = 149;
     private static final int BUTTON_Y_OFFSET = 4;
     private static final int BUTTON_WIDTH = 10;

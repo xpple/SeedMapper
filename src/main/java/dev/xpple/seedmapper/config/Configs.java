@@ -8,9 +8,9 @@ import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.seedmap.MapFeature;
 import dev.xpple.seedmapper.seedmap.SeedMapScreen;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 
 import java.util.EnumSet;
 import java.util.HashMap;

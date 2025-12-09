@@ -122,6 +122,7 @@
 --include-constant MC_1_21_5
 --include-constant MC_1_21_6
 --include-constant MC_1_21_9
+--include-constant MC_1_21_11
 --include-constant MC_1_21_WD
 --include-constant MC_1_2_5
 --include-constant MC_1_3
@@ -705,6 +706,7 @@
 --include-constant ITEM_COOKED_PORKCHOP
 --include-constant ITEM_COOKED_SALMON
 --include-constant ITEM_COPPER_HORSE_ARMOR
+--include-constant ITEM_COPPER_NAUTILUS_ARMOR
 --include-constant ITEM_CROSSBOW
 --include-constant ITEM_CRYING_OBSIDIAN
 --include-constant ITEM_DARK_OAK_LOG
@@ -714,8 +716,10 @@
 --include-constant ITEM_DIAMOND_HELMET
 --include-constant ITEM_DIAMOND_HORSE_ARMOR
 --include-constant ITEM_DIAMOND_LEGGINGS
+--include-constant ITEM_DIAMOND_NAUTILUS_ARMOR
 --include-constant ITEM_DIAMOND_PICKAXE
 --include-constant ITEM_DIAMOND_SHOVEL
+--include-constant ITEM_DIAMOND_SPEAR
 --include-constant ITEM_DIAMOND_SWORD
 --include-constant ITEM_DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
 --include-constant ITEM_EMERALD
@@ -737,6 +741,7 @@
 --include-constant ITEM_GOLDEN_HOE
 --include-constant ITEM_GOLDEN_HORSE_ARMOR
 --include-constant ITEM_GOLDEN_LEGGINGS
+--include-constant ITEM_GOLDEN_NAUTILUS_ARMOR
 --include-constant ITEM_GOLDEN_PICKAXE
 --include-constant ITEM_GOLDEN_SHOVEL
 --include-constant ITEM_GOLDEN_SWORD
@@ -753,9 +758,11 @@
 --include-constant ITEM_IRON_HORSE_ARMOR
 --include-constant ITEM_IRON_INGOT
 --include-constant ITEM_IRON_LEGGINGS
+--include-constant ITEM_IRON_NAUTILUS_ARMOR
 --include-constant ITEM_IRON_NUGGET
 --include-constant ITEM_IRON_PICKAXE
 --include-constant ITEM_IRON_SHOVEL
+--include-constant ITEM_IRON_SPEAR
 --include-constant ITEM_IRON_SWORD
 --include-constant ITEM_LAPIS_LAZULI
 --include-constant ITEM_LEATHER
@@ -797,6 +804,7 @@
 --include-constant ITEM_UNKNOWN
 --include-constant ITEM_WHEAT
 --include-constant ITEM_WILD_ARMOR_TRIM_SMITHING_TEMPLATE
+--include-constant NUM_ITEMS
 
 --include-struct EnchantInstance
 --include-struct ItemStack

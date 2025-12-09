@@ -4,8 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "ClientPacketListenerMixin",
-    "LevelRendererMixin",
-    "ScreenMixin",
+    "ChatScreenMixin",
     "betterconfig.ConfigCommandClientMixin"
   ],
   "injectors": {
