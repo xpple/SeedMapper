@@ -1,0 +1,58 @@
+language: java
+os: linux
+dist: jammy
+sudo: required
+before_install:
+  - wget --no-verbose https://github.com/adoptium/temurin23-binaries/releases/download/jdk-23.0.1%2B11/OpenJDK23U-jdk_x64_linux_hotspot_23.0.1_11.tar.gz
+  - tar -xzf OpenJDK23U-jdk_x64_linux_hotspot_23.0.1_11.tar.gz
+  - export JAVA_HOME=$PWD/jdk-23.0.1+11
+  - export PATH=$JAVA_HOME/bin:$PATH
+  - java -version
+install:
+  - wget --no-verbose https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+  - tar -xf clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+  - sudo mv clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04 /usr/lib/llvm-13
+  - chmod +x ./gradlew
+  - chmod +x jextract/gradlew
+script:
+  - cd jextract && ./gradlew --stacktrace -Pjdk_home=$JAVA_HOME -Pllvm_home=/usr/lib/llvm-13 clean verify && cd ..
+  - ./gradlew build -Pjdk_home=$JAVA_HOME -Pllvm_home=/usr/lib/llvm-13
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - jextract/.gradle/caches/
+    - jextract/.gradle/wrapper/
+    - src/main/c/cubiomes/build/
+    - src/main/c/cubiomes/cubiomes.c
+    - src/main/c/cubiomes/cubiomes.h
+    - src/main/c/cubiomes/CMakeLists.txt
+    - src/main/c/cubiomes/include/cubiomes.h
+    - src/main/c/cubiomes/include/cubiomes.i
+    - src/main/c/cubiomes/include/cubiomes.cpp
+    - src/main/c/cubiomes/include/cubiomes_test.h
+    - src/main/c/cubiomes/include/cubiomes_test.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_main.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_runner.h
+    - src/main/c/cubiomes/include/cubiomes_test_runner.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_suite.h
+    - src/main/c/cubiomes/include/cubiomes_test_suite.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils.h
+    - src/main/c/cubiomes/include/cubiomes_test_utils.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils_main.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils_runner.h
+    - src/main/c/cubiomes/include/cubiomes_test_utils_runner.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils_suite.h
+    - src/main/c/cubiomes/include/cubiomes_test_utils_suite.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils_utils.h
+    - src/main/c/cubiomes/include/cubiomes_test_utils_utils.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils_utils_main.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils_runner_main.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils_suite_main.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils_utils_runner.h
+    - src/main/c/cubiomes/include/cubiomes_test_utils_utils_runner.cpp
+    - src/main/c/cubiomes/include/cubiomes_test_utils_utils_suite.h
+    - src/main/c/cubiomes/include/cubiomes_test_utils_utils_
