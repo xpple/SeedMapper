@@ -1,8 +1,7 @@
 package dev.xpple.seedmapper.command.arguments;
 
 import com.github.cubiomes.Cubiomes;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -15,41 +14,42 @@ import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class DimensionArgument implements ArgumentType<Integer> {
+public class GeneratorFlagArgument implements ArgumentType<Integer> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("overworld", "the_nether", "the_end");
 
-    public static final BiMap<String, Integer> DIMENSIONS = ImmutableBiMap.<String, Integer>builder()
-        .put("overworld", Cubiomes.DIM_OVERWORLD())
-        .put("the_nether", Cubiomes.DIM_NETHER())
-        .put("the_end", Cubiomes.DIM_END())
+    public static final Map<String, Integer> GENERATOR_FLAGS = ImmutableMap.<String, Integer>builder()
+        .put("large_biomes", Cubiomes.LARGE_BIOMES())
+        .put("no_beta_ocean", Cubiomes.NO_BETA_OCEAN())
+        .put("force_ocean_variants", Cubiomes.FORCE_OCEAN_VARIANTS())
         .build();
 
-    public static DimensionArgument dimension() {
-        return new DimensionArgument();
+    public static GeneratorFlagArgument generatorFlag() {
+        return new GeneratorFlagArgument();
     }
 
-    public static int getDimension(CommandContext<FabricClientCommandSource> context, String name) {
+    public static int getGeneratorFlag(CommandContext<FabricClientCommandSource> context, String name) {
         return context.getArgument(name, Integer.class);
     }
 
     @Override
     public Integer parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
-        String dimensionString = reader.readUnquotedString();
-        Integer dimension = DIMENSIONS.get(dimensionString);
-        if (dimension == null) {
+        String generatorFlagString = reader.readUnquotedString();
+        Integer generatorFlag = GENERATOR_FLAGS.get(generatorFlagString);
+        if (generatorFlag == null) {
             reader.setCursor(cursor);
-            throw CommandExceptions.UNKNOWN_DIMENSION_EXCEPTION.create(dimensionString);
+            throw CommandExceptions.UNKNOWN_GENERATOR_FLAG_EXCEPTION.create(generatorFlagString);
         }
-        return dimension;
+        return generatorFlag;
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggest(DIMENSIONS.keySet(), builder);
+        return SharedSuggestionProvider.suggest(GENERATOR_FLAGS.keySet(), builder);
     }
 
     @Override

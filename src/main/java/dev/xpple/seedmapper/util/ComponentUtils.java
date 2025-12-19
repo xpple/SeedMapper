@@ -1,8 +1,11 @@
 package dev.xpple.seedmapper.util;
 
+import com.github.cubiomes.Cubiomes;
+import dev.xpple.seedmapper.command.arguments.GeneratorFlagArgument;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -13,7 +16,7 @@ public final class ComponentUtils {
     private ComponentUtils() {
     }
 
-    public static MutableComponent formatNumber(Number number) {
+    public static MutableComponent formatNumber(@Nullable Number number) {
         return copy(
             hover(
                 accent(String.valueOf(number)),
@@ -21,6 +24,23 @@ public final class ComponentUtils {
             ),
             String.valueOf(number)
         );
+    }
+
+    public static MutableComponent formatSeed(@Nullable SeedIdentifier seed) {
+        if (seed == null) {
+            return Component.literal("null");
+        }
+        return chain(
+            formatNumber(seed.seed()),
+            !seed.hasVersion() ? Component.empty() : Component.literal(" " + Cubiomes.mc2str(seed.version()).getString(0)),
+            !seed.hasFlags() ? Component.empty() : Component.literal(" ").append(formatGeneratorFlags(seed.generatorFlags()))
+        );
+    }
+
+    public static MutableComponent formatGeneratorFlags(int generatorFlags) {
+        return join(Component.literal(" "), GeneratorFlagArgument.GENERATOR_FLAGS.entrySet().stream()
+            .filter(entry -> (generatorFlags & entry.getValue()) != 0)
+            .map(entry -> Component.literal(entry.getKey())));
     }
 
     public static MutableComponent formatXZ(int x, int z) {

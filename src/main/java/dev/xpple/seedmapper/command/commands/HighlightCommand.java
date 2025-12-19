@@ -19,6 +19,7 @@ import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.OreTypes;
 import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
@@ -89,15 +90,15 @@ public class HighlightCommand {
     }
 
     private static int highlightBlock(CustomClientCommandSource source, Pair<Integer, Integer> blockPair, int chunkRange) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         int version = source.getVersion();
         int dimension = source.getDimension();
-        long seed = source.getSeed().getSecond();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, version, 0);
-            Cubiomes.applySeed(generator, dimension, seed);
+            Cubiomes.setupGenerator(generator, version, source.getGeneratorFlags());
+            Cubiomes.applySeed(generator, dimension, seed.seed());
             MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
-            Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed);
+            Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed.seed());
 
             ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
 
@@ -188,10 +189,10 @@ public class HighlightCommand {
 
     private static int highlightOreVein(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
         int version = source.getVersion();
-        long seed = source.getSeed().getSecond();
+        SeedIdentifier seed = source.getSeed().getSecond();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment parameters = OreVeinParameters.allocate(arena);
-            if (Cubiomes.initOreVeinNoise(parameters, seed, version) == 0) {
+            if (Cubiomes.initOreVeinNoise(parameters, seed.seed(), version) == 0) {
                 throw CommandExceptions.ORE_VEIN_WRONG_VERSION_EXCEPTION.create();
             }
 
@@ -246,11 +247,11 @@ public class HighlightCommand {
     }
 
     private static int highlightTerrain(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         if (dimension != Cubiomes.DIM_OVERWORLD()) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
-        long seed = source.getSeed().getSecond();
         int version = source.getVersion();
 
         ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
@@ -265,7 +266,7 @@ public class HighlightCommand {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params = TerrainNoiseParameters.allocate(arena);
-            if (Cubiomes.initTerrainNoise(params, seed, version) == 0) {
+            if (Cubiomes.initTerrainNoise(params, seed.seed(), version) == 0) {
                 throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
             }
 
@@ -297,7 +298,7 @@ public class HighlightCommand {
     }
 
     private static int highlightCanyon(CustomClientCommandSource source, int canyonCarver, int chunkRange) throws CommandSyntaxException {
-        long seed = source.getSeed().getSecond();
+        SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         int version = source.getVersion();
 
@@ -309,13 +310,13 @@ public class HighlightCommand {
             if (CanyonCarverConfig.dim(ccc) != dimension) {
                 throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
             }
-            var biomeFunction = LocateCommand.getCarverBiomeFunction(arena, seed, dimension, version);
+            var biomeFunction = LocateCommand.getCarverBiomeFunction(arena, seed.seed(), dimension, version, source.getGeneratorFlags());
             return highlightCarver(source, chunkRange, (chunkX, chunkZ) -> {
                 int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
                 if (Cubiomes.isViableCanyonBiome(canyonCarver, biome) == 0) {
                     return null;
                 }
-                return Cubiomes.carveCanyon(arena, seed, chunkX, chunkZ, ccc);
+                return Cubiomes.carveCanyon(arena, seed.seed(), chunkX, chunkZ, ccc);
             });
         }
     }
@@ -325,7 +326,7 @@ public class HighlightCommand {
     }
 
     private static int highlightCave(CustomClientCommandSource source, int caveCarver, int chunkRange) throws CommandSyntaxException {
-        long seed = source.getSeed().getSecond();
+        SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         int version = source.getVersion();
 
@@ -337,13 +338,13 @@ public class HighlightCommand {
             if (CaveCarverConfig.dim(ccc) != dimension) {
                 throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
             }
-            var biomeFunction = LocateCommand.getCarverBiomeFunction(arena, seed, dimension, version);
+            var biomeFunction = LocateCommand.getCarverBiomeFunction(arena, seed.seed(), dimension, version, source.getGeneratorFlags());
             return highlightCarver(source, chunkRange, (chunkX, chunkZ) -> {
                 int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
                 if (Cubiomes.isViableCaveBiome(caveCarver, biome) == 0) {
                     return null;
                 }
-                return Cubiomes.carveCave(arena, seed, chunkX, chunkZ, ccc);
+                return Cubiomes.carveCave(arena, seed.seed(), chunkX, chunkZ, ccc);
             });
         }
     }

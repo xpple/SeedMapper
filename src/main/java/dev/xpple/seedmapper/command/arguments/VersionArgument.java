@@ -21,8 +21,8 @@ public class VersionArgument implements ArgumentType<Integer> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("1.21.1", "1.17.1", "1.15");
 
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> VERSIONS;">
-    private static final Map<String, Integer> VERSIONS = ImmutableMap.<String, Integer>builder()
+    //<editor-fold defaultstate="collapsed" desc="static final Map<String, Integer> VERSIONS;">
+    static final Map<String, Integer> VERSIONS = ImmutableMap.<String, Integer>builder()
         .put("b1.7", Cubiomes.MC_B1_7())
         .put("b1.7.2", Cubiomes.MC_B1_7())
         .put("b1.7.3", Cubiomes.MC_B1_7())
