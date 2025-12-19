@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.command;
 
+import com.github.cubiomes.Cubiomes;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
@@ -150,8 +151,15 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         if (dimensionMeta != null) {
             return (int) dimensionMeta;
         }
-        // TODO change
-        return DimensionArgument.dimension().parse(new StringReader(this.getWorld().dimension().identifier().getPath()));
+        try {
+            return DimensionArgument.dimension().parse(new StringReader(this.getWorld().dimension().identifier().getPath()));
+        } catch (CommandSyntaxException _) {
+        }
+        return switch (this.getWorld().dimensionType().skybox()) {
+            case NONE -> Cubiomes.DIM_NETHER();
+            case OVERWORLD -> Cubiomes.DIM_OVERWORLD();
+            case END -> Cubiomes.DIM_END();
+        };
     }
 
     public int getVersion() throws CommandSyntaxException {
