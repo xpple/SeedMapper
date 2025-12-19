@@ -8,6 +8,8 @@ import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.seedmap.MapFeature;
 import dev.xpple.seedmapper.seedmap.SeedMapScreen;
+import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
@@ -27,14 +29,21 @@ public class Configs {
         Configs.CONFIG_REF.get().save();
     }
 
-    @Config
-    public static Long Seed = null;
+    @Config(chatRepresentation = "displaySeed")
+    public static SeedIdentifier Seed = null;
+    private static Component displaySeed() {
+        return ComponentUtils.formatSeed(Seed);
+    }
 
-    @Config(putter = @Config.Putter("none"), adder = @Config.Adder(value = "addSavedSeed", type = long.class))
-    public static Map<String, Long> SavedSeeds = new HashMap<>();
-    private static void addSavedSeed(long seed) {
+    @Config(putter = @Config.Putter("none"), adder = @Config.Adder(value = "addSavedSeed", type = SeedIdentifier.class), chatRepresentation = "displaySavedSeeds")
+    public static Map<String, SeedIdentifier> SavedSeeds = new HashMap<>();
+    private static void addSavedSeed(SeedIdentifier seed) {
         String key = Minecraft.getInstance().getConnection().getConnection().getRemoteAddress().toString();
         SavedSeeds.put(key, seed);
+    }
+    private static Component displaySavedSeeds() {
+        return join(Component.literal(", "), SavedSeeds.entrySet().stream()
+            .map(entry -> chain(Component.literal(entry.getKey() + ": "), ComponentUtils.formatSeed(entry.getValue()))));
     }
 
     @Config

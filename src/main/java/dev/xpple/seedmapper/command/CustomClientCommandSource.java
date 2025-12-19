@@ -8,7 +8,9 @@ import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.command.arguments.VersionArgument;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.util.SeedDatabaseHelper;
+import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.Optionull;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -121,11 +123,11 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         return this;
     }
 
-    public Pair<SeedResolutionArgument.SeedResolution.Method, Long> getSeed() throws CommandSyntaxException {
-        Long seed;
+    public Pair<SeedResolutionArgument.SeedResolution.Method, SeedIdentifier> getSeed() throws CommandSyntaxException {
+        SeedIdentifier seed;
         for (SeedResolutionArgument.SeedResolution.Method method : Configs.SeedResolutionOrder) {
             seed = switch (method) {
-                case COMMAND_SOURCE -> (Long) this.getMeta("seed");
+                case COMMAND_SOURCE -> Optionull.map(this.getMeta("seed"), s -> new SeedIdentifier((long) s));
                 case SEED_CONFIG -> Configs.Seed;
                 case SAVED_SEEDS_CONFIG -> {
                     String key = this.client.getConnection().getConnection().getRemoteAddress().toString();
@@ -148,6 +150,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         if (dimensionMeta != null) {
             return (int) dimensionMeta;
         }
+        // TODO change
         return DimensionArgument.dimension().parse(new StringReader(this.getWorld().dimension().identifier().getPath()));
     }
 
@@ -156,6 +159,17 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         if (versionMeta != null) {
             return (int) versionMeta;
         }
+        if (this.getSeed().getSecond().hasVersion()) {
+            return this.getSeed().getSecond().version();
+        }
         return VersionArgument.version().parse(new StringReader(SharedConstants.getCurrentVersion().name()));
+    }
+
+    public int getGeneratorFlags() throws CommandSyntaxException {
+        Object generatorFlagsMeta = this.getMeta("generatorFlags");
+        if (generatorFlagsMeta != null) {
+            return (int) generatorFlagsMeta;
+        }
+        return this.getSeed().getSecond().generatorFlags();
     }
 }

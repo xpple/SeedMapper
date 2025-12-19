@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.seedmap.SeedMapScreen;
+import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 
@@ -17,10 +18,11 @@ public class SeedMapCommand {
     }
 
     private static int seedMap(CustomClientCommandSource source) throws CommandSyntaxException {
-        long seed = source.getSeed().getSecond();
+        SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         int version = source.getVersion();
-        source.getClient().schedule(() -> source.getClient().setScreen(new SeedMapScreen(seed, dimension, version, BlockPos.containing(source.getPosition()), source.getRotation())));
+        int generatorFlags = source.getGeneratorFlags();
+        source.getClient().schedule(() -> source.getClient().setScreen(new SeedMapScreen(seed.seed(), dimension, version, generatorFlags, BlockPos.containing(source.getPosition()), source.getRotation())));
         return Command.SINGLE_SUCCESS;
     }
 }

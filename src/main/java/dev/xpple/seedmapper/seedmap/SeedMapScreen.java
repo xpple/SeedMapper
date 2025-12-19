@@ -173,6 +173,7 @@ public class SeedMapScreen extends Screen {
     private final long seed;
     private final int dimension;
     private final int version;
+    private final int generatorFlags;
     private final WorldIdentifier worldIdentifier;
 
     /**
@@ -228,15 +229,16 @@ public class SeedMapScreen extends Screen {
 
     private Registry<Enchantment> enchantmentsRegistry;
 
-    public SeedMapScreen(long seed, int dimension, int version, BlockPos playerPos, Vec2 playerRotation) {
+    public SeedMapScreen(long seed, int dimension, int version, int generatorFlags, BlockPos playerPos, Vec2 playerRotation) {
         super(Component.empty());
         this.seed = seed;
         this.dimension = dimension;
         this.version = version;
-        this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version);
+        this.generatorFlags = generatorFlags;
+        this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version, this.generatorFlags);
 
         this.biomeGenerator = Generator.allocate(this.arena);
-        Cubiomes.setupGenerator(this.biomeGenerator, this.version, 0);
+        Cubiomes.setupGenerator(this.biomeGenerator, this.version, this.generatorFlags);
         Cubiomes.applySeed(this.biomeGenerator, this.dimension, this.seed);
 
         this.structureGenerator = Generator.allocate(this.arena);
@@ -285,7 +287,7 @@ public class SeedMapScreen extends Screen {
         this.canyonCache = canyonDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
 
         if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.containsKey(this.worldIdentifier)) {
-            this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
+            this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version, this.generatorFlags))
                 .thenAccept(tree -> {
                     if (tree != null) {
                         strongholdDataCache.put(this.worldIdentifier, tree);

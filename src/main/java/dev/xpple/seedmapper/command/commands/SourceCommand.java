@@ -12,6 +12,7 @@ import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
 import static dev.xpple.clientarguments.arguments.CRotationArgument.*;
 import static dev.xpple.clientarguments.arguments.CVec3Argument.*;
 import static dev.xpple.seedmapper.command.arguments.DimensionArgument.*;
+import static dev.xpple.seedmapper.command.arguments.GeneratorFlagArgument.*;
 import static dev.xpple.seedmapper.command.arguments.VersionArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -40,6 +41,17 @@ public class SourceCommand {
                     .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("version", getVersion(ctx, "version")))))
             .then(literal("seeded")
                 .then(argument("seed", longArg())
-                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("seed", getLong(ctx, "seed"))))));
+                    .redirect(root, ctx -> CustomClientCommandSource.of(ctx.getSource()).withMeta("seed", getLong(ctx, "seed")))))
+            .then(literal("flagged")
+                .then(argument("generatorFlag", generatorFlag())
+                    .redirect(root, ctx -> {
+                        CustomClientCommandSource source = CustomClientCommandSource.of(ctx.getSource());
+                        Object existingGeneratorFlag = source.getMeta("generatorFlags");
+                        int generatorFlag = getGeneratorFlag(ctx, "generatorFlag");
+                        if (existingGeneratorFlag == null) {
+                            return source.withMeta("generatorFlags", generatorFlag);
+                        }
+                        return source.withMeta("generatorFlags", ((int) existingGeneratorFlag) | generatorFlag);
+                    }))));
     }
 }
