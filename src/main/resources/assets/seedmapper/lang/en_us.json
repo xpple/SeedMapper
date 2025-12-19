@@ -5,6 +5,7 @@
   "commands.exceptions.alreadyBusyLocating.clickToStop": "Click to stop the task",
   "commands.exceptions.unknownError": "An unknown error occurred, please see the log!",
   "commands.exceptions.unknownDimension": "Unknown dimension \"%s\".",
+  "commands.exceptions.unknownGeneratorFlag": "Unknown generator flag \"%s\".",
   "commands.exceptions.unknownVersion": "Unknown version \"%s\".",
   "commands.exceptions.invalidDimension": "Invalid dimension.",
   "commands.exceptions.unknownBiome": "Unknown biome \"%s\".",
@@ -31,6 +32,7 @@
   "commands.exceptions.lootNotSupported": "Loot is not supported before version 1.13!",
   "commands.exceptions.lootNotAvailable": "This loot is not available in this dimension!",
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\".",
+  "commands.exceptions.unknownSeedArgument": "Unknown seed argument \"%s\".",
 
   "command.checkSeed.using": "SeedMapper is using the seed %s from %s.",
   "command.checkSeed.fromSavedSeeds": "the \"SavedSeeds\" config",
@@ -98,7 +100,7 @@
 
   "key.seedMap": "Seed map",
 
-  "seedMap.seedAndVersion": "Seed: %s (%s)",
+  "seedMap.seed": "Seed: %s | %s %s",
   "seedMap.chestLoot.title": "%s loot (%d/%d)",
   "seedMap.chestLoot.extraInfo.pieceName": "Piece name: %s",
   "seedMap.chestLoot.extraInfo.chestPos": "Chest position: %s",

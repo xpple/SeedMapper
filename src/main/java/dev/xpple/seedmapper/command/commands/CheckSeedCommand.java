@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -27,19 +28,19 @@ public class CheckSeedCommand {
     }
 
     private static int checkSeed(CustomClientCommandSource source) throws CommandSyntaxException {
-        Pair<SeedResolutionArgument.SeedResolution.Method, Long> seedPair = source.getSeed();
-        long seed = seedPair.getSecond();
+        Pair<SeedResolutionArgument.SeedResolution.Method, SeedIdentifier> seedPair = source.getSeed();
+        SeedIdentifier seed = seedPair.getSecond();
         switch (seedPair.getFirst()) {
-            case COMMAND_SOURCE -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatNumber(seed),
+            case COMMAND_SOURCE -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed),
                 format(
                     suggest(
                         Component.translatable("command.checkSeed.fromSource"),
-                        "/sm:source seeded %d run ".formatted(seed)
+                        "/sm:source seeded %d run ".formatted(seed.seed())
                     ),
                     ChatFormatting.UNDERLINE
                 ))
             );
-            case SEED_CONFIG -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatNumber(seed),
+            case SEED_CONFIG -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed),
                 format(
                     file(
                         Component.translatable("command.checkSeed.fromSeed"),
@@ -48,7 +49,7 @@ public class CheckSeedCommand {
                     ChatFormatting.UNDERLINE
                 ))
             );
-            case SAVED_SEEDS_CONFIG -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatNumber(seed),
+            case SAVED_SEEDS_CONFIG -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed),
                 format(
                     file(
                         Component.translatable("command.checkSeed.fromSavedSeeds"),
@@ -57,7 +58,7 @@ public class CheckSeedCommand {
                     ChatFormatting.UNDERLINE
                 ))
             );
-            case ONLINE_DATABASE -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatNumber(seed),
+            case ONLINE_DATABASE -> source.sendFeedback(Component.translatable("command.checkSeed.using", ComponentUtils.formatSeed(seed),
                 format(
                     url(
                         Component.translatable("command.checkSeed.fromDatabase"),

@@ -31,6 +31,7 @@ import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.seedmap.SeedMapScreen.FeatureWidget;
 import dev.xpple.seedmapper.thread.SeedMapCache;
 import dev.xpple.seedmapper.thread.SeedMapExecutor;
+import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.QuartPos2f;
 import dev.xpple.seedmapper.util.RegionPos;
@@ -100,6 +101,7 @@ import org.joml.Vector2i;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SequenceLayout;
 import java.lang.foreign.ValueLayout;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -149,7 +151,7 @@ public class SeedMapScreen extends Screen {
 
     static {
         // unsigned char color[3]
-        MemoryLayout rgbLayout = MemoryLayout.sequenceLayout(3, Cubiomes.C_CHAR);
+        SequenceLayout rgbLayout = MemoryLayout.sequenceLayout(3, Cubiomes.C_CHAR);
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment biomeColoursInternal = arena.allocate(rgbLayout, biomeColours.length);
@@ -198,6 +200,7 @@ public class SeedMapScreen extends Screen {
     private final long seed;
     private final int dimension;
     private final int version;
+    private final int generatorFlags;
     private final WorldIdentifier worldIdentifier;
 
     /**
@@ -257,15 +260,16 @@ public class SeedMapScreen extends Screen {
 
     private Registry<Enchantment> enchantmentsRegistry;
 
-    public SeedMapScreen(long seed, int dimension, int version, BlockPos playerPos, Vec2 playerRotation) {
+    public SeedMapScreen(long seed, int dimension, int version, int generatorFlags, BlockPos playerPos, Vec2 playerRotation) {
         super(Component.empty());
         this.seed = seed;
         this.dimension = dimension;
         this.version = version;
-        this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version);
+        this.generatorFlags = generatorFlags;
+        this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version, this.generatorFlags);
 
         this.biomeGenerator = Generator.allocate(this.arena);
-        Cubiomes.setupGenerator(this.biomeGenerator, this.version, 0);
+        Cubiomes.setupGenerator(this.biomeGenerator, this.version, this.generatorFlags);
         Cubiomes.applySeed(this.biomeGenerator, this.dimension, this.seed);
 
         this.structureGenerator = Generator.allocate(this.arena);
@@ -314,7 +318,7 @@ public class SeedMapScreen extends Screen {
         this.canyonCache = canyonDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
 
         if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.containsKey(this.worldIdentifier)) {
-            this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version))
+            this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version, this.generatorFlags))
                 .thenAccept(tree -> {
                     if (tree != null) {
                         strongholdDataCache.put(this.worldIdentifier, tree);
@@ -1031,9 +1035,9 @@ private boolean handleWaypointNameFieldEnter(KeyEvent keyEvent) {
     protected boolean shouldDrawPlayerIcon() { return this.allowPlayerIconRendering; }
 
     protected void renderSeedMap(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-            // draw seed + version
-        Component seedComponent = Component.translatable("seedMap.seedAndVersion", accent(Long.toString(this.seed)), Cubiomes.mc2str(this.version).getString(0));
-            guiGraphics.drawString(this.font, seedComponent, HORIZONTAL_PADDING, VERTICAL_PADDING - this.font.lineHeight - 1, -1);
+        // draw seed
+        Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(this.seed)), Cubiomes.mc2str(this.version).getString(0), ComponentUtils.formatGeneratorFlags(this.generatorFlags));
+        guiGraphics.drawString(this.font, seedComponent, HORIZONTAL_PADDING, VERTICAL_PADDING - this.font.lineHeight - 1, -1);
 
         int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
         int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;

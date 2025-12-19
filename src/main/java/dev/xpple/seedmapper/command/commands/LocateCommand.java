@@ -24,6 +24,7 @@ import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
 import dev.xpple.seedmapper.seedmap.SeedMapScreen;
 import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.SpiralSpliterator;
 import dev.xpple.seedmapper.util.TwoDTree;
@@ -98,14 +99,15 @@ public class LocateCommand {
     }
 
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         if (Cubiomes.getDimension(biome) != dimension) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, source.getVersion(), 0);
-            Cubiomes.applySeed(generator, dimension, source.getSeed().getSecond());
+            Cubiomes.setupGenerator(generator, source.getVersion(), source.getGeneratorFlags());
+            Cubiomes.applySeed(generator, dimension, seed.seed());
 
             BlockPos center = BlockPos.containing(source.getPosition());
 
@@ -126,9 +128,10 @@ public class LocateCommand {
     }
 
     private static int locateStructure(CustomClientCommandSource source, StructureAndPredicate structureAndPredicate, boolean variantData) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
+        int version = source.getVersion();
+        int dimension = source.getDimension();
         try (Arena arena = Arena.ofConfined()) {
-            int version = source.getVersion();
-            int dimension = source.getDimension();
             int structure = structureAndPredicate.structure();
             MemorySegment structureConfig = StructureConfig.allocate(arena);
             int config = Cubiomes.getStructureConfig(structure, version, structureConfig);
@@ -138,15 +141,14 @@ public class LocateCommand {
             if (StructureConfig.dim(structureConfig) != dimension) {
                 throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
             }
-            long seed = source.getSeed().getSecond();
 
             MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, version, 0);
-            Cubiomes.applySeed(generator, dimension, seed);
+            Cubiomes.setupGenerator(generator, version, source.getGeneratorFlags());
+            Cubiomes.applySeed(generator, dimension, seed.seed());
 
             // currently only used for end cities
             MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
-            Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed);
+            Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed.seed());
 
             // check if the structure will generate at a position
             StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
@@ -182,7 +184,7 @@ public class LocateCommand {
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.feature.structure.foundAt", ComponentUtils.formatXZ(structureXPos, structureZPos))));
 
             if (structure == Cubiomes.End_City()) {
-                int numPieces = Cubiomes.getEndCityPieces(pieces, seed, structureXPos >> 4, structureZPos >> 4);
+                int numPieces = Cubiomes.getEndCityPieces(pieces, seed.seed(), structureXPos >> 4, structureZPos >> 4);
                 IntStream.range(0, numPieces)
                     .mapToObj(i -> Piece.asSlice(pieces, i))
                     .filter(piece -> Piece.type(piece) == Cubiomes.END_SHIP())
@@ -192,7 +194,7 @@ public class LocateCommand {
                     .ifPresent(city -> source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ")
                         .append(Component.translatable("command.locate.feature.structure.endCity.hasShip", ComponentUtils.formatXYZ(city.getX(), city.getY(), city.getZ()))))));
             } else if (structure == Cubiomes.Fortress()) {
-                int numPieces = Cubiomes.getFortressPieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, version, seed, structureXPos >> 4, structureZPos >> 4);
+                int numPieces = Cubiomes.getFortressPieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, version, seed.seed(), structureXPos >> 4, structureZPos >> 4);
                 IntStream.range(0, numPieces)
                     .mapToObj(i -> Piece.asSlice(pieces, i))
                     .filter(piece -> Piece.type(piece) == Cubiomes.BRIDGE_SPAWNER())
@@ -206,7 +208,7 @@ public class LocateCommand {
                 return Command.SINGLE_SUCCESS;
             }
             int biome = Cubiomes.getBiomeAt(generator, 4, structureXPos >> 2, 320 >> 2, structureZPos >> 2);
-            Cubiomes.getVariant(structureVariant, structure, version, seed, structureXPos, structureZPos, biome);
+            Cubiomes.getVariant(structureVariant, structure, version, seed.seed(), structureXPos, structureZPos, biome);
 
             List<Component> components = StructureVariantFeedbackHelper.get(structure, structureVariant);
             if (components.isEmpty()) {
@@ -219,17 +221,17 @@ public class LocateCommand {
     }
 
     private static int locateStronghold(CustomClientCommandSource source) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         if (dimension != Cubiomes.DIM_OVERWORLD()) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         int version = source.getVersion();
-
-        long seed = source.getSeed().getSecond();
+        int generatorFlags = source.getGeneratorFlags();
 
         BlockPos position = BlockPos.containing(source.getPosition());
 
-        TwoDTree tree = SeedMapScreen.strongholdDataCache.computeIfAbsent(new WorldIdentifier(seed, dimension, version), _ -> calculateStrongholds(seed, dimension, version));
+        TwoDTree tree = SeedMapScreen.strongholdDataCache.computeIfAbsent(new WorldIdentifier(seed.seed(), dimension, version, generatorFlags), _ -> calculateStrongholds(seed.seed(), dimension, version, generatorFlags));
 
         BlockPos pos = tree.nearestTo(position.atY(0));
 
@@ -237,13 +239,13 @@ public class LocateCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    public static TwoDTree calculateStrongholds(long seed, int dimension, int version) {
+    public static TwoDTree calculateStrongholds(long seed, int dimension, int version, int generatorFlags) {
         TwoDTree tree = new TwoDTree();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment strongholdIter = StrongholdIter.allocate(arena);
             Cubiomes.initFirstStronghold(arena, strongholdIter, version, seed);
             MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, version, 0);
+            Cubiomes.setupGenerator(generator, version, generatorFlags);
             Cubiomes.applySeed(generator, dimension, seed);
 
             final int count = version <= Cubiomes.MC_1_8() ? 3 : 128;
@@ -259,13 +261,13 @@ public class LocateCommand {
     }
 
     private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         if (source.getDimension() != Cubiomes.DIM_OVERWORLD()) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
-        long seed = source.getSeed().getSecond();
         ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
         SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.x, center.z, 6400, (x, z) -> {
-            RandomSource random = WorldgenRandom.seedSlimeChunk(x, z, seed, 987234911L);
+            RandomSource random = WorldgenRandom.seedSlimeChunk(x, z, seed.seed(), 987234911L);
             return random.nextInt(10) == 0;
         });
         assert pos != null;
@@ -280,21 +282,21 @@ public class LocateCommand {
     }
 
     private static int locateLoot(CustomClientCommandSource source, int amount, EnchantedItem itemPredicate) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         int version = source.getVersion();
         if (version <= Cubiomes.MC_1_12()) {
             throw CommandExceptions.LOOT_NOT_SUPPORTED_EXCEPTION.create();
         }
         int dimension = source.getDimension();
-        long seed = source.getSeed().getSecond();
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, version, 0);
-            Cubiomes.applySeed(generator, dimension, seed);
+            Cubiomes.setupGenerator(generator, version, source.getGeneratorFlags());
+            Cubiomes.applySeed(generator, dimension, seed.seed());
 
             // currently only used for end cities
             MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
-            Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed);
+            Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed.seed());
 
             BlockPos center = BlockPos.containing(source.getPosition());
 
@@ -368,12 +370,12 @@ public class LocateCommand {
                         int posX = Pos.x(structurePos);
                         int posZ = Pos.z(structurePos);
                         int biome = Cubiomes.getBiomeAt(generator, 4, posX >> 2, 320 >> 2, posZ >> 2);
-                        Cubiomes.getVariant(structureVariant, structure, version, seed, posX, posZ, biome);
+                        Cubiomes.getVariant(structureVariant, structure, version, seed.seed(), posX, posZ, biome);
                         biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
                         if (Cubiomes.getStructureSaltConfig(structure, version, biome, structureSaltConfig) == 0) {
                             return;
                         }
-                        int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, version, seed, posX, posZ);
+                        int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, version, seed.seed(), posX, posZ);
                         if (numPieces <= 0) {
                             return;
                         }
@@ -447,10 +449,11 @@ public class LocateCommand {
     }
 
     private static int locateSpawn(CustomClientCommandSource source) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, source.getVersion(), 0);
-            Cubiomes.applySeed(generator, source.getDimension(), source.getSeed().getSecond());
+            Cubiomes.setupGenerator(generator, source.getVersion(), source.getGeneratorFlags());
+            Cubiomes.applySeed(generator, source.getDimension(), seed.seed());
             MemorySegment pos = Cubiomes.getSpawn(arena, generator);
 
             source.sendFeedback(Component.translatable("command.locate.spawn.success", ComponentUtils.formatXZ(Pos.x(pos), Pos.z(pos))));
@@ -459,11 +462,11 @@ public class LocateCommand {
     }
 
     private static int locateOreVein(CustomClientCommandSource source, boolean wantCopperVein) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         int version = source.getVersion();
-        long seed = source.getSeed().getSecond();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment parameters = OreVeinParameters.allocate(arena);
-            if (Cubiomes.initOreVeinNoise(parameters, seed, version) == 0) {
+            if (Cubiomes.initOreVeinNoise(parameters, seed.seed(), version) == 0) {
                 throw CommandExceptions.ORE_VEIN_WRONG_VERSION_EXCEPTION.create();
             }
             ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
@@ -500,7 +503,7 @@ public class LocateCommand {
     }
 
     private static int locateCanyon(CustomClientCommandSource source) throws CommandSyntaxException {
-        long seed = source.getSeed().getSecond();
+        SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         if (dimension != Cubiomes.DIM_OVERWORLD()) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
@@ -511,7 +514,7 @@ public class LocateCommand {
         }
         ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
         try (Arena arena = Arena.ofConfined()) {
-            ToIntBiFunction<Integer, Integer> biomeFunction = getCarverBiomeFunction(arena, seed, dimension, version);
+            ToIntBiFunction<Integer, Integer> biomeFunction = getCarverBiomeFunction(arena, seed.seed(), dimension, version, source.getGeneratorFlags());
             MemorySegment ccc = CanyonCarverConfig.allocate(arena);
             MemorySegment rnd = arena.allocate(Cubiomes.C_LONG_LONG);
             SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.x, center.z, 6400, (chunkX, chunkZ) -> {
@@ -523,7 +526,7 @@ public class LocateCommand {
                     if (Cubiomes.isViableCanyonBiome(canyonCarver, biome) == 0) {
                         continue;
                     }
-                    if (Cubiomes.checkCanyonStart(seed, chunkX, chunkZ, ccc, rnd) == 0) {
+                    if (Cubiomes.checkCanyonStart(seed.seed(), chunkX, chunkZ, ccc, rnd) == 0) {
                         continue;
                     }
                     return true;
@@ -538,12 +541,12 @@ public class LocateCommand {
         }
     }
 
-    static ToIntBiFunction<Integer, Integer> getCarverBiomeFunction(Arena arena, long seed, int dimension, int version) {
+    static ToIntBiFunction<Integer, Integer> getCarverBiomeFunction(Arena arena, long seed, int dimension, int version, int generatorFlags) {
         if (version > Cubiomes.MC_1_17_1()) {
             return (_, _) -> -1;
         }
         MemorySegment generator = Generator.allocate(arena);
-        Cubiomes.setupGenerator(generator, version, 0);
+        Cubiomes.setupGenerator(generator, version, generatorFlags);
         Cubiomes.applySeed(generator, dimension, seed);
         return (chunkX, chunkZ) -> Cubiomes.getBiomeAt(generator, 4, chunkX << 2, 0, chunkZ << 2);
     }

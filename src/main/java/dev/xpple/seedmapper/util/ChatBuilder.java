@@ -112,7 +112,7 @@ public final class ChatBuilder {
     }
 
     public static MutableComponent hover(MutableComponent component, MutableComponent hover) {
-        return component.withStyle((style) -> style.withHoverEvent(new HoverEvent.ShowText(hover)));
+        return component.withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(hover)));
     }
 
     public static MutableComponent copy(MutableComponent component, String copy) {

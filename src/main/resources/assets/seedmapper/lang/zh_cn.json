@@ -94,7 +94,7 @@
 
   "key.seedMap": "种子地图",
 
-  "seedMap.seedAndVersion": "种子：%s (%s)",
+  "seedMap.seed": "种子：%s | %s %s",
   "seedMap.chestLoot.title": "%s 战利品 (%d/%d)",
   "seedMap.chestLoot.extraInfo.pieceName": "部件名称：%s",
   "seedMap.chestLoot.extraInfo.chestPos": "箱子位置：%s",

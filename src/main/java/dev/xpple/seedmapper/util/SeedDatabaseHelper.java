@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class SeedDatabaseHelper {
 
@@ -23,12 +24,12 @@ public final class SeedDatabaseHelper {
     private static final Map<String, Long> connectionToSeed = new HashMap<>();
     private static final Map<Long, Long> hashedSeedToSeed = new HashMap<>();
 
-    public static @Nullable Long getSeed(String connection, long hashedSeed) {
-        Long seed = connectionToSeed.get(connection);
-        if (seed != null) {
-            return seed;
-        }
-        return hashedSeedToSeed.get(hashedSeed);
+    public static @Nullable SeedIdentifier getSeed(String connection, long hashedSeed) {
+        return Optional
+            .ofNullable(connectionToSeed.get(connection))
+            .or(() -> Optional.ofNullable(hashedSeedToSeed.get(hashedSeed)))
+            .map(SeedIdentifier::new)
+            .orElse(null);
     }
 
     public static void fetchSeeds() {

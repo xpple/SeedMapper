@@ -12,6 +12,7 @@ public final class CommandExceptions {
 
     public static final SimpleCommandExceptionType ALREADY_BUSY_LOCATING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.alreadyBusyLocating", LocatorThreadHelper.STOP_TASK_COMPONENT));
     public static final DynamicCommandExceptionType UNKNOWN_DIMENSION_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownDimension", arg));
+    public static final DynamicCommandExceptionType UNKNOWN_GENERATOR_FLAG_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownGeneratorFlag", arg));
     public static final DynamicCommandExceptionType UNKNOWN_VERSION_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownVersion", arg));
     public static final DynamicCommandExceptionType UNKNOWN_BIOME_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownBiome", arg));
     public static final DynamicCommandExceptionType UNKNOWN_STRUCTURE_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownStructure", arg));

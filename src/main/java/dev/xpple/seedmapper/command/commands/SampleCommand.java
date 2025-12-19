@@ -8,6 +8,7 @@ import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -30,18 +31,18 @@ public class SampleCommand {
     }
 
     private static int sampleAll(CustomClientCommandSource source) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         if (dimension != Cubiomes.DIM_OVERWORLD()) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         int version = source.getVersion();
-        long seed = source.getSeed().getSecond();
 
         BlockPos pos = BlockPos.containing(source.getPosition());
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params = TerrainNoiseParameters.allocate(arena);
-            if (Cubiomes.initTerrainNoise(params, seed, version) == 0) {
+            if (Cubiomes.initTerrainNoise(params, seed.seed(), version) == 0) {
                 throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
             }
 
@@ -55,18 +56,18 @@ public class SampleCommand {
     }
 
     private static int sampleDensity(CustomClientCommandSource source, DensityFunction densityFunction) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
         if (dimension != Cubiomes.DIM_OVERWORLD()) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         int version = source.getVersion();
-        long seed = source.getSeed().getSecond();
 
         BlockPos pos = BlockPos.containing(source.getPosition());
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params = TerrainNoiseParameters.allocate(arena);
-            Cubiomes.initTerrainNoise(params, seed, version);
+            Cubiomes.initTerrainNoise(params, seed.seed(), version);
             double density = densityFunction.compute(params, pos.getX(), pos.getY(), pos.getZ());
             source.sendFeedback(Component.translatable("command.sample.sampleDensity.success", ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ()), ComponentUtils.formatNumber(density)));
 

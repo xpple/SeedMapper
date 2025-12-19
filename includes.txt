@@ -17,6 +17,8 @@
 --include-function genBiomeNoiseBetaScaled
 --include-function genBiomeNoiseChunkSection
 --include-function genBiomeNoiseScaled
+--include-function generateColumn
+--include-function generateRegion
 --include-function genEndScaled
 --include-function genNetherScaled
 --include-function getBiomeDepthAndScale
@@ -43,6 +45,7 @@
 --include-function sampleClimatePara
 --include-function sampleEntrances
 --include-function sampleFinalDensity
+--include-function sampleNoiseColumn
 --include-function sampleNoodle
 --include-function samplePillars
 --include-function samplePreliminarySurfaceLevel
