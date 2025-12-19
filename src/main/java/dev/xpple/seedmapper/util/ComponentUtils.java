@@ -33,10 +33,14 @@ public final class ComponentUtils {
         return chain(
             formatNumber(seed.seed()),
             !seed.hasVersion() ? Component.empty() : Component.literal(" " + Cubiomes.mc2str(seed.version()).getString(0)),
-            !seed.hasFlags() ? Component.empty() : Component.literal(" ").append(join(Component.literal(" "), GeneratorFlagArgument.GENERATOR_FLAGS.entrySet().stream()
-                .filter(entry -> (seed.generatorFlags() & entry.getValue()) != 0)
-                .map(entry -> Component.literal(entry.getKey()))))
+            !seed.hasFlags() ? Component.empty() : Component.literal(" ").append(formatGeneratorFlags(seed.generatorFlags()))
         );
+    }
+
+    public static MutableComponent formatGeneratorFlags(int generatorFlags) {
+        return join(Component.literal(" "), GeneratorFlagArgument.GENERATOR_FLAGS.entrySet().stream()
+            .filter(entry -> (generatorFlags & entry.getValue()) != 0)
+            .map(entry -> Component.literal(entry.getKey())));
     }
 
     public static MutableComponent formatXZ(int x, int z) {

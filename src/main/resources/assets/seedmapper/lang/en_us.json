@@ -100,7 +100,7 @@
 
   "key.seedMap": "Seed map",
 
-  "seedMap.seedAndVersion": "Seed: %s (%s)",
+  "seedMap.seed": "Seed: %s | %s %s",
   "seedMap.chestLoot.title": "%s loot (%d/%d)",
   "seedMap.chestLoot.extraInfo.pieceName": "Piece name: %s",
   "seedMap.chestLoot.extraInfo.chestPos": "Chest position: %s",

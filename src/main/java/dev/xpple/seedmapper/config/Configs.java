@@ -10,6 +10,7 @@ import dev.xpple.seedmapper.seedmap.MapFeature;
 import dev.xpple.seedmapper.seedmap.SeedMapScreen;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
@@ -43,7 +44,17 @@ public class Configs {
     }
     private static Component displaySavedSeeds() {
         return join(Component.literal(", "), SavedSeeds.entrySet().stream()
-            .map(entry -> chain(Component.literal(entry.getKey() + ": "), ComponentUtils.formatSeed(entry.getValue()))));
+            .map(entry -> chain(
+                copy(
+                    hover(
+                        Component.literal(entry.getKey()).withStyle(ChatFormatting.UNDERLINE),
+                        base(Component.translatable("chat.copy.click"))),
+                    entry.getKey()
+                ),
+                Component.literal(": "),
+                ComponentUtils.formatSeed(entry.getValue()))
+            )
+        );
     }
 
     @Config
