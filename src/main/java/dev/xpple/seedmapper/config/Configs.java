@@ -83,63 +83,35 @@ public class Configs {
     }
 
     @Config(setter = @Config.Setter("setMinimapOffsetX"))
-    public static int SeedMapMinimapOffsetX = 4;
+    public static int MinimapOffsetX = 4;
 
     private static void setMinimapOffsetX(int offsetX) {
-        SeedMapMinimapOffsetX = Math.max(0, offsetX);
+        MinimapOffsetX = Math.max(0, offsetX);
     }
 
     @Config(setter = @Config.Setter("setMinimapOffsetY"))
-    public static int SeedMapMinimapOffsetY = 4;
+    public static int MinimapOffsetY = 4;
 
     private static void setMinimapOffsetY(int offsetY) {
-        SeedMapMinimapOffsetY = Math.max(0, offsetY);
+        MinimapOffsetY = Math.max(0, offsetY);
     }
 
     @Config(setter = @Config.Setter("setMinimapWidth"))
-    public static int SeedMapMinimapWidth = 205;
+    public static int MinimapWidth = 205;
 
     private static void setMinimapWidth(int width) {
-        SeedMapMinimapWidth = Math.clamp(width, 64, 512);
+        MinimapWidth = Math.clamp(width, 64, 512);
     }
 
     @Config(setter = @Config.Setter("setMinimapHeight"))
-    public static int SeedMapMinimapHeight = 205;
+    public static int MinimapHeight = 205;
 
     private static void setMinimapHeight(int height) {
-        SeedMapMinimapHeight = Math.clamp(height, 64, 512);
+        MinimapHeight = Math.clamp(height, 64, 512);
     }
 
     @Config
-    public static boolean SeedMapMinimapRotateWithPlayer = true;
-
-    @Config(setter = @Config.Setter("setMinimapPixelsPerBiome"))
-    public static double SeedMapMinimapPixelsPerBiome = 1.5D;
-
-    private static void setMinimapPixelsPerBiome(double pixelsPerBiome) {
-        SeedMapMinimapPixelsPerBiome = Math.clamp(pixelsPerBiome, SeedMapScreen.MIN_PIXELS_PER_BIOME, SeedMapScreen.MAX_PIXELS_PER_BIOME);
-    }
-
-    @Config(setter = @Config.Setter("setMinimapIconScale"))
-    public static double SeedMapMinimapIconScale = 0.5D;
-
-    private static void setMinimapIconScale(double iconScale) {
-        SeedMapMinimapIconScale = Math.clamp(iconScale, 0.25D, 4.0D);
-    }
-
-    @Config(setter = @Config.Setter("setMinimapOpacity"))
-    public static double SeedMapMinimapOpacity = 1.0D;
-
-    private static void setMinimapOpacity(double opacity) {
-        SeedMapMinimapOpacity = Math.clamp(opacity, 0.00D, 1.0D);
-    }
-
-    @Config(comment = "getPlayerDirectionArrowComment")
-    public static boolean ShowPlayerDirectionArrow = true;
-
-    private static Component getPlayerDirectionArrowComment() {
-        return Component.translatable("config.showPlayerDirectionArrow.comment");
-    }
+    public static boolean RotateMinimap = true;
 
     @Config(chatRepresentation = "listToggledFeatures")
     public static EnumSet<MapFeature> ToggledFeatures = Util.make(() -> {
