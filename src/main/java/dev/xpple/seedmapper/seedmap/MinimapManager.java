@@ -37,6 +37,16 @@ public final class MinimapManager {
         }
     }
 
+    public static void updateDimension(int dimension) {
+        if (minimapScreen == null) {
+            return;
+        }
+        if (minimapScreen.getDimension() == dimension) {
+            return;
+        }
+        show(minimapScreen.getSeed(), dimension, minimapScreen.getVersion(), minimapScreen.getGeneratorFlags());
+    }
+
     private static void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         if (minimapScreen == null) {
             return;

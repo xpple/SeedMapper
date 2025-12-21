@@ -1253,8 +1253,19 @@ public class SeedMapScreen extends Screen {
         return VERTICAL_PADDING;
     }
 
-    // TODO detect dimension change
-    public int getDimensionId() {
+    protected long getSeed() {
+        return this.seed;
+    }
+
+    protected int getDimension() {
         return this.dimension;
+    }
+
+    protected int getVersion() {
+        return this.version;
+    }
+
+    protected int getGeneratorFlags() {
+        return this.generatorFlags;
     }
 }
