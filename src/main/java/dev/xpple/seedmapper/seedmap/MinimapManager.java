@@ -53,7 +53,7 @@ public final class MinimapManager {
         }
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
-        minimapScreen.update(player.blockPosition(), player.getRotationVector());
+        minimapScreen.update(player.position(), player.getRotationVector());
         minimapScreen.renderToHud(guiGraphics, deltaTracker.getGameTimeDeltaTicks());
     }
 }

@@ -1,14 +1,15 @@
 package dev.xpple.seedmapper.seedmap;
 
 import dev.xpple.seedmapper.config.Configs;
-import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.QuartPos2f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
+// TODO refactor so that the minimap is not a `Screen`; it has no reason to be one
 public class MinimapScreen extends SeedMapScreen {
 
     private boolean initialized = false;
@@ -76,10 +77,10 @@ public class MinimapScreen extends SeedMapScreen {
         guiGraphics.fill(centerX, centerY - crossHalf, centerX + 1, centerY + crossHalf + 1, color);
     }
 
-    public void update(BlockPos pos, Vec2 playerRotation) {
-        this.updatePlayerPosition(pos);
+    public void update(Vec3 pos, Vec2 playerRotation) {
+        this.updatePlayerPosition(BlockPos.containing(pos));
         this.updatePlayerRotation(playerRotation);
-        this.moveCenter(QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(pos)));
+        this.moveCenter(QuartPos2f.fromVec3(pos));
     }
 
     public boolean isInitialized() {
