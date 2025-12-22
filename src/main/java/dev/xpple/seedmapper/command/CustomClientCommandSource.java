@@ -21,6 +21,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -155,11 +156,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
             return DimensionArgument.dimension().parse(new StringReader(this.getWorld().dimension().identifier().getPath()));
         } catch (CommandSyntaxException _) {
         }
-        return switch (this.getWorld().dimensionType().skybox()) {
-            case NONE -> Cubiomes.DIM_NETHER();
-            case OVERWORLD -> Cubiomes.DIM_OVERWORLD();
-            case END -> Cubiomes.DIM_END();
-        };
+        return inferDimension(this.getWorld().dimensionType());
     }
 
     public int getVersion() throws CommandSyntaxException {
@@ -179,5 +176,13 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
             return (int) generatorFlagsMeta;
         }
         return this.getSeed().getSecond().generatorFlags();
+    }
+
+    public static int inferDimension(DimensionType dimensionType) {
+        return switch (dimensionType.skybox()) {
+            case NONE -> Cubiomes.DIM_NETHER();
+            case OVERWORLD -> Cubiomes.DIM_OVERWORLD();
+            case END -> Cubiomes.DIM_END();
+        };
     }
 }

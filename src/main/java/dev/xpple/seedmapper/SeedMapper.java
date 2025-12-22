@@ -12,6 +12,7 @@ import dev.xpple.seedmapper.command.commands.ClearCommand;
 import dev.xpple.seedmapper.command.commands.DiscordCommand;
 import dev.xpple.seedmapper.command.commands.HighlightCommand;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
+import dev.xpple.seedmapper.command.commands.MinimapCommand;
 import dev.xpple.seedmapper.command.commands.SampleCommand;
 import dev.xpple.seedmapper.command.commands.SeedMapCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
@@ -22,6 +23,7 @@ import dev.xpple.seedmapper.config.SeedIdentifierAdapter;
 import dev.xpple.seedmapper.config.SeedResolutionAdapter;
 import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.seedmap.MapFeature;
+import dev.xpple.seedmapper.seedmap.MinimapManager;
 import dev.xpple.seedmapper.util.SeedDatabaseHelper;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
@@ -80,15 +82,20 @@ public class SeedMapper implements ClientModInitializer {
 
         SeedDatabaseHelper.fetchSeeds();
 
-        KeyMapping keyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.seedMap", InputConstants.KEY_M, KeyMapping.Category.GAMEPLAY));
+        KeyMapping seedMapKeyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.seedMap", InputConstants.KEY_M, KeyMapping.Category.GAMEPLAY));
+        KeyMapping minimapKeyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.minimap", InputConstants.KEY_COMMA, KeyMapping.Category.GAMEPLAY));
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
-            while (keyMapping.consumeClick()) {
+            while (seedMapKeyMapping.consumeClick()) {
                 minecraft.player.connection.sendCommand("sm:seedmap");
+            }
+            while (minimapKeyMapping.consumeClick()) {
+                minecraft.player.connection.sendCommand("sm:minimap");
             }
         });
 
         ClientCommandRegistrationCallback.EVENT.register(SeedMapper::registerCommands);
         RenderManager.registerEvents();
+        MinimapManager.registerHudElement();
     }
 
     private static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
@@ -102,5 +109,6 @@ public class SeedMapper implements ClientModInitializer {
         SeedMapCommand.register(dispatcher);
         DiscordCommand.register(dispatcher);
         SampleCommand.register(dispatcher);
+        MinimapCommand.register(dispatcher);
     }
 }

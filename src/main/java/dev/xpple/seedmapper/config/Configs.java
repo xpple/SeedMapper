@@ -82,6 +82,37 @@ public class Configs {
         PixelsPerBiome = Math.clamp(pixelsPerBiome, SeedMapScreen.MIN_PIXELS_PER_BIOME, SeedMapScreen.MAX_PIXELS_PER_BIOME);
     }
 
+    @Config(setter = @Config.Setter("setMinimapOffsetX"))
+    public static int MinimapOffsetX = 4;
+
+    private static void setMinimapOffsetX(int offsetX) {
+        MinimapOffsetX = Math.max(0, offsetX);
+    }
+
+    @Config(setter = @Config.Setter("setMinimapOffsetY"))
+    public static int MinimapOffsetY = 4;
+
+    private static void setMinimapOffsetY(int offsetY) {
+        MinimapOffsetY = Math.max(0, offsetY);
+    }
+
+    @Config(setter = @Config.Setter("setMinimapWidth"))
+    public static int MinimapWidth = 205;
+
+    private static void setMinimapWidth(int width) {
+        MinimapWidth = Math.clamp(width, 64, 512);
+    }
+
+    @Config(setter = @Config.Setter("setMinimapHeight"))
+    public static int MinimapHeight = 205;
+
+    private static void setMinimapHeight(int height) {
+        MinimapHeight = Math.clamp(height, 64, 512);
+    }
+
+    @Config
+    public static boolean RotateMinimap = true;
+
     @Config(chatRepresentation = "listToggledFeatures")
     public static EnumSet<MapFeature> ToggledFeatures = Util.make(() -> {
         EnumSet<MapFeature> toggledFeatures = EnumSet.allOf(MapFeature.class);
