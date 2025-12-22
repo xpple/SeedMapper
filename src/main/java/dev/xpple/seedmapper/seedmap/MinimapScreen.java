@@ -52,7 +52,7 @@ public class MinimapScreen extends SeedMapScreen {
         var pose = guiGraphics.pose();
         pose.pushMatrix();
         if (rotateMinimap) {
-            pose.translate(-this.centerX + contentWidth / 2, -this.centerY + contentHeight / 2);
+            pose.translate(-this.centerX + (float) (this.horizontalPadding() + contentWidth / 2), -this.centerY + (float) (this.verticalPadding() + contentHeight / 2));
             pose.translate(this.centerX, this.centerY);
             pose.rotate((float) (-Math.toRadians(this.getPlayerRotation().y) + Math.PI));
             pose.translate(-this.centerX, -this.centerY);
@@ -62,16 +62,18 @@ public class MinimapScreen extends SeedMapScreen {
         this.renderFeatures(guiGraphics, Integer.MIN_VALUE, Integer.MIN_VALUE, partialTick);
         pose.popMatrix();
 
+        if (Configs.RotateMinimap) {
+            this.drawCenterCross(guiGraphics, this.horizontalPadding() + contentWidth / 2, this.verticalPadding() + contentHeight / 2);
+        }
+
         guiGraphics.disableScissor();
     }
 
-    private void drawCenterCross(GuiGraphics guiGraphics, double centerX, double centerY) {
-        int cx = (int) Math.round(centerX);
-        int cy = (int) Math.round(centerY);
+    private void drawCenterCross(GuiGraphics guiGraphics, int centerX, int centerY) {
         int crossHalf = 3;
         int color = 0xFF_FFFFFF;
-        guiGraphics.fill(cx - crossHalf, cy, cx + crossHalf + 1, cy + 1, color);
-        guiGraphics.fill(cx, cy - crossHalf, cx + 1, cy + crossHalf + 1, color);
+        guiGraphics.fill(centerX - crossHalf, centerY, centerX + crossHalf + 1, centerY + 1, color);
+        guiGraphics.fill(centerX, centerY - crossHalf, centerX + 1, centerY + crossHalf + 1, color);
     }
 
     public void update(BlockPos pos, Vec2 playerRotation) {
@@ -86,9 +88,7 @@ public class MinimapScreen extends SeedMapScreen {
 
     @Override
     protected void drawPlayerIndicator(GuiGraphics guiGraphics) {
-        if (Configs.RotateMinimap) {
-            this.drawCenterCross(guiGraphics, this.centerX, this.centerY);
-        } else {
+        if (!Configs.RotateMinimap) {
             this.drawDirectionArrow(guiGraphics, this.centerX - 10, this.centerY - 10);
         }
     }
