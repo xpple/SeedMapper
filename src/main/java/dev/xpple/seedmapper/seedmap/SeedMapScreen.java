@@ -482,7 +482,17 @@ public class SeedMapScreen extends Screen {
                if (widget == null) {
                    return;
                }
-               guiGraphics.drawCenteredString(this.font, name, widget.x + widget.width() / 2, widget.y + widget.height(), ARGB.color(255, waypoint.color()));
+               int waypointCenterX = widget.x + widget.width() / 2;
+               int waypointCenterY = widget.y + widget.width() / 2;
+               var pose = guiGraphics.pose();
+               pose.pushMatrix();
+               if (this.isMinimap() && Configs.RotateMinimap) {
+                   pose.translate(waypointCenterX, waypointCenterY);
+                   pose.rotate((float) (Math.toRadians(this.playerRotation.y) - Math.PI));
+                   pose.translate(-waypointCenterX, -waypointCenterY);
+               }
+               guiGraphics.drawCenteredString(this.font, name, waypointCenterX, waypointCenterY + widget.height() / 2, ARGB.color(255, waypoint.color()));
+               pose.popMatrix();
            });
        }
 
@@ -1206,10 +1216,10 @@ public class SeedMapScreen extends Screen {
     private void drawIcon(GuiGraphics guiGraphics, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int colour) {
         var pose = guiGraphics.pose();
         pose.pushMatrix();
-        if (Configs.RotateMinimap) {
-            pose.translate(minX + iconWidth / 2, minY + iconWidth / 2);
-            pose.rotate((float) (Math.toRadians(this.getPlayerRotation().y) - Math.PI));
-            pose.translate(-minX - iconWidth / 2, -minY - iconWidth / 2);
+        if (this.isMinimap() && Configs.RotateMinimap) {
+            pose.translate(minX + (float) iconWidth / 2, minY + (float) iconWidth / 2);
+            pose.rotate((float) (Math.toRadians(this.playerRotation.y) - Math.PI));
+            pose.translate(-minX - (float) iconWidth / 2, -minY - (float) iconWidth / 2);
         }
         drawIconStatic(guiGraphics, identifier, minX, minY, iconWidth, iconHeight, colour);
         pose.popMatrix();
