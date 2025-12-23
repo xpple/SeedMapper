@@ -253,6 +253,7 @@ public class HighlightCommand {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         int version = source.getVersion();
+        int generatorFlags = source.getGeneratorFlags();
 
         ChunkPos center = new ChunkPos(BlockPos.containing(source.getPosition()));
         int minChunkX = center.x - chunkRange;
@@ -266,7 +267,7 @@ public class HighlightCommand {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params = TerrainNoiseParameters.allocate(arena);
-            if (Cubiomes.initTerrainNoise(params, seed.seed(), version) == 0) {
+            if (Cubiomes.initTerrainNoise(params, seed.seed(), version, generatorFlags & Cubiomes.LARGE_BIOMES()) == 0) {
                 throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
             }
 
