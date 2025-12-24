@@ -25,6 +25,7 @@
 --include-function getEndSurfaceHeight
 --include-function getNetherBiome
 --include-function getOldBetaBiome
+--include-function getSpline
 --include-function getVoronoiSrcRange
 --include-function initBiomeNoise
 --include-function initBlendedNoise
@@ -46,6 +47,7 @@
 --include-function sampleEntrances
 --include-function sampleFinalDensity
 --include-function sampleNoiseColumn
+--include-function sampleNoiseParameters
 --include-function sampleNoodle
 --include-function samplePillars
 --include-function samplePreliminarySurfaceLevel

@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.command.arguments;
 
+import com.github.cubiomes.BiomeNoise;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.TerrainNoiseParameters;
 import com.google.common.collect.ImmutableMap;
@@ -13,6 +14,7 @@ import dev.xpple.seedmapper.command.CommandExceptions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,17 +34,17 @@ public class DensityFunctionArgument implements ArgumentType<DensityFunctionArgu
         .put("cave_entrance", Cubiomes::sampleCaveEntrance)
         .put("overworld.caves.entrances", (params, x, y, z) -> Cubiomes.sampleEntrances(params, x, y, z, Cubiomes.sampleSpaghettiRoughness(params, x, y, z)))
         .put("cave_layer", Cubiomes::sampleCaveLayer)
-        .put("overworld.sloped_cheese", Cubiomes::sampleSlopedCheese)
-        .put("cave_cheese", (params, x, y, z) -> Cubiomes.sampleCaveCheese(params, x, y, z, Cubiomes.sampleSlopedCheese(params, x, y, z)))
+        .put("overworld.sloped_cheese", DensityFunctionArgument::computeSlopedCheese)
+        .put("cave_cheese", (params, x, y, z) -> Cubiomes.sampleCaveCheese(params, x, y, z, computeSlopedCheese(params, x, y, z)))
         .put("overworld.caves.pillars", Cubiomes::samplePillars)
         .put("overworld.caves.noodle", Cubiomes::sampleNoodle)
         .put("underground", (params, x, y, z) -> {
             double spaghettiRoughness = Cubiomes.sampleSpaghettiRoughness(params, x, y, z);
-            return Cubiomes.sampleUnderground(params, x, y, z, spaghettiRoughness, Cubiomes.sampleEntrances(params, x, y, z, spaghettiRoughness), Cubiomes.sampleSlopedCheese(params, x, y, z));
+            return Cubiomes.sampleUnderground(params, x, y, z, spaghettiRoughness, Cubiomes.sampleEntrances(params, x, y, z, spaghettiRoughness), computeSlopedCheese(params, x, y, z));
         })
         .put("final_density", (params, x, y, z) -> {
             double spaghettiRoughness = Cubiomes.sampleSpaghettiRoughness(params, x, y, z);
-            return Cubiomes.sampleFinalDensity(params, x, y, z, spaghettiRoughness, Cubiomes.sampleEntrances(params, x, y, z, spaghettiRoughness), Cubiomes.sampleSlopedCheese(params, x, y, z));
+            return Cubiomes.sampleFinalDensity(params, x, y, z, spaghettiRoughness, Cubiomes.sampleEntrances(params, x, y, z, spaghettiRoughness), computeSlopedCheese(params, x, y, z));
         })
         .put("preliminary_surface_level", (params, x, _, z) -> Cubiomes.samplePreliminarySurfaceLevel(params, x, z))
         .build();
@@ -80,5 +82,18 @@ public class DensityFunctionArgument implements ArgumentType<DensityFunctionArgu
     @FunctionalInterface
     public interface DensityFunction {
         double compute(MemorySegment terrainNoiseParameters, int x, int y, int z);
+    }
+
+    private static double computeSlopedCheese(MemorySegment params, int x, int y, int z) {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment np_param = arena.allocate(Cubiomes.C_FLOAT, 4);
+            Cubiomes.sampleNoiseParameters(TerrainNoiseParameters.bn(params), x >> 2, z >> 2, np_param);
+            double depth = Cubiomes.getSpline(BiomeNoise.sp(TerrainNoiseParameters.bn(params)), np_param) - 0.50375f;
+            double factor = Cubiomes.getSpline(TerrainNoiseParameters.factorSpline(params), np_param);
+            double jagged = Cubiomes.sampleDoublePerlin(TerrainNoiseParameters.jagged(params), x * 1500.0, 0, z * 1500.0);
+            jagged = jagged >= 0.0 ? jagged : jagged / 2.0;
+            jagged *= Cubiomes.getSpline(TerrainNoiseParameters.jaggednessSpline(params), np_param);
+            return Cubiomes.sampleSlopedCheese(params, x, y, z, depth, factor, jagged);
+        }
     }
 }
