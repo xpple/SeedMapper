@@ -1,7 +1,7 @@
 package dev.xpple.seedmapper.command.commands;
 
 import com.github.cubiomes.Cubiomes;
-import com.github.cubiomes.TerrainNoiseParameters;
+import com.github.cubiomes.TerrainNoise;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.CommandExceptions;
@@ -42,8 +42,11 @@ public class SampleCommand {
         BlockPos pos = BlockPos.containing(source.getPosition());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment params = TerrainNoiseParameters.allocate(arena);
-            if (Cubiomes.initTerrainNoise(params, seed.seed(), version, generatorFlags & Cubiomes.LARGE_BIOMES()) == 0) {
+            MemorySegment params = TerrainNoise.allocate(arena);
+            if (Cubiomes.setupTerrainNoise(params, version, generatorFlags) == 0) {
+                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
+            }
+            if (Cubiomes.initTerrainNoise(params, seed.seed(), dimension) == 0) {
                 throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
             }
 
@@ -68,8 +71,13 @@ public class SampleCommand {
         BlockPos pos = BlockPos.containing(source.getPosition());
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment params = TerrainNoiseParameters.allocate(arena);
-            Cubiomes.initTerrainNoise(params, seed.seed(), version, generatorFlags & Cubiomes.LARGE_BIOMES());
+            MemorySegment params = TerrainNoise.allocate(arena);
+            if (Cubiomes.setupTerrainNoise(params, version, generatorFlags) == 0) {
+                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
+            }
+            if (Cubiomes.initTerrainNoise(params, seed.seed(), dimension) == 0) {
+                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
+            }
             double density = densityFunction.compute(params, pos.getX(), pos.getY(), pos.getZ());
             source.sendFeedback(Component.translatable("command.sample.sampleDensity.success", ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ()), ComponentUtils.formatNumber(density)));
 

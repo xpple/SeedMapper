@@ -50,20 +50,28 @@ dependencies {
 	include modImplementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
 	include modImplementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
 
-//	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
-//		exclude group: 'net.fabricmc', module: 'fabric-loader'
-//	}
-//	productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
-//		exclude group: 'net.fabricmc', module: 'fabric-loader'
-//	}
+	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+		exclude group: 'net.fabricmc', module: 'fabric-loader'
+	}
+	productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+		exclude group: 'net.fabricmc', module: 'fabric-loader'
+	}
 
 	testImplementation platform("org.junit:junit-bom:${project.junit_version}")
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+clean {
+    delete fileTree("${projectDir}/src/main/java/com/github/cubiomes") {
+        exclude '.gitkeep'
+    }
+}
+
 tasks.register('createJavaBindings', CreateJavaBindingsTask) {}
 compileJava.dependsOn('createJavaBindings')
+
+createJavaBindings.dependsOn(clean)
 
 tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
 	outputFile = new File(temporaryDir, "build_info.json")
