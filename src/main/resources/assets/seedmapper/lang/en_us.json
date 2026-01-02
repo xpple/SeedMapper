@@ -99,6 +99,7 @@
   "config.devMode.comment": "Enables certain debug commands.",
 
   "key.seedMap": "Seed map",
+  "key.minimap": "Seed minimap",
 
   "seedMap.seed": "Seed: %s | %s %s",
   "seedMap.chestLoot.title": "%s loot (%d/%d)",
