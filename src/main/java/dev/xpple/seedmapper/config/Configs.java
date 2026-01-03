@@ -120,7 +120,7 @@ public class Configs {
         return toggledFeatures;
     });
 
-    public static Component listToggledFeatures() {
+    private static Component listToggledFeatures() {
         return join(Component.literal(", "), ToggledFeatures.stream()
             .map(MapFeature::getName)
             .map(Component::literal));
@@ -129,7 +129,7 @@ public class Configs {
     @Config(comment = "getDevModeComment")
     public static boolean DevMode = false;
 
-    public static Component getDevModeComment() {
+    private static Component getDevModeComment() {
         return Component.translatable("config.devMode.comment");
     }
 }

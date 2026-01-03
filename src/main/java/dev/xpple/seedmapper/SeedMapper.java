@@ -37,6 +37,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -82,8 +83,9 @@ public class SeedMapper implements ClientModInitializer {
 
         SeedDatabaseHelper.fetchSeeds();
 
-        KeyMapping seedMapKeyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.seedMap", InputConstants.KEY_M, KeyMapping.Category.GAMEPLAY));
-        KeyMapping minimapKeyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.minimap", InputConstants.KEY_COMMA, KeyMapping.Category.GAMEPLAY));
+        KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, MOD_ID));
+        KeyMapping seedMapKeyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.seedMap", InputConstants.KEY_M, category));
+        KeyMapping minimapKeyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.minimap", InputConstants.KEY_COMMA, category));
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
             while (seedMapKeyMapping.consumeClick()) {
                 minecraft.player.connection.sendCommand("sm:seedmap");
