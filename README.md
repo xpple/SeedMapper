@@ -28,9 +28,14 @@ If you run into issues, contact your launcher's support.
 Before using any of these commands, make sure the seed has been configured using `/sm:config Seed set <seed>`.
 
 ### Seed map
-Usage: `/sm:seedmap`
+Usage: `/sm:seedmap`.
 
 Opens an explorable seed map based on the configured seed. You can move the map by dragging the mouse, and zoom in or out by using the scroll wheel. You can toggle what features are visible by clicking the feature toggles at the top of the screen. This command is especially useful in combination with the `/sm:source` command!
+
+### Seed minimap
+Usage: `/sm:minimap [show|hide]`.
+
+Displays a minimap based on configured seed in the heads-up display (HUD). Depending on whether the `RotateMinimap` config is enabled, the minimap will rotate with the player. The minimap displays the same features as the seed map (see above). Changing dimension will automatically update the minimap. The configs `MinimapOffsetX`, `MinimapOffsetY`, `MinimapWidth` and `MinimapHeight` can be used to further customise the minimap.
 
 ### Biome locating
 Usage: `/sm:locate biome <biome>`.
@@ -45,7 +50,7 @@ Locates a given structure closest to the player. All structures in all dimension
 ### Ore vein locating
 Usage: `/sm:locate orevein (copper|iron)`.
 
-Locates an [ore vein](https://minecraft.wiki/w/Ore_vein) closest to the player. The coordinates of the first ore vein block found will be returned. After this, you can use [`/sm:highlight orevein [chunks]`](#ore-vein-highlighting) to highlight the other ores.
+Locates an [ore vein](https://minecraft.wiki/w/Ore_vein) closest to the player. The coordinates of the first ore vein block found will be returned. After this, you can use [`/sm:highlight orevein [<chunks>]`](#ore-vein-highlighting) to highlight the other ores.
 
 ### Loot locating
 Usage: `/sm:locate loot <amount> <item> [<enchantment conditions>]`.
@@ -53,12 +58,12 @@ Usage: `/sm:locate loot <amount> <item> [<enchantment conditions>]`.
 Locates chest loot closest to the player. All versions from 1.13 onwards are supported. SeedMapper will search through the chest loot of structures to find loot that matches the item and enchantment conditions. Note that queries for unobtainable loot and illegal enchantment combinations are not prevented by the command. If a search is taking too long, you should probably cancel it using `/sm:stoptask`.
 
 ### Ore highlighting
-Usage: `/sm:highlight block <block> [chunks]`.
+Usage: `/sm:highlight block <block> [<chunks>]`.
 
 Highlights the specified block in the world. All versions from 1.13 onwards are supported. Due to high dependence on the [`OCEAN_FLOOR_WG`](https://minecraft.wiki/w/Heightmap#OCEAN_FLOOR_WG) heightmap, coal, copper and emerald ore locations may be off.
 
 ### Ore vein highlighting
-Usage: `/sm:highlight orevein [chunks]`.
+Usage: `/sm:highlight orevein [<chunks>]`.
 
 Highlights ore veins in the world. Raw ore blocks that generate as part of the ore vein are highlighted distinctly. Filler blocks are ignored.
 
