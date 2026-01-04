@@ -1,5 +1,5 @@
 {
-  "commands.exceptions.noSeedAvailable": "无可用种子，请使用 /cconfig 命令设置。",
+  "commands.exceptions.noSeedAvailable": "无可用种子，请使用 /sm:config 命令设置。",
   "commands.exceptions.alreadyBusyLocating": "已在定位其他目标 [%s]。",
   "commands.exceptions.alreadyBusyLocating.stopTask": "停止任务",
   "commands.exceptions.alreadyBusyLocating.clickToStop": "点击停止任务",

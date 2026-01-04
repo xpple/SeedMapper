@@ -1,5 +1,5 @@
 {
-  "commands.exceptions.noSeedAvailable": "No seed available, set it using the /cconfig command.",
+  "commands.exceptions.noSeedAvailable": "No seed available, set it using the /sm:config command.",
   "commands.exceptions.alreadyBusyLocating": "Already busy locating something [%s].",
   "commands.exceptions.alreadyBusyLocating.stopTask": "stop task",
   "commands.exceptions.alreadyBusyLocating.clickToStop": "Click to stop the task",
