@@ -3,6 +3,7 @@ package dev.xpple.seedmapper.render;
 import com.google.common.cache.CacheBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.xpple.seedmapper.config.Configs;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldExtractionContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
@@ -15,7 +16,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,7 +28,17 @@ public final class RenderManager {
 
     private static final RenderStateDataKey<Set<Line>> LINES_SET_KEY = RenderStateDataKey.create(() -> "SeedMapper lines set");
 
-    private static final Set<Line> lines = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<Line, Boolean>build().asMap());
+    private static Set<Line> lines = Collections.emptySet();
+    static {
+        rebuildLineSet();
+    }
+
+    public static void rebuildLineSet() {
+        Set<Line> temp = lines;
+        lines = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Configs.HighlightDuration).<Line, Boolean>build().asMap());
+        lines.addAll(temp);
+        temp.clear();
+    }
 
     public static void drawBoxes(Collection<BlockPos> posBatch, int colour) {
         Set<Line> lines = new HashSet<>();

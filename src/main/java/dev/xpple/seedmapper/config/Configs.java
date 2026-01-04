@@ -6,6 +6,7 @@ import dev.xpple.betterconfig.api.Config;
 import dev.xpple.betterconfig.api.ModConfig;
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
+import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.seedmap.MapFeature;
 import dev.xpple.seedmapper.seedmap.SeedMapScreen;
 import dev.xpple.seedmapper.util.ComponentUtils;
@@ -15,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 
+import java.time.Duration;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,5 +133,11 @@ public class Configs {
 
     private static Component getDevModeComment() {
         return Component.translatable("config.devMode.comment");
+    }
+
+    @Config(onChange = "updateHighlightDuration")
+    public static Duration HighlightDuration = Duration.ofMinutes(5);
+    private static void updateHighlightDuration(Duration oldValue, Duration newValue) {
+        RenderManager.rebuildLineSet();
     }
 }
