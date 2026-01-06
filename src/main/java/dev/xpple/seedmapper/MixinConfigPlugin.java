@@ -8,6 +8,12 @@ import java.util.List;
 import java.util.Set;
 
 public class MixinConfigPlugin implements IMixinConfigPlugin {
+
+    private static final Set<String> BARITONE_MIXINS = Set.of(
+        "dev.xpple.seedmapper.mixin.baritone.CustomGoalProcessMixin",
+        "dev.xpple.seedmapper.mixin.baritone.PathingBehaviorMixin"
+    );
+
     @Override
     public void onLoad(String mixinPackage) {
     }
@@ -19,7 +25,7 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.equals("dev.xpple.seedmapper.mixin.baritone.CustomGoalProcessMixin")) {
+        if (BARITONE_MIXINS.contains(mixinClassName)) {
             return SeedMapper.BARITONE_AVAILABLE;
         }
         return true;
