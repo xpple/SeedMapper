@@ -13,11 +13,13 @@ import com.github.cubiomes.TerrainNoise;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
+import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.OreTypes;
 import dev.xpple.seedmapper.render.RenderManager;
+import dev.xpple.seedmapper.util.BaritoneIntegration;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
@@ -172,6 +174,9 @@ public class HighlightCommand {
                 count[0] += blockOres.size();
                 source.getClient().schedule(() -> {
                     RenderManager.drawBoxes(blockOres, colour);
+                    if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
+                        BaritoneIntegration.addGoals(blockOres);
+                    }
                     source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ComponentUtils.formatXZ(chunkX, chunkZ)));
                 });
 

@@ -2,6 +2,7 @@ package dev.xpple.seedmapper;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
 import dev.xpple.seedmapper.command.arguments.DurationArgument;
 import dev.xpple.seedmapper.command.arguments.MapFeatureArgument;
@@ -40,6 +41,7 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.resources.Identifier;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,6 +54,10 @@ public class SeedMapper implements ClientModInitializer {
     public static final String MOD_ID = "seedmapper";
 
     public static final Path modConfigPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final boolean BARITONE_AVAILABLE = FabricLoader.getInstance().getModContainer("baritone-meteor").isPresent();
 
     static {
         String libraryName = System.mapLibraryName("cubiomes");
@@ -102,6 +108,10 @@ public class SeedMapper implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(SeedMapper::registerCommands);
         RenderManager.registerEvents();
         MinimapManager.registerHudElement();
+
+        if (BARITONE_AVAILABLE) {
+            LOGGER.info("Baritone detected, Baritone integration will be available!");
+        }
     }
 
     private static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {

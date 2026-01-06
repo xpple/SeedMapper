@@ -5,6 +5,7 @@
   "client": [
     "ChatScreenMixin",
     "ClientPacketListenerMixin",
+    "baritone.CustomGoalProcessMixin",
     "betterconfig.ConfigCommandClientMixin"
   ],
   "injectors": {
