@@ -2,6 +2,7 @@
   "required": true,
   "package": "dev.xpple.seedmapper.mixin",
   "compatibilityLevel": "JAVA_21",
+  "plugin": "dev.xpple.seedmapper.MixinConfigPlugin",
   "client": [
     "ChatScreenMixin",
     "ClientPacketListenerMixin",

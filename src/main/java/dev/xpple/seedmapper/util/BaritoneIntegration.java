@@ -24,13 +24,22 @@ public class BaritoneIntegration {
      * closest block to a given input block and remove it). Particularly the removing aspect is limiting, and for
      * instance rules out 3D-trees. I figured for a not too large number of blocks, a hash set suffices.
      */
-    private static final ConcurrentHashMap.KeySetView<BlockPos, Boolean> targetBlocks = ConcurrentHashMap.newKeySet();
-    private static volatile @Nullable GoalBlock currentGoal = null;
+    private static final ConcurrentHashMap.KeySetView<BlockPos, ?> targetBlocks = ConcurrentHashMap.newKeySet();
+    private static @Nullable GoalBlock currentGoal = null;
+    private static final Object CURRENT_GOAL_LOCK = new Object();
+
+    private static final ConcurrentHashMap.KeySetView<BlockPos, ?> minedBlocks = ConcurrentHashMap.newKeySet();
 
     public static void addGoals(Collection<? extends Vec3i> blocks) {
-        blocks.forEach(v -> targetBlocks.add(new BlockPos(v)));
-        if (currentGoal == null) {
-            setGoalForNextBlock();
+        blocks.stream()
+            .map(BlockPos::new)
+            .filter(v -> !minedBlocks.contains(v))
+            .forEach(targetBlocks::add);
+
+        synchronized (CURRENT_GOAL_LOCK) {
+            if (currentGoal == null) {
+                setGoalForNextBlock();
+            }
         }
     }
 
@@ -38,13 +47,17 @@ public class BaritoneIntegration {
         if (currentGoal == null) {
             return;
         }
+
         // check goal equality by reference, this makes sure it was the goal from SeedMapper that was completed
-        if (goal == currentGoal) {
-            setGoalForNextBlock();
+        synchronized (CURRENT_GOAL_LOCK) {
+            if (goal == currentGoal) {
+                minedBlocks.add(currentGoal.getGoalPos());
+                setGoalForNextBlock();
+            }
         }
     }
 
-    public static void setGoalForNextBlock() {
+    private static void setGoalForNextBlock() {
         if (targetBlocks.isEmpty()) {
             currentGoal = null;
             return;
@@ -63,7 +76,13 @@ public class BaritoneIntegration {
 
     public static void clearGoals() {
         targetBlocks.clear();
-        currentGoal = null;
+        synchronized (CURRENT_GOAL_LOCK) {
+            currentGoal = null;
+        }
         BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoal(null);
+    }
+
+    public static void clearMinedBlocks() {
+        minedBlocks.clear();
     }
 }
