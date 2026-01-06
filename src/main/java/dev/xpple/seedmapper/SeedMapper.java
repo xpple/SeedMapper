@@ -111,6 +111,7 @@ public class SeedMapper implements ClientModInitializer {
 
         if (BARITONE_AVAILABLE) {
             LOGGER.info("Baritone detected, Baritone integration will be available!");
+            LOGGER.info("Set AutoMine to true to automatically mine certain blocks highlighted by `/sm:highlight`");
         }
     }
 
