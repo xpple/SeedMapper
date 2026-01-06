@@ -6,12 +6,11 @@ import baritone.api.pathing.goals.GoalBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /*
@@ -30,9 +29,8 @@ public class BaritoneIntegration {
 
     private static final ConcurrentHashMap.KeySetView<BlockPos, ?> minedBlocks = ConcurrentHashMap.newKeySet();
 
-    public static void addGoals(Collection<? extends Vec3i> blocks) {
+    public static void addGoals(List<BlockPos> blocks) {
         blocks.stream()
-            .map(BlockPos::new)
             .filter(v -> !minedBlocks.contains(v))
             .forEach(targetBlocks::add);
 

@@ -237,6 +237,9 @@ public class HighlightCommand {
                     count[0] += positions.size();
                     int colour = BLOCKS.values().stream().filter(pair -> Objects.equals(block, pair.getFirst())).findAny().orElseThrow().getSecond();
                     RenderManager.drawBoxes(positions, colour);
+                    if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
+                        BaritoneIntegration.addGoals(positions);
+                    }
                     if (block == Cubiomes.RAW_COPPER_BLOCK() || block == Cubiomes.RAW_IRON_BLOCK()) {
                         source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", ComponentUtils.formatXYZCollection(positions))));
                     }
