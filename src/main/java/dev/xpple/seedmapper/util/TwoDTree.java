@@ -1,12 +1,17 @@
 package dev.xpple.seedmapper.util;
 
 import net.minecraft.core.BlockPos;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
 
 public class TwoDTree implements Iterable<BlockPos> {
-    private Node root;
+    private @Nullable Node root;
 
     public boolean isEmpty() {
         return this.root == null;
@@ -30,11 +35,28 @@ public class TwoDTree implements Iterable<BlockPos> {
         return node;
     }
 
-    public BlockPos nearestTo(BlockPos target) {
+    public @Nullable BlockPos nearestTo(BlockPos target) {
         if (this.root == null) {
             return null;
         }
         return this.nearestTo(this.root, target, true, this.root.pos, Double.POSITIVE_INFINITY).pos;
+    }
+
+    public void balance() {
+        if (this.root == null) {
+            return;
+        }
+
+        List<BlockPos> points = new ArrayList<>();
+        for (BlockPos pos : this) {
+            points.add(pos);
+        }
+
+        this.root = buildBalanced(points, true);
+    }
+
+    public void clear() {
+        this.root = null;
     }
 
     private Result nearestTo(Node node, BlockPos target, boolean x, BlockPos bestPos, double bestDistanceSqr) {
@@ -72,8 +94,26 @@ public class TwoDTree implements Iterable<BlockPos> {
         return bestResult;
     }
 
+    private Node buildBalanced(List<BlockPos> points, boolean x) {
+        if (points.isEmpty()) {
+            return null;
+        }
+
+        points.sort(x ? Comparator.comparingInt(BlockPos::getX) : Comparator.comparingInt(BlockPos::getZ));
+
+        int mid = points.size() / 2;
+        BlockPos median = points.get(mid);
+
+        Node node = new Node(median);
+
+        node.left = buildBalanced(points.subList(0, mid), !x);
+        node.right = buildBalanced(points.subList(mid + 1, points.size()), !x);
+
+        return node;
+    }
+
     @Override
-    public Iterator<BlockPos> iterator() {
+    public @NonNull Iterator<BlockPos> iterator() {
         return new Iterator<>() {
             private final Stack<Node> stack = new Stack<>();
 

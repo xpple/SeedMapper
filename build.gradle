@@ -31,6 +31,10 @@ repositories {
 		name = 'DJtheRedstoner'
 		url = 'https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1'
 	}
+	maven {
+		name = 'MeteorDevelopment'
+		url = 'https://maven.meteordev.org/snapshots'
+	}
 }
 
 dependencies {
@@ -56,6 +60,8 @@ dependencies {
 	productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
 		exclude group: 'net.fabricmc', module: 'fabric-loader'
 	}
+
+	modCompileOnly "meteordevelopment:baritone:${project.baritone_version}"
 
 	testImplementation platform("org.junit:junit-bom:${project.junit_version}")
 	testImplementation 'org.junit.jupiter:junit-jupiter'

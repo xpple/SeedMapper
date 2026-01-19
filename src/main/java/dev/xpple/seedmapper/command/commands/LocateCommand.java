@@ -257,6 +257,7 @@ public class LocateCommand {
                 tree.insert(new BlockPos(Pos.x(pos), 0, Pos.z(pos)));
             }
         }
+        tree.balance();
         return tree;
     }
 
