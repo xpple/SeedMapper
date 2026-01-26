@@ -1,8 +1,5 @@
 package dev.xpple.seedmapper.feature;
 
-import com.github.cubiomes.Cubiomes;
-import com.github.cubiomes.Generator;
-import com.github.cubiomes.Pos;
 import dev.xpple.seedmapper.command.arguments.StructurePredicateArgument;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
@@ -10,6 +7,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.lang.foreign.MemorySegment;
 import java.util.function.IntFunction;
+
+import com.github.cubiomes.Cubiomes;
+import com.github.cubiomes.Generator;
+import com.github.cubiomes.Pos;
 
 public final class StructureChecks {
 

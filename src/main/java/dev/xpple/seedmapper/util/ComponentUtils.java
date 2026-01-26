@@ -1,11 +1,12 @@
 package dev.xpple.seedmapper.util;
 
-import com.github.cubiomes.Cubiomes;
 import dev.xpple.seedmapper.command.arguments.GeneratorFlagArgument;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
+
+import com.github.cubiomes.Cubiomes;
 
 import java.util.Collection;
 

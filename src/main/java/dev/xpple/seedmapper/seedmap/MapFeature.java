@@ -1,8 +1,5 @@
 package dev.xpple.seedmapper.seedmap;
 
-import com.github.cubiomes.Cubiomes;
-import com.github.cubiomes.Piece;
-import com.github.cubiomes.StructureVariant;
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.util.WorldIdentifier;
@@ -14,6 +11,10 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.github.cubiomes.Cubiomes;
+import com.github.cubiomes.Piece;
+import com.github.cubiomes.StructureVariant;
 
 public enum MapFeature {
     DESERT_PYRAMID("desert_pyramid", Cubiomes.Desert_Pyramid(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_1_3(), "cubiomes_viewer_icons", 19, 20),

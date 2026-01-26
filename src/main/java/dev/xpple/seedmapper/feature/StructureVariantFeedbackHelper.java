@@ -1,7 +1,5 @@
 package dev.xpple.seedmapper.feature;
 
-import com.github.cubiomes.Cubiomes;
-import com.github.cubiomes.StructureVariant;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -12,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+
+import com.github.cubiomes.Cubiomes;
+import com.github.cubiomes.StructureVariant;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 

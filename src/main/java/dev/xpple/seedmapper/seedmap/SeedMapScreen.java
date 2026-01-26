@@ -18,6 +18,8 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.logging.LogUtils;
+
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.arguments.CanyonCarverArgument;
 import dev.xpple.seedmapper.command.arguments.ItemAndEnchantmentsPredicateArgument;
@@ -34,6 +36,7 @@ import dev.xpple.seedmapper.util.TwoDTree;
 import dev.xpple.seedmapper.util.WorldIdentifier;
 import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import dev.xpple.simplewaypoints.api.Waypoint;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.AbstractIntCollection;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
@@ -84,6 +87,7 @@ import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
+import org.slf4j.Logger;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
@@ -151,14 +155,15 @@ public class SeedMapScreen extends Screen {
     public static final int MIN_PIXELS_PER_BIOME = 1;
     public static final int MAX_PIXELS_PER_BIOME = 100;
 
-    private static final int HORIZONTAL_FEATURE_TOGGLE_SPACING = 5;
+    private static final int HORIZONTAL_FEATURE_TOGGLE_SPACING = 1;
     private static final int VERTICAL_FEATURE_TOGGLE_SPACING = 1;
-    private static final int FEATURE_TOGGLE_HEIGHT = 20;
 
     private static final int TELEPORT_FIELD_WIDTH = 70;
     private static final int WAYPOINT_NAME_FIELD_WIDTH = 100;
 
     private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
+
+    private static final double FEATURE_TOGGLE_LOWER_PADDING_FACTOR = 0.95;
 
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, ChunkStructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
@@ -210,8 +215,10 @@ public class SeedMapScreen extends Screen {
     private int seedMapWidth;
     private int seedMapHeight;
 
+    // A list of all features that can have their appearance on the map toggled on or off.
     private final List<MapFeature> toggleableFeatures;
-    private final int featureIconsCombinedWidth;
+    // The combined height of the images of *all* toggleable features. Includes padding.
+    private final int featureIconsCombinedHeight;
 
     private final ObjectSet<FeatureWidget> featureWidgets = new ObjectOpenHashSet<>();
 
@@ -297,9 +304,9 @@ public class SeedMapScreen extends Screen {
                 });
         }
 
-        this.featureIconsCombinedWidth = this.toggleableFeatures.stream()
-            .map(feature -> feature.getDefaultTexture().width())
-            .reduce((l, r) -> l + HORIZONTAL_FEATURE_TOGGLE_SPACING + r)
+        this.featureIconsCombinedHeight = this.toggleableFeatures.stream()
+            .map(feature -> feature.getDefaultTexture().height())
+            .reduce((l, r) -> l + VERTICAL_FEATURE_TOGGLE_SPACING + r)
             .orElseThrow();
 
         this.playerPos = playerPos;
@@ -652,27 +659,65 @@ public class SeedMapScreen extends Screen {
         guiGraphics.pose().popMatrix();
     }
 
+    // Formerly, this laid the feature toggles out in rows above the map.
+    // Now they are laid out in columns besides the map.
     private void createFeatureToggles() {
         // TODO: replace with Gatherers API?
         // TODO: only calculate on resize?
-        int rows = Math.ceilDiv(this.featureIconsCombinedWidth, this.seedMapWidth);
-        int togglesPerRow = Math.ceilDiv(this.toggleableFeatures.size(), rows);
-        int toggleMinY = 1;
-        for (int row = 0; row < rows - 1; row++) {
-            this.createFeatureTogglesInner(row, togglesPerRow, togglesPerRow, this.horizontalPadding(), toggleMinY);
-            toggleMinY += FEATURE_TOGGLE_HEIGHT + VERTICAL_FEATURE_TOGGLE_SPACING;
+
+        Pair<Integer, Double> columnCountAndScale = this.computeFeatureToggleScale();
+        int columns = columnCountAndScale.left();
+        double scale = columnCountAndScale.right();
+
+        int togglesPerColumn = Math.ceilDiv(this.toggleableFeatures.size(), columns);
+
+        int row = 0;
+        int iconLeftX = 0, iconTopY = 0;
+        int maxIconWidth = 0;
+        for (MapFeature toggleableFeature : this.toggleableFeatures) {
+            // Draw the icon.
+            int iconHeight = (int)Math.ceil(scale*toggleableFeature.getDefaultTexture().height());
+            this.addRenderableWidget(new FeatureToggleWidget(toggleableFeature, iconLeftX, iconTopY, scale));
+            
+            // Set up the position for where to draw the next icon.
+            iconTopY += iconHeight + (int)Math.ceil(scale*VERTICAL_FEATURE_TOGGLE_SPACING);
+            maxIconWidth = Math.max(maxIconWidth, (int)Math.ceil(scale*toggleableFeature.getDefaultTexture().width()));
+
+            ++row;
+            if (row >= togglesPerColumn) {
+                // Begin a new column.
+                row = 0;
+                iconTopY = 0;
+                iconLeftX += maxIconWidth + Math.ceil(scale*HORIZONTAL_FEATURE_TOGGLE_SPACING);
+                maxIconWidth = 0;
+            }
         }
-        int togglesInLastRow = this.toggleableFeatures.size() - togglesPerRow * (rows - 1);
-        this.createFeatureTogglesInner(rows - 1, togglesPerRow, togglesInLastRow, this.horizontalPadding(), toggleMinY);
     }
 
-    private void createFeatureTogglesInner(int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
-        for (int toggle = 0; toggle < maxToggles; toggle++) {
-            MapFeature feature = this.toggleableFeatures.get(row * togglesPerRow + toggle);
-            MapFeature.Texture featureIcon = feature.getDefaultTexture();
-            this.addRenderableWidget(new FeatureToggleWidget(feature, toggleMinX, toggleMinY));
-            toggleMinX += featureIcon.width() + HORIZONTAL_FEATURE_TOGGLE_SPACING;
+    private Pair<Integer, Double> computeFeatureToggleScale() {
+        int baseColumnWidth = 0;
+        for (MapFeature toggleableFeature : this.toggleableFeatures) {
+            baseColumnWidth = Math.max(baseColumnWidth, toggleableFeature.getDefaultTexture().width());
         }
+
+        int n = this.toggleableFeatures.size();
+        Pair<Integer, Double> bestResult = null;
+        for (int columns = 1; columns <= n; ++columns) {
+            // Approximate the maximum column height. This doesn't work if the textures have very different heights.
+            /// TODO: enforce textures being squares of the same size.
+            int maxColumnHeight = this.featureIconsCombinedHeight / columns;
+
+            double scaleX = (double)HORIZONTAL_PADDING / (columns * (baseColumnWidth + HORIZONTAL_FEATURE_TOGGLE_SPACING));
+            double scaleY = (double)this.height * FEATURE_TOGGLE_LOWER_PADDING_FACTOR / maxColumnHeight;
+            double scale = Math.min(scaleX, scaleY);
+
+            if (scale <= 0) continue;
+
+            if (bestResult == null || scale > bestResult.right())
+                bestResult = Pair.of(columns, scale);
+        }
+
+        return bestResult;
     }
 
     private int[] calculateBiomeData(TilePos tilePos) {
@@ -1225,7 +1270,7 @@ public class SeedMapScreen extends Screen {
         pose.popMatrix();
     }
 
-    private static void drawIconStatic(GuiGraphics guiGraphics, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int colour) {
+    public static void drawIconStatic(GuiGraphics guiGraphics, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int colour) {
         // Skip intersection checks (GuiRenderState.hasIntersection) you would otherwise get when calling
         // GuiGraphics.blit as these checks incur a significant performance hit
         AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(identifier);

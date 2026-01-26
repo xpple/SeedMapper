@@ -4,6 +4,7 @@ import com.github.cubiomes.Cubiomes;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
+
 import dev.xpple.seedmapper.command.arguments.DimensionArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.command.arguments.VersionArgument;
