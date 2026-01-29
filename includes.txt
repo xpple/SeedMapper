@@ -801,7 +801,9 @@
 --include-function create_enchant_randomly
 --include-function create_enchant_randomly_list
 --include-function create_enchant_randomly_one_enchant
+--include-function create_enchant_randomly_tag
 --include-function create_enchant_with_levels
+--include-function create_enchant_with_levels_tag
 --include-function create_no_op
 --include-function create_set_count
 --include-function create_set_damage
@@ -841,6 +843,7 @@
 --include-constant LOOTING
 --include-constant LOYALTY
 --include-constant LUCK_OF_THE_SEA
+--include-constant LUNGE
 --include-constant LURE
 --include-constant MACE
 --include-constant MENDING
@@ -861,6 +864,7 @@
 --include-constant SILK_TOUCH
 --include-constant SMITE
 --include-constant SOUL_SPEED
+--include-constant SPEAR
 --include-constant SWEEPING_EDGE
 --include-constant SWIFT_SNEAK
 --include-constant SWORD
