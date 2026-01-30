@@ -108,6 +108,7 @@
   "seedMap.chestLoot.extraInfo.chestPos": "Chest position: %s",
   "seedMap.chestLoot.extraInfo.lootTable": "Loot table: %s",
   "seedMap.chestLoot.extraInfo.lootSeed": "Loot seed: %s",
+  "seedMap.chestLoot.stewEffect": "%s (%s seconds)",
   "seedMap.coordinatesCopied": "%s (coordinates copied!)",
   "seedMap.teleportEditBoxX": "Edit box X coordinate",
   "seedMap.teleportEditBoxZ": "Edit box Z coordinate",
