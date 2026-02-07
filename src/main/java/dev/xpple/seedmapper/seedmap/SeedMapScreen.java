@@ -160,6 +160,9 @@ public class SeedMapScreen extends Screen {
     private static final Identifier SEED_ICON_TEXTURE = Identifier.fromNamespaceAndPath("minecraft", "textures/item/wheat_seeds.png");
     private static final int SEED_ICON_SIZE = 16;
     private static final int SEED_ICON_PADDING = 4;
+    // can't find the chest texture
+    private static final Identifier LOOT_SEARCH_ICON_TEXTURE = Identifier.fromNamespaceAndPath("minecraft", "textures/item/chest_minecart.png");
+    private static final int LOOT_SEARCH_ICON_SIZE = 16;
     private static final float MIN_STRUCTURE_REGION_PIXELS = 8.0F;
     private static final float MIN_CHUNK_PIXELS = 4.0F;
 
@@ -367,7 +370,9 @@ public class SeedMapScreen extends Screen {
             this.teleportEditBoxZ.setHint(Component.literal("Z: %d".formatted(QuartPos.toBlock(this.mouseQuart.z()))));
         }
 
-        if (this.isMouseOverMap(this.lastMouseX, this.lastMouseY) && !this.isMouseOverSeedWidget(this.lastMouseX, this.lastMouseY)) {
+        if (this.isMouseOverMap(this.lastMouseX, this.lastMouseY)
+            && !this.isMouseOverSeedWidget(this.lastMouseX, this.lastMouseY)
+            && !this.isMouseOverLootSearchWidget(this.lastMouseX, this.lastMouseY)) {
             OptionalInt optionalBiome = getBiome(this.mouseQuart);
             if (optionalBiome.isPresent()) {
                 Component tooltip = Component.literal(Cubiomes.biome2str(this.version, optionalBiome.getAsInt()).getString(0));
@@ -378,7 +383,9 @@ public class SeedMapScreen extends Screen {
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
+        guiGraphics.nextStratum();
         this.drawSeedWidget(guiGraphics);
+        this.drawLootSearchWidget(guiGraphics);
     }
 
     @Override
@@ -720,12 +727,37 @@ public class SeedMapScreen extends Screen {
         guiGraphics.renderTooltip(this.font, tooltips, this.lastMouseX, this.lastMouseY, DefaultTooltipPositioner.INSTANCE, null);
     }
 
+    protected void drawLootSearchWidget(GuiGraphics guiGraphics) {
+        int minX = this.getLootSearchWidgetMinX();
+        int minY = this.getLootSearchWidgetMinY();
+        int maxX = minX + LOOT_SEARCH_ICON_SIZE;
+        int maxY = minY + LOOT_SEARCH_ICON_SIZE;
+
+        drawIconStatic(guiGraphics, LOOT_SEARCH_ICON_TEXTURE, minX, minY, LOOT_SEARCH_ICON_SIZE, LOOT_SEARCH_ICON_SIZE, 0xFF_FFFFFF);
+
+        if (this.lastMouseX < minX || this.lastMouseX > maxX || this.lastMouseY < minY || this.lastMouseY > maxY) {
+            return;
+        }
+
+        Component tooltip = Component.literal("Loot search");
+        List<ClientTooltipComponent> tooltips = List.of(ClientTooltipComponent.create(tooltip.getVisualOrderText()));
+        guiGraphics.renderTooltip(this.font, tooltips, this.lastMouseX, this.lastMouseY, DefaultTooltipPositioner.INSTANCE, null);
+    }
+
     private int getSeedWidgetMinX() {
         return this.width - SEED_ICON_SIZE - SEED_ICON_PADDING;
     }
 
     private int getSeedWidgetMinY() {
         return SEED_ICON_PADDING;
+    }
+
+    private int getLootSearchWidgetMinX() {
+        return this.getSeedWidgetMinX() - LOOT_SEARCH_ICON_SIZE - SEED_ICON_PADDING;
+    }
+
+    private int getLootSearchWidgetMinY() {
+        return this.getSeedWidgetMinY();
     }
 
     private boolean isMouseOverMap(double mouseX, double mouseY) {
@@ -740,6 +772,14 @@ public class SeedMapScreen extends Screen {
         int minY = this.getSeedWidgetMinY();
         int maxX = minX + SEED_ICON_SIZE;
         int maxY = minY + SEED_ICON_SIZE;
+        return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
+    }
+
+    private boolean isMouseOverLootSearchWidget(double mouseX, double mouseY) {
+        int minX = this.getLootSearchWidgetMinX();
+        int minY = this.getLootSearchWidgetMinY();
+        int maxX = minX + LOOT_SEARCH_ICON_SIZE;
+        int maxY = minY + LOOT_SEARCH_ICON_SIZE;
         return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
     }
 
@@ -1079,6 +1119,10 @@ public class SeedMapScreen extends Screen {
         }
         if (mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_LEFT && this.isMouseOverSeedWidget(mouseButtonEvent.x(), mouseButtonEvent.y())) {
             this.minecraft.keyboardHandler.setClipboard(Long.toString(this.seed));
+            return true;
+        }
+        if (mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_LEFT && this.isMouseOverLootSearchWidget(mouseButtonEvent.x(), mouseButtonEvent.y())) {
+            this.minecraft.setScreen(new LootSearchScreen(this, this.seed, this.dimension, this.version, this.generatorFlags, this.playerPos));
             return true;
         }
         int button = mouseButtonEvent.button();
