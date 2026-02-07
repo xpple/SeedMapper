@@ -104,7 +104,7 @@ public class MinimapScreen extends SeedMapScreen {
         return Configs.MinimapOffsetX;
     }
 
-    @Override
+    //@Override
     protected int verticalPadding() {
         return Configs.MinimapOffsetY;
     }
