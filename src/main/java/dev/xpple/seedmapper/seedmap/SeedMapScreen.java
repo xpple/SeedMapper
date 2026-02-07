@@ -150,10 +150,8 @@ public class SeedMapScreen extends Screen {
 
     private static final int HORIZONTAL_PADDING = 50;
     //private static final int VERTICAL_PADDING = 0;
-    private static final int VERTICAL_LOWER_PADDING = 20;
-
-    public static final int MIN_PIXELS_PER_BIOME = 1;
-    public static final int MAX_PIXELS_PER_BIOME = 100;
+    public static final float MIN_PIXELS_PER_BIOME = 0.25F;
+    public static final float MAX_PIXELS_PER_BIOME = 100.0F;
 
     private static final int HORIZONTAL_FEATURE_TOGGLE_SPACING = 1;
     private static final int VERTICAL_FEATURE_TOGGLE_SPACING = 1;
@@ -165,7 +163,9 @@ public class SeedMapScreen extends Screen {
     //private static final int TELEPORT_FIELD_WIDTH = 70;
     //private static final int WAYPOINT_NAME_FIELD_WIDTH = 100;
 
-    private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
+    private static float tileSizePixels() {
+        return TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
+    }
 
     private static final double FEATURE_TOGGLE_LOWER_PADDING_FACTOR = 0.95;
 
@@ -331,7 +331,7 @@ public class SeedMapScreen extends Screen {
         this.centerY = this.height / 2;
 
         this.seedMapWidth = this.width - this.horizontalPadding();
-        this.seedMapHeight = this.height - VERTICAL_LOWER_PADDING;
+        this.seedMapHeight = this.height;
 
         if (!this.isMinimap()) {
             this.createFeatureToggles();
@@ -346,7 +346,6 @@ public class SeedMapScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.lastMouseX = mouseX;
         this.lastMouseY = mouseY;
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
         // draw title
         //Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(this.seed)), Cubiomes.mc2str(this.version).getString(0), ComponentUtils.formatGeneratorFlags(this.generatorFlags));
         //guiGraphics.drawString(this.font, seedComponent, this.horizontalPadding(), this.verticalPadding() - this.font.lineHeight - 1, -1);
@@ -375,12 +374,19 @@ public class SeedMapScreen extends Screen {
         }
 
         this.drawSeedWidget(guiGraphics);
+
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // No background; the map fills the screen.
     }
 
     protected void renderBiomes(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
-        int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
-        int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
+        float tileSizePixels = tileSizePixels();
+        int horTileRadius = Mth.ceil(this.seedMapWidth / tileSizePixels) + 1;
+        int verTileRadius = Mth.ceil(this.seedMapHeight / tileSizePixels) + 1;
 
         TilePos centerTile = TilePos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart));
         for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
@@ -407,14 +413,14 @@ public class SeedMapScreen extends Screen {
    }
 
    protected void renderFeatures(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-       int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
-       int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
-       int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
+       float tileSizePixels = tileSizePixels();
+       int horTileRadius = Mth.ceil(this.seedMapWidth / tileSizePixels) + 1;
+       int verTileRadius = Mth.ceil(this.seedMapHeight / tileSizePixels) + 1;
 
        TilePos centerTile = TilePos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart));
 
-       int horChunkRadius = Math.ceilDiv(this.seedMapWidth / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
-       int verChunkRadius = Math.ceilDiv(this.seedMapHeight / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
+       int horChunkRadius = Mth.ceil((this.seedMapWidth / 2.0F) / (SCALED_CHUNK_SIZE * Configs.PixelsPerBiome));
+       int verChunkRadius = Mth.ceil((this.seedMapHeight / 2.0F) / (SCALED_CHUNK_SIZE * Configs.PixelsPerBiome));
 
        // compute structures
        Configs.ToggledFeatures.stream()
@@ -554,11 +560,11 @@ public class SeedMapScreen extends Screen {
     private void drawTile(GuiGraphics guiGraphics, Tile tile) {
         TilePos tilePos = tile.pos();
         QuartPos2f relTileQuart = QuartPos2f.fromQuartPos(QuartPos2.fromTilePos(tilePos)).subtract(this.centerQuart);
-        int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
+        float tileSizePixels = tileSizePixels();
         int minX = this.centerX + Mth.floor(Configs.PixelsPerBiome * relTileQuart.x());
         int minY = this.centerY + Mth.floor(Configs.PixelsPerBiome * relTileQuart.z());
-        int maxX = minX + tileSizePixels;
-        int maxY = minY + tileSizePixels;
+        int maxX = minX + Mth.ceil(tileSizePixels);
+        int maxY = minY + Mth.ceil(tileSizePixels);
 
         if (maxX < this.horizontalPadding() || minX > this.horizontalPadding() + this.seedMapWidth) {
             return;
@@ -569,22 +575,23 @@ public class SeedMapScreen extends Screen {
 
         float u0, u1, v0, v1;
         if (minX < this.horizontalPadding()) {
-            u0 = (float) (this.horizontalPadding() - minX) / tileSizePixels;
+            u0 = (this.horizontalPadding() - minX) / tileSizePixels;
             minX = this.horizontalPadding();
         } else u0 = 0;
         if (maxX > this.horizontalPadding() + this.seedMapWidth) {
-            u1 = 1 - ((float) (maxX - this.horizontalPadding() - this.seedMapWidth) / tileSizePixels);
+            u1 = 1 - ((maxX - this.horizontalPadding() - this.seedMapWidth) / tileSizePixels);
             maxX = this.horizontalPadding() + this.seedMapWidth;
         } else u1 = 1;
         if (minY < 0) {
-            v0 = (float) (0 - minY) / tileSizePixels;
+            v0 = (0 - minY) / tileSizePixels;
             minY = 0;
         } else v0 = 0;
         if (maxY > this.seedMapHeight()) {
-            v1 = 1 - ((float) (maxY - this.seedMapHeight()) / tileSizePixels);
+            v1 = 1 - ((maxY - this.seedMapHeight()) / tileSizePixels);
             maxY = this.seedMapHeight();
         } else v1 = 1;
 
+        //tile.texture().setFilter(Configs.PixelsPerBiome < 1.0F, false);
         guiGraphics.submitBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), tile.texture().getSampler(), minX, minY, maxX, maxY, u0, u1, v0, v1, 0xFF_FFFFFF);
     }
 
@@ -985,10 +992,10 @@ public class SeedMapScreen extends Screen {
             return true;
         }
 
-        float currentScroll = Mth.clamp((float) Configs.PixelsPerBiome / MAX_PIXELS_PER_BIOME, 0.0F, 1.0F);
-        currentScroll = Mth.clamp(currentScroll - (float) (-scrollY / MAX_PIXELS_PER_BIOME), 0.0F, 1.0F);
+        float currentScroll = Mth.clamp(Configs.PixelsPerBiome / MAX_PIXELS_PER_BIOME, MIN_PIXELS_PER_BIOME / MAX_PIXELS_PER_BIOME, 1.0F);
+        currentScroll = Mth.clamp(currentScroll - (float) (-scrollY / MAX_PIXELS_PER_BIOME), MIN_PIXELS_PER_BIOME / MAX_PIXELS_PER_BIOME, 1.0F);
 
-        Configs.PixelsPerBiome = Math.max((int) (currentScroll * MAX_PIXELS_PER_BIOME + 0.5), MIN_PIXELS_PER_BIOME);
+        Configs.PixelsPerBiome = currentScroll * MAX_PIXELS_PER_BIOME;
 
         this.featureWidgets.removeIf(widget -> {
             widget.updatePosition();
@@ -1396,7 +1403,7 @@ public class SeedMapScreen extends Screen {
     //}
 
     protected int seedMapHeight() {
-        return this.height - VERTICAL_LOWER_PADDING;
+        return this.height;
     }
 
     protected long getSeed() {
