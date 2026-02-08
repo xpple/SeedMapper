@@ -12,7 +12,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-
 import dev.xpple.seedmapper.command.CommandExceptions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -81,6 +80,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         .put("silk_touch", Cubiomes.SILK_TOUCH())
         .put("fortune", Cubiomes.FORTUNE())
         .put("luck_of_the_sea", Cubiomes.LUCK_OF_THE_SEA())
+        .put("lunge", Cubiomes.LUNGE())
         .put("lure", Cubiomes.LURE())
         .put("power", Cubiomes.POWER())
         .put("punch", Cubiomes.PUNCH())
@@ -128,6 +128,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         .put(Cubiomes.SILK_TOUCH(), Enchantments.SILK_TOUCH)
         .put(Cubiomes.FORTUNE(), Enchantments.FORTUNE)
         .put(Cubiomes.LUCK_OF_THE_SEA(), Enchantments.LUCK_OF_THE_SEA)
+        .put(Cubiomes.LUNGE(), Enchantments.LUNGE)
         .put(Cubiomes.LURE(), Enchantments.LURE)
         .put(Cubiomes.POWER(), Enchantments.POWER)
         .put(Cubiomes.PUNCH(), Enchantments.PUNCH)

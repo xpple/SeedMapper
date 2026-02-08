@@ -2,7 +2,6 @@ package dev.xpple.seedmapper.seedmap;
 
 import com.github.cubiomes.Cubiomes;
 import com.mojang.blaze3d.platform.InputConstants;
-
 import dev.xpple.seedmapper.SeedMapper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

@@ -1,3 +1,5 @@
+import dev.xpple.seedmapper.buildscript.CreateJavaBindingsTask
+import dev.xpple.seedmapper.buildscript.GenerateBuildInfoTask
 import net.fabricmc.loom.task.prod.ClientProductionRunTask
 
 plugins {
@@ -67,19 +69,19 @@ dependencies {
 }
 
 clean {
-    //delete fileTree("${projectDir}/src/main/java/com/github/cubiomes") {
-    //    exclude '.gitkeep'
-    //}
+    delete fileTree("${projectDir}/src/main/java/com/github/cubiomes") {
+        exclude '.gitkeep'
+    }
 }
 
-//tasks.register('createJavaBindings', CreateJavaBindingsTask) {}
-// compileJava.dependsOn('createJavaBindings')
+tasks.register('createJavaBindings', CreateJavaBindingsTask) {}
+compileJava.dependsOn('createJavaBindings')
 
-//createJavaBindings.dependsOn(clean)
+createJavaBindings.dependsOn(clean)
 
-//tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
-//	outputFile = new File(temporaryDir, "build_info.json")
-//}
+tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
+	outputFile = new File(temporaryDir, "build_info.json")
+}
 
 tasks.register("prodClient", ClientProductionRunTask) {
 	runDir = file("run")
@@ -110,7 +112,7 @@ processResources {
 
 	from("src/main/c/cubiomes/loot/LICENSE_loot_library.h.txt")
 
-	//from generateBuildInfo
+	from generateBuildInfo
 }
 
 tasks.withType(JavaCompile).configureEach {
