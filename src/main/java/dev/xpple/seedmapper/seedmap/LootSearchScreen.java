@@ -14,7 +14,6 @@ import com.github.cubiomes.SurfaceNoise;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.thread.SeedMapExecutor;
-import dev.xpple.seedmapper.util.ComponentUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -22,7 +21,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.BlockPos;
@@ -167,7 +165,6 @@ public class LootSearchScreen extends Screen {
         this.addRenderableWidget(this.sortToggleButton);
 
         int listLeft = LIST_PADDING;
-        int listTop = RESULTS_TOP;
         int listWidth = this.width / 2 - LIST_PADDING * 2;
         int searchY = this.height - LIST_PADDING - FIELD_HEIGHT;
         this.resultsSearchEditBox = new EditBox(this.font, listLeft, searchY, listWidth, FIELD_HEIGHT, Component.translatable("seedMap.lootSearch.filter"));
@@ -197,7 +194,6 @@ public class LootSearchScreen extends Screen {
     private void renderResultsTab(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         int listLeft = LIST_PADDING;
         int listTop = RESULTS_TOP;
-        int listWidth = this.width / 2 - LIST_PADDING * 2;
         int listBottom = this.height - LIST_PADDING - FIELD_HEIGHT - ROW_SPACING;
         int listHeight = Math.max(0, listBottom - listTop);
 
@@ -237,7 +233,6 @@ public class LootSearchScreen extends Screen {
 
         int structureListTop = detailsTop + LIST_ROW_HEIGHT * 3;
         int structureListHeight = this.height - structureListTop - LIST_PADDING - TAB_HEIGHT - ROW_SPACING;
-        int structureListBottom = structureListTop + structureListHeight;
 
         List<StructureEntry> structures = this.selectedItem.sortedStructures(this.structureSortMode, this.playerPos);
         if (structures.isEmpty()) {
@@ -394,7 +389,6 @@ public class LootSearchScreen extends Screen {
                 int maxRegionZ = Mth.floor((centerZ + radiusBlocks) / (float) regionSizeBlocks);
 
                 StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
-                List<BlockPos> positions = new ArrayList<>();
                 for (int regionX = minRegionX; regionX <= maxRegionX; regionX++) {
                     for (int regionZ = minRegionZ; regionZ <= maxRegionZ; regionZ++) {
                         if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionX, regionZ, structurePos) == 0) {
@@ -477,7 +471,6 @@ public class LootSearchScreen extends Screen {
         int listTop = RESULTS_TOP;
         int listWidth = this.width / 2 - LIST_PADDING * 2;
         int listBottom = this.height - LIST_PADDING - FIELD_HEIGHT - ROW_SPACING;
-        int listHeight = Math.max(0, listBottom - listTop);
         int listRight = listLeft + listWidth;
         //int listBottom = listTop + listHeight;
         if (mouseX < listLeft || mouseX > listRight || mouseY < listTop || mouseY > listBottom) {
