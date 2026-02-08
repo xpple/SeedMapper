@@ -6,6 +6,8 @@ import com.github.cubiomes.EnchantInstance;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.ItemStack;
 import com.github.cubiomes.LootTableContext;
+import com.github.cubiomes.MobEffect;
+import com.github.cubiomes.MobEffectInstance;
 import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Piece;
 import com.github.cubiomes.Pos;
@@ -66,6 +68,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -76,6 +79,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -250,6 +256,7 @@ public class SeedMapScreen extends Screen {
     private static final Identifier DIRECTION_ARROW_TEXTURE = Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/arrow.png");
 
     private Registry<Enchantment> enchantmentsRegistry;
+    private Registry<net.minecraft.world.effect.MobEffect> mobEffectRegistry;
 
     public SeedMapScreen(long seed, int dimension, int version, int generatorFlags, BlockPos playerPos, Vec2 playerRotation) {
         super(Component.empty());
@@ -345,6 +352,7 @@ public class SeedMapScreen extends Screen {
             this.createWaypointNameField();
 
             this.enchantmentsRegistry = this.minecraft.player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+            this.mobEffectRegistry = this.minecraft.player.registryAccess().lookupOrThrow(Registries.MOB_EFFECT);
         }
    }
 
@@ -1225,6 +1233,18 @@ public class SeedMapScreen extends Screen {
                             ResourceKey<Enchantment> enchantmentResourceKey = ItemAndEnchantmentsPredicateArgument.ENCHANTMENT_ID_TO_MC.get(itemEnchantment);
                             Holder.Reference<Enchantment> enchantmentReference = this.enchantmentsRegistry.getOrThrow(enchantmentResourceKey);
                             itemStack.enchant(enchantmentReference, EnchantInstance.level(enchantInstance));
+                        }
+                        MemorySegment mobEffectInstance = ItemStack.mob_effect(itemStackInternal);
+                        if (MobEffectInstance.effect(mobEffectInstance) != -1) {
+                            MemorySegment mobEffectInternal = MobEffect.asSlice(Cubiomes.MOB_EFFECTS(), MobEffectInstance.effect(mobEffectInstance));
+                            var mobEffect = this.mobEffectRegistry.getOptional(Identifier.parse(MobEffect.effect_name(mobEffectInternal).getString(0))).orElse(null);
+                            if (mobEffect != null) {
+                                SuspiciousStewEffects.Entry entry = new SuspiciousStewEffects.Entry(Holder.direct(mobEffect), MobEffectInstance.duration(mobEffectInstance));
+                                net.minecraft.world.effect.MobEffectInstance effectInstance = entry.createEffectInstance();
+                                MutableComponent description = PotionContents.getPotionDescription(effectInstance.getEffect(), effectInstance.getAmplifier());
+                                MutableComponent lore = Component.translatable("seedMap.chestLoot.stewEffect", description, (float) entry.duration() / SharedConstants.TICKS_PER_SECOND);
+                                itemStack.set(DataComponents.LORE, new ItemLore(List.of(lore)));
+                            }
                         }
                         container.addItem(itemStack);
                     }

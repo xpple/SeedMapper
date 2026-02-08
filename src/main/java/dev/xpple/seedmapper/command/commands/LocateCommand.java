@@ -32,8 +32,10 @@ import dev.xpple.seedmapper.util.TwoDTree;
 import dev.xpple.seedmapper.util.WorldIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -66,7 +68,9 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class LocateCommand {
 
-    private static final int BIOME_SEARCH_RADIUS = 6400;
+    private static final int BIOME_SEARCH_RADIUS = 25600;
+    private static final int BIOME_SEARCH_HORIZONTAL_STEP = 32;
+    private static final int BIOME_SEARCH_VERTICAL_STEP = 64;
 
     public static final Set<Integer> LOOT_SUPPORTED_STRUCTURES = Set.of(Cubiomes.Treasure(), Cubiomes.Desert_Pyramid(), Cubiomes.End_City(), Cubiomes.Igloo(), Cubiomes.Jungle_Pyramid(), Cubiomes.Ruined_Portal(), Cubiomes.Ruined_Portal_N(), Cubiomes.Fortress(), Cubiomes.Bastion(), Cubiomes.Outpost(), Cubiomes.Shipwreck());
 
@@ -102,18 +106,31 @@ public class LocateCommand {
     private static int locateBiome(CustomClientCommandSource source, int biome) throws CommandSyntaxException {
         SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
+        int version = source.getVersion();
         if (Cubiomes.getDimension(biome) != dimension) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
+        if (Cubiomes.biomeExists(version, biome) == 0) {
+            throw CommandExceptions.BIOME_WRONG_VERSION_EXCEPTION.create();
+        }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, source.getVersion(), source.getGeneratorFlags());
+            Cubiomes.setupGenerator(generator, version, source.getGeneratorFlags());
             Cubiomes.applySeed(generator, dimension, seed.seed());
 
             BlockPos center = BlockPos.containing(source.getPosition());
 
-            SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.getX(), center.getZ(), BIOME_SEARCH_RADIUS, 32, (x, z) -> {
-                return Cubiomes.getBiomeAt(generator, 1, x, 63, z) == biome;
+            int minY = version <= Cubiomes.MC_1_17_1() ? 0 : -64;
+            int maxY = version <= Cubiomes.MC_1_17_1() ? 256 : 320;
+            int[] ys = Mth.outFromOrigin(center.getY(), minY + 1, maxY + 1, BIOME_SEARCH_VERTICAL_STEP).toArray();
+
+            SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.getX(), center.getZ(), BIOME_SEARCH_RADIUS, BIOME_SEARCH_HORIZONTAL_STEP, (x, z) -> {
+                for (int y : ys) {
+                    if (Cubiomes.getBiomeAt(generator, 4, QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) == biome) {
+                        return true;
+                    }
+                }
+                return false;
             });
             if (pos == null) {
                 throw CommandExceptions.NO_BIOME_FOUND_EXCEPTION.create(BIOME_SEARCH_RADIUS);
