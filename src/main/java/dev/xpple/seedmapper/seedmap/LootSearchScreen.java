@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
@@ -58,13 +59,8 @@ public class LootSearchScreen extends Screen {
     private static final int STRUCTURE_ICON_GAP = 4;
     private static final int STRUCTURE_BUTTON_ROWS = 2;
 
-    private final Screen parent;
+    private final SeedMapScreen parent;
     private final SeedMapExecutor executor = new SeedMapExecutor();
-    private final long seed;
-    private final int dimension;
-    private final int version;
-    private final int generatorFlags;
-    private final BlockPos playerPos;
 
     private enum Tab {
         SEARCH,
@@ -96,17 +92,12 @@ public class LootSearchScreen extends Screen {
     private @Nullable ItemResult selectedItem = null;
     private int structureScroll = 0;
 
-    public LootSearchScreen(Screen parent, long seed, int dimension, int version, int generatorFlags, BlockPos playerPos) {
+    public LootSearchScreen(SeedMapScreen parent) {
         super(Component.translatable("seedMap.lootSearch.title"));
         this.parent = parent;
-        this.seed = seed;
-        this.dimension = dimension;
-        this.version = version;
-        this.generatorFlags = generatorFlags;
-        this.playerPos = playerPos;
-        this.lootFeatures = List.of(MapFeature.values()).stream()
+        this.lootFeatures = Stream.of(MapFeature.values())
             .filter(feature -> LocateCommand.LOOT_SUPPORTED_STRUCTURES.contains(feature.getStructureId()))
-            .filter(feature -> feature.getDimension() == this.dimension)
+            .filter(feature -> feature.getDimension() == this.parent.getDimension())
             .toList();
         this.lootFeatures.forEach(feature -> this.enabledStructureIds.add(feature.getStructureId()));
     }
@@ -213,7 +204,7 @@ public class LootSearchScreen extends Screen {
         for (int i = startIndex; i < endIndex; i++) {
             ItemResult result = filteredResults.get(i);
             int color = Objects.equals(this.selectedItem, result) ? 0xFF_FFFFFF : 0xFF_C0C0C0;
-            Component line = Component.literal("%s x%d".formatted(result.displayName(this.version), result.totalCount));
+            Component line = Component.literal("%s x%d".formatted(result.displayName(this.parent.getVersion()), result.totalCount));
             guiGraphics.drawString(this.font, line, listLeft, y, color);
             y += LIST_ROW_HEIGHT;
         }
@@ -226,13 +217,13 @@ public class LootSearchScreen extends Screen {
             return;
         }
 
-        guiGraphics.drawString(this.font, Component.literal(this.selectedItem.displayName(this.version)), detailsLeft, detailsTop, 0xFF_FFFFFF);
+        guiGraphics.drawString(this.font, Component.literal(this.selectedItem.displayName(this.parent.getVersion())), detailsLeft, detailsTop, 0xFF_FFFFFF);
         guiGraphics.drawString(this.font, Component.translatable("seedMap.lootSearch.total", this.selectedItem.totalCount), detailsLeft, detailsTop + LIST_ROW_HEIGHT, 0xFF_C0C0C0);
 
         int structureListTop = detailsTop + LIST_ROW_HEIGHT * 3;
         int structureListHeight = this.height - structureListTop - LIST_PADDING - TAB_HEIGHT - ROW_SPACING;
 
-        List<StructureEntry> structures = this.selectedItem.sortedStructures(this.structureSortMode, this.playerPos);
+        List<StructureEntry> structures = this.selectedItem.sortedStructures(this.structureSortMode, this.parent.getPlayerPos());
         if (structures.isEmpty()) {
             guiGraphics.drawString(this.font, Component.translatable("seedMap.lootSearch.noStructures"), detailsLeft, structureListTop, 0xFF_A0A0A0);
             return;
@@ -352,11 +343,11 @@ public class LootSearchScreen extends Screen {
     private @Nullable SearchResults searchLoot(int radiusBlocks) {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, this.version, this.generatorFlags);
-            Cubiomes.applySeed(generator, this.dimension, this.seed);
+            Cubiomes.setupGenerator(generator, this.parent.getVersion(), this.parent.getGeneratorFlags());
+            Cubiomes.applySeed(generator, this.parent.getDimension(), this.parent.getSeed());
 
             MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
-            Cubiomes.initSurfaceNoise(surfaceNoise, this.dimension, this.seed);
+            Cubiomes.initSurfaceNoise(surfaceNoise, this.parent.getDimension(), this.parent.getSeed());
 
             SearchResults results = new SearchResults();
             MemorySegment structurePos = Pos.allocate(arena);
@@ -365,8 +356,8 @@ public class LootSearchScreen extends Screen {
             MemorySegment structureSaltConfig = StructureSaltConfig.allocate(arena);
             MemorySegment ltcPtr = arena.allocate(Cubiomes.C_POINTER);
 
-            int centerX = this.playerPos.getX();
-            int centerZ = this.playerPos.getZ();
+            int centerX = this.parent.getPlayerPos().getX();
+            int centerZ = this.parent.getPlayerPos().getZ();
             int radiusSq = radiusBlocks * radiusBlocks;
 
             for (int structure : LocateCommand.LOOT_SUPPORTED_STRUCTURES) {
@@ -374,10 +365,10 @@ public class LootSearchScreen extends Screen {
                     continue;
                 }
                 MemorySegment structureConfig = StructureConfig.allocate(arena);
-                if (Cubiomes.getStructureConfig(structure, this.version, structureConfig) == 0) {
+                if (Cubiomes.getStructureConfig(structure, this.parent.getVersion(), structureConfig) == 0) {
                     continue;
                 }
-                if (StructureConfig.dim(structureConfig) != this.dimension) {
+                if (StructureConfig.dim(structureConfig) != this.parent.getDimension()) {
                     continue;
                 }
                 int regionSizeBlocks = StructureConfig.regionSize(structureConfig) << 4;
@@ -389,7 +380,7 @@ public class LootSearchScreen extends Screen {
                 StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
                 for (int regionX = minRegionX; regionX <= maxRegionX; regionX++) {
                     for (int regionZ = minRegionZ; regionZ <= maxRegionZ; regionZ++) {
-                        if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionX, regionZ, structurePos) == 0) {
+                        if (Cubiomes.getStructurePos(structure, this.parent.getVersion(), this.parent.getSeed(), regionX, regionZ, structurePos) == 0) {
                             continue;
                         }
                         int posX = Pos.x(structurePos);
@@ -403,12 +394,12 @@ public class LootSearchScreen extends Screen {
                             continue;
                         }
                         int biome = Cubiomes.getBiomeAt(generator, 4, posX >> 2, 320 >> 2, posZ >> 2);
-                        Cubiomes.getVariant(structureVariant, structure, this.version, this.seed, posX, posZ, biome);
+                        Cubiomes.getVariant(structureVariant, structure, this.parent.getVersion(), this.parent.getSeed(), posX, posZ, biome);
                         biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
-                        if (Cubiomes.getStructureSaltConfig(structure, this.version, biome, structureSaltConfig) == 0) {
+                        if (Cubiomes.getStructureSaltConfig(structure, this.parent.getVersion(), biome, structureSaltConfig) == 0) {
                             continue;
                         }
-                        int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, this.version, this.seed, posX, posZ);
+                        int numPieces = Cubiomes.getStructurePieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, structure, structureSaltConfig, structureVariant, this.parent.getVersion(), this.parent.getSeed(), posX, posZ);
                         if (numPieces <= 0) {
                             continue;
                         }
@@ -422,7 +413,7 @@ public class LootSearchScreen extends Screen {
                             MemorySegment lootSeeds = Piece.lootSeeds(piece);
                             for (int chestIdx = 0; chestIdx < chestCount; chestIdx++) {
                                 MemorySegment lootTable = lootTables.getAtIndex(ValueLayout.ADDRESS, chestIdx).reinterpret(Long.MAX_VALUE);
-                                if (Cubiomes.init_loot_table_name(ltcPtr, lootTable, this.version) == 0) {
+                                if (Cubiomes.init_loot_table_name(ltcPtr, lootTable, this.parent.getVersion()) == 0) {
                                     continue;
                                 }
                                 MemorySegment lootTableContext = ltcPtr.get(ValueLayout.ADDRESS, 0).reinterpret(LootTableContext.sizeof());
@@ -450,9 +441,7 @@ public class LootSearchScreen extends Screen {
     public void onClose() {
         super.onClose();
         this.executor.close(() -> {});
-        if (this.minecraft != null) {
-            this.minecraft.setScreen(this.parent);
-        }
+        this.minecraft.setScreen(this.parent);
     }
 
     @Override
@@ -475,7 +464,7 @@ public class LootSearchScreen extends Screen {
             return false;
         }
         List<ItemResult> filteredResults = this.getFilteredResults();
-        int index = this.resultsScroll + (int) ((mouseY - listTop) / LIST_ROW_HEIGHT);
+        int index = this.resultsScroll + (mouseY - listTop) / LIST_ROW_HEIGHT;
         if (index >= 0 && index < filteredResults.size()) {
             this.selectedItem = filteredResults.get(index);
             this.structureScroll = 0;
@@ -512,7 +501,7 @@ public class LootSearchScreen extends Screen {
         int structureListRight = this.width - LIST_PADDING;
         int structureListBottom = structureListTop + structureListHeight;
         if (mouseX >= detailsLeft && mouseX <= structureListRight && mouseY >= structureListTop && mouseY <= structureListBottom && this.selectedItem != null) {
-            List<StructureEntry> structures = this.selectedItem.sortedStructures(this.structureSortMode, this.playerPos);
+            List<StructureEntry> structures = this.selectedItem.sortedStructures(this.structureSortMode, this.parent.getPlayerPos());
             int visibleRows = Math.max(1, structureListHeight / LIST_ROW_HEIGHT);
             int maxScroll = Math.max(0, structures.size() - visibleRows);
             this.structureScroll = Mth.clamp(this.structureScroll + delta, 0, maxScroll);
@@ -648,7 +637,7 @@ public class LootSearchScreen extends Screen {
             return this.itemResults;
         }
         return this.itemResults.stream()
-            .filter(result -> result.displayName(this.version).toLowerCase().contains(query))
+            .filter(result -> result.displayName(this.parent.getVersion()).toLowerCase().contains(query))
             .toList();
     }
 

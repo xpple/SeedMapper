@@ -16,7 +16,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 
 import java.time.Duration;
@@ -81,10 +80,10 @@ public class Configs {
     }
 
     @Config(setter = @Config.Setter("setPixelsPerBiome"))
-    public static float PixelsPerBiome = 4.0F;
+    public static int PixelsPerBiome = 4;
 
-    private static void setPixelsPerBiome(float pixelsPerBiome) {
-        PixelsPerBiome = Mth.clamp(pixelsPerBiome, SeedMapScreen.MIN_PIXELS_PER_BIOME, SeedMapScreen.MAX_PIXELS_PER_BIOME);
+    private static void setPixelsPerBiome(int pixelsPerBiome) {
+        PixelsPerBiome = Math.clamp(pixelsPerBiome, SeedMapScreen.MIN_PIXELS_PER_BIOME, SeedMapScreen.MAX_PIXELS_PER_BIOME);
     }
 
     @Config(setter = @Config.Setter("setMinimapOffsetX"))

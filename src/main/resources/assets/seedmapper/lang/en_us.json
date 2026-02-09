@@ -110,7 +110,7 @@
   "seedMap.chestLoot.extraInfo.lootTable": "Loot table: %s",
   "seedMap.chestLoot.extraInfo.lootSeed": "Loot seed: %s",
   "seedMap.chestLoot.stewEffect": "%s (%s seconds)",
-  "seedMap.coordinatesCopied": "%s (coordinates copied!)",
+  "seedMap.coordinatesCopied": "Coordinates copied!",
   "seedMap.teleportEditBoxX": "Edit box X coordinate",
   "seedMap.teleportEditBoxZ": "Edit box Z coordinate",
   "seedMap.waypointNameEditBox": "Waypoint name edit box",
@@ -139,7 +139,7 @@
   "seedMap.lootSearch.foundTypes": "Found %d item types.",
   "seedMap.lootSearch.sort": "Sort: %s",
   "seedMap.lootSearch.sort.count": "Count",
-  "seedMap.lootSearch.sort.distance": "Distance"
+  "seedMap.lootSearch.sort.distance": "Distance",
 
   "seedMap.clickToCopy": "Click to copy"
 }
