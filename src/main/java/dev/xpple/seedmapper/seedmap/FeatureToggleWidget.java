@@ -14,7 +14,7 @@ public class FeatureToggleWidget extends Button {
     public FeatureToggleWidget(MapFeature feature, int x, int y) {
         super(x, y, feature.getDefaultTexture().width(), feature.getDefaultTexture().height(), Component.literal(feature.getName()), FeatureToggleWidget::onButtonPress, DEFAULT_NARRATION);
         this.feature = feature;
-        this.setTooltip(Tooltip.create(Component.literal(this.feature.getName())));
+        this.setTooltip(Tooltip.create(this.message));
     }
 
     @Override

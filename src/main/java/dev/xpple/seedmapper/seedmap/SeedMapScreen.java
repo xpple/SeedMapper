@@ -43,9 +43,8 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -76,6 +75,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
@@ -105,7 +105,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.IntSupplier;
 import java.util.function.ToIntBiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -151,20 +150,22 @@ public class SeedMapScreen extends Screen {
     public static final int BIOME_SCALE = 4;
     public static final int SCALED_CHUNK_SIZE = LevelChunkSection.SECTION_WIDTH / BIOME_SCALE;
 
-    private static final int HORIZONTAL_PADDING = 50;
-    private static final int VERTICAL_PADDING = 50;
+    private static final int TOP_PADDING = 20;
+    private static final int BOTTOM_PADDING = 20;
 
     public static final int MIN_PIXELS_PER_BIOME = 1;
     public static final int MAX_PIXELS_PER_BIOME = 100;
 
-    private static final int HORIZONTAL_FEATURE_TOGGLE_SPACING = 5;
+    private static final int HORIZONTAL_FEATURE_TOGGLE_SPACING = 1;
     private static final int VERTICAL_FEATURE_TOGGLE_SPACING = 1;
-    private static final int FEATURE_TOGGLE_HEIGHT = 20;
 
-    private static final int TELEPORT_FIELD_WIDTH = 70;
-    private static final int WAYPOINT_NAME_FIELD_WIDTH = 100;
+    private static final net.minecraft.world.item.ItemStack LOOT_SEARCH_ICON_ITEM = Items.CHEST.getDefaultInstance();
 
-    private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
+    private static int tileSizePixels() {
+        return TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
+    }
+
+    private static final double FEATURE_TOGGLE_LOWER_PADDING_FACTOR = 0.95;
 
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, ChunkStructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
@@ -213,13 +214,17 @@ public class SeedMapScreen extends Screen {
 
     protected int centerX;
     protected int centerY;
+    private int leftPadding;
     private int seedMapWidth;
     private int seedMapHeight;
 
+    /// A list of all features that can have their appearance on the map toggled on or off.
     private final List<MapFeature> toggleableFeatures;
-    private final int featureIconsCombinedWidth;
+    /// The combined height of the icons of _all_ toggleable features. Includes padding.
+    private final int featureIconsCombinedHeight;
 
-    private final ObjectSet<FeatureWidget> featureWidgets = new ObjectOpenHashSet<>();
+    ///  A list of all features currently on rendered screen. Used for click detection.
+    private final ObjectList<FeatureWidget> featureWidgets = new ObjectArrayList<>();
 
     private QuartPos2 mouseQuart;
 
@@ -304,9 +309,9 @@ public class SeedMapScreen extends Screen {
                 });
         }
 
-        this.featureIconsCombinedWidth = this.toggleableFeatures.stream()
-            .map(feature -> feature.getDefaultTexture().width())
-            .reduce((l, r) -> l + HORIZONTAL_FEATURE_TOGGLE_SPACING + r)
+        this.featureIconsCombinedHeight = this.toggleableFeatures.stream()
+            .map(feature -> feature.getDefaultTexture().height())
+            .reduce((l, r) -> l + VERTICAL_FEATURE_TOGGLE_SPACING + r)
             .orElseThrow();
 
         this.playerPos = playerPos;
@@ -323,42 +328,56 @@ public class SeedMapScreen extends Screen {
         this.centerX = this.width / 2;
         this.centerY = this.height / 2;
 
-        this.seedMapWidth = 2 * (this.centerX - this.horizontalPadding());
-        this.seedMapHeight = 2 * (this.centerY - this.verticalPadding());
+        this.seedMapHeight = this.height - this.topPadding() - BOTTOM_PADDING - 1;
+        if (!this.isMinimap()) {
+            this.leftPadding = this.createFeatureToggles();
+        }
+        this.seedMapWidth = this.width - this.leftPadding();
 
         if (!this.isMinimap()) {
-            this.createFeatureToggles();
             this.createTeleportField();
             this.createWaypointNameField();
+
+            ItemIconButton lootSearchButton = new ItemIconButton(this.width - ItemIconButton.ICON_SIZE - 1, this.topPadding() - ItemIconButton.ICON_SIZE - 1, LOOT_SEARCH_ICON_ITEM, Component.literal("Loot Search"), button -> {
+                this.minecraft.setScreen(new LootSearchScreen(SeedMapScreen.this));
+            });
+            this.addRenderableWidget(lootSearchButton);
 
             this.enchantmentsRegistry = this.minecraft.player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
             this.mobEffectRegistry = this.minecraft.player.registryAccess().lookupOrThrow(Registries.MOB_EFFECT);
         }
-   }
+    }
+
+    private boolean isOverMap(double mouseX, double mouseY) {
+        return mouseX >= this.leftPadding() && mouseX <= this.leftPadding() + this.seedMapWidth
+            && mouseY >= this.topPadding() && mouseY <= this.topPadding() + this.seedMapHeight;
+    }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         // draw title
         Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(this.seed)), Cubiomes.mc2str(this.version).getString(0), ComponentUtils.formatGeneratorFlags(this.generatorFlags));
-        guiGraphics.drawString(this.font, seedComponent, this.horizontalPadding(), this.verticalPadding() - this.font.lineHeight - 1, -1);
+        guiGraphics.drawString(this.font, seedComponent, this.leftPadding(), this.topPadding() - this.font.lineHeight - 1, -1);
         this.renderBiomes(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.nextStratum();
         this.renderFeatures(guiGraphics, mouseX, mouseY, partialTick);
-        // draw hovered coordinates and biome
-        MutableComponent coordinates = accent("x: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
-        OptionalInt optionalBiome = getBiome(this.mouseQuart);
-        if (optionalBiome.isPresent()) {
-            coordinates = coordinates.append(" [%s]".formatted(Cubiomes.biome2str(this.version, optionalBiome.getAsInt()).getString(0)));
-        }
+
+        this.teleportEditBoxX.setHint(Component.literal("X: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()))));
+        this.teleportEditBoxZ.setHint(Component.literal("Z: %d".formatted(QuartPos.toBlock(this.mouseQuart.z()))));
+
         if (this.displayCoordinatesCopiedTicks > 0) {
-            coordinates = Component.translatable("seedMap.coordinatesCopied", coordinates);
+            guiGraphics.setTooltipForNextFrame(Component.translatable("seedMap.coordinatesCopied"), mouseX, mouseY);
+        } else if (this.isOverMap(mouseX, mouseY)) {
+            OptionalInt optionalBiome = this.getBiome(this.mouseQuart);
+            if (optionalBiome.isPresent()) {
+                guiGraphics.setTooltipForNextFrame(Component.literal(Cubiomes.biome2str(this.version, optionalBiome.getAsInt()).getString(0)), mouseX, mouseY);
+            }
         }
-        guiGraphics.drawString(this.font, coordinates, this.horizontalPadding(), this.verticalPadding() + this.seedMapHeight + 1, -1);
     }
 
     protected void renderBiomes(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
+        int tileSizePixels = tileSizePixels();
         int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
         int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
 
@@ -387,7 +406,8 @@ public class SeedMapScreen extends Screen {
    }
 
    protected void renderFeatures(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-       int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
+       this.featureWidgets.clear();
+       int tileSizePixels = tileSizePixels();
        int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
        int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
 
@@ -534,35 +554,35 @@ public class SeedMapScreen extends Screen {
     private void drawTile(GuiGraphics guiGraphics, Tile tile) {
         TilePos tilePos = tile.pos();
         QuartPos2f relTileQuart = QuartPos2f.fromQuartPos(QuartPos2.fromTilePos(tilePos)).subtract(this.centerQuart);
-        int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
+        int tileSizePixels = tileSizePixels();
         int minX = this.centerX + Mth.floor(Configs.PixelsPerBiome * relTileQuart.x());
         int minY = this.centerY + Mth.floor(Configs.PixelsPerBiome * relTileQuart.z());
         int maxX = minX + tileSizePixels;
         int maxY = minY + tileSizePixels;
 
-        if (maxX < this.horizontalPadding() || minX > this.horizontalPadding() + this.seedMapWidth) {
+        if (maxX < this.leftPadding() || minX > this.leftPadding() + this.seedMapWidth) {
             return;
         }
-        if (maxY < this.verticalPadding() || minY > this.verticalPadding() + this.seedMapHeight) {
+        if (maxY < this.topPadding() || minY > this.topPadding() + this.seedMapHeight) {
             return;
         }
 
         float u0, u1, v0, v1;
-        if (minX < this.horizontalPadding()) {
-            u0 = (float) (this.horizontalPadding() - minX) / tileSizePixels;
-            minX = this.horizontalPadding();
+        if (minX < this.leftPadding()) {
+            u0 = (float) (this.leftPadding() - minX) / tileSizePixels;
+            minX = this.leftPadding();
         } else u0 = 0;
-        if (maxX > this.horizontalPadding() + this.seedMapWidth) {
-            u1 = 1 - ((float) (maxX - this.horizontalPadding() - this.seedMapWidth) / tileSizePixels);
-            maxX = this.horizontalPadding() + this.seedMapWidth;
+        if (maxX > this.leftPadding() + this.seedMapWidth) {
+            u1 = 1 - ((float) (maxX - this.leftPadding() - this.seedMapWidth) / tileSizePixels);
+            maxX = this.leftPadding() + this.seedMapWidth;
         } else u1 = 1;
-        if (minY < this.verticalPadding()) {
-            v0 = (float) (this.verticalPadding() - minY) / tileSizePixels;
-            minY = this.verticalPadding();
+        if (minY < this.topPadding()) {
+            v0 = (float) (this.topPadding() - minY) / tileSizePixels;
+            minY = this.topPadding();
         } else v0 = 0;
-        if (maxY > this.verticalPadding() + this.seedMapHeight) {
-            v1 = 1 - ((float) (maxY - this.verticalPadding() - this.seedMapHeight) / tileSizePixels);
-            maxY = this.verticalPadding() + this.seedMapHeight;
+        if (maxY > this.topPadding() + this.seedMapHeight) {
+            v1 = 1 - ((float) (maxY - this.topPadding() - this.seedMapHeight) / tileSizePixels);
+            maxY = this.topPadding() + this.seedMapHeight;
         } else v1 = 1;
 
         guiGraphics.submitBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), tile.texture().getSampler(), minX, minY, maxX, maxY, u0, u1, v0, v1, 0xFF_FFFFFF);
@@ -613,14 +633,9 @@ public class SeedMapScreen extends Screen {
     }
 
     private void drawFeatureIcons(GuiGraphics guiGraphics) {
-        for (ObjectIterator<FeatureWidget> iterator = this.featureWidgets.iterator(); iterator.hasNext();) {
-            FeatureWidget widget = iterator.next();
-            if (Configs.ToggledFeatures.contains(widget.feature)) {
-                MapFeature.Texture texture = widget.texture();
-                this.drawIcon(guiGraphics, texture.identifier(), widget.x, widget.y, texture.width(), texture.height(), 0xFF_FFFFFF);
-            } else {
-                iterator.remove();
-            }
+        for (FeatureWidget widget : this.featureWidgets) {
+            MapFeature.Texture texture = widget.texture();
+            this.drawIcon(guiGraphics, texture.identifier(), widget.x, widget.y, texture.width(), texture.height(), 0xFF_FFFFFF);
         }
     }
 
@@ -633,7 +648,7 @@ public class SeedMapScreen extends Screen {
         int playerMinY = this.centerY + Mth.floor(Configs.PixelsPerBiome * relPlayerQuart.z()) - 10;
         int playerMaxX = playerMinX + 20;
         int playerMaxY = playerMinY + 20;
-        if (playerMinX < this.horizontalPadding() || playerMaxX > this.horizontalPadding() + this.seedMapWidth || playerMinY < this.verticalPadding() || playerMaxY > this.verticalPadding() + this.seedMapHeight) {
+        if (playerMinX < this.leftPadding() || playerMaxX > this.leftPadding() + this.seedMapWidth || playerMinY < this.topPadding() || playerMaxY > this.topPadding() + this.seedMapHeight) {
             return;
         }
         PlayerFaceRenderer.draw(guiGraphics, this.minecraft.player.getSkin(), playerMinX, playerMinY, 20);
@@ -652,34 +667,36 @@ public class SeedMapScreen extends Screen {
         ;
         boolean withinBounds = Stream.of(new Vector2f(20, 0), new Vector2f(20, 20), new Vector2f(0, 20), new Vector2f(0, 0))
             .map(transform::transformPosition)
-            .allMatch(v -> v.x >= this.horizontalPadding() && v.x <= this.horizontalPadding() + this.seedMapWidth &&
-                v.y >= this.verticalPadding() && v.y <= this.verticalPadding() + this.seedMapHeight);
+            .allMatch(v -> isOverMap(v.x, v.y));
         if (withinBounds) {
             drawIconStatic(guiGraphics, DIRECTION_ARROW_TEXTURE, 0, 0, 20, 20, 0xFF_FFFFFF);
         }
         guiGraphics.pose().popMatrix();
     }
 
-    private void createFeatureToggles() {
+    /// @return the amount of vertical pixels that are reserved for the feature toggles
+    private int createFeatureToggles() {
         // TODO: replace with Gatherers API?
         // TODO: only calculate on resize?
-        int rows = Math.ceilDiv(this.featureIconsCombinedWidth, this.seedMapWidth);
-        int togglesPerRow = Math.ceilDiv(this.toggleableFeatures.size(), rows);
-        int toggleMinY = 1;
-        for (int row = 0; row < rows - 1; row++) {
-            this.createFeatureTogglesInner(row, togglesPerRow, togglesPerRow, this.horizontalPadding(), toggleMinY);
-            toggleMinY += FEATURE_TOGGLE_HEIGHT + VERTICAL_FEATURE_TOGGLE_SPACING;
+        int columns = Math.ceilDiv(this.featureIconsCombinedHeight, this.seedMapHeight);
+        int togglesPerColumn = Math.ceilDiv(this.toggleableFeatures.size(), columns);
+        int toggleMinX = 1;
+        for (int column = 0; column < columns - 1; column++) {
+            this.createFeatureTogglesInner(column, togglesPerColumn, togglesPerColumn, toggleMinX, this.topPadding());
+            toggleMinX += 20 + HORIZONTAL_FEATURE_TOGGLE_SPACING;
         }
-        int togglesInLastRow = this.toggleableFeatures.size() - togglesPerRow * (rows - 1);
-        this.createFeatureTogglesInner(rows - 1, togglesPerRow, togglesInLastRow, this.horizontalPadding(), toggleMinY);
+        int togglesInLastColumn = this.toggleableFeatures.size() - togglesPerColumn * (columns - 1);
+        this.createFeatureTogglesInner(columns - 1, togglesPerColumn, togglesInLastColumn, toggleMinX, this.topPadding());
+
+        return toggleMinX + 20 + HORIZONTAL_FEATURE_TOGGLE_SPACING;
     }
 
-    private void createFeatureTogglesInner(int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
+    private void createFeatureTogglesInner(int column, int togglesPerColumn, int maxToggles, int toggleMinX, int toggleMinY) {
         for (int toggle = 0; toggle < maxToggles; toggle++) {
-            MapFeature feature = this.toggleableFeatures.get(row * togglesPerRow + toggle);
+            MapFeature feature = this.toggleableFeatures.get(column * togglesPerColumn + toggle);
             MapFeature.Texture featureIcon = feature.getDefaultTexture();
             this.addRenderableWidget(new FeatureToggleWidget(feature, toggleMinX, toggleMinY));
-            toggleMinX += featureIcon.width() + HORIZONTAL_FEATURE_TOGGLE_SPACING;
+            toggleMinY += featureIcon.height() + VERTICAL_FEATURE_TOGGLE_SPACING;
         }
     }
 
@@ -726,7 +743,7 @@ public class SeedMapScreen extends Screen {
         }
 
         BlockPos pos = new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));
-        OptionalInt optionalBiome = getBiome(QuartPos2.fromBlockPos(pos));
+        OptionalInt optionalBiome = this.getBiome(QuartPos2.fromBlockPos(pos));
         MapFeature.Texture texture;
         if (optionalBiome.isEmpty()) {
             texture = feature.getDefaultTexture();
@@ -769,7 +786,7 @@ public class SeedMapScreen extends Screen {
     private BitSet calculateCanyonData(TilePos tilePos) {
         ToIntBiFunction<Integer, Integer> biomeFunction;
         if (this.version <= Cubiomes.MC_1_17()) {
-            biomeFunction = (chunkX, chunkZ) -> getBiome(new QuartPos2(QuartPos.fromSection(chunkX), QuartPos.fromSection(chunkZ))).orElseGet(() -> Cubiomes.getBiomeAt(this.biomeGenerator, 4, chunkX << 2, 0, chunkZ << 2));
+            biomeFunction = (chunkX, chunkZ) -> this.getBiome(new QuartPos2(QuartPos.fromSection(chunkX), QuartPos.fromSection(chunkZ))).orElseGet(() -> Cubiomes.getBiomeAt(this.biomeGenerator, 4, chunkX << 2, 0, chunkZ << 2));
         } else {
             biomeFunction = (_, _) -> -1;
         }
@@ -819,29 +836,24 @@ public class SeedMapScreen extends Screen {
     }
 
     private void createTeleportField() {
-        this.teleportEditBoxX = new EditBox(this.font, this.width / 2 - TELEPORT_FIELD_WIDTH, this.verticalPadding() + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.teleportEditBoxX"));
+        this.teleportEditBoxX = new EditBox(this.font, this.leftPadding(), this.height - BOTTOM_PADDING, this.seedMapWidth / 4, BOTTOM_PADDING, Component.translatable("seedMap.teleportEditBoxX"));
         this.teleportEditBoxX.setHint(Component.literal("X"));
         this.teleportEditBoxX.setMaxLength(9);
         this.addRenderableWidget(this.teleportEditBoxX);
-        this.teleportEditBoxZ = new EditBox(this.font, this.width / 2, this.verticalPadding() + this.seedMapHeight + 1, TELEPORT_FIELD_WIDTH, 20, Component.translatable("seedMap.teleportEditBoxZ"));
+        this.teleportEditBoxZ = new EditBox(this.font, this.leftPadding() + this.seedMapWidth / 4, this.height - BOTTOM_PADDING, this.seedMapWidth / 4, BOTTOM_PADDING, Component.translatable("seedMap.teleportEditBoxZ"));
         this.teleportEditBoxZ.setHint(Component.literal("Z"));
         this.teleportEditBoxZ.setMaxLength(9);
         this.addRenderableWidget(this.teleportEditBoxZ);
     }
 
     private void createWaypointNameField() {
-        this.waypointNameEditBox = new EditBox(this.font, this.horizontalPadding() + this.seedMapWidth - WAYPOINT_NAME_FIELD_WIDTH, this.verticalPadding() + this.seedMapHeight + 1, WAYPOINT_NAME_FIELD_WIDTH, 20, Component.translatable("seedMap.waypointNameEditBox"));
+        this.waypointNameEditBox = new EditBox(this.font, this.leftPadding() + this.seedMapWidth / 2, this.height - BOTTOM_PADDING, this.seedMapWidth / 2, BOTTOM_PADDING, Component.translatable("seedMap.waypointNameEditBox"));
         this.waypointNameEditBox.setHint(Component.literal("Waypoint name"));
         this.addRenderableWidget(this.waypointNameEditBox);
     }
 
     protected void moveCenter(QuartPos2f newCenter) {
         this.centerQuart = newCenter;
-
-        this.featureWidgets.removeIf(widget -> {
-            widget.updatePosition();
-            return !widget.withinBounds();
-        });
 
         if (this.markerWidget != null) {
             this.markerWidget.updatePosition();
@@ -870,7 +882,7 @@ public class SeedMapScreen extends Screen {
     }
 
     private void handleMapMouseMoved(double mouseX, double mouseY) {
-        if (mouseX < this.horizontalPadding() || mouseX > this.horizontalPadding() + this.seedMapWidth || mouseY < this.verticalPadding() || mouseY > this.verticalPadding() + this.seedMapHeight) {
+        if (!this.isOverMap(mouseX, mouseY)) {
             return;
         }
 
@@ -891,11 +903,6 @@ public class SeedMapScreen extends Screen {
 
         Configs.PixelsPerBiome = Math.max((int) (currentScroll * MAX_PIXELS_PER_BIOME + 0.5), MIN_PIXELS_PER_BIOME);
 
-        this.featureWidgets.removeIf(widget -> {
-            widget.updatePosition();
-            return !widget.withinBounds();
-        });
-
         if (this.markerWidget != null) {
             this.markerWidget.updatePosition();
         }
@@ -910,7 +917,7 @@ public class SeedMapScreen extends Screen {
         }
         double mouseX = mouseButtonEvent.x();
         double mouseY = mouseButtonEvent.y();
-        if (mouseX < this.horizontalPadding() || mouseX > this.horizontalPadding() + this.seedMapWidth || mouseY < this.verticalPadding() || mouseY > this.verticalPadding() + this.seedMapHeight) {
+        if (!this.isOverMap(mouseX, mouseY)) {
             return false;
         }
 
@@ -951,7 +958,7 @@ public class SeedMapScreen extends Screen {
         }
         double mouseX = mouseButtonEvent.x();
         double mouseY = mouseButtonEvent.y();
-        if (mouseX < this.horizontalPadding() || mouseX > this.horizontalPadding() + this.seedMapWidth || mouseY < this.verticalPadding() || mouseY > this.verticalPadding() + this.seedMapHeight) {
+        if (!this.isOverMap(mouseX, mouseY)) {
             return false;
         }
         Optional<FeatureWidget> optionalFeatureWidget = this.featureWidgets.stream()
@@ -1057,7 +1064,7 @@ public class SeedMapScreen extends Screen {
         }
         double mouseX = mouseButtonEvent.x();
         double mouseY = mouseButtonEvent.y();
-        if (mouseX < this.horizontalPadding() || mouseX > this.horizontalPadding() + this.seedMapWidth || mouseY < this.verticalPadding() || mouseY > this.verticalPadding() + this.seedMapHeight) {
+        if (!this.isOverMap(mouseX, mouseY)) {
             return false;
         }
         this.minecraft.keyboardHandler.setClipboard("%d ~ %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
@@ -1072,7 +1079,7 @@ public class SeedMapScreen extends Screen {
         }
         double mouseX = mouseButtonEvent.x();
         double mouseY = mouseButtonEvent.y();
-        if (mouseX < this.horizontalPadding() || mouseX > this.horizontalPadding() + this.seedMapWidth || mouseY < this.verticalPadding() || mouseY > this.verticalPadding() + this.seedMapHeight) {
+        if (!this.isOverMap(mouseX, mouseY)) {
             return false;
         }
 
@@ -1099,7 +1106,11 @@ public class SeedMapScreen extends Screen {
         if (keyCode != InputConstants.KEY_RETURN) {
             return false;
         }
-        if (!this.teleportEditBoxX.isActive() && !this.teleportEditBoxZ.isActive()) {
+        if (this.teleportEditBoxX == null || this.teleportEditBoxZ == null) {
+            return false;
+        }
+        boolean hasTeleportFocus = this.teleportEditBoxX.isActive() || this.teleportEditBoxZ.isActive();
+        if (!hasTeleportFocus) {
             return false;
         }
         int x, z;
@@ -1107,17 +1118,19 @@ public class SeedMapScreen extends Screen {
             x = Integer.parseInt(this.teleportEditBoxX.getValue());
             z = Integer.parseInt(this.teleportEditBoxZ.getValue());
         } catch (NumberFormatException _) {
+            this.clearEntryBoxFocus();
             return false;
         }
         if (x < -Level.MAX_LEVEL_SIZE || x > Level.MAX_LEVEL_SIZE) {
+            this.clearEntryBoxFocus();
             return false;
         }
         if (z < -Level.MAX_LEVEL_SIZE || z > Level.MAX_LEVEL_SIZE) {
+            this.clearEntryBoxFocus();
             return false;
         }
         this.moveCenter(new QuartPos2f(QuartPos.fromBlock(x), QuartPos.fromBlock(z)));
-        this.teleportEditBoxX.setValue("");
-        this.teleportEditBoxZ.setValue("");
+        this.clearEntryBoxFocus();
         return true;
     }
 
@@ -1148,7 +1161,20 @@ public class SeedMapScreen extends Screen {
             return false;
         }
         this.waypointNameEditBox.setValue("");
+        this.clearEntryBoxFocus();
         return true;
+    }
+
+    private void clearEntryBoxFocus() {
+        if (this.teleportEditBoxX != null) {
+            this.teleportEditBoxX.setFocused(false);
+        }
+        if (this.teleportEditBoxZ != null) {
+            this.teleportEditBoxZ.setFocused(false);
+        }
+        if (this.waypointNameEditBox != null) {
+            this.waypointNameEditBox.setFocused(false);
+        }
     }
 
     @Override
@@ -1202,10 +1228,10 @@ public class SeedMapScreen extends Screen {
             int maxX = minX + this.width();
             int maxY = minY + this.height();
 
-            if (maxX >= horizontalPadding() + seedMapWidth || maxY >= verticalPadding() + seedMapHeight) {
+            if (maxX >= leftPadding() + seedMapWidth || maxY >= topPadding() + seedMapHeight) {
                 return false;
             }
-            if (minX < horizontalPadding() || minY < verticalPadding()) {
+            if (minX < leftPadding() || minY < topPadding()) {
                 return false;
             }
             return true;
@@ -1245,7 +1271,7 @@ public class SeedMapScreen extends Screen {
         pose.popMatrix();
     }
 
-    private static void drawIconStatic(GuiGraphics guiGraphics, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int colour) {
+    public static void drawIconStatic(GuiGraphics guiGraphics, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int colour) {
         // Skip intersection checks (GuiRenderState.hasIntersection) you would otherwise get when calling
         // GuiGraphics.blit as these checks incur a significant performance hit
         AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(identifier);
@@ -1271,16 +1297,20 @@ public class SeedMapScreen extends Screen {
         this.playerRotation = vec2;
     }
 
+    public BlockPos getPlayerPos() {
+        return this.playerPos;
+    }
+
     public Vec2 getPlayerRotation() {
         return this.playerRotation;
     }
 
-    protected int horizontalPadding() {
-        return HORIZONTAL_PADDING;
+    protected int leftPadding() {
+        return this.leftPadding;
     }
 
-    protected int verticalPadding() {
-        return VERTICAL_PADDING;
+    protected int topPadding() {
+        return TOP_PADDING;
     }
 
     protected long getSeed() {

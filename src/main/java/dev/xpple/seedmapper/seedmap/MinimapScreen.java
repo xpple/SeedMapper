@@ -42,18 +42,18 @@ public class MinimapScreen extends SeedMapScreen {
             renderContentHeight = diagonal;
         }
         // ensures super.seedMapWidth == renderContentWidth
-        int renderWidth = renderContentWidth + 2 * this.horizontalPadding();
+        int renderWidth = renderContentWidth + 2 * this.leftPadding();
         // ensures super.seedMapHeight == renderContentHeight
-        int renderHeight = renderContentHeight + 2 * this.verticalPadding();
+        int renderHeight = renderContentHeight + 2 * this.topPadding();
 
         this.initForOverlay(renderWidth, renderHeight);
 
-        guiGraphics.enableScissor(this.horizontalPadding(), this.verticalPadding(), this.horizontalPadding() + contentWidth, this.verticalPadding() + contentHeight);
+        guiGraphics.enableScissor(this.leftPadding(), this.topPadding(), this.leftPadding() + contentWidth, this.topPadding() + contentHeight);
 
         var pose = guiGraphics.pose();
         pose.pushMatrix();
         if (rotateMinimap) {
-            pose.translate(-this.centerX + (float) (this.horizontalPadding() + contentWidth / 2), -this.centerY + (float) (this.verticalPadding() + contentHeight / 2));
+            pose.translate(-this.centerX + (float) (this.leftPadding() + contentWidth / 2), -this.centerY + (float) (this.topPadding() + contentHeight / 2));
             pose.translate(this.centerX, this.centerY);
             pose.rotate((float) (-Math.toRadians(this.getPlayerRotation().y) + Math.PI));
             pose.translate(-this.centerX, -this.centerY);
@@ -64,7 +64,7 @@ public class MinimapScreen extends SeedMapScreen {
         pose.popMatrix();
 
         if (Configs.RotateMinimap) {
-            this.drawCenterCross(guiGraphics, this.horizontalPadding() + contentWidth / 2, this.verticalPadding() + contentHeight / 2);
+            this.drawCenterCross(guiGraphics, this.leftPadding() + contentWidth / 2, this.topPadding() + contentHeight / 2);
         }
 
         guiGraphics.disableScissor();
@@ -100,12 +100,12 @@ public class MinimapScreen extends SeedMapScreen {
     }
 
     @Override
-    protected int horizontalPadding() {
+    protected int leftPadding() {
         return Configs.MinimapOffsetX;
     }
 
     @Override
-    protected int verticalPadding() {
+    protected int topPadding() {
         return Configs.MinimapOffsetY;
     }
 }
