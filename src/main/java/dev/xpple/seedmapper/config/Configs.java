@@ -12,6 +12,7 @@ import dev.xpple.seedmapper.seedmap.SeedMapScreen;
 import dev.xpple.seedmapper.util.BaritoneIntegration;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
+import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -43,7 +44,7 @@ public class Configs {
     @Config(putter = @Config.Putter("none"), adder = @Config.Adder(value = "addSavedSeed", type = SeedIdentifier.class), chatRepresentation = "displaySavedSeeds")
     public static Map<String, SeedIdentifier> SavedSeeds = new HashMap<>();
     private static void addSavedSeed(SeedIdentifier seed) {
-        String key = Minecraft.getInstance().getConnection().getConnection().getRemoteAddress().toString();
+        String key = SimpleWaypointsAPI.getInstance().getWorldIdentifier(Minecraft.getInstance());
         SavedSeeds.put(key, seed);
     }
     private static Component displaySavedSeeds() {

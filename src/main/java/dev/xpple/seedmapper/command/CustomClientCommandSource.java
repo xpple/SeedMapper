@@ -10,6 +10,7 @@ import dev.xpple.seedmapper.command.arguments.VersionArgument;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.util.SeedDatabaseHelper;
 import dev.xpple.seedmapper.util.SeedIdentifier;
+import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.Optionull;
 import net.minecraft.SharedConstants;
@@ -132,10 +133,11 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
                 case COMMAND_SOURCE -> Optionull.map(this.getMeta("seed"), s -> new SeedIdentifier((long) s));
                 case SEED_CONFIG -> Configs.Seed;
                 case SAVED_SEEDS_CONFIG -> {
-                    String key = this.client.getConnection().getConnection().getRemoteAddress().toString();
+                    String key = SimpleWaypointsAPI.getInstance().getWorldIdentifier(this.client);
                     yield Configs.SavedSeeds.get(key);
                 }
                 case ONLINE_DATABASE -> {
+                    // match SeedCrackerX's key format
                     String key = this.client.getConnection().getConnection().getRemoteAddress().toString();
                     yield SeedDatabaseHelper.getSeed(key, this.getWorld().getBiomeManager().biomeZoomSeed);
                 }
