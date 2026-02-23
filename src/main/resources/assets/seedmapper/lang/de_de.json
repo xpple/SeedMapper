@@ -100,8 +100,8 @@
   "config.devMode.comment": "Enables certain debug commands.",
 
   "key.category.seedmapper.seedmapper": "SeedMapper",
-  "key.seedMap": "Seed map",
-  "key.minimap": "Seed minimap",
+  "key.seedMap": "Seed Map",
+  "key.minimap": "Seed MiniMap",
 
   "seedMap.seed": "Seed: %s | %s %s",
   "seedMap.chestLoot.title": "%s loot (%d/%d)",
@@ -112,6 +112,6 @@
   "seedMap.chestLoot.stewEffect": "%s (%s seconds)",
   "seedMap.coordinatesCopied": "%s (coordinates copied!)",
   "seedMap.teleportEditBoxX": "Edit box X coordinate",
-  "seedMap.teleportEditBoxZ": "Edit box Z coordinate",
+  "seedMap.teleportEditBoxZ": "Box Z Koordinate",
   "seedMap.waypointNameEditBox": "Wegpunkt Name edit box"
 }
