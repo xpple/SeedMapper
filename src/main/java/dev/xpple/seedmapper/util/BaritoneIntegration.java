@@ -13,10 +13,20 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+// FIXME: update as soon as MeteorDevelopment/baritone is updated to 26.1
+
 /*
  * This class should NOT be loaded if Baritone is not available.
  */
 public class BaritoneIntegration {
+
+    // FIXME
+    static {
+        if (true) {
+            throw new AssertionError();
+        }
+    }
+
     /*
      * There probably exists a more efficient data structure, but I couldn't find one that really appealed to me.
      * Basically, you want a data structure that implements fast nearest-neighbour searches with popping (i.e. find the
@@ -49,7 +59,8 @@ public class BaritoneIntegration {
         // check goal equality by reference, this makes sure it was the goal from SeedMapper that was completed
         synchronized (CURRENT_GOAL_LOCK) {
             if (goal == currentGoal) {
-                minedBlocks.add(currentGoal.getGoalPos());
+                // FIXME
+                // minedBlocks.add(currentGoal.getGoalPos());
                 setGoalForNextBlock();
             }
         }
@@ -67,7 +78,8 @@ public class BaritoneIntegration {
         Vec3 playerPos = player.position();
         BlockPos closest = targetBlocks.stream().min(Comparator.comparingDouble(b -> b.distToLowCornerSqr(playerPos.x, playerPos.y, playerPos.z))).orElseThrow();
         targetBlocks.remove(closest);
-        currentGoal = new GoalBlock(closest);
+        // FIXME
+        // currentGoal = new GoalBlock(closest);
         // delay configuring the goal until the next tick, otherwise the new goal won't be executed
         Minecraft.getInstance().schedule(() -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(currentGoal));
     }

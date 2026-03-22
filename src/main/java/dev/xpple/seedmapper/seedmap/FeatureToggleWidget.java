@@ -1,7 +1,7 @@
 package dev.xpple.seedmapper.seedmap;
 
 import dev.xpple.seedmapper.config.Configs;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -18,12 +18,12 @@ public class FeatureToggleWidget extends Button {
     }
 
     @Override
-    protected void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractContents(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
         int colour = 0xff_ffffff;
         if (!Configs.ToggledFeatures.contains(this.feature)) {
             colour = ARGB.color(255 >> 1, 255, 255, 255);
         }
-        SeedMapScreen.FeatureWidget.drawFeatureIcon(guiGraphics, this.feature.getDefaultTexture(), this.getX(), this.getY(), colour);
+        SeedMapScreen.FeatureWidget.drawFeatureIcon(guiGraphicsExtractor, this.feature.getDefaultTexture(), this.getX(), this.getY(), colour);
     }
 
     private static void onButtonPress(Button button) {

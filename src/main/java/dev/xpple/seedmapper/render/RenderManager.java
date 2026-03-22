@@ -5,9 +5,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.xpple.seedmapper.config.Configs;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldExtractionContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -73,28 +73,28 @@ public final class RenderManager {
     }
 
     public static void registerEvents() {
-        WorldRenderEvents.END_EXTRACTION.register(RenderManager::extractLines);
-        WorldRenderEvents.END_MAIN.register(RenderManager::renderLines);
+        LevelRenderEvents.END_EXTRACTION.register(RenderManager::extractLines);
+        LevelRenderEvents.END_MAIN.register(RenderManager::renderLines);
     }
 
-    private static void extractLines(WorldExtractionContext worldExtractionContext) {
+    private static void extractLines(LevelExtractionContext levelExtractionContext) {
         Set<Line> extractedLines = new HashSet<>();
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null) {
             return;
         }
         RenderManager.lines.forEach(line -> {
-            ChunkPos chunkPos = new ChunkPos(BlockPos.containing(line.start()));
-            if (level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false) == null) {
+            ChunkPos chunkPos = ChunkPos.containing(BlockPos.containing(line.start()));
+            if (level.getChunk(chunkPos.x(), chunkPos.z(), ChunkStatus.FULL, false) == null) {
                 return;
             }
-            extractedLines.add(line.offset(worldExtractionContext.camera().position().scale(-1)));
+            extractedLines.add(line.offset(levelExtractionContext.camera().position().scale(-1)));
         });
-        worldExtractionContext.worldState().setData(LINES_SET_KEY, extractedLines);
+        levelExtractionContext.levelState().setData(LINES_SET_KEY, extractedLines);
     }
 
-    private static void renderLines(WorldRenderContext worldRenderContext) {
-        Set<Line> extractedLines = worldRenderContext.worldState().getData(LINES_SET_KEY);
+    private static void renderLines(LevelRenderContext levelRenderContext) {
+        Set<Line> extractedLines = levelRenderContext.levelState().getData(LINES_SET_KEY);
         if (extractedLines == null) {
             return;
         }
@@ -107,9 +107,9 @@ public final class RenderManager {
             float green = ARGB.greenFloat(colour);
             float blue = ARGB.blueFloat(colour);
 
-            worldRenderContext.matrices().pushPose();
-            PoseStack.Pose pose = worldRenderContext.matrices().last();
-            VertexConsumer buffer = worldRenderContext.consumers().getBuffer(NoDepthLayer.LINES_NO_DEPTH_LAYER);
+            levelRenderContext.poseStack().pushPose();
+            PoseStack.Pose pose = levelRenderContext.poseStack().last();
+            VertexConsumer buffer = levelRenderContext.bufferSource().getBuffer(NoDepthLayer.LINES_NO_DEPTH_LAYER);
             buffer
                 .addVertex(pose, (float) start.x, (float) start.y, (float) start.z)
                 .setColor(red, green, blue, 1.0F)
@@ -120,7 +120,9 @@ public final class RenderManager {
                 .setColor(red, green, blue, 1.0F)
                 .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
                 .setLineWidth(2);
-            worldRenderContext.matrices().popPose();
+            levelRenderContext.poseStack().popPose();
         });
+
+        levelRenderContext.bufferSource().endBatch();
     }
 }

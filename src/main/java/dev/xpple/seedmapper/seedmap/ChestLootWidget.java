@@ -4,7 +4,7 @@ import com.github.cubiomes.Cubiomes;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.xpple.seedmapper.SeedMapper;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -63,8 +63,8 @@ public class ChestLootWidget {
         }
     }
 
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, Font font) {
-        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CHEST_CONTAINER, this.x, this.y, 0, 0, CHEST_CONTAINER_WIDTH, CHEST_CONTAINER_HEIGHT, CHEST_CONTAINER_WIDTH, CHEST_CONTAINER_HEIGHT);
+    public void render(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, Font font) {
+        guiGraphicsExtractor.blit(RenderPipelines.GUI_TEXTURED, CHEST_CONTAINER, this.x, this.y, 0, 0, CHEST_CONTAINER_WIDTH, CHEST_CONTAINER_HEIGHT, CHEST_CONTAINER_WIDTH, CHEST_CONTAINER_HEIGHT);
 
         ChestLootData chestData = this.chestDataList.get(this.chestIndex);
         String structure = Cubiomes.struct2str(chestData.structure()).getString(0);
@@ -72,12 +72,12 @@ public class ChestLootWidget {
 
         int minX = this.x + 8;
         int minY = this.y + 6;
-        guiGraphics.drawString(font, title, minX, minY, -1);
+        guiGraphicsExtractor.text(font, title, minX, minY, -1);
 
         int titleWidth = font.width(title.getVisualOrderText());
         if (mouseX >= minX && mouseX <= minX + titleWidth && mouseY >= minY && mouseY <= minY + font.lineHeight) {
             List<ClientTooltipComponent> tooltips = this.extraChestInfo.get(this.chestIndex);
-            guiGraphics.renderTooltip(font, tooltips, minX - 4 - 12, this.y - tooltips.size() * font.lineHeight - 8 + 12, DefaultTooltipPositioner.INSTANCE, null);
+            guiGraphicsExtractor.tooltip(font, tooltips, minX - 4 - 12, this.y - tooltips.size() * font.lineHeight - 8 + 12, DefaultTooltipPositioner.INSTANCE, null);
         }
 
         minY += 12;
@@ -89,16 +89,16 @@ public class ChestLootWidget {
                     continue;
                 }
                 int x = minX + column * ITEM_SLOT_SIZE;
-                guiGraphics.renderItem(item, x, y);
-                guiGraphics.renderItemDecorations(font, item, x, y);
+                guiGraphicsExtractor.item(item, x, y);
+                guiGraphicsExtractor.itemDecorations(font, item, x, y);
                 if (mouseX >= x && mouseX <= x + ITEM_SLOT_SIZE && mouseY >= y && mouseY <= y + ITEM_SLOT_SIZE) {
-                    guiGraphics.setTooltipForNextFrame(font, item, mouseX, mouseY);
+                    guiGraphicsExtractor.setTooltipForNextFrame(font, item, mouseX, mouseY);
                 }
             }
         }
 
-        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, BUTTON_TEXTURE, this.x + BUTTON_X_OFFSET, this.y + BUTTON_Y_OFFSET, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, 256, 256);
-        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, BUTTON_TEXTURE, this.x + BUTTON_X_OFFSET + BUTTON_WIDTH, this.y + BUTTON_Y_OFFSET, BUTTON_WIDTH, 0, BUTTON_WIDTH, BUTTON_HEIGHT, 256, 256);
+        guiGraphicsExtractor.blit(RenderPipelines.GUI_TEXTURED, BUTTON_TEXTURE, this.x + BUTTON_X_OFFSET, this.y + BUTTON_Y_OFFSET, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, 256, 256);
+        guiGraphicsExtractor.blit(RenderPipelines.GUI_TEXTURED, BUTTON_TEXTURE, this.x + BUTTON_X_OFFSET + BUTTON_WIDTH, this.y + BUTTON_Y_OFFSET, BUTTON_WIDTH, 0, BUTTON_WIDTH, BUTTON_HEIGHT, 256, 256);
     }
 
     public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubleClick) {

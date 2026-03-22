@@ -38,17 +38,17 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
     private final Entity entity;
     private final Vec3 position;
     private final Vec2 rotation;
-    private final ClientLevel world;
+    private final ClientLevel level;
     private final Map<String, Object> meta;
 
-    public CustomClientCommandSource(ClientPacketListener listener, Minecraft minecraft, Entity entity, Vec3 position, Vec2 rotation, ClientLevel world, PermissionSet permissionSet, Map<String, Object> meta) {
+    public CustomClientCommandSource(ClientPacketListener listener, Minecraft minecraft, Entity entity, Vec3 position, Vec2 rotation, ClientLevel level, PermissionSet permissionSet, Map<String, Object> meta) {
         super(listener, minecraft, permissionSet);
 
         this.client = minecraft;
         this.entity = entity;
         this.position = position;
         this.rotation = rotation;
-        this.world = world;
+        this.level = level;
         this.meta = meta;
     }
 
@@ -56,12 +56,12 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         if (source instanceof CustomClientCommandSource custom) {
             return custom;
         }
-        return new CustomClientCommandSource(source.getClient().getConnection(), source.getClient(), source.getEntity(), source.getPosition(), source.getRotation(), source.getWorld(), source.permissions(), new HashMap<>());
+        return new CustomClientCommandSource(source.getClient().getConnection(), source.getClient(), source.getEntity(), source.getPosition(), source.getRotation(), source.getLevel(), source.permissions(), new HashMap<>());
     }
 
     @Override
     public void sendFeedback(Component message) {
-        this.client.gui.getChat().addMessage(message);
+        this.client.gui.getChat().addClientSystemMessage(message);
         this.client.getNarrator().saySystemChatQueued(message);
     }
 
@@ -96,8 +96,8 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
     }
 
     @Override
-    public ClientLevel getWorld() {
-        return this.world;
+    public ClientLevel getLevel() {
+        return this.level;
     }
 
     @Override
@@ -106,19 +106,19 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
     }
 
     public CustomClientCommandSource withEntity(Entity entity) {
-        return new CustomClientCommandSource(this.client.getConnection(), this.client, entity, this.position, this.rotation, this.world, this.permissions(), this.meta);
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, entity, this.position, this.rotation, this.level, this.permissions(), this.meta);
     }
 
     public CustomClientCommandSource withPosition(Vec3 position) {
-        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, position, this.rotation, this.world, this.permissions(), this.meta);
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, position, this.rotation, this.level, this.permissions(), this.meta);
     }
 
     public CustomClientCommandSource withRotation(Vec2 rotation) {
-        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, rotation, this.world, this.permissions(), this.meta);
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, rotation, this.level, this.permissions(), this.meta);
     }
 
-    public CustomClientCommandSource withWorld(ClientLevel world) {
-        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, this.rotation, world, this.permissions(), this.meta);
+    public CustomClientCommandSource withLevel(ClientLevel level) {
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, this.rotation, level, this.permissions(), this.meta);
     }
 
     public CustomClientCommandSource withMeta(String key, Object value) {
@@ -139,7 +139,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
                 case ONLINE_DATABASE -> {
                     // match SeedCrackerX's key format
                     String key = this.client.getConnection().getConnection().getRemoteAddress().toString();
-                    yield SeedDatabaseHelper.getSeed(key, this.getWorld().getBiomeManager().biomeZoomSeed);
+                    yield SeedDatabaseHelper.getSeed(key, this.getLevel().getBiomeManager().biomeZoomSeed);
                 }
             };
             if (seed != null) {
@@ -155,10 +155,10 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
             return (int) dimensionMeta;
         }
         try {
-            return DimensionArgument.dimension().parse(new StringReader(this.getWorld().dimension().identifier().getPath()));
+            return DimensionArgument.dimension().parse(new StringReader(this.getLevel().dimension().identifier().getPath()));
         } catch (CommandSyntaxException _) {
         }
-        return inferDimension(this.getWorld().dimensionType());
+        return inferDimension(this.getLevel().dimensionType());
     }
 
     public int getVersion() throws CommandSyntaxException {

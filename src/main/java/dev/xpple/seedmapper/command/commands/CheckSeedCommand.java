@@ -16,7 +16,7 @@ import java.net.URI;
 
 import static dev.xpple.seedmapper.SeedMapper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class CheckSeedCommand {
 
