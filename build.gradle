@@ -3,60 +3,60 @@ import dev.xpple.seedmapper.buildscript.GenerateBuildInfoTask
 import net.fabricmc.loom.task.prod.ClientProductionRunTask
 
 plugins {
-	id 'net.fabricmc.fabric-loom' version "${fabric_loom_version}"
-	id 'maven-publish'
+    id 'net.fabricmc.fabric-loom' version "${fabric_loom_version}"
+    id 'me.modmuss50.mod-publish-plugin' version "${mod_publish_plugin_version}"
 }
 
 version = project.mod_version
 group = project.maven_group
 
 base {
-	archivesName = project.archives_base_name
+    archivesName = project.archives_base_name
 }
 
 loom {
-	accessWidenerPath = file('src/main/resources/seedmapper.aw')
+    accessWidenerPath = file('src/main/resources/seedmapper.aw')
 }
 
 repositories {
-	mavenCentral()
-	maven {
-		name = 'xpple'
-		url = 'https://maven.xpple.dev/maven2'
-	}
-	maven {
-		name = 'DJtheRedstoner'
-		url = 'https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1'
-	}
-	maven {
-		name = 'MeteorDevelopment'
-		url = 'https://maven.meteordev.org/snapshots'
-	}
+    mavenCentral()
+    maven {
+        name = 'xpple'
+        url = 'https://maven.xpple.dev/maven2'
+    }
+    maven {
+        name = 'DJtheRedstoner'
+        url = 'https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1'
+    }
+    maven {
+        name = 'MeteorDevelopment'
+        url = 'https://maven.meteordev.org/snapshots'
+    }
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	implementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
 
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	productionRuntimeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    productionRuntimeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	include implementation("dev.xpple:clientarguments:${project.clientarguments_version}")
-	include implementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
-	include implementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
+    include implementation("dev.xpple:clientarguments:${project.clientarguments_version}")
+    include implementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
+    include implementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
 
-	runtimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
-		exclude group: 'net.fabricmc', module: 'fabric-loader'
-	}
-	productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
-		exclude group: 'net.fabricmc', module: 'fabric-loader'
-	}
+    runtimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+        exclude group: 'net.fabricmc', module: 'fabric-loader'
+    }
+    productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+        exclude group: 'net.fabricmc', module: 'fabric-loader'
+    }
 
-	compileOnly "meteordevelopment:baritone:${project.baritone_version}"
+    compileOnly "meteordevelopment:baritone:${project.baritone_version}"
 
-	testImplementation platform("org.junit:junit-bom:${project.junit_version}")
-	testImplementation 'org.junit.jupiter:junit-jupiter'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation platform("org.junit:junit-bom:${project.junit_version}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 clean {
@@ -71,63 +71,92 @@ compileJava.dependsOn('createJavaBindings')
 createJavaBindings.dependsOn(clean)
 
 tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
-	outputFile = new File(temporaryDir, "build_info.json")
+    outputFile = new File(temporaryDir, "build_info.json")
 }
 
 tasks.register("prodClient", ClientProductionRunTask) {
-	runDir = file("run")
+    runDir = file("run")
 
-	jvmArgs.add("-Ddevauth.enabled=true")
+    jvmArgs.add("-Ddevauth.enabled=true")
 
-	javaLauncher = javaToolchains.launcherFor {
-		languageVersion = JavaLanguageVersion.of(25)
-	}
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 processResources {
-	def props = [version: project.mod_version, minecraft_version_dependency: project.minecraft_version_dependency, loader_version: project.fabric_loader_version]
-	inputs.properties props
-	filteringCharset "UTF-8"
+    def props = [version: project.mod_version, minecraft_version_dependency: project.minecraft_version_dependency, loader_version: project.fabric_loader_version]
+    inputs.properties props
+    filteringCharset "UTF-8"
 
-	filesMatching("fabric.mod.json") {
-		expand props
-	}
+    filesMatching("fabric.mod.json") {
+        expand props
+    }
 
-	from("LICENSE") {
-		rename {"${it}_${project.base.archivesName.get()}"}
-	}
+    from("LICENSE") {
+        rename {"${it}_${project.base.archivesName.get()}"}
+    }
 
-	from("src/main/c/cubiomes/LICENSE") {
-		rename {"${it}_cubiomes"}
-	}
+    from("src/main/c/cubiomes/LICENSE") {
+        rename {"${it}_cubiomes"}
+    }
 
-	from("src/main/c/cubiomes/loot/LICENSE_loot_library.h.txt")
+    from("src/main/c/cubiomes/loot/LICENSE_loot_library.h.txt")
 
-	from generateBuildInfo
+    from generateBuildInfo
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 25
+    it.options.release = 25
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			artifactId = project.base.archivesName.get()
-			from components.java
-		}
-	}
+publishMods {
+    def artifactFile = base.getLibsDirectory().file(jar.archiveFileName)
+    if (!artifactFile.isPresent()) {
+        logger.lifecycle("Artifact not present!")
+        return
+    }
+    def changeLogText = providers.fileContents(layout.projectDirectory.file("changelog.md")).asText
+    if (!changeLogText.isPresent()) {
+        logger.lifecycle("Changelog file not found!")
+        return
+    }
 
-	repositories {
+    displayName = "Release ${project.mod_version}"
+    type = STABLE
+    modLoaders.add('fabric')
+    github {
+        changelog = changeLogText.map {"Download available [on Modrinth](https://modrinth.com/mod/seedmapper/version/${project.mod_version}).\n\n${it}"}
 
-	}
+        repository = 'xpple/SeedMapper'
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        commitish = 'master'
+        tagName = "v${project.mod_version}"
+
+        allowEmptyFiles = true
+    }
+    modrinth {
+        file = artifactFile
+        changelog = changeLogText
+
+        projectId = "C4GbEnuY"
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        project.minecraft_version_list.split('\\s*,\\s*').toList().forEach {minecraftVersions.add(it)}
+
+        embeds {
+            slug = 'betterconfig'
+        }
+        embeds {
+            slug = 'simplewaypoints'
+        }
+    }
 }
