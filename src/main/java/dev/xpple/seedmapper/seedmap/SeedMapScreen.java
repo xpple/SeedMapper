@@ -107,6 +107,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.IntSupplier;
 import java.util.function.ToIntBiFunction;
+import java.util.stream.Gatherers;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -661,25 +662,20 @@ public class SeedMapScreen extends Screen {
     }
 
     private void createFeatureToggles() {
-        // TODO: replace with Gatherers API?
         // TODO: only calculate on resize?
         int rows = Math.ceilDiv(this.featureIconsCombinedWidth, this.seedMapWidth);
         int togglesPerRow = Math.ceilDiv(this.toggleableFeatures.size(), rows);
-        int toggleMinY = 1;
-        for (int row = 0; row < rows - 1; row++) {
-            this.createFeatureTogglesInner(row, togglesPerRow, togglesPerRow, this.horizontalPadding(), toggleMinY);
-            toggleMinY += FEATURE_TOGGLE_HEIGHT + VERTICAL_FEATURE_TOGGLE_SPACING;
-        }
-        int togglesInLastRow = this.toggleableFeatures.size() - togglesPerRow * (rows - 1);
-        this.createFeatureTogglesInner(rows - 1, togglesPerRow, togglesInLastRow, this.horizontalPadding(), toggleMinY);
-    }
+        List<List<MapFeature>> toggleRows = this.toggleableFeatures.stream().gather(Gatherers.windowFixed(togglesPerRow)).toList();
 
-    private void createFeatureTogglesInner(int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
-        for (int toggle = 0; toggle < maxToggles; toggle++) {
-            MapFeature feature = this.toggleableFeatures.get(row * togglesPerRow + toggle);
-            MapFeature.Texture featureIcon = feature.getDefaultTexture();
-            this.addRenderableWidget(new FeatureToggleWidget(feature, toggleMinX, toggleMinY));
-            toggleMinX += featureIcon.width() + HORIZONTAL_FEATURE_TOGGLE_SPACING;
+        int toggleMinY = 1;
+        for (List<MapFeature> rowToggles : toggleRows) {
+            int toggleMinX = this.horizontalPadding();
+            for (MapFeature feature : rowToggles) {
+                MapFeature.Texture featureIcon = feature.getDefaultTexture();
+                this.addRenderableWidget(new FeatureToggleWidget(feature, toggleMinX, toggleMinY));
+                toggleMinX += featureIcon.width() + HORIZONTAL_FEATURE_TOGGLE_SPACING;
+            }
+            toggleMinY += FEATURE_TOGGLE_HEIGHT + VERTICAL_FEATURE_TOGGLE_SPACING;
         }
     }
 
