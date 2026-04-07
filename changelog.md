@@ -1,5 +1,5 @@
 ## Changelog
-- Updated to 26.1.
+- Added 26.1.1 version argument.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
