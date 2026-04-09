@@ -134,6 +134,7 @@ public class VersionArgument implements ArgumentType<Integer> {
         .put("1.21.11", Cubiomes.MC_1_21_11())
         .put("26.1", Cubiomes.MC_1_21_11())
         .put("26.1.1", Cubiomes.MC_1_21_11())
+        .put("26.1.2", Cubiomes.MC_1_21_11())
         .build();
     //</editor-fold>
 
