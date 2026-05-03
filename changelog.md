@@ -1,5 +1,6 @@
 ## Changelog
-- Added 26.1.2 version argument.
+- Re-enabled Baritone integration.
+- Fixed carver highlighting on 1.17.1 and below.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
