@@ -8,6 +8,7 @@ import com.github.cubiomes.OreConfig;
 import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Pos3;
 import com.github.cubiomes.Pos3List;
+import com.github.cubiomes.Range;
 import com.github.cubiomes.SurfaceNoise;
 import com.github.cubiomes.TerrainNoise;
 import com.mojang.brigadier.CommandDispatcher;
@@ -43,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -83,7 +83,7 @@ public class HighlightCommand {
                 .requires(_ -> Configs.DevMode)
                 .then(argument("cave", caveCarver())
                     .executes(ctx -> highlightCave(CustomClientCommandSource.of(ctx.getSource()), getCaveCarver(ctx, "cave")))
-                    .then(argument("chunks", integer(0, 20))
+                    .then(argument("chunks", integer(0, 10))
                         .executes(ctx -> submit(() -> highlightCave(CustomClientCommandSource.of(ctx.getSource()), getCaveCarver(ctx, "cave"), getInteger(ctx, "chunks"))))))));
     }
 
@@ -322,13 +322,8 @@ public class HighlightCommand {
             if (CanyonCarverConfig.dim(ccc) != dimension) {
                 throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
             }
-            var biomeFunction = LocateCommand.getCarverBiomeFunction(arena, seed.seed(), dimension, version, source.getGeneratorFlags());
-            return highlightCarver(source, chunkRange, (chunkX, chunkZ) -> {
-                int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
-                if (Cubiomes.isViableCanyonBiome(canyonCarver, biome) == 0) {
-                    return null;
-                }
-                return Cubiomes.carveCanyon(arena, seed.seed(), chunkX, chunkZ, ccc);
+            return highlightCarver(source, chunkRange, arena, (chunkX, chunkZ, biomes, poses) -> {
+                Cubiomes.carveCanyon(seed.seed(), version, chunkX, chunkZ, ccc, canyonCarver, biomes, poses);
             });
         }
     }
@@ -350,36 +345,70 @@ public class HighlightCommand {
             if (CaveCarverConfig.dim(ccc) != dimension) {
                 throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
             }
-            var biomeFunction = LocateCommand.getCarverBiomeFunction(arena, seed.seed(), dimension, version, source.getGeneratorFlags());
-            return highlightCarver(source, chunkRange, (chunkX, chunkZ) -> {
-                int biome = biomeFunction.applyAsInt(chunkX, chunkZ);
-                if (Cubiomes.isViableCaveBiome(caveCarver, biome) == 0) {
-                    return null;
-                }
-                return Cubiomes.carveCave(arena, seed.seed(), chunkX, chunkZ, ccc);
+            return highlightCarver(source, chunkRange, arena, (chunkX, chunkZ, biomes, poses) -> {
+                Cubiomes.carveCave(seed.seed(), version, chunkX, chunkZ, ccc, caveCarver, biomes, poses);
             });
         }
     }
 
-    private static int highlightCarver(CustomClientCommandSource source, int chunkRange, BiFunction<Integer, Integer, @Nullable MemorySegment> carverFunction) {
-        ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
-        Set<BlockPos> blocks = new HashSet<>();
-        SpiralLoop.spiral(center.x(), center.z(), chunkRange, (chunkX, chunkZ) -> {
-            MemorySegment pos3List = carverFunction.apply(chunkX, chunkZ);
-            if (pos3List == null) {
-                return false;
-            }
-            int size = Pos3List.size(pos3List);
-            MemorySegment pos3s = Pos3List.pos3s(pos3List);
-            for (int i = 0; i < size; i++) {
-                MemorySegment pos3 = Pos3.asSlice(pos3s, i);
-                blocks.add(new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3)));
-            }
+    private static int highlightCarver(CustomClientCommandSource source, int chunkRange, Arena arena, CarverFunction carverFunction) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
+        int dimension = source.getDimension();
+        int version = source.getVersion();
+        int generatorFlags = source.getGeneratorFlags();
 
+        @Nullable MemorySegment generator, range;
+        MemorySegment biomes;
+        if (version <= Cubiomes.MC_1_17_1()) {
+            generator = Generator.allocate(arena);
+            Cubiomes.setupGenerator(generator, version, generatorFlags);
+            Cubiomes.applySeed(generator, dimension, seed.seed());
+
+            range = Range.allocate(arena);
+            Range.scale(range, 16);
+            Range.sx(range, 17);
+            Range.sz(range, 17);
+            Range.y(range, 0);
+            Range.sy(range, 0);
+
+            long cacheSize = Cubiomes.getMinCacheSize(generator, Range.scale(range), Range.sx(range), Range.sy(range), Range.sz(range));
+            biomes = arena.allocate(Cubiomes.C_INT, cacheSize);
+        } else {
+            generator = null;
+            range = null;
+            biomes = arena.allocate(MemoryLayout.sequenceLayout(17, MemoryLayout.sequenceLayout(17, Cubiomes.C_INT)));
+        }
+
+        MemorySegment pos3List = Pos3List.allocate(arena);
+        Cubiomes.createPos3List(pos3List, 1024);
+
+        ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
+        SpiralLoop.spiral(center.x(), center.z(), chunkRange, (chunkX, chunkZ) -> {
+            if (version <= Cubiomes.MC_1_17_1()) {
+                assert range != null;
+                Range.x(range, chunkX - 8);
+                Range.z(range, chunkZ - 8);
+                Cubiomes.genBiomes(generator, biomes, range);
+            }
+            carverFunction.carve(chunkX, chunkZ, biomes, pos3List);
             return false;
         });
+
+        Set<BlockPos> blocks = new HashSet<>();
+        int size = Pos3List.size(pos3List);
+        MemorySegment pos3s = Pos3List.pos3s(pos3List);
+        for (int i = 0; i < size; i++) {
+            MemorySegment pos3 = Pos3.asSlice(pos3s, i);
+            blocks.add(new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3)));
+        }
+        Cubiomes.freePos3List(pos3List);
         RenderManager.drawBoxes(blocks, 0xFF_FF0000);
         source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.carver.success", accent(String.valueOf(blocks.size())))));
         return blocks.size();
+    }
+
+    @FunctionalInterface
+    private interface CarverFunction {
+        void carve(int chunkX, int chunkZ, MemorySegment biomes, MemorySegment poses);
     }
 }

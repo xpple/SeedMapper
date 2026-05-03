@@ -71,7 +71,7 @@ public class LocateCommand {
     private static final int BIOME_SEARCH_HORIZONTAL_STEP = 32;
     private static final int BIOME_SEARCH_VERTICAL_STEP = 64;
 
-    public static final Set<Integer> LOOT_SUPPORTED_STRUCTURES = Set.of(Cubiomes.Treasure(), Cubiomes.Desert_Pyramid(), Cubiomes.End_City(), Cubiomes.Igloo(), Cubiomes.Jungle_Pyramid(), Cubiomes.Ruined_Portal(), Cubiomes.Ruined_Portal_N(), Cubiomes.Fortress(), Cubiomes.Bastion(), Cubiomes.Outpost(), Cubiomes.Shipwreck());
+    public static final Set<Integer> LOOT_SUPPORTED_STRUCTURES = Set.of(Cubiomes.Treasure(), Cubiomes.Desert_Pyramid(), Cubiomes.End_City(), Cubiomes.Igloo(), Cubiomes.Jungle_Pyramid(), Cubiomes.Ruined_Portal(), Cubiomes.Ruined_Portal_N(), Cubiomes.Fortress(), Cubiomes.Bastion(), Cubiomes.Outpost(), Cubiomes.Shipwreck(), Cubiomes.Stronghold());
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("sm:locate")
@@ -532,7 +532,16 @@ public class LocateCommand {
         }
         ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
         try (Arena arena = Arena.ofConfined()) {
-            ToIntBiFunction<Integer, Integer> biomeFunction = getCarverBiomeFunction(arena, seed.seed(), dimension, version, source.getGeneratorFlags());
+            ToIntBiFunction<Integer, Integer> biomeFunction;
+            int generatorFlags = source.getGeneratorFlags();
+            if (version > Cubiomes.MC_1_17_1()) {
+                biomeFunction = (_, _) -> -1;
+            } else {
+                MemorySegment generator = Generator.allocate(arena);
+                Cubiomes.setupGenerator(generator, version, generatorFlags);
+                Cubiomes.applySeed(generator, dimension, seed.seed());
+                biomeFunction = (chunkX, chunkZ) -> Cubiomes.getBiomeAt(generator, 4, chunkX << 2, 0, chunkZ << 2);
+            }
             MemorySegment ccc = CanyonCarverConfig.allocate(arena);
             MemorySegment rnd = arena.allocate(Cubiomes.C_LONG_LONG);
             SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.x(), center.z(), 6400, (chunkX, chunkZ) -> {
@@ -557,15 +566,5 @@ public class LocateCommand {
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.canyon.foundAt", ComponentUtils.formatXZ(SectionPos.sectionToBlockCoord(pos.x()), SectionPos.sectionToBlockCoord(pos.z()), Component.translatable("command.locate.canyon.copy")))));
             return Command.SINGLE_SUCCESS;
         }
-    }
-
-    static ToIntBiFunction<Integer, Integer> getCarverBiomeFunction(Arena arena, long seed, int dimension, int version, int generatorFlags) {
-        if (version > Cubiomes.MC_1_17_1()) {
-            return (_, _) -> -1;
-        }
-        MemorySegment generator = Generator.allocate(arena);
-        Cubiomes.setupGenerator(generator, version, generatorFlags);
-        Cubiomes.applySeed(generator, dimension, seed);
-        return (chunkX, chunkZ) -> Cubiomes.getBiomeAt(generator, 4, chunkX << 2, 0, chunkZ << 2);
     }
 }

@@ -102,6 +102,20 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
             .put("corridor_nether_wart", Cubiomes.CORRIDOR_NETHER_WART())
             .put("fortress_end", Cubiomes.FORTRESS_END())
             .build())
+        .put(Cubiomes.Stronghold(), ImmutableMap.<String, Integer>builder()
+            .put("straight", Cubiomes.SH_STRAIGHT())
+            .put("prison_hall", Cubiomes.SH_PRISON_HALL())
+            .put("left_turn", Cubiomes.SH_LEFT_TURN())
+            .put("right_turn", Cubiomes.SH_RIGHT_TURN())
+            .put("room_crossing", Cubiomes.SH_ROOM_CROSSING())
+            .put("straight_stairs_down", Cubiomes.SH_STRAIGHT_STAIRS_DOWN())
+            .put("stairs_down", Cubiomes.SH_STAIRS_DOWN())
+            .put("five_crossing", Cubiomes.SH_FIVE_CROSSING())
+            .put("chest_corridor", Cubiomes.SH_CHEST_CORRIDOR())
+            .put("library", Cubiomes.SH_LIBRARY())
+            .put("portal_room", Cubiomes.SH_PORTAL_ROOM())
+            .put("filler_corridor", Cubiomes.SH_FILLER_CORRIDOR())
+            .build())
         .build();
     //</editor-fold>
 
