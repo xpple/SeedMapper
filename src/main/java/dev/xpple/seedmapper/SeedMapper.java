@@ -57,8 +57,7 @@ public class SeedMapper implements ClientModInitializer {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    // FIXME
-    public static final boolean BARITONE_AVAILABLE = false; // FabricLoader.getInstance().getModContainer("baritone-meteor").isPresent();
+    public static final boolean BARITONE_AVAILABLE = FabricLoader.getInstance().getModContainer("baritone-meteor").isPresent();
 
     static {
         String libraryName = System.mapLibraryName("cubiomes");
