@@ -146,7 +146,7 @@ public class HighlightCommand {
                             for (int i = 0; i < size; i++) {
                                 MemorySegment pos3 = Pos3.asSlice(pos3s, i);
                                 BlockPos pos = new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3));
-                                if (doAirCheck && chunk.getBlockState(pos).isAir()) {
+                                if (doAirCheck && !chunk.getBlockState(pos).canOcclude()) {
                                     continue;
                                 }
                                 Integer previouslyGeneratedOre = generatedOres.get(pos);
