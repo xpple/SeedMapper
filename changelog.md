@@ -1,6 +1,7 @@
 ## Changelog
-- Re-enabled Baritone integration.
-- Fixed carver highlighting on 1.17.1 and below.
+- Made block colors configurable (`/sm:config BlockColors`).
+- Added ore debug highlighting (`/sm:highlight ore`).
+- Fixed Pale Garden biome issue for 1.21.5+.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
