@@ -19,11 +19,11 @@ public class FeatureToggleWidget extends Button {
 
     @Override
     protected void extractContents(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
-        int colour = 0xff_ffffff;
+        int color = 0xff_ffffff;
         if (!Configs.ToggledFeatures.contains(this.feature)) {
-            colour = ARGB.color(255 >> 1, 255, 255, 255);
+            color = ARGB.color(255 >> 1, 255, 255, 255);
         }
-        SeedMapScreen.FeatureWidget.drawFeatureIcon(guiGraphicsExtractor, this.feature.getDefaultTexture(), this.getX(), this.getY(), colour);
+        SeedMapScreen.FeatureWidget.drawFeatureIcon(guiGraphicsExtractor, this.feature.getDefaultTexture(), this.getX(), this.getY(), color);
     }
 
     private static void onButtonPress(Button button) {

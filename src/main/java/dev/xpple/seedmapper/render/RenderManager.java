@@ -40,24 +40,24 @@ public final class RenderManager {
         temp.clear();
     }
 
-    public static void drawBoxes(Collection<BlockPos> posBatch, int colour) {
+    public static void drawBoxes(Collection<BlockPos> posBatch, int color) {
         Set<Line> lines = new HashSet<>();
 
         posBatch.forEach(pos -> {
             Vec3 minPosition = new Vec3(pos);
             Vec3 size = new Vec3(1, 1, 1);
-            addLine(new Line(minPosition, minPosition.add(size.x(), 0, 0), colour), lines);
-            addLine(new Line(minPosition, minPosition.add(0, size.y(), 0), colour), lines);
-            addLine(new Line(minPosition, minPosition.add(0, 0, size.z()), colour), lines);
-            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), 0, 0), colour), lines);
-            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), size.y(), size.z()), colour), lines);
-            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(0, 0, size.z()), colour), lines);
-            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), 0, 0), colour), lines);
-            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(0, size.y(), 0), colour), lines);
-            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), size.y(), size.z()), colour), lines);
-            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, 0, size.z()), colour), lines);
-            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, size.y(), 0), colour), lines);
-            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(size.x(), size.y(), size.z()), colour), lines);
+            addLine(new Line(minPosition, minPosition.add(size.x(), 0, 0), color), lines);
+            addLine(new Line(minPosition, minPosition.add(0, size.y(), 0), color), lines);
+            addLine(new Line(minPosition, minPosition.add(0, 0, size.z()), color), lines);
+            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), 0, 0), color), lines);
+            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), size.y(), size.z()), color), lines);
+            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(0, 0, size.z()), color), lines);
+            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), 0, 0), color), lines);
+            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(0, size.y(), 0), color), lines);
+            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), size.y(), size.z()), color), lines);
+            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, 0, size.z()), color), lines);
+            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, size.y(), 0), color), lines);
+            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(size.x(), size.y(), size.z()), color), lines);
         });
         RenderManager.lines.addAll(lines);
     }
@@ -102,10 +102,10 @@ public final class RenderManager {
             Vec3 start = line.start();
             Vec3 end = line.end();
             Vec3 normal = end.subtract(start).normalize();
-            int colour = line.colour();
-            float red = ARGB.redFloat(colour);
-            float green = ARGB.greenFloat(colour);
-            float blue = ARGB.blueFloat(colour);
+            int color = line.color();
+            float red = ARGB.redFloat(color);
+            float green = ARGB.greenFloat(color);
+            float blue = ARGB.blueFloat(color);
 
             levelRenderContext.poseStack().pushPose();
             PoseStack.Pose pose = levelRenderContext.poseStack().last();

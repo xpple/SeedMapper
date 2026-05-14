@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.seedmapper.command.arguments.ColorWrapperArgument;
 import dev.xpple.seedmapper.command.arguments.DurationArgument;
 import dev.xpple.seedmapper.command.arguments.MapFeatureArgument;
 import dev.xpple.seedmapper.command.arguments.SeedIdentifierArgument;
@@ -19,6 +20,8 @@ import dev.xpple.seedmapper.command.commands.SampleCommand;
 import dev.xpple.seedmapper.command.commands.SeedMapCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
 import dev.xpple.seedmapper.command.commands.StopTaskCommand;
+import dev.xpple.seedmapper.config.ColorWrapper;
+import dev.xpple.seedmapper.config.ColorWrapperAdapter;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.config.DurationAdapter;
 import dev.xpple.seedmapper.config.MapFeatureAdapter;
@@ -79,6 +82,7 @@ public class SeedMapper implements ClientModInitializer {
             .registerType(SeedResolutionArgument.SeedResolution.class, new SeedResolutionAdapter(), SeedResolutionArgument::seedResolution)
             .registerTypeHierarchy(MapFeature.class, new MapFeatureAdapter(), MapFeatureArgument::mapFeature)
             .registerType(Duration.class, new DurationAdapter(), DurationArgument::duration)
+            .registerType(ColorWrapper.class, new ColorWrapperAdapter(), ColorWrapperArgument::colorWrapper)
             .registerGlobalChangeHook(event -> {
                 if (event.config().equals("DevMode")) {
                     try {

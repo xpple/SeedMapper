@@ -15,7 +15,7 @@
   "commands.exceptions.unknownVariantKey": "Unbekannter Strukturvarianten Key \"%s\".",
   "commands.exceptions.unknownVariantValue": "Unbekannter Strukturvarianten Wert \"%s\".",
   "commands.exceptions.noStructureFound": "Konnte Struktur nicht in %s Blöcken finden.",
-  "commands.exceptions.unknownOre": "Unbekannter Block \"%s\".",
+  "commands.exceptions.unknownBlock": "Unbekannter Block \"%s\".",
   "commands.exceptions.unknownItem": "Unbekanntes Item \"%s\".",
 
   "command.checkSeed.using": "SeedMapper benutzt den Seed %s aus %s.",

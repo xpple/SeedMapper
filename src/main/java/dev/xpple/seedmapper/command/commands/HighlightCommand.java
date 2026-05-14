@@ -13,12 +13,11 @@ import com.github.cubiomes.SurfaceNoise;
 import com.github.cubiomes.TerrainNoise;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
+import dev.xpple.seedmapper.command.arguments.OreArgument;
 import dev.xpple.seedmapper.config.Configs;
-import dev.xpple.seedmapper.feature.OreTypes;
 import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.util.BaritoneIntegration;
 import dev.xpple.seedmapper.util.ComponentUtils;
@@ -42,7 +41,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -51,6 +49,7 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.seedmapper.command.arguments.BlockArgument.*;
 import static dev.xpple.seedmapper.command.arguments.CanyonCarverArgument.*;
 import static dev.xpple.seedmapper.command.arguments.CaveCarverArgument.*;
+import static dev.xpple.seedmapper.command.arguments.OreArgument.*;
 import static dev.xpple.seedmapper.thread.LocatorThreadHelper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
@@ -60,10 +59,16 @@ public class HighlightCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("sm:highlight")
             .then(literal("block")
-                .then(argument("block", block())
-                    .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block")))
+                .then(argument("block", oreBlock())
+                    .executes(ctx -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getOreBlock(ctx, "block")))
                     .then(argument("chunks", integer(0, 20))
-                        .executes(ctx -> submit(() -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getBlock(ctx, "block"), getInteger(ctx, "chunks")))))))
+                        .executes(ctx -> submit(() -> highlightBlock(CustomClientCommandSource.of(ctx.getSource()), getOreBlock(ctx, "block"), getInteger(ctx, "chunks")))))))
+            .then(literal("ore")
+                .requires(_ -> Configs.DevMode)
+                .then(argument("ore", ore())
+                    .executes(ctx -> highlightOre(CustomClientCommandSource.of(ctx.getSource()), getOre(ctx, "ore")))
+                    .then(argument("chunks", integer(0, 20))
+                        .executes(ctx -> submit(() -> highlightOre(CustomClientCommandSource.of(ctx.getSource()), getOre(ctx, "ore"), getInteger(ctx, "chunks")))))))
             .then(literal("orevein")
                 .executes(ctx -> submit(() -> highlightOreVein(CustomClientCommandSource.of(ctx.getSource()))))
                 .then(argument("chunks", integer(0, 20))
@@ -87,11 +92,11 @@ public class HighlightCommand {
                         .executes(ctx -> submit(() -> highlightCave(CustomClientCommandSource.of(ctx.getSource()), getCaveCarver(ctx, "cave"), getInteger(ctx, "chunks"))))))));
     }
 
-    private static int highlightBlock(CustomClientCommandSource source, Pair<Integer, Integer> blockPair) throws CommandSyntaxException {
-        return highlightBlock(source, blockPair, 0);
+    private static int highlightBlock(CustomClientCommandSource source, int block) throws CommandSyntaxException {
+        return highlightBlock(source, block, 0);
     }
 
-    private static int highlightBlock(CustomClientCommandSource source, Pair<Integer, Integer> blockPair, int chunkRange) throws CommandSyntaxException {
+    private static int highlightBlock(CustomClientCommandSource source, int block, int chunkRange) throws CommandSyntaxException {
         SeedIdentifier seed = source.getSeed().getSecond();
         int version = source.getVersion();
         int dimension = source.getDimension();
@@ -120,7 +125,7 @@ public class HighlightCommand {
                         .boxed()
                         .toList();
                 }
-                OreTypes.ORE_TYPES.stream()
+                OreArgument.ORES.values().stream()
                     .filter(oreType -> biomes.stream().anyMatch(biome -> Cubiomes.isViableOreBiome(version, oreType, biome) != 0))
                     .<MemorySegment>mapMulti((oreType, consumer) -> {
                         MemorySegment oreConfig = OreConfig.allocate(arena);
@@ -145,6 +150,7 @@ public class HighlightCommand {
                                     continue;
                                 }
                                 Integer previouslyGeneratedOre = generatedOres.get(pos);
+                                // if there is already an ore at this position, check if this ore can replace it
                                 if (previouslyGeneratedOre != null) {
                                     boolean contains = false;
                                     for (int j = 0; j < numReplaceBlocks; j++) {
@@ -165,21 +171,84 @@ public class HighlightCommand {
                         }
                     });
 
-                int block = blockPair.getFirst();
-                int colour = blockPair.getSecond();
+                int color = Configs.BlockColors.getOrDefault(block, 0xFFFFFF);
                 List<BlockPos> blockOres = generatedOres.entrySet().stream()
                     .filter(entry -> entry.getValue() == block)
                     .map(Map.Entry::getKey)
                     .toList();
                 count[0] += blockOres.size();
                 source.getClient().schedule(() -> {
-                    RenderManager.drawBoxes(blockOres, colour);
+                    RenderManager.drawBoxes(blockOres, color);
                     if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(blockOres);
                     }
                     source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ComponentUtils.formatXZ(chunkX, chunkZ)));
                 });
 
+                return false;
+            });
+
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.block.success", accent(String.valueOf(count[0])))));
+            return count[0];
+        }
+    }
+
+    private static int highlightOre(CustomClientCommandSource source, int ore) throws CommandSyntaxException {
+        return highlightOre(source, ore, 0);
+    }
+
+    private static int highlightOre(CustomClientCommandSource source, int ore, int chunkRange) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
+        int version = source.getVersion();
+        int dimension = source.getDimension();
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment generator = Generator.allocate(arena);
+            Cubiomes.setupGenerator(generator, version, source.getGeneratorFlags());
+            Cubiomes.applySeed(generator, dimension, seed.seed());
+            MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
+            Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed.seed());
+
+            ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
+
+            int[] count = {0};
+            SpiralLoop.spiral(center.x(), center.z(), chunkRange, (chunkX, chunkZ) -> {
+                List<Integer> biomes;
+                if (version <= Cubiomes.MC_1_17()) {
+                    biomes = List.of(Cubiomes.getBiomeForOreGen(generator, chunkX, chunkZ, 0));
+                } else {
+                    // check certain Y-coordinates that matter for ore generation
+                    // Minecraft checks _all_ biomes in a 3x3 square of chunks, which is not necessary
+                    biomes = IntStream.of(-30, 64, 120)
+                        .map(y -> Cubiomes.getBiomeForOreGen(generator, chunkX, chunkZ, y))
+                        .boxed()
+                        .toList();
+                }
+
+                if (biomes.stream().noneMatch(biome -> Cubiomes.isViableOreBiome(version, ore, biome) != 0)) {
+                    return false;
+                }
+
+                MemorySegment oreConfig = OreConfig.allocate(arena);
+                // just do biomes.getFirst() because in 1.17 there is only one, and in 1.18 it does not matter
+                if (Cubiomes.getOreConfig(ore, version, biomes.getFirst(), oreConfig) == 0) {
+                    return false;
+                }
+
+                Set<BlockPos> ores = new HashSet<>();
+                MemorySegment pos3List = Cubiomes.generateOres(arena, generator, surfaceNoise, oreConfig, chunkX, chunkZ);
+                try {
+                    MemorySegment pos3s = Pos3List.pos3s(pos3List);
+                    for (int i = 0; i < Pos3List.size(pos3List); i++) {
+                        MemorySegment pos3 = Pos3.asSlice(pos3s, i);
+                        ores.add(new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3)));
+                    }
+                } finally {
+                    Cubiomes.freePos3List(pos3List);
+                }
+                count[0] += ores.size();
+                RenderManager.drawBoxes(ores, Configs.BlockColors.getOrDefault(OreConfig.oreBlock(oreConfig), 0xFFFFFF));
+                source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(ores.size())), ComponentUtils.formatXZ(chunkX, chunkZ)));
                 return false;
             });
 
@@ -235,8 +304,8 @@ public class HighlightCommand {
                         return;
                     }
                     count[0] += positions.size();
-                    int colour = BLOCKS.values().stream().filter(pair -> Objects.equals(block, pair.getFirst())).findAny().orElseThrow().getSecond();
-                    RenderManager.drawBoxes(positions, colour);
+                    int color = Configs.BlockColors.getOrDefault(block, 0xFFFFFF);
+                    RenderManager.drawBoxes(positions, color);
                     if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(positions);
                     }

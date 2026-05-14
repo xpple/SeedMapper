@@ -16,7 +16,7 @@
   "commands.exceptions.noStructureFound": "在 %s 格范围内未找到该结构。",
   "commands.exceptions.noOreVeinFound": "在 %s 个区块范围内未找到矿脉。",
   "commands.exceptions.noCanyonFound": "在 %s 个区块范围内未找到峡谷。",
-  "commands.exceptions.unknownOre": "未知方块 \"%s\"。",
+  "commands.exceptions.unknownBlock": "未知方块 \"%s\"。",
   "commands.exceptions.unknownItem": "未知物品 \"%s\"。",
   "commands.exceptions.expectedWithWithout": "应为 \"with\" 或 \"without\"。",
   "commands.exceptions.unknownEnchantment": "未知附魔 \"%s\"。",

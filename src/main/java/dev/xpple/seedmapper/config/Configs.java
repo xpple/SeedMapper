@@ -1,10 +1,14 @@
 package dev.xpple.seedmapper.config;
 
+import com.github.cubiomes.Cubiomes;
 import com.google.common.base.Suppliers;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.Config;
 import dev.xpple.betterconfig.api.ModConfig;
 import dev.xpple.seedmapper.SeedMapper;
+import dev.xpple.seedmapper.command.CommandExceptions;
+import dev.xpple.seedmapper.command.arguments.BlockArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.seedmap.MapFeature;
@@ -18,10 +22,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
+import net.minecraft.world.level.material.MapColor;
 
 import java.time.Duration;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -70,6 +76,53 @@ public class Configs {
 
     private static Component getOreAreCheckComment() {
         return Component.translatable("config.oreAirCheck.comment");
+    }
+
+    @Config(putter = @Config.Putter(value = "putBlockColor", keyType = String.class, valueType = ColorWrapper.class), remover = @Config.Remover(value = "none"), chatRepresentation = "displayBlockColors")
+    public static Map<Integer, Integer> BlockColors = new HashMap<>(Map.ofEntries(
+        Map.entry(Cubiomes.ANCIENT_DEBRIS(), MapColor.TERRACOTTA_BROWN.col),
+        Map.entry(Cubiomes.ANDESITE(), MapColor.STONE.col),
+        Map.entry(Cubiomes.BASALT(), MapColor.COLOR_BLACK.col),
+        Map.entry(Cubiomes.BLACKSTONE(), MapColor.COLOR_BLACK.col),
+        Map.entry(Cubiomes.CLAY(), MapColor.CLAY.col),
+        Map.entry(Cubiomes.COAL_ORE(), MapColor.COLOR_BLACK.col),
+        Map.entry(Cubiomes.COPPER_ORE(), MapColor.COLOR_ORANGE.col),
+        Map.entry(Cubiomes.DEEPSLATE(), MapColor.DEEPSLATE.col),
+        Map.entry(Cubiomes.DIAMOND_ORE(), MapColor.DIAMOND.col),
+        Map.entry(Cubiomes.DIORITE(), MapColor.QUARTZ.col),
+        Map.entry(Cubiomes.DIRT(), MapColor.DIRT.col),
+        Map.entry(Cubiomes.EMERALD_ORE(), MapColor.EMERALD.col),
+        Map.entry(Cubiomes.GOLD_ORE(), MapColor.GOLD.col),
+        Map.entry(Cubiomes.GRANITE(), MapColor.DIRT.col),
+        Map.entry(Cubiomes.GRAVEL(), MapColor.STONE.col),
+        Map.entry(Cubiomes.IRON_ORE(), MapColor.RAW_IRON.col),
+        Map.entry(Cubiomes.LAPIS_ORE(), MapColor.LAPIS.col),
+        Map.entry(Cubiomes.MAGMA_BLOCK(), MapColor.NETHER.col),
+        Map.entry(Cubiomes.NETHERRACK(), MapColor.NETHER.col),
+        Map.entry(Cubiomes.NETHER_GOLD_ORE(), MapColor.GOLD.col),
+        Map.entry(Cubiomes.NETHER_QUARTZ_ORE(), MapColor.QUARTZ.col),
+        Map.entry(Cubiomes.RAW_COPPER_BLOCK(), MapColor.COLOR_YELLOW.col),
+        Map.entry(Cubiomes.RAW_IRON_BLOCK(), MapColor.COLOR_YELLOW.col),
+        Map.entry(Cubiomes.REDSTONE_ORE(), MapColor.FIRE.col),
+        Map.entry(Cubiomes.SOUL_SAND(), MapColor.COLOR_BROWN.col),
+        Map.entry(Cubiomes.STONE(), MapColor.STONE.col),
+        Map.entry(Cubiomes.TUFF(), MapColor.COLOR_GRAY.col)
+    ));
+    private static void putBlockColor(String key, ColorWrapper value) throws CommandSyntaxException {
+        Integer block = BlockArgument.BLOCKS.get(key);
+        if (block == null) {
+            throw CommandExceptions.UNKNOWN_BLOCK_EXCEPTION.create(key);
+        }
+        BlockColors.put(block, value.argb());
+    }
+    private static Component displayBlockColors() {
+        return join(Component.literal(", "), BlockColors.entrySet().stream()
+            .map(entry -> chain(
+                Component.literal(Cubiomes.block2str(entry.getKey()).getString(0)),
+                Component.literal(": "),
+                accent(HexFormat.of().toHexDigits(entry.getValue(), 6)))
+            )
+        );
     }
 
     private static final int MAX_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);

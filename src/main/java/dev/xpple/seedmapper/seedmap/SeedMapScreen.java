@@ -129,22 +129,22 @@ public class SeedMapScreen extends Screen {
      */
 
     // unsigned char biomeColors[256][3]
-    private static final int[] biomeColours = new int[256];
+    private static final int[] biomeColors = new int[256];
 
     static {
         // unsigned char color[3]
         SequenceLayout rgbLayout = MemoryLayout.sequenceLayout(3, Cubiomes.C_CHAR);
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment biomeColoursInternal = arena.allocate(rgbLayout, biomeColours.length);
-            Cubiomes.initBiomeColors(biomeColoursInternal);
-            for (int biome = 0; biome < biomeColours.length; biome++) {
-                MemorySegment colourArray = biomeColoursInternal.asSlice(biome * rgbLayout.byteSize());
-                int red = colourArray.getAtIndex(Cubiomes.C_CHAR, 0) & 0xFF;
-                int green = colourArray.getAtIndex(Cubiomes.C_CHAR, 1) & 0xFF;
-                int blue = colourArray.getAtIndex(Cubiomes.C_CHAR, 2) & 0xFF;
-                int colour = ARGB.color(red, green, blue);
-                biomeColours[biome] = colour;
+            MemorySegment biomeColorsInternal = arena.allocate(rgbLayout, biomeColors.length);
+            Cubiomes.initBiomeColors(biomeColorsInternal);
+            for (int biome = 0; biome < biomeColors.length; biome++) {
+                MemorySegment colorArray = biomeColorsInternal.asSlice(biome * rgbLayout.byteSize());
+                int red = colorArray.getAtIndex(Cubiomes.C_CHAR, 0) & 0xFF;
+                int green = colorArray.getAtIndex(Cubiomes.C_CHAR, 1) & 0xFF;
+                int blue = colorArray.getAtIndex(Cubiomes.C_CHAR, 2) & 0xFF;
+                int color = ARGB.color(red, green, blue);
+                biomeColors[biome] = color;
             }
         }
     }
@@ -577,7 +577,7 @@ public class SeedMapScreen extends Screen {
         for (int relX = 0; relX < width; relX++) {
             for (int relZ = 0; relZ < height; relZ++) {
                 int biome = biomeData[relX + relZ * width];
-                texture.getPixels().setPixel(relX, relZ, biomeColours[biome]);
+                texture.getPixels().setPixel(relX, relZ, biomeColors[biome]);
             }
         }
         texture.upload();
@@ -1221,15 +1221,15 @@ public class SeedMapScreen extends Screen {
             return this.feature == that.feature && Objects.equals(this.featureTexture, that.featureTexture) && Objects.equals(this.featureLocation, that.featureLocation);
         }
 
-        static void drawFeatureIcon(GuiGraphicsExtractor guiGraphicsExtractor, MapFeature.Texture texture, int minX, int minY, int colour) {
+        static void drawFeatureIcon(GuiGraphicsExtractor guiGraphicsExtractor, MapFeature.Texture texture, int minX, int minY, int color) {
             int iconWidth = texture.width();
             int iconHeight = texture.height();
 
-            drawIconStatic(guiGraphicsExtractor, texture.identifier(), minX, minY, iconWidth, iconHeight, colour);
+            drawIconStatic(guiGraphicsExtractor, texture.identifier(), minX, minY, iconWidth, iconHeight, color);
         }
     }
 
-    private void drawIcon(GuiGraphicsExtractor guiGraphicsExtractor, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int colour) {
+    private void drawIcon(GuiGraphicsExtractor guiGraphicsExtractor, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int color) {
         var pose = guiGraphicsExtractor.pose();
         pose.pushMatrix();
         if (this.isMinimap() && Configs.RotateMinimap) {
@@ -1237,15 +1237,15 @@ public class SeedMapScreen extends Screen {
             pose.rotate((float) (Math.toRadians(this.playerRotation.y) - Math.PI));
             pose.translate(-minX - (float) iconWidth / 2, -minY - (float) iconWidth / 2);
         }
-        drawIconStatic(guiGraphicsExtractor, identifier, minX, minY, iconWidth, iconHeight, colour);
+        drawIconStatic(guiGraphicsExtractor, identifier, minX, minY, iconWidth, iconHeight, color);
         pose.popMatrix();
     }
 
-    private static void drawIconStatic(GuiGraphicsExtractor guiGraphicsExtractor, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int colour) {
+    private static void drawIconStatic(GuiGraphicsExtractor guiGraphicsExtractor, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int color) {
         // Skip intersection checks (GuiRenderState.hasIntersection) you would otherwise get when calling
         // GuiGraphics.blit as these checks incur a significant performance hit
         AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(identifier);
-        BlitRenderState renderState = new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()), new Matrix3x2f(guiGraphicsExtractor.pose()), minX, minY, minX + iconWidth, minY + iconHeight, 0, 1, 0, 1, colour, guiGraphicsExtractor.scissorStack.peek());
+        BlitRenderState renderState = new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()), new Matrix3x2f(guiGraphicsExtractor.pose()), minX, minY, minX + iconWidth, minY + iconHeight, 0, 1, 0, 1, color, guiGraphicsExtractor.scissorStack.peek());
         guiGraphicsExtractor.guiRenderState.addBlitToCurrentLayer(renderState);
     }
 
