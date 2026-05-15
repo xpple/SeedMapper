@@ -972,8 +972,9 @@ public class SeedMapScreen extends Screen {
         // temporary arena so that everything will be deallocated after the loot is calculated
         try (Arena tempArena = Arena.ofConfined()) {
             MemorySegment structureVariant = StructureVariant.allocate(tempArena);
-            Cubiomes.getVariant(structureVariant, structure, this.version, this.seed, pos.getX(), pos.getZ(), biome);
-            biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
+            if (Cubiomes.getVariant(structureVariant, structure, this.version, this.seed, pos.getX(), pos.getZ(), biome) != 0) {
+                biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
+            }
             MemorySegment structureSaltConfig = StructureSaltConfig.allocate(tempArena);
             if (Cubiomes.getStructureSaltConfig(structure, this.version, biome, structureSaltConfig) == 0) {
                 return;
