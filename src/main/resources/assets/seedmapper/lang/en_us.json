@@ -74,6 +74,8 @@
   "command.locate.loot.foundAtStructure": "Found %s in %s at %s.",
   "command.locate.loot.totalFound": "Found %s of %s in total.",
   "command.locate.feature.stronghold.success": "Stronghold found at %s.",
+  "command.locate.feature.stronghold.portal": "Portal is at %s and has %s eyes in it.",
+  "command.locate.feature.stronghold.portalNoEyes": "Portal is at %s.",
   "command.locate.feature.slimeChunk.noneFound": "Couldn't locate a slime chunk within 6400 blocks.",
   "command.locate.feature.slimeChunk.foundAt": "Slime chunk found at %s (chunk %s).",
   "command.locate.feature.slimeChunk.copy": "Click to copy coordinates of this slime chunk",

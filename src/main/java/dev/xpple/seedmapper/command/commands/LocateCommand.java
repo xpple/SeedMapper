@@ -251,9 +251,40 @@ public class LocateCommand {
         TwoDTree tree = SeedMapScreen.strongholdDataCache.computeIfAbsent(new WorldIdentifier(seed.seed(), dimension, version, generatorFlags), _ -> calculateStrongholds(seed.seed(), dimension, version, generatorFlags));
 
         BlockPos pos = tree.nearestTo(position.atY(0));
+        assert pos != null;
 
         source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.feature.stronghold.success", ComponentUtils.formatXZ(pos.getX(), pos.getZ()))));
-        return Command.SINGLE_SUCCESS;
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
+            MemorySegment ssconf = StructureSaltConfig.allocate(arena);
+            int numPieces;
+            boolean lootSupported;
+            // biome is not used for strongholds
+            //noinspection AssignmentUsedAsCondition
+            if (lootSupported = Cubiomes.getStructureSaltConfig(Cubiomes.Stronghold(), version, -1, ssconf) != 0) {
+                numPieces = Cubiomes.getStrongholdLoot(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, ssconf, version, seed.seed(), pos.getX() >> 4, pos.getZ() >> 4);
+            } else {
+                numPieces = Cubiomes.getStrongholdPieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, version, seed.seed(), pos.getX() >> 4, pos.getZ() >> 4);
+            }
+            MemorySegment piece = IntStream.range(0, numPieces)
+                .mapToObj(i -> Piece.asSlice(pieces, i))
+                .filter(p -> Piece.type(p) == Cubiomes.SH_PORTAL_ROOM())
+                .findAny().orElseThrow(); // every stronghold has a portal
+            MemorySegment portalRoomPos = Piece.pos(piece);
+            int portalRoomX = Pos3.x(portalRoomPos);
+            int portalRoomZ = Pos3.z(portalRoomPos);
+            if (lootSupported) {
+                int eyesBitPack = Piece.additionalData(piece);
+                int eyes = Integer.bitCount(eyesBitPack);
+                source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ")
+                    .append(Component.translatable("command.locate.feature.stronghold.portal", ComponentUtils.formatXZ(portalRoomX, portalRoomZ), accent(Integer.toString(eyes))))));
+            } else {
+                source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ")
+                    .append(Component.translatable("command.locate.feature.stronghold.portalNoEyes", ComponentUtils.formatXZ(portalRoomX, portalRoomZ)))));
+            }
+            return numPieces;
+        }
     }
 
     public static TwoDTree calculateStrongholds(long seed, int dimension, int version, int generatorFlags) {
