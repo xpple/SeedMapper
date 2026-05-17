@@ -93,7 +93,7 @@
   "commands.exceptions.unknownVariantValue": "Билгесез «%s» төзелеш төре кыйммәте.",
   "commands.exceptions.unknownVersion": "Билгесез «%s» версиясе.",
   "config.devMode.comment": "Кайбер төзәтү боерыкларын куша.",
-  "config.oreAirCheck.comment": "Мәгъдән урыннарын invalidate өчен SeedMapper уендагы һава тикшерүләрне кулланырга тиеш яки тиеш түгел.",
+  "config.oreAirCheck.comment": "Мәгъдән урыннарын хаталы дип билгеләү өчен SeedMapper уендагы һава тикшерүләрне кулланырга тиеш яки тиеш түгел.",
   "key.category.seedmapper.seedmapper": "SeedMapper",
   "key.minimap": "Орлык кыска харитасы",
   "key.seedMap": "Орлык харитасы",
