@@ -94,8 +94,10 @@
   "seedMap.chestLoot.extraInfo.lootTable": "Табыш таблицасы: %s",
   "seedMap.chestLoot.extraInfo.pieceName": "Өлеш исеме: %s",
   "seedMap.chestLoot.stewEffect": "%s (%s секунд)",
-  "seedMap.chestLoot.title": "%s табыш (%d/%d)",
+  "seedMap.chestLoot.title": "%s табышы (%s/%s)",
   "seedMap.coordinatesCopied": "%s (координаталар күчереп алынды!)",
   "seedMap.seed": "Орлык: %s | %s %s",
+  "seedMap.teleportEditBoxX": "X координатасы кертү кыры",
+  "seedMap.teleportEditBoxZ": "Z координатасы кертү кыры",
   "seedMap.waypointNameEditBox": "Нокта исеме"
 }
