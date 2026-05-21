@@ -1,7 +1,8 @@
 ## Changelog
-- Made block colors configurable (`/sm:config BlockColors`).
-- Added ore debug highlighting (`/sm:highlight ore`).
-- Fixed Pale Garden biome issue for 1.21.5+.
+- Added stronghold loot support for the seed map.
+- Added portal room information when locating strongholds.
+- Extended OreAirCheck to blocks that cannot occlude.
+- Added Tatar translations (thansk to @Amirhan-Taipovjan-Greatest-I).
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
