@@ -10,7 +10,7 @@ In-game Minecraft Fabric mod that allows you to do various things with the world
    - Mac: `minecraft/mods`.
 3. Download SeedMapper from the [releases page](https://modrinth.com/mod/seedmapper/versions/) and move it to your mods folder.
 
-## IMPORTANT
+## IMPORTANT FOR 1.21.11 AND BELOW
 You need to have at least Java 23 installed to use this mod. I recommend to get Java 23 (or higher) from [adoptium.net](https://adoptium.net/temurin/releases/?version=23). Next, configure your Minecraft launcher to use this release of Java.
 
 - Vanilla launcher: Go to `Installations` -> `Edit` -> `More options` -> `Java executable`.
@@ -23,6 +23,8 @@ Sometimes it may be necessary to click the option for skipping the Java compatib
 If you are on Windows, make sure to select `javaw.exe`, not `java.exe`.
 
 If you run into issues, contact your launcher's support.
+
+As of 26.1 this step is no longer necessary.
 
 ## Features
 Before using any of these commands, make sure the seed has been configured using `/sm:config Seed set <seed>`.
