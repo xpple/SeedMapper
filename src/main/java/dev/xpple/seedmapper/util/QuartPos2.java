@@ -20,7 +20,7 @@ public record QuartPos2(int x, int z) {
     }
 
     public static QuartPos2 fromChunkPos(ChunkPos chunkPos) {
-        return new QuartPos2(QuartPos.fromSection(chunkPos.x), QuartPos.fromSection(chunkPos.z));
+        return new QuartPos2(QuartPos.fromSection(chunkPos.x()), QuartPos.fromSection(chunkPos.z()));
     }
 
     public ChunkPos toChunkPos() {

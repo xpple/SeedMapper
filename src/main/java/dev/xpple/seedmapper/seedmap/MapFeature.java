@@ -19,7 +19,7 @@ public enum MapFeature {
     DESERT_PYRAMID("desert_pyramid", Cubiomes.Desert_Pyramid(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_1_3(), "cubiomes_viewer_icons", 19, 20),
     JUNGLE_PYRAMID("jungle_pyramid", Cubiomes.Jungle_Pyramid(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_1_3(), "cubiomes_viewer_icons", 19, 20),
     SWAMP_HUT("swamp_hut", Cubiomes.Swamp_Hut(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_1_4(), "cubiomes_viewer_icons", 20, 20),
-    STRONGHOLD("stronghold", -1, Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_B1_8(), "cubiomes_viewer_icons", 19, 20),
+    STRONGHOLD("stronghold", Cubiomes.Stronghold(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_B1_8(), "cubiomes_viewer_icons", 19, 20),
     IGLOO("igloo", Cubiomes.Igloo(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_1_9(), "cubiomes_viewer_icons", 20, 20) {
         private static final Texture IGLOO_BASEMENT_TEXTURE = new Texture("igloo_basement", "cubiomes_viewer_icons", 20, 20);
         @Override

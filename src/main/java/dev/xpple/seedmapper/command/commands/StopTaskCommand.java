@@ -5,7 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.seedmapper.thread.LocatorThreadHelper;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class StopTaskCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

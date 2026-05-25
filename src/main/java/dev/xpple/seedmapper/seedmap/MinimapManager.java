@@ -4,7 +4,7 @@ import dev.xpple.seedmapper.SeedMapper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -47,13 +47,13 @@ public final class MinimapManager {
         show(minimapScreen.getSeed(), dimension, minimapScreen.getVersion(), minimapScreen.getGeneratorFlags());
     }
 
-    private static void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+    private static void render(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {
         if (minimapScreen == null) {
             return;
         }
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         minimapScreen.update(player.position(), player.getRotationVector());
-        minimapScreen.renderToHud(guiGraphics, deltaTracker.getGameTimeDeltaTicks());
+        minimapScreen.renderToHud(guiGraphicsExtractor, deltaTracker.getGameTimeDeltaTicks());
     }
 }

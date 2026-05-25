@@ -46,6 +46,11 @@ public final class StructureChecks {
                     int numPieces = Cubiomes.getFortressPieces(pieces, MAX_END_CITY_AND_FORTRESS_PIECES, Generator.mc(generator), Generator.seed(generator), Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
                     return piecesPredicate.test(numPieces, pieces);
                 });
+            } else if (structure == Cubiomes.Stronghold()) {
+                tempPiecesPredicateChecks.put(structure, (piecesPredicate, pieces, generator, structurePos) -> {
+                    int numPieces = Cubiomes.getStrongholdPieces(pieces, MAX_END_CITY_AND_FORTRESS_PIECES, Generator.mc(generator), Generator.seed(generator), Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4);
+                    return piecesPredicate.test(numPieces, pieces);
+                });
             } else {
                 throw new AssertionError();
             }

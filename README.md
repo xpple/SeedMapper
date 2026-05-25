@@ -10,7 +10,7 @@ In-game Minecraft Fabric mod that allows you to do various things with the world
    - Mac: `minecraft/mods`.
 3. Download SeedMapper from the [releases page](https://modrinth.com/mod/seedmapper/versions/) and move it to your mods folder.
 
-## IMPORTANT
+## IMPORTANT FOR 1.21.11 AND BELOW
 You need to have at least Java 23 installed to use this mod. I recommend to get Java 23 (or higher) from [adoptium.net](https://adoptium.net/temurin/releases/?version=23). Next, configure your Minecraft launcher to use this release of Java.
 
 - Vanilla launcher: Go to `Installations` -> `Edit` -> `More options` -> `Java executable`.
@@ -23,6 +23,8 @@ Sometimes it may be necessary to click the option for skipping the Java compatib
 If you are on Windows, make sure to select `javaw.exe`, not `java.exe`.
 
 If you run into issues, contact your launcher's support.
+
+As of 26.1 this step is no longer necessary.
 
 ## Features
 Before using any of these commands, make sure the seed has been configured using `/sm:config Seed set <seed>`.
@@ -78,7 +80,7 @@ Usage: `/sm:source (run)|(as <entity>)|(positioned <position>)|(rotated <rotatio
 Executes a given command from a modified source. For example, modifying the source's position will execute the command as if you were in that position. This command is really powerful, use it!
 
 ### Baritone integration
-If [Meteor's version of Baritone](https://maven.meteordev.org/#/snapshots/meteordevelopment/baritone) is present, the `AutoMine` config will be visible. When set to true, certain blocks highlighted by `/sm:highlight` will be automatically mined. You can stop Baritone by executing `#stop` as usual. Make sure `#allowBreak` is set to true in Baritone's configs, otherwise Baritone will get stuck forever and no blocks will be mined.
+If [Meteor's version of Baritone](https://maven.meteordev.org/#/snapshots/meteordevelopment/baritone) is present, SeedMapper's `AutoMine` config will be visible. When set to true, certain blocks highlighted by `/sm:highlight` will be automatically mined. You can stop Baritone by executing `#stop` as usual. Make sure `#allowBreak` is set to true in Baritone's configs, otherwise Baritone will get stuck forever and no blocks will be mined.
 
 ## Building from source
 This mod internally uses (a fork of) the C library [cubiomes](https://github.com/Cubitect/cubiomes) by Cubitect. Java bindings for this library were created with (also a fork of) [jextract](https://github.com/openjdk/jextract). The bindings use the [Foreign Function & Memory API](https://openjdk.org/jeps/454) from [Project Panama](https://openjdk.org/projects/panama/). See [CreateJavaBindingsTask.java](https://github.com/xpple/SeedMapper/blob/master/buildSrc/src/main/java/dev/xpple/seedmapper/buildscript/CreateJavaBindingsTask.java) for the Gradle task that automates this.

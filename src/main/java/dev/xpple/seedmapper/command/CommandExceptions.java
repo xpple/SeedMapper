@@ -19,7 +19,8 @@ public final class CommandExceptions {
     public static final DynamicCommandExceptionType UNKNOWN_STRUCTURE_PIECE_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownStructurePiece", arg));
     public static final DynamicCommandExceptionType UNKNOWN_VARIANT_KEY_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownVariantKey", arg));
     public static final DynamicCommandExceptionType UNKNOWN_VARIANT_VALUE_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownVariantValue", arg));
-    public static final DynamicCommandExceptionType UNKNOWN_BLOCK_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownOre", arg));
+    public static final DynamicCommandExceptionType UNKNOWN_BLOCK_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownBlock", arg));
+    public static final DynamicCommandExceptionType UNKNOWN_ORE_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownOre", arg));
     public static final DynamicCommandExceptionType UNKNOWN_ITEM_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownItem", arg));
     public static final DynamicCommandExceptionType UNKNOWN_ENCHANTMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownEnchantment", arg));
     public static final DynamicCommandExceptionType UNKNOWN_CANYON_CARVER_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.exceptions.unknownCanyonCarver", arg));

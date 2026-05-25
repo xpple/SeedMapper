@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.seedmapper.command.arguments.ColorWrapperArgument;
 import dev.xpple.seedmapper.command.arguments.DurationArgument;
 import dev.xpple.seedmapper.command.arguments.MapFeatureArgument;
 import dev.xpple.seedmapper.command.arguments.SeedIdentifierArgument;
@@ -19,6 +20,8 @@ import dev.xpple.seedmapper.command.commands.SampleCommand;
 import dev.xpple.seedmapper.command.commands.SeedMapCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
 import dev.xpple.seedmapper.command.commands.StopTaskCommand;
+import dev.xpple.seedmapper.config.ColorWrapper;
+import dev.xpple.seedmapper.config.ColorWrapperAdapter;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.config.DurationAdapter;
 import dev.xpple.seedmapper.config.MapFeatureAdapter;
@@ -31,11 +34,11 @@ import dev.xpple.seedmapper.util.SeedDatabaseHelper;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.KeyMapping;
@@ -79,10 +82,11 @@ public class SeedMapper implements ClientModInitializer {
             .registerType(SeedResolutionArgument.SeedResolution.class, new SeedResolutionAdapter(), SeedResolutionArgument::seedResolution)
             .registerTypeHierarchy(MapFeature.class, new MapFeatureAdapter(), MapFeatureArgument::mapFeature)
             .registerType(Duration.class, new DurationAdapter(), DurationArgument::duration)
+            .registerType(ColorWrapper.class, new ColorWrapperAdapter(), ColorWrapperArgument::colorWrapper)
             .registerGlobalChangeHook(event -> {
                 if (event.config().equals("DevMode")) {
                     try {
-                        ClientCommandManager.refreshCommandCompletions();
+                        ClientCommands.refreshCommandCompletions();
                     } catch (IllegalStateException _) {
                     }
                 }
@@ -94,8 +98,8 @@ public class SeedMapper implements ClientModInitializer {
         SeedDatabaseHelper.fetchSeeds();
 
         KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, MOD_ID));
-        KeyMapping seedMapKeyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.seedMap", InputConstants.KEY_M, category));
-        KeyMapping minimapKeyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.minimap", InputConstants.KEY_COMMA, category));
+        KeyMapping seedMapKeyMapping = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.seedMap", InputConstants.KEY_M, category));
+        KeyMapping minimapKeyMapping = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.minimap", InputConstants.KEY_COMMA, category));
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
             while (seedMapKeyMapping.consumeClick()) {
                 minecraft.player.connection.sendCommand("sm:seedmap");

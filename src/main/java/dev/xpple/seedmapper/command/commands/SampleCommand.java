@@ -17,7 +17,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
 import static dev.xpple.seedmapper.command.arguments.DensityFunctionArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class SampleCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

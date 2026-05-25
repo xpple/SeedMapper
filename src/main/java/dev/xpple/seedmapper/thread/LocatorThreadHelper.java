@@ -44,27 +44,27 @@ public final class LocatorThreadHelper {
                 Player player = Minecraft.getInstance().player;
                 if (e instanceof CommandSyntaxException cse) {
                     if (player != null) {
-                        Minecraft.getInstance().schedule(() -> player.displayClientMessage(error((MutableComponent) cse.getRawMessage()), false));
+                        Minecraft.getInstance().schedule(() -> player.sendSystemMessage(error((MutableComponent) cse.getRawMessage())));
                     }
                 } else {
                     LOGGER.error("An error occurred while executing one of SeedMapper's tasks!", e);
                     if (player != null) {
-                        Minecraft.getInstance().schedule(() -> player.displayClientMessage(error(Component.translatable("commands.exceptions.unknownError")), false));
+                        Minecraft.getInstance().schedule(() -> player.sendSystemMessage(error(Component.translatable("commands.exceptions.unknownError"))));
                     }
                 }
                 return 0;
             }
         });
-        Minecraft.getInstance().player.displayClientMessage(Component.translatable("command.locate.taskStarted"), false);
+        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("command.locate.taskStarted"));
         return Command.SINGLE_SUCCESS;
     }
 
     public static void stop() {
         if (currentTask != null && !currentTask.isDone()) {
             currentTask.cancel(true);
-            Minecraft.getInstance().player.displayClientMessage(Component.translatable("command.locate.taskStopped"), false);
+            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("command.locate.taskStopped"));
         } else {
-            Minecraft.getInstance().player.displayClientMessage(error(Component.translatable("command.locate.noTaskRunning")), false);
+            Minecraft.getInstance().player.sendSystemMessage(error(Component.translatable("command.locate.noTaskRunning")));
         }
     }
 }

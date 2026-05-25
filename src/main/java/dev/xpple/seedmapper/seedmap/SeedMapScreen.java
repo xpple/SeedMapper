@@ -48,16 +48,16 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.gui.components.PlayerFaceExtractor;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.BlitRenderState;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.BlitRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
@@ -107,6 +107,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.IntSupplier;
 import java.util.function.ToIntBiFunction;
+import java.util.stream.Gatherers;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -128,22 +129,22 @@ public class SeedMapScreen extends Screen {
      */
 
     // unsigned char biomeColors[256][3]
-    private static final int[] biomeColours = new int[256];
+    private static final int[] biomeColors = new int[256];
 
     static {
         // unsigned char color[3]
         SequenceLayout rgbLayout = MemoryLayout.sequenceLayout(3, Cubiomes.C_CHAR);
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment biomeColoursInternal = arena.allocate(rgbLayout, biomeColours.length);
-            Cubiomes.initBiomeColors(biomeColoursInternal);
-            for (int biome = 0; biome < biomeColours.length; biome++) {
-                MemorySegment colourArray = biomeColoursInternal.asSlice(biome * rgbLayout.byteSize());
-                int red = colourArray.getAtIndex(Cubiomes.C_CHAR, 0) & 0xFF;
-                int green = colourArray.getAtIndex(Cubiomes.C_CHAR, 1) & 0xFF;
-                int blue = colourArray.getAtIndex(Cubiomes.C_CHAR, 2) & 0xFF;
-                int colour = ARGB.color(red, green, blue);
-                biomeColours[biome] = colour;
+            MemorySegment biomeColorsInternal = arena.allocate(rgbLayout, biomeColors.length);
+            Cubiomes.initBiomeColors(biomeColorsInternal);
+            for (int biome = 0; biome < biomeColors.length; biome++) {
+                MemorySegment colorArray = biomeColorsInternal.asSlice(biome * rgbLayout.byteSize());
+                int red = colorArray.getAtIndex(Cubiomes.C_CHAR, 0) & 0xFF;
+                int green = colorArray.getAtIndex(Cubiomes.C_CHAR, 1) & 0xFF;
+                int blue = colorArray.getAtIndex(Cubiomes.C_CHAR, 2) & 0xFF;
+                int color = ARGB.color(red, green, blue);
+                biomeColors[biome] = color;
             }
         }
     }
@@ -337,14 +338,14 @@ public class SeedMapScreen extends Screen {
    }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, partialTick);
         // draw title
         Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(this.seed)), Cubiomes.mc2str(this.version).getString(0), ComponentUtils.formatGeneratorFlags(this.generatorFlags));
-        guiGraphics.drawString(this.font, seedComponent, this.horizontalPadding(), this.verticalPadding() - this.font.lineHeight - 1, -1);
-        this.renderBiomes(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.nextStratum();
-        this.renderFeatures(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphicsExtractor.text(this.font, seedComponent, this.horizontalPadding(), this.verticalPadding() - this.font.lineHeight - 1, -1);
+        this.renderBiomes(guiGraphicsExtractor, mouseX, mouseY, partialTick);
+        guiGraphicsExtractor.nextStratum();
+        this.renderFeatures(guiGraphicsExtractor, mouseX, mouseY, partialTick);
         // draw hovered coordinates and biome
         MutableComponent coordinates = accent("x: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
         OptionalInt optionalBiome = getBiome(this.mouseQuart);
@@ -354,10 +355,10 @@ public class SeedMapScreen extends Screen {
         if (this.displayCoordinatesCopiedTicks > 0) {
             coordinates = Component.translatable("seedMap.coordinatesCopied", coordinates);
         }
-        guiGraphics.drawString(this.font, coordinates, this.horizontalPadding(), this.verticalPadding() + this.seedMapHeight + 1, -1);
+        guiGraphicsExtractor.text(this.font, coordinates, this.horizontalPadding(), this.verticalPadding() + this.seedMapHeight + 1, -1);
     }
 
-    protected void renderBiomes(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void renderBiomes(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
         int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
         int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
         int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
@@ -371,7 +372,7 @@ public class SeedMapScreen extends Screen {
                 int[] biomeData = this.biomeCache.computeIfAbsent(tilePos, this::calculateBiomeData);
                 if (biomeData != null) {
                     Tile tile = this.biomeTileCache.computeIfAbsent(tilePos, _ -> this.createBiomeTile(tilePos, biomeData));
-                    this.drawTile(guiGraphics, tile);
+                    this.drawTile(guiGraphicsExtractor, tile);
                 }
 
                 // compute slime chunks and store in texture
@@ -379,14 +380,14 @@ public class SeedMapScreen extends Screen {
                     BitSet slimeChunkData = this.slimeChunkCache.computeIfAbsent(tilePos, this::calculateSlimeChunkData);
                     if (slimeChunkData != null) {
                         Tile tile = this.slimeChunkTileCache.computeIfAbsent(tilePos, _ -> this.createSlimeChunkTile(tilePos, slimeChunkData));
-                        this.drawTile(guiGraphics, tile);
+                        this.drawTile(guiGraphicsExtractor, tile);
                     }
                 }
             }
         }
    }
 
-   protected void renderFeatures(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+   protected void renderFeatures(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
        int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
        int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
        int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
@@ -430,7 +431,7 @@ public class SeedMapScreen extends Screen {
                }
            });
 
-       guiGraphics.nextStratum();
+       guiGraphicsExtractor.nextStratum();
 
        // draw strongholds
        if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && Configs.ToggledFeatures.contains(MapFeature.STRONGHOLD)) {
@@ -469,8 +470,8 @@ public class SeedMapScreen extends Screen {
                    canyonData.stream().forEach(i -> {
                        int relChunkX = i % TilePos.TILE_SIZE_CHUNKS;
                        int relChunkZ = i / TilePos.TILE_SIZE_CHUNKS;
-                       int chunkX = chunkPos.x + relChunkX;
-                       int chunkZ = chunkPos.z + relChunkZ;
+                       int chunkX = chunkPos.x() + relChunkX;
+                       int chunkZ = chunkPos.z() + relChunkZ;
                        this.addFeatureWidget(MapFeature.CANYON, new BlockPos(SectionPos.sectionToBlockCoord(chunkX), 0, SectionPos.sectionToBlockCoord(chunkZ)));
                    });
                }
@@ -492,20 +493,20 @@ public class SeedMapScreen extends Screen {
                }
                int waypointCenterX = widget.x + widget.width() / 2;
                int waypointCenterY = widget.y + widget.width() / 2;
-               var pose = guiGraphics.pose();
+               var pose = guiGraphicsExtractor.pose();
                pose.pushMatrix();
                if (this.isMinimap() && Configs.RotateMinimap) {
                    pose.translate(waypointCenterX, waypointCenterY);
                    pose.rotate((float) (Math.toRadians(this.playerRotation.y) - Math.PI));
                    pose.translate(-waypointCenterX, -waypointCenterY);
                }
-               guiGraphics.drawCenteredString(this.font, name, waypointCenterX, waypointCenterY + widget.height() / 2, ARGB.color(255, waypoint.color()));
+               guiGraphicsExtractor.centeredText(this.font, name, waypointCenterX, waypointCenterY + widget.height() / 2, ARGB.color(255, waypoint.color()));
                pose.popMatrix();
            });
        }
 
        // draw player position
-       this.drawPlayerIndicator(guiGraphics);
+       this.drawPlayerIndicator(guiGraphicsExtractor);
 
        // calculate spawn point
        if (this.toggleableFeatures.contains(MapFeature.WORLD_SPAWN) && Configs.ToggledFeatures.contains(MapFeature.WORLD_SPAWN)) {
@@ -514,24 +515,24 @@ public class SeedMapScreen extends Screen {
        }
 
        // draw feature icons
-       this.drawFeatureIcons(guiGraphics);
+       this.drawFeatureIcons(guiGraphicsExtractor);
 
        // draw marker
        if (!this.isMinimap()) {
            if (this.markerWidget != null && this.markerWidget.withinBounds()) {
-               FeatureWidget.drawFeatureIcon(guiGraphics, this.markerWidget.featureTexture, this.markerWidget.x, this.markerWidget.y, -1);
+               FeatureWidget.drawFeatureIcon(guiGraphicsExtractor, this.markerWidget.featureTexture, this.markerWidget.x, this.markerWidget.y, -1);
            }
        }
 
        // draw chest loot widget
        if (!this.isMinimap()) {
            if (this.chestLootWidget != null) {
-               this.chestLootWidget.render(guiGraphics, mouseX, mouseY, this.font);
+               this.chestLootWidget.render(guiGraphicsExtractor, mouseX, mouseY, this.font);
            }
        }
    }
 
-    private void drawTile(GuiGraphics guiGraphics, Tile tile) {
+    private void drawTile(GuiGraphicsExtractor guiGraphicsExtractor, Tile tile) {
         TilePos tilePos = tile.pos();
         QuartPos2f relTileQuart = QuartPos2f.fromQuartPos(QuartPos2.fromTilePos(tilePos)).subtract(this.centerQuart);
         int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
@@ -565,7 +566,7 @@ public class SeedMapScreen extends Screen {
             maxY = this.verticalPadding() + this.seedMapHeight;
         } else v1 = 1;
 
-        guiGraphics.submitBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), tile.texture().getSampler(), minX, minY, maxX, maxY, u0, u1, v0, v1, 0xFF_FFFFFF);
+        guiGraphicsExtractor.innerBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), tile.texture().getSampler(), minX, minY, maxX, maxY, u0, u1, v0, v1, 0xFF_FFFFFF);
     }
 
     private Tile createBiomeTile(TilePos tilePos, int[] biomeData) {
@@ -576,7 +577,7 @@ public class SeedMapScreen extends Screen {
         for (int relX = 0; relX < width; relX++) {
             for (int relZ = 0; relZ < height; relZ++) {
                 int biome = biomeData[relX + relZ * width];
-                texture.getPixels().setPixel(relX, relZ, biomeColours[biome]);
+                texture.getPixels().setPixel(relX, relZ, biomeColors[biome]);
             }
         }
         texture.upload();
@@ -612,19 +613,19 @@ public class SeedMapScreen extends Screen {
         return widget;
     }
 
-    private void drawFeatureIcons(GuiGraphics guiGraphics) {
+    private void drawFeatureIcons(GuiGraphicsExtractor guiGraphicsExtractor) {
         for (ObjectIterator<FeatureWidget> iterator = this.featureWidgets.iterator(); iterator.hasNext();) {
             FeatureWidget widget = iterator.next();
             if (Configs.ToggledFeatures.contains(widget.feature)) {
                 MapFeature.Texture texture = widget.texture();
-                this.drawIcon(guiGraphics, texture.identifier(), widget.x, widget.y, texture.width(), texture.height(), 0xFF_FFFFFF);
+                this.drawIcon(guiGraphicsExtractor, texture.identifier(), widget.x, widget.y, texture.width(), texture.height(), 0xFF_FFFFFF);
             } else {
                 iterator.remove();
             }
         }
     }
 
-    protected void drawPlayerIndicator(GuiGraphics guiGraphics) {
+    protected void drawPlayerIndicator(GuiGraphicsExtractor guiGraphicsExtractor) {
         if (!this.toggleableFeatures.contains(MapFeature.PLAYER_ICON) || !Configs.ToggledFeatures.contains(MapFeature.PLAYER_ICON)) {
             return;
         }
@@ -636,14 +637,14 @@ public class SeedMapScreen extends Screen {
         if (playerMinX < this.horizontalPadding() || playerMaxX > this.horizontalPadding() + this.seedMapWidth || playerMinY < this.verticalPadding() || playerMaxY > this.verticalPadding() + this.seedMapHeight) {
             return;
         }
-        PlayerFaceRenderer.draw(guiGraphics, this.minecraft.player.getSkin(), playerMinX, playerMinY, 20);
+        PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, this.minecraft.player.getSkin(), playerMinX, playerMinY, 20);
 
-        this.drawDirectionArrow(guiGraphics, playerMinX, playerMinY);
+        this.drawDirectionArrow(guiGraphicsExtractor, playerMinX, playerMinY);
     }
 
-    protected void drawDirectionArrow(GuiGraphics guiGraphics, int playerMinX, int playerMinY) {
-        guiGraphics.pose().pushMatrix();
-        Matrix3x2f transform = guiGraphics.pose() // transformations are applied in reverse order
+    protected void drawDirectionArrow(GuiGraphicsExtractor guiGraphicsExtractor, int playerMinX, int playerMinY) {
+        guiGraphicsExtractor.pose().pushMatrix();
+        Matrix3x2f transform = guiGraphicsExtractor.pose() // transformations are applied in reverse order
             .translate(10, 10)
             .translate(playerMinX, playerMinY)
             .rotate((float) (Math.toRadians(this.playerRotation.y) + Math.PI))
@@ -655,31 +656,26 @@ public class SeedMapScreen extends Screen {
             .allMatch(v -> v.x >= this.horizontalPadding() && v.x <= this.horizontalPadding() + this.seedMapWidth &&
                 v.y >= this.verticalPadding() && v.y <= this.verticalPadding() + this.seedMapHeight);
         if (withinBounds) {
-            drawIconStatic(guiGraphics, DIRECTION_ARROW_TEXTURE, 0, 0, 20, 20, 0xFF_FFFFFF);
+            drawIconStatic(guiGraphicsExtractor, DIRECTION_ARROW_TEXTURE, 0, 0, 20, 20, 0xFF_FFFFFF);
         }
-        guiGraphics.pose().popMatrix();
+        guiGraphicsExtractor.pose().popMatrix();
     }
 
     private void createFeatureToggles() {
-        // TODO: replace with Gatherers API?
         // TODO: only calculate on resize?
         int rows = Math.ceilDiv(this.featureIconsCombinedWidth, this.seedMapWidth);
         int togglesPerRow = Math.ceilDiv(this.toggleableFeatures.size(), rows);
-        int toggleMinY = 1;
-        for (int row = 0; row < rows - 1; row++) {
-            this.createFeatureTogglesInner(row, togglesPerRow, togglesPerRow, this.horizontalPadding(), toggleMinY);
-            toggleMinY += FEATURE_TOGGLE_HEIGHT + VERTICAL_FEATURE_TOGGLE_SPACING;
-        }
-        int togglesInLastRow = this.toggleableFeatures.size() - togglesPerRow * (rows - 1);
-        this.createFeatureTogglesInner(rows - 1, togglesPerRow, togglesInLastRow, this.horizontalPadding(), toggleMinY);
-    }
+        List<List<MapFeature>> toggleRows = this.toggleableFeatures.stream().gather(Gatherers.windowFixed(togglesPerRow)).toList();
 
-    private void createFeatureTogglesInner(int row, int togglesPerRow, int maxToggles, int toggleMinX, int toggleMinY) {
-        for (int toggle = 0; toggle < maxToggles; toggle++) {
-            MapFeature feature = this.toggleableFeatures.get(row * togglesPerRow + toggle);
-            MapFeature.Texture featureIcon = feature.getDefaultTexture();
-            this.addRenderableWidget(new FeatureToggleWidget(feature, toggleMinX, toggleMinY));
-            toggleMinX += featureIcon.width() + HORIZONTAL_FEATURE_TOGGLE_SPACING;
+        int toggleMinY = 1;
+        for (List<MapFeature> rowToggles : toggleRows) {
+            int toggleMinX = this.horizontalPadding();
+            for (MapFeature feature : rowToggles) {
+                MapFeature.Texture featureIcon = feature.getDefaultTexture();
+                this.addRenderableWidget(new FeatureToggleWidget(feature, toggleMinX, toggleMinY));
+                toggleMinX += featureIcon.width() + HORIZONTAL_FEATURE_TOGGLE_SPACING;
+            }
+            toggleMinY += FEATURE_TOGGLE_HEIGHT + VERTICAL_FEATURE_TOGGLE_SPACING;
         }
     }
 
@@ -713,7 +709,7 @@ public class SeedMapScreen extends Screen {
         ChunkPos chunkPos = tilePos.toChunkPos();
         for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
             for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
-                RandomSource random = WorldgenRandom.seedSlimeChunk(chunkPos.x + relChunkX, chunkPos.z + relChunkZ, this.seed, 987234911L);
+                RandomSource random = WorldgenRandom.seedSlimeChunk(chunkPos.x() + relChunkX, chunkPos.z() + relChunkZ, this.seed, 987234911L);
                 slimeChunks.set(relChunkX + relChunkZ * TilePos.TILE_SIZE_CHUNKS, random.nextInt(10) == 0);
             }
         }
@@ -740,8 +736,8 @@ public class SeedMapScreen extends Screen {
         ChunkPos chunkPos = tilePos.toChunkPos();
         for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
             for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
-                int minBlockX = SectionPos.sectionToBlockCoord(chunkPos.x + relChunkZ);
-                int minBlockZ = SectionPos.sectionToBlockCoord(chunkPos.z + relChunkZ);
+                int minBlockX = SectionPos.sectionToBlockCoord(chunkPos.x() + relChunkZ);
+                int minBlockZ = SectionPos.sectionToBlockCoord(chunkPos.z() + relChunkZ);
                 RandomSource rnd = this.oreVeinRandom.at(minBlockX, 0, minBlockZ);
                 BlockPos pos = new BlockPos(minBlockX + rnd.nextInt(LevelChunkSection.SECTION_WIDTH), 0, minBlockZ + rnd.nextInt(LevelChunkSection.SECTION_WIDTH));
                 IntSet blocks = IntStream.rangeClosed(0, (50 - -60) / 4)
@@ -779,8 +775,8 @@ public class SeedMapScreen extends Screen {
             ChunkPos chunkPos = tilePos.toChunkPos();
             for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
                 for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
-                    int chunkX = chunkPos.x + relChunkX;
-                    int chunkZ = chunkPos.z + relChunkZ;
+                    int chunkX = chunkPos.x() + relChunkX;
+                    int chunkZ = chunkPos.z() + relChunkZ;
                     for (int canyonCarver : CanyonCarverArgument.CANYON_CARVERS.values()) {
                         MemorySegment ccc = this.canyonCarverConfigs[canyonCarver];
                         if (ccc == null) {
@@ -976,8 +972,9 @@ public class SeedMapScreen extends Screen {
         // temporary arena so that everything will be deallocated after the loot is calculated
         try (Arena tempArena = Arena.ofConfined()) {
             MemorySegment structureVariant = StructureVariant.allocate(tempArena);
-            Cubiomes.getVariant(structureVariant, structure, this.version, this.seed, pos.getX(), pos.getZ(), biome);
-            biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
+            if (Cubiomes.getVariant(structureVariant, structure, this.version, this.seed, pos.getX(), pos.getZ(), biome) != 0) {
+                biome = StructureVariant.biome(structureVariant) != -1 ? StructureVariant.biome(structureVariant) : biome;
+            }
             MemorySegment structureSaltConfig = StructureSaltConfig.allocate(tempArena);
             if (Cubiomes.getStructureSaltConfig(structure, this.version, biome, structureSaltConfig) == 0) {
                 return;
@@ -1143,7 +1140,7 @@ public class SeedMapScreen extends Screen {
         } catch (CommandSyntaxException e) {
             LocalPlayer player = this.minecraft.player;
             if (player != null) {
-                player.displayClientMessage(error((MutableComponent) e.getRawMessage()), false);
+                player.sendSystemMessage(error((MutableComponent) e.getRawMessage()));
             }
             return false;
         }
@@ -1225,32 +1222,32 @@ public class SeedMapScreen extends Screen {
             return this.feature == that.feature && Objects.equals(this.featureTexture, that.featureTexture) && Objects.equals(this.featureLocation, that.featureLocation);
         }
 
-        static void drawFeatureIcon(GuiGraphics guiGraphics, MapFeature.Texture texture, int minX, int minY, int colour) {
+        static void drawFeatureIcon(GuiGraphicsExtractor guiGraphicsExtractor, MapFeature.Texture texture, int minX, int minY, int color) {
             int iconWidth = texture.width();
             int iconHeight = texture.height();
 
-            drawIconStatic(guiGraphics, texture.identifier(), minX, minY, iconWidth, iconHeight, colour);
+            drawIconStatic(guiGraphicsExtractor, texture.identifier(), minX, minY, iconWidth, iconHeight, color);
         }
     }
 
-    private void drawIcon(GuiGraphics guiGraphics, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int colour) {
-        var pose = guiGraphics.pose();
+    private void drawIcon(GuiGraphicsExtractor guiGraphicsExtractor, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int color) {
+        var pose = guiGraphicsExtractor.pose();
         pose.pushMatrix();
         if (this.isMinimap() && Configs.RotateMinimap) {
             pose.translate(minX + (float) iconWidth / 2, minY + (float) iconWidth / 2);
             pose.rotate((float) (Math.toRadians(this.playerRotation.y) - Math.PI));
             pose.translate(-minX - (float) iconWidth / 2, -minY - (float) iconWidth / 2);
         }
-        drawIconStatic(guiGraphics, identifier, minX, minY, iconWidth, iconHeight, colour);
+        drawIconStatic(guiGraphicsExtractor, identifier, minX, minY, iconWidth, iconHeight, color);
         pose.popMatrix();
     }
 
-    private static void drawIconStatic(GuiGraphics guiGraphics, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int colour) {
+    private static void drawIconStatic(GuiGraphicsExtractor guiGraphicsExtractor, Identifier identifier, int minX, int minY, int iconWidth, int iconHeight, int color) {
         // Skip intersection checks (GuiRenderState.hasIntersection) you would otherwise get when calling
         // GuiGraphics.blit as these checks incur a significant performance hit
         AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(identifier);
-        BlitRenderState renderState = new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()), new Matrix3x2f(guiGraphics.pose()), minX, minY, minX + iconWidth, minY + iconHeight, 0, 1, 0, 1, colour, guiGraphics.scissorStack.peek());
-        guiGraphics.guiRenderState.submitBlitToCurrentLayer(renderState);
+        BlitRenderState renderState = new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()), new Matrix3x2f(guiGraphicsExtractor.pose()), minX, minY, minX + iconWidth, minY + iconHeight, 0, 1, 0, 1, color, guiGraphicsExtractor.scissorStack.peek());
+        guiGraphicsExtractor.guiRenderState.addBlitToCurrentLayer(renderState);
     }
 
     private static final BiMap<Integer, ResourceKey<Level>> DIM_ID_TO_MC = ImmutableBiMap.of(
