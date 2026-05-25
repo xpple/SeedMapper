@@ -44,6 +44,9 @@ public final class RenderManager {
         Set<Line> lines = new HashSet<>();
 
         posBatch.forEach(pos -> {
+            if (pos.getY() >= 0) {
+                return; // Внутри forEach 'return' работает как 'continue' в обычном цикле
+            }
             Vec3 minPosition = new Vec3(pos);
             Vec3 size = new Vec3(1, 1, 1);
             addLine(new Line(minPosition, minPosition.add(size.x(), 0, 0), colour), lines);
