@@ -45,7 +45,7 @@ public final class RenderManager {
 
         posBatch.forEach(pos -> {
             if (pos.getY() >= 0) {
-                return; // Внутри forEach 'return' работает как 'continue' в обычном цикле
+                return;
             }
             Vec3 minPosition = new Vec3(pos);
             Vec3 size = new Vec3(1, 1, 1);
