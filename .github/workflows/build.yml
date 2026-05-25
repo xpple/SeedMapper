@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - master
+      - emerald-2.21.2
   pull_request:
     branches:
       - master
+      - emerald-2.21.2
   create: # for Git tag creations
 
 jobs:
