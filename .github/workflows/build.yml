@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - master
+      - emerald
   pull_request:
     branches:
       - master
+      - emerald
   create: # for Git tag creations
 
 jobs:
