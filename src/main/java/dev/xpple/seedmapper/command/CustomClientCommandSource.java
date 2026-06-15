@@ -8,6 +8,7 @@ import dev.xpple.seedmapper.command.arguments.DimensionArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.command.arguments.VersionArgument;
 import dev.xpple.seedmapper.config.Configs;
+import dev.xpple.seedmapper.mixin.simplewaypoints.SerializationHelperInvoker;
 import dev.xpple.seedmapper.util.SeedDatabaseHelper;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
@@ -141,7 +142,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
                 case SEED_CONFIG -> Configs.Seed;
                 case SAVED_SEEDS_CONFIG -> {
                     String key = SimpleWaypointsAPI.getInstance().getWorldIdentifier(this.client);
-                    yield Configs.SavedSeeds.get(key);
+                    yield Optionull.map(key, k -> Configs.SavedSeeds.get(SerializationHelperInvoker.invokeUpgradeWorldIdentifier(k)));
                 }
                 case ONLINE_DATABASE -> {
                     // match SeedCrackerX's key format

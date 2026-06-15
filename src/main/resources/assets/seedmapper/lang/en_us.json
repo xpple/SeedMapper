@@ -33,6 +33,7 @@
   "commands.exceptions.caveWrongVersion": "Invalid version for cave carver!",
   "commands.exceptions.lootNotSupported": "Loot is not supported before version 1.13!",
   "commands.exceptions.lootNotAvailable": "This loot is not available in this dimension!",
+  "commands.exceptions.couldNotDetermineWorldIdentifier": "Could not determine world identifier!",
   "commands.exceptions.unknownResolutionMethod": "Unknowing resolution method \"%s\".",
   "commands.exceptions.unknownSeedArgument": "Unknown seed argument \"%s\".",
 

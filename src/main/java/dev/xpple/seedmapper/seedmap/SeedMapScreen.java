@@ -481,27 +481,31 @@ public class SeedMapScreen extends Screen {
        if (this.toggleableFeatures.contains(MapFeature.WAYPOINT) && Configs.ToggledFeatures.contains(MapFeature.WAYPOINT)) {
            SimpleWaypointsAPI waypointsApi = SimpleWaypointsAPI.getInstance();
            String identifier = waypointsApi.getWorldIdentifier(this.minecraft);
-           Map<String, Waypoint> worldWaypoints = waypointsApi.getWorldWaypoints(identifier);
-           worldWaypoints.forEach((name, waypoint) -> {
-               if (!waypoint.dimension().equals(DIM_ID_TO_MC.get(this.dimension))) {
-                   return;
+           if (identifier != null) {
+               Map<String, Waypoint> worldWaypoints = waypointsApi.getWorldWaypoints(identifier);
+               if (worldWaypoints != null) {
+                   worldWaypoints.forEach((name, waypoint) -> {
+                       if (!waypoint.dimension().equals(DIM_ID_TO_MC.get(this.dimension))) {
+                           return;
+                       }
+                       FeatureWidget widget = this.addFeatureWidget(MapFeature.WAYPOINT, waypoint.location());
+                       if (widget == null) {
+                           return;
+                       }
+                       int waypointCenterX = widget.x + widget.width() / 2;
+                       int waypointCenterY = widget.y + widget.width() / 2;
+                       var pose = guiGraphicsExtractor.pose();
+                       pose.pushMatrix();
+                       if (this.isMinimap() && Configs.RotateMinimap) {
+                           pose.translate(waypointCenterX, waypointCenterY);
+                           pose.rotate((float) (Math.toRadians(this.playerRotation.y) - Math.PI));
+                           pose.translate(-waypointCenterX, -waypointCenterY);
+                       }
+                       guiGraphicsExtractor.centeredText(this.font, name, waypointCenterX, waypointCenterY + widget.height() / 2, ARGB.color(255, waypoint.color()));
+                       pose.popMatrix();
+                   });
                }
-               FeatureWidget widget = this.addFeatureWidget(MapFeature.WAYPOINT, waypoint.location());
-               if (widget == null) {
-                   return;
-               }
-               int waypointCenterX = widget.x + widget.width() / 2;
-               int waypointCenterY = widget.y + widget.width() / 2;
-               var pose = guiGraphicsExtractor.pose();
-               pose.pushMatrix();
-               if (this.isMinimap() && Configs.RotateMinimap) {
-                   pose.translate(waypointCenterX, waypointCenterY);
-                   pose.rotate((float) (Math.toRadians(this.playerRotation.y) - Math.PI));
-                   pose.translate(-waypointCenterX, -waypointCenterY);
-               }
-               guiGraphicsExtractor.centeredText(this.font, name, waypointCenterX, waypointCenterY + widget.height() / 2, ARGB.color(255, waypoint.color()));
-               pose.popMatrix();
-           });
+           }
        }
 
        // draw player position
@@ -1134,6 +1138,9 @@ public class SeedMapScreen extends Screen {
         }
         SimpleWaypointsAPI waypointsApi = SimpleWaypointsAPI.getInstance();
         String identifier = waypointsApi.getWorldIdentifier(this.minecraft);
+        if (identifier == null) {
+            return false;
+        }
         try {
             waypointsApi.addWaypoint(identifier, DIM_ID_TO_MC.get(this.dimension), waypointName, this.markerWidget.featureLocation);
         } catch (CommandSyntaxException e) {

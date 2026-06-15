@@ -49,8 +49,11 @@ public class Configs {
 
     @Config(putter = @Config.Putter("none"), adder = @Config.Adder(value = "addSavedSeed", type = SeedIdentifier.class), chatRepresentation = "displaySavedSeeds")
     public static Map<String, SeedIdentifier> SavedSeeds = new HashMap<>();
-    private static void addSavedSeed(SeedIdentifier seed) {
+    private static void addSavedSeed(SeedIdentifier seed) throws CommandSyntaxException {
         String key = SimpleWaypointsAPI.getInstance().getWorldIdentifier(Minecraft.getInstance());
+        if (key == null) {
+            throw CommandExceptions.COULD_NOT_DETERMINE_WORLD_IDENTIFIER.create();
+        }
         SavedSeeds.put(key, seed);
     }
     private static Component displaySavedSeeds() {
