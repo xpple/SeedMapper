@@ -39,9 +39,10 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
     private final Vec3 position;
     private final Vec2 rotation;
     private final ClientLevel level;
+    private final boolean attended;
     private final Map<String, Object> meta;
 
-    public CustomClientCommandSource(ClientPacketListener listener, Minecraft minecraft, Entity entity, Vec3 position, Vec2 rotation, ClientLevel level, PermissionSet permissionSet, Map<String, Object> meta) {
+    public CustomClientCommandSource(ClientPacketListener listener, Minecraft minecraft, Entity entity, Vec3 position, Vec2 rotation, ClientLevel level, boolean attended, PermissionSet permissionSet, Map<String, Object> meta) {
         super(listener, minecraft, permissionSet);
 
         this.client = minecraft;
@@ -49,6 +50,7 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         this.position = position;
         this.rotation = rotation;
         this.level = level;
+        this.attended = attended;
         this.meta = meta;
     }
 
@@ -56,12 +58,12 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         if (source instanceof CustomClientCommandSource custom) {
             return custom;
         }
-        return new CustomClientCommandSource(source.getClient().getConnection(), source.getClient(), source.getEntity(), source.getPosition(), source.getRotation(), source.getLevel(), source.permissions(), new HashMap<>());
+        return new CustomClientCommandSource(source.getClient().getConnection(), source.getClient(), source.getEntity(), source.getPosition(), source.getRotation(), source.getLevel(), source.attended(), source.permissions(), new HashMap<>());
     }
 
     @Override
     public void sendFeedback(Component message) {
-        this.client.gui.getChat().addClientSystemMessage(message);
+        this.client.gui.hud.getChat().addClientSystemMessage(message);
         this.client.getNarrator().saySystemChatQueued(message);
     }
 
@@ -105,20 +107,25 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         return this.meta.get(key);
     }
 
+    @Override
+    public boolean attended() {
+        return this.attended;
+    }
+
     public CustomClientCommandSource withEntity(Entity entity) {
-        return new CustomClientCommandSource(this.client.getConnection(), this.client, entity, this.position, this.rotation, this.level, this.permissions(), this.meta);
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, entity, this.position, this.rotation, this.level, this.attended, this.permissions(), this.meta);
     }
 
     public CustomClientCommandSource withPosition(Vec3 position) {
-        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, position, this.rotation, this.level, this.permissions(), this.meta);
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, position, this.rotation, this.level, this.attended, this.permissions(), this.meta);
     }
 
     public CustomClientCommandSource withRotation(Vec2 rotation) {
-        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, rotation, this.level, this.permissions(), this.meta);
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, rotation, this.level, this.attended, this.permissions(), this.meta);
     }
 
     public CustomClientCommandSource withLevel(ClientLevel level) {
-        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, this.rotation, level, this.permissions(), this.meta);
+        return new CustomClientCommandSource(this.client.getConnection(), this.client, this.entity, this.position, this.rotation, level, this.attended, this.permissions(), this.meta);
     }
 
     public CustomClientCommandSource withMeta(String key, Object value) {

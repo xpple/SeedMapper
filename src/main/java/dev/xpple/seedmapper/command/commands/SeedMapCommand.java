@@ -22,7 +22,7 @@ public class SeedMapCommand {
         int dimension = source.getDimension();
         int version = source.getVersion();
         int generatorFlags = source.getGeneratorFlags();
-        source.getClient().schedule(() -> source.getClient().setScreen(new SeedMapScreen(seed.seed(), dimension, version, generatorFlags, BlockPos.containing(source.getPosition()), source.getRotation())));
+        source.getClient().schedule(() -> source.getClient().gui.setScreen(new SeedMapScreen(seed.seed(), dimension, version, generatorFlags, BlockPos.containing(source.getPosition()), source.getRotation())));
         return Command.SINGLE_SUCCESS;
     }
 }

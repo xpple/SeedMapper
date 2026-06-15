@@ -25,10 +25,10 @@ import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -278,8 +278,8 @@ public class HighlightCommand {
                 int minX = chunkX << 4;
                 int minZ = chunkZ << 4;
 
-                for (int x = 0; x < LevelChunkSection.SECTION_WIDTH; x++) {
-                    for (int z = 0; z < LevelChunkSection.SECTION_WIDTH; z++) {
+                for (int x = 0; x < SectionPos.SECTION_SIZE; x++) {
+                    for (int z = 0; z < SectionPos.SECTION_SIZE; z++) {
                         for (int y = -60; y <= 50; y++) {
                             int block = Cubiomes.getOreVeinBlockAt(minX + x, y, minZ + z, parameters);
                             if (block == -1) {

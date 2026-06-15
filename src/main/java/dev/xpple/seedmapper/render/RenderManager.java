@@ -1,8 +1,6 @@
 package dev.xpple.seedmapper.render;
 
 import com.google.common.cache.CacheBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.xpple.seedmapper.config.Configs;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext;
@@ -93,8 +91,8 @@ public final class RenderManager {
         levelExtractionContext.levelState().setData(LINES_SET_KEY, extractedLines);
     }
 
-    private static void renderLines(LevelRenderContext levelRenderContext) {
-        Set<Line> extractedLines = levelRenderContext.levelState().getData(LINES_SET_KEY);
+    private static void renderLines(LevelRenderContext context) {
+        Set<Line> extractedLines = context.levelState().getData(LINES_SET_KEY);
         if (extractedLines == null) {
             return;
         }
@@ -107,22 +105,18 @@ public final class RenderManager {
             float green = ARGB.greenFloat(color);
             float blue = ARGB.blueFloat(color);
 
-            levelRenderContext.poseStack().pushPose();
-            PoseStack.Pose pose = levelRenderContext.poseStack().last();
-            VertexConsumer buffer = levelRenderContext.bufferSource().getBuffer(NoDepthLayer.LINES_NO_DEPTH_LAYER);
-            buffer
-                .addVertex(pose, (float) start.x, (float) start.y, (float) start.z)
-                .setColor(red, green, blue, 1.0F)
-                .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
-                .setLineWidth(2);
-            buffer
-                .addVertex(pose, (float) end.x, (float) end.y, (float) end.z)
-                .setColor(red, green, blue, 1.0F)
-                .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
-                .setLineWidth(2);
-            levelRenderContext.poseStack().popPose();
+            context.submitNodeCollector().submitCustomGeometry(context.poseStack(), NoDepthLayer.LINES_NO_DEPTH_LAYER, (pose, buffer) -> {
+                buffer
+                    .addVertex(pose, (float) start.x, (float) start.y, (float) start.z)
+                    .setColor(red, green, blue, 1.0F)
+                    .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
+                    .setLineWidth(2);
+                buffer
+                    .addVertex(pose, (float) end.x, (float) end.y, (float) end.z)
+                    .setColor(red, green, blue, 1.0F)
+                    .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
+                    .setLineWidth(2);
+            });
         });
-
-        levelRenderContext.bufferSource().endBatch();
     }
 }
