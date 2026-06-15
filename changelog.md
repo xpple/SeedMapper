@@ -1,12 +1,10 @@
 ## Changelog
-- Added stronghold loot support for the seed map.
-- Added portal room information when locating strongholds.
-- Extended OreAirCheck to blocks that cannot occlude.
-- Added Tatar translations (thansk to @Amirhan-Taipovjan-Greatest-I).
+- Updated to 26.2.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
 |:----:|:-------:|:------:|:----------:|:----:|:----:|:------------:|
+| 26.2 |   ✔️    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
 | 26.1 |   ✔️    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
 | 1.21 |    ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
 | 1.20 |    ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
