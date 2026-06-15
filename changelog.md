@@ -1,5 +1,7 @@
 ## Changelog
-- Updated to 26.2.
+- Fixed Minecraft version dependency.
+- Added migration logic for newer format of storing saved seeds.
+- Fixed possible crash relating to saved seeds and/or waypoints.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
