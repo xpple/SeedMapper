@@ -1,13 +1,11 @@
 ## Changelog
-- Fixed Minecraft version dependency.
-- Added migration logic for newer format of storing saved seeds.
-- Fixed possible crash relating to saved seeds and/or waypoints.
+- Added support for sulfur caves.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
 |:----:|:-------:|:------:|:----------:|:----:|:----:|:------------:|
 | 26.2 |   ✔️    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
-| 26.1 |   ✔️    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
+| 26.1 |    ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
 | 1.21 |    ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
 | 1.20 |    ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
 | 1.19 |    ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
