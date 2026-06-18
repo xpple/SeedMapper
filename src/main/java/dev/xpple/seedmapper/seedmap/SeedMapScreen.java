@@ -43,6 +43,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
@@ -157,6 +158,10 @@ public class SeedMapScreen extends Screen {
     public static final int MIN_PIXELS_PER_BIOME = 1;
     public static final int MAX_PIXELS_PER_BIOME = 100;
 
+    public static final int MIN_BIOME_Y = -64;
+    public static final int MAX_BIOME_Y = 320;
+    public static final int BIOME_Y_GRANULARITY = 16;
+
     private static final int HORIZONTAL_FEATURE_TOGGLE_SPACING = 5;
     private static final int VERTICAL_FEATURE_TOGGLE_SPACING = 1;
     private static final int FEATURE_TOGGLE_HEIGHT = 20;
@@ -166,7 +171,7 @@ public class SeedMapScreen extends Screen {
 
     private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
 
-    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ObjectIntPair<TilePos>, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, ChunkStructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
     public static final Object2ObjectMap<WorldIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
@@ -198,8 +203,8 @@ public class SeedMapScreen extends Screen {
     private final MemorySegment oreVeinParameters;
     private final @Nullable MemorySegment[] canyonCarverConfigs;
 
-    private final Object2ObjectMap<TilePos, Tile> biomeTileCache = new Object2ObjectOpenHashMap<>();
-    private final SeedMapCache<TilePos, int[]> biomeCache;
+    private final Object2ObjectMap<ObjectIntPair<TilePos>, Tile> biomeTileCache = new Object2ObjectOpenHashMap<>();
+    private final SeedMapCache<ObjectIntPair<TilePos>, int[]> biomeCache;
     private final Object2ObjectMap<ChunkPos, ChunkStructureData> structureCache;
     private final SeedMapCache<TilePos, OreVeinData> oreVeinCache;
     private final Object2ObjectMap<TilePos, BitSet> canyonCache;
@@ -346,7 +351,7 @@ public class SeedMapScreen extends Screen {
         guiGraphicsExtractor.nextStratum();
         this.renderFeatures(guiGraphicsExtractor, mouseX, mouseY, partialTick);
         // draw hovered coordinates and biome
-        MutableComponent coordinates = accent("x: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), QuartPos.toBlock(this.mouseQuart.z())));
+        MutableComponent coordinates = accent("x: %d, y: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), this.getBiomeYHeight(), QuartPos.toBlock(this.mouseQuart.z())));
         OptionalInt optionalBiome = getBiome(this.mouseQuart);
         if (optionalBiome.isPresent()) {
             coordinates = coordinates.append(" [%s]".formatted(Cubiomes.biome2str(this.version, optionalBiome.getAsInt()).getString(0)));
@@ -366,11 +371,12 @@ public class SeedMapScreen extends Screen {
         for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
             for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
                 TilePos tilePos = centerTile.add(relTileX, relTileZ);
+                ObjectIntPair<TilePos> pair = ObjectIntPair.of(tilePos, this.getBiomeYHeight());
 
                 // compute biomes and store in texture
-                int[] biomeData = this.biomeCache.computeIfAbsent(tilePos, this::calculateBiomeData);
+                int[] biomeData = this.biomeCache.computeIfAbsent(pair, p -> this.calculateBiomeData(p.left(), p.rightInt()));
                 if (biomeData != null) {
-                    Tile tile = this.biomeTileCache.computeIfAbsent(tilePos, _ -> this.createBiomeTile(tilePos, biomeData));
+                    Tile tile = this.biomeTileCache.computeIfAbsent(pair, _ -> this.createBiomeTile(tilePos, biomeData));
                     this.drawTile(guiGraphicsExtractor, tile);
                 }
 
@@ -682,7 +688,7 @@ public class SeedMapScreen extends Screen {
         }
     }
 
-    private int[] calculateBiomeData(TilePos tilePos) {
+    private int[] calculateBiomeData(TilePos tilePos, int seedMapBiomeY) {
         QuartPos2 quartPos = QuartPos2.fromTilePos(tilePos);
         int rangeSize = TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE;
 
@@ -694,7 +700,7 @@ public class SeedMapScreen extends Screen {
             Range.z(range, quartPos.z());
             Range.sx(range, rangeSize);
             Range.sz(range, rangeSize);
-            Range.y(range, 63 / Range.scale(range)); // sea level
+            Range.y(range, seedMapBiomeY / Range.scale(range));
             Range.sy(range, 1);
 
             long cacheSize = Cubiomes.getMinCacheSize(this.biomeGenerator, Range.scale(range), Range.sx(range), Range.sy(range), Range.sz(range));
@@ -801,9 +807,17 @@ public class SeedMapScreen extends Screen {
         }
     }
 
+    private int getBiomeYHeight() {
+        if (this.dimension == Cubiomes.DIM_OVERWORLD()) {
+            return Configs.SeedMapBiomeY;
+        }
+        return 64;
+    }
+
     private OptionalInt getBiome(QuartPos2 pos) {
         TilePos tilePos = TilePos.fromQuartPos(pos);
-        int[] biomeCache = this.biomeCache.get(tilePos);
+        ObjectIntPair<TilePos> pair = ObjectIntPair.of(tilePos, this.getBiomeYHeight());
+        int[] biomeCache = this.biomeCache.get(pair);
         if (biomeCache == null) {
             return OptionalInt.empty();
         }
@@ -885,6 +899,14 @@ public class SeedMapScreen extends Screen {
             return true;
         }
 
+        if (!minecraft.hasControlDown()) {
+            return this.zoomMap(mouseX, mouseY, scrollX, scrollY);
+        }
+
+        return this.changeBiomeY(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    private boolean zoomMap(double mouseX, double mouseY, double scrollX, double scrollY) {
         float currentScroll = Mth.clamp((float) Configs.PixelsPerBiome / MAX_PIXELS_PER_BIOME, 0.0F, 1.0F);
         currentScroll = Mth.clamp(currentScroll - (float) (-scrollY / MAX_PIXELS_PER_BIOME), 0.0F, 1.0F);
 
@@ -898,6 +920,17 @@ public class SeedMapScreen extends Screen {
         if (this.markerWidget != null) {
             this.markerWidget.updatePosition();
         }
+        return true;
+    }
+
+    private boolean changeBiomeY(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (this.dimension != Cubiomes.DIM_OVERWORLD()) {
+            return false;
+        }
+        int y = this.getBiomeYHeight() - BIOME_Y_GRANULARITY * (int)Math.signum(scrollY);
+
+        Configs.setSeedMapBiomeY(y);
+
         return true;
     }
 

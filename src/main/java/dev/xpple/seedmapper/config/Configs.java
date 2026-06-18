@@ -21,6 +21,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.material.MapColor;
 
@@ -126,6 +127,12 @@ public class Configs {
                 accent(HexFormat.of().toHexDigits(entry.getValue(), 6)))
             )
         );
+    }
+
+    @Config(setter = @Config.Setter("setSeedMapBiomeY"))
+    public static int SeedMapBiomeY = 64;
+    public static void setSeedMapBiomeY(int seedMapBiomeY) {
+        SeedMapBiomeY = Mth.clamp(seedMapBiomeY & -SeedMapScreen.BIOME_Y_GRANULARITY, SeedMapScreen.MIN_BIOME_Y, SeedMapScreen.MAX_BIOME_Y);
     }
 
     private static final int MAX_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
