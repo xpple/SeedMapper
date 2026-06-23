@@ -31,8 +31,8 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
 
     private static final Collection<String> EXAMPLES = Arrays.asList("village", "end_city[end_ship]", "ruined_portal{giant=true, underground=true}", "fortress[bridge_spawner, corridor_nether_wart]");
 
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> STRUCTURES;">
-    private static final Map<String, Integer> STRUCTURES = ImmutableMap.<String, Integer>builder()
+    //<editor-fold defaultstate="collapsed" desc="static final Map<String, Integer> STRUCTURES;">
+    static final Map<String, Integer> STRUCTURES = ImmutableMap.<String, Integer>builder()
         .put("feature", Cubiomes.Feature())
         .put("desert_pyramid", Cubiomes.Desert_Pyramid())
         .put("jungle_pyramid", Cubiomes.Jungle_Pyramid())

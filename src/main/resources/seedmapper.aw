@@ -5,3 +5,6 @@ accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
 
 # seed map
 accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lcom/mojang/blaze3d/textures/GpuTextureView;Lcom/mojang/blaze3d/textures/GpuSampler;IIIIFFFFI)V
+
+# jni
+accessible field net/minecraft/client/multiplayer/ClientPacketListener ALLOW_RESTRICTED_COMMANDS Lnet/minecraft/server/permissions/PermissionSet;

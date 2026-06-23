@@ -24,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.material.MapColor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.EnumSet;
@@ -43,7 +44,7 @@ public class Configs {
     }
 
     @Config(chatRepresentation = "displaySeed")
-    public static SeedIdentifier Seed = null;
+    public static @Nullable SeedIdentifier Seed = null;
     private static Component displaySeed() {
         return ComponentUtils.formatSeed(Seed);
     }

@@ -9,6 +9,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 public final class MinimapManager {
     private MinimapManager() {
     }
@@ -23,9 +25,9 @@ public final class MinimapManager {
         return minimapScreen != null;
     }
 
-    public static void show(long seed, int dimension, int version, int generatorFlags) {
+    public static void show(long seed, int dimension, int version, int generatorFlags, Map<Integer, Integer> customStructureSalts) {
         hide();
-        minimapScreen = new MinimapScreen(seed, dimension, version, generatorFlags);
+        minimapScreen = new MinimapScreen(seed, dimension, version, generatorFlags, customStructureSalts);
     }
 
     public static void hide() {
@@ -44,7 +46,7 @@ public final class MinimapManager {
         if (minimapScreen.getDimension() == dimension) {
             return;
         }
-        show(minimapScreen.getSeed(), dimension, minimapScreen.getVersion(), minimapScreen.getGeneratorFlags());
+        show(minimapScreen.getSeed(), dimension, minimapScreen.getVersion(), minimapScreen.getGeneratorFlags(), minimapScreen.getCustomStructureSalts());
     }
 
     private static void render(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {

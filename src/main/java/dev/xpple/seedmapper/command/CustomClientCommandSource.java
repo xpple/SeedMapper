@@ -188,6 +188,15 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
         return this.getSeed().getSecond().generatorFlags();
     }
 
+    public Map<Integer, Integer> getCustomStructureSalts() throws CommandSyntaxException {
+        Object customStructureSaltsMeta = this.getMeta("customStructureSalts");
+        if (customStructureSaltsMeta != null) {
+            //noinspection unchecked
+            return (Map<Integer, Integer>) customStructureSaltsMeta;
+        }
+        return this.getSeed().getSecond().customStructureSalts();
+    }
+
     public static int inferDimension(DimensionType dimensionType) {
         return switch (dimensionType.skybox()) {
             case NONE -> Cubiomes.DIM_NETHER();

@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.datafixers.util.Pair;
 import dev.xpple.betterconfig.util.CheckedFunction;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -68,6 +69,7 @@ public class SeedIdentifierArgument implements ArgumentType<SeedIdentifier> {
         private final Map<String, CheckedFunction<SeedIdentifier, SeedIdentifier, CommandSyntaxException>> ARGUMENTS = ImmutableMap.<String, CheckedFunction<SeedIdentifier, SeedIdentifier, CommandSyntaxException>>builder()
             .put("--version", this::parseVersion)
             .put("--generatorFlag", this::parseGeneratorFlag)
+            .put("--structureSalt", this::parseStructureSalt)
             .build();
 
         private Parser(StringReader reader) {
@@ -105,7 +107,7 @@ public class SeedIdentifierArgument implements ArgumentType<SeedIdentifier> {
                 this.reader.expect(' ');
                 this.reader.skipWhitespace();
                 identifier = parser.apply(identifier);
-                if (!argumentString.equals("--generatorFlag")) { // allow multiple flags
+                if (!argumentString.equals("--generatorFlag") && !argumentString.equals("--structureSalt")) { // allow multiple flags/salts
                     remainingArguments.remove(argumentString);
                 }
                 if (this.reader.canRead()) {
@@ -138,6 +140,17 @@ public class SeedIdentifierArgument implements ArgumentType<SeedIdentifier> {
             };
             int generatorFlag = GeneratorFlagArgument.generatorFlag().parse(this.reader);
             return identifier.withGeneratorFlag(generatorFlag);
+        }
+
+        private SeedIdentifier parseStructureSalt(SeedIdentifier identifier) throws CommandSyntaxException {
+            int cursor = this.reader.getCursor();
+            this.suggester = builder -> {
+                SuggestionsBuilder newBuilder = builder.createOffset(cursor);
+                SharedSuggestionProvider.suggest(StructurePredicateArgument.STRUCTURES.keySet(), newBuilder);
+                builder.add(newBuilder);
+            };
+            Pair<Integer, Integer> structureSalt = StructureSaltArgument.structureSalt().parse(reader);
+            return identifier.withCustomStructureSalt(structureSalt.getFirst(), structureSalt.getSecond());
         }
     }
 
