@@ -1,5 +1,5 @@
 ## Changelog
-- Added support for sulfur caves.
+- Allowed for changing the biome Y-coordinate in the seed map. You can modify the Y-coordinate from within the seed map by `Ctrl` + scrolling, or by editing the `SeedMapBiomeY` config directly.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
