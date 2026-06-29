@@ -157,6 +157,10 @@ public class LocateCommand {
             if (StructureConfig.dim(structureConfig) != dimension) {
                 throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
             }
+            Integer customSalt = source.getCustomStructureSalts().get(structure);
+            if (customSalt != null) {
+                StructureConfig.salt(structureConfig, customSalt);
+            }
 
             MemorySegment generator = Generator.allocate(arena);
             Cubiomes.setupGenerator(generator, version, source.getGeneratorFlags());
@@ -244,10 +248,11 @@ public class LocateCommand {
         }
         int version = source.getVersion();
         int generatorFlags = source.getGeneratorFlags();
+        Map<Integer, Integer> customStructureSalts = source.getCustomStructureSalts();
 
         BlockPos position = BlockPos.containing(source.getPosition());
 
-        TwoDTree tree = SeedMapScreen.strongholdDataCache.computeIfAbsent(new WorldIdentifier(seed.seed(), dimension, version, generatorFlags), _ -> calculateStrongholds(seed.seed(), dimension, version, generatorFlags));
+        TwoDTree tree = SeedMapScreen.strongholdDataCache.computeIfAbsent(new WorldIdentifier(seed.seed(), dimension, version, generatorFlags, customStructureSalts), _ -> calculateStrongholds(seed.seed(), dimension, version, generatorFlags));
 
         BlockPos pos = tree.nearestTo(position.atY(0));
         assert pos != null;
@@ -346,6 +351,8 @@ public class LocateCommand {
             MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
             Cubiomes.initSurfaceNoise(surfaceNoise, dimension, seed.seed());
 
+            Map<Integer, Integer> customStructureSalts = source.getCustomStructureSalts();
+
             BlockPos center = BlockPos.containing(source.getPosition());
 
             record StructureIterationState(MemorySegment structureConfig, StructureChecks.GenerationCheck generationCheck, SpiralSpliterator iterator) {
@@ -354,6 +361,10 @@ public class LocateCommand {
                 .<MemorySegment>mapMulti((s, consumer) -> {
                     MemorySegment structureConfig = StructureConfig.allocate(arena);
                     if (Cubiomes.getStructureConfig(s, version, structureConfig) != 0) {
+                        Integer salt = customStructureSalts.get(s);
+                        if (salt != null) {
+                            StructureConfig.salt(structureConfig, salt);
+                        }
                         consumer.accept(structureConfig);
                     }
                 })

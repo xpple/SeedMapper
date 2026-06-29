@@ -7,6 +7,8 @@ import dev.xpple.seedmapper.seedmap.MinimapManager;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
+import java.util.Map;
+
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class MinimapCommand {
@@ -30,7 +32,8 @@ public class MinimapCommand {
             int dimension = source.getDimension();
             int version = source.getVersion();
             int generatorFlags = source.getGeneratorFlags();
-            MinimapManager.show(seed.seed(), dimension, version, generatorFlags);
+            Map<Integer, Integer> customStructureSalts = source.getCustomStructureSalts();
+            MinimapManager.show(seed.seed(), dimension, version, generatorFlags, customStructureSalts);
             return 1;
         } else {
             MinimapManager.hide();

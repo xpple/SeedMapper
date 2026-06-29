@@ -9,6 +9,8 @@ import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 
+import java.util.Map;
+
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class SeedMapCommand {
@@ -22,7 +24,8 @@ public class SeedMapCommand {
         int dimension = source.getDimension();
         int version = source.getVersion();
         int generatorFlags = source.getGeneratorFlags();
-        source.getClient().schedule(() -> source.getClient().gui.setScreen(new SeedMapScreen(seed.seed(), dimension, version, generatorFlags, BlockPos.containing(source.getPosition()), source.getRotation())));
+        Map<Integer, Integer> customStructureSalts = source.getCustomStructureSalts();
+        source.getClient().schedule(() -> source.getClient().gui.setScreen(new SeedMapScreen(seed.seed(), dimension, version, generatorFlags, customStructureSalts, BlockPos.containing(source.getPosition()), source.getRotation())));
         return Command.SINGLE_SUCCESS;
     }
 }

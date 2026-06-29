@@ -187,6 +187,7 @@ public class SeedMapScreen extends Screen {
     private final int dimension;
     private final int version;
     private final int generatorFlags;
+    private final Map<Integer, Integer> customStructureSalts;
     private final WorldIdentifier worldIdentifier;
 
     /**
@@ -243,13 +244,14 @@ public class SeedMapScreen extends Screen {
     private Registry<Enchantment> enchantmentsRegistry;
     private Registry<net.minecraft.world.effect.MobEffect> mobEffectRegistry;
 
-    public SeedMapScreen(long seed, int dimension, int version, int generatorFlags, BlockPos playerPos, Vec2 playerRotation) {
+    public SeedMapScreen(long seed, int dimension, int version, int generatorFlags, Map<Integer, Integer> customStructureSalts, BlockPos playerPos, Vec2 playerRotation) {
         super(Component.empty());
         this.seed = seed;
         this.dimension = dimension;
         this.version = version;
         this.generatorFlags = generatorFlags;
-        this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version, this.generatorFlags);
+        this.customStructureSalts = customStructureSalts;
+        this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version, this.generatorFlags, this.customStructureSalts);
 
         this.biomeGenerator = Generator.allocate(this.arena);
         Cubiomes.setupGenerator(this.biomeGenerator, this.version, this.generatorFlags);
@@ -266,6 +268,10 @@ public class SeedMapScreen extends Screen {
                 }
                 if (StructureConfig.dim(structureConfig) != this.dimension) {
                     return null;
+                }
+                Integer salt = this.customStructureSalts.get(structure);
+                if (salt != null) {
+                    StructureConfig.salt(structureConfig, salt);
                 }
                 return structureConfig;
             })
@@ -1333,5 +1339,9 @@ public class SeedMapScreen extends Screen {
 
     protected int getGeneratorFlags() {
         return this.generatorFlags;
+    }
+
+    protected Map<Integer, Integer> getCustomStructureSalts() {
+        return this.customStructureSalts;
     }
 }

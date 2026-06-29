@@ -9,6 +9,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Map;
+
 // TODO refactor so that the minimap is not a `Screen`; it has no reason to be one
 public class MinimapScreen extends SeedMapScreen {
 
@@ -16,8 +18,8 @@ public class MinimapScreen extends SeedMapScreen {
     private int lastWidth = -1;
     private int lastHeight = -1;
 
-    public MinimapScreen(long seed, int dimension, int version, int generatorFlags) {
-        super(seed, dimension, version, generatorFlags, Minecraft.getInstance().player.blockPosition(), Minecraft.getInstance().player.getRotationVector());
+    public MinimapScreen(long seed, int dimension, int version, int generatorFlags, Map<Integer, Integer> customStructureSalts) {
+        super(seed, dimension, version, generatorFlags, customStructureSalts, Minecraft.getInstance().player.blockPosition(), Minecraft.getInstance().player.getRotationVector());
     }
 
     public void initForOverlay(int width, int height) {

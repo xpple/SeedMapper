@@ -62,8 +62,8 @@ public class SeedMapper implements ClientModInitializer {
 
     public static final boolean BARITONE_AVAILABLE = FabricLoader.getInstance().getModContainer("baritone-meteor").isPresent();
 
-    static {
-        String libraryName = System.mapLibraryName("cubiomes");
+    private static void loadLibrary(String name) {
+        String libraryName = System.mapLibraryName(name);
         ModContainer modContainer = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
         Path tempFile;
         try {
@@ -73,6 +73,11 @@ public class SeedMapper implements ClientModInitializer {
             throw new RuntimeException(e);
         }
         System.load(tempFile.toAbsolutePath().toString());
+    }
+
+    static {
+        loadLibrary("getStructureConfig_override");
+        loadLibrary("cubiomes");
     }
 
     @Override
