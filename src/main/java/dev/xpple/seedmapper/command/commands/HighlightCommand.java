@@ -367,7 +367,7 @@ public class HighlightCommand {
             if (dimension == Cubiomes.DIM_OVERWORLD()) {
                 Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates, MemorySegment.NULL, 0);
             } else {
-                Cubiomes.generateNetherRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates, MemorySegment.NULL, 0);
+                Cubiomes.generateNetherRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates);
             }
 
             for (int relX = 0; relX < blockW; relX++) {
