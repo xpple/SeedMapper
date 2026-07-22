@@ -6,6 +6,7 @@
   "client": [
     "ChatScreenMixin",
     "ClientPacketListenerMixin",
+    "RandomizableContainerMixin",
     "baritone.CustomGoalProcessMixin",
     "baritone.PathingBehaviorMixin",
     "betterconfig.ConfigCommandClientMixin",
