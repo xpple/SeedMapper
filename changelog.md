@@ -1,5 +1,6 @@
 ## Changelog
-- Allowed for changing the biome Y-coordinate in the seed map. You can modify the Y-coordinate from within the seed map by `Ctrl` + scrolling, or by editing the `SeedMapBiomeY` config directly.
+- Fixed bug with using version 1.21.6.
+- Added support for terrain highlighting in the nether.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
