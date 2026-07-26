@@ -1,6 +1,7 @@
 ## Changelog
-- Fixed bug with using version 1.21.6.
-- Added support for terrain highlighting in the nether.
+- Fixed rare loot bug.
+- Made keys for `BlockColors` config stable. It is possible that this caused some block-colour pairs to be mismatched, in which case you can do `/sm:config BlockColors reset` to reset the config to the default value.
+- Made `SeedMapBiomeY` config temporary (meaning it resets after restart).
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
