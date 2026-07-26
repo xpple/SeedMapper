@@ -171,7 +171,7 @@ public class HighlightCommand {
                         }
                     });
 
-                int color = Configs.BlockColors.getOrDefault(block, 0xFFFFFF);
+                int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), 0xFFFFFF);
                 List<BlockPos> blockOres = generatedOres.entrySet().stream()
                     .filter(entry -> entry.getValue() == block)
                     .map(Map.Entry::getKey)
@@ -247,7 +247,7 @@ public class HighlightCommand {
                     Cubiomes.freePos3List(pos3List);
                 }
                 count[0] += ores.size();
-                RenderManager.drawBoxes(ores, Configs.BlockColors.getOrDefault(OreConfig.oreBlock(oreConfig), 0xFFFFFF));
+                RenderManager.drawBoxes(ores, Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(OreConfig.oreBlock(oreConfig)), 0xFFFFFF));
                 source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(ores.size())), ComponentUtils.formatXZ(chunkX, chunkZ)));
                 return false;
             });
@@ -304,7 +304,7 @@ public class HighlightCommand {
                         return;
                     }
                     count[0] += positions.size();
-                    int color = Configs.BlockColors.getOrDefault(block, 0xFFFFFF);
+                    int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), 0xFFFFFF);
                     RenderManager.drawBoxes(positions, color);
                     if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(positions);

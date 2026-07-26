@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
@@ -82,8 +84,8 @@ public class Configs {
         return Component.translatable("config.oreAirCheck.comment");
     }
 
-    @Config(putter = @Config.Putter(value = "putBlockColor", keyType = String.class, valueType = ColorWrapper.class), remover = @Config.Remover(value = "none"), chatRepresentation = "displayBlockColors")
-    public static Map<Integer, Integer> BlockColors = new HashMap<>(Map.ofEntries(
+    @Config(putter = @Config.Putter(value = "putBlockColor", valueType = ColorWrapper.class), remover = @Config.Remover(value = "none"), chatRepresentation = "displayBlockColors")
+    public static Map<String, Integer> BlockColors = new HashMap<>(Stream.of(
         Map.entry(Cubiomes.ANCIENT_DEBRIS(), MapColor.TERRACOTTA_BROWN.col),
         Map.entry(Cubiomes.ANDESITE(), MapColor.STONE.col),
         Map.entry(Cubiomes.BASALT(), MapColor.COLOR_BLACK.col),
@@ -99,6 +101,7 @@ public class Configs {
         Map.entry(Cubiomes.GOLD_ORE(), MapColor.GOLD.col),
         Map.entry(Cubiomes.GRANITE(), MapColor.DIRT.col),
         Map.entry(Cubiomes.GRAVEL(), MapColor.STONE.col),
+        Map.entry(Cubiomes.INFESTED_STONE(), MapColor.STONE.col),
         Map.entry(Cubiomes.IRON_ORE(), MapColor.RAW_IRON.col),
         Map.entry(Cubiomes.LAPIS_ORE(), MapColor.LAPIS.col),
         Map.entry(Cubiomes.MAGMA_BLOCK(), MapColor.NETHER.col),
@@ -111,25 +114,24 @@ public class Configs {
         Map.entry(Cubiomes.SOUL_SAND(), MapColor.COLOR_BROWN.col),
         Map.entry(Cubiomes.STONE(), MapColor.STONE.col),
         Map.entry(Cubiomes.TUFF(), MapColor.COLOR_GRAY.col)
-    ));
+    ).collect(Collectors.toMap(entry -> BlockArgument.BLOCKS.inverse().get(entry.getKey()), Map.Entry::getValue)));
     private static void putBlockColor(String key, ColorWrapper value) throws CommandSyntaxException {
-        Integer block = BlockArgument.BLOCKS.get(key);
-        if (block == null) {
+        if (!BlockArgument.BLOCKS.containsKey(key)) {
             throw CommandExceptions.UNKNOWN_BLOCK_EXCEPTION.create(key);
         }
-        BlockColors.put(block, value.argb());
+        BlockColors.put(key, value.argb());
     }
     private static Component displayBlockColors() {
         return join(Component.literal(", "), BlockColors.entrySet().stream()
             .map(entry -> chain(
-                Component.literal(Cubiomes.block2str(entry.getKey()).getString(0)),
+                Component.literal(entry.getKey()),
                 Component.literal(": "),
                 accent(HexFormat.of().toHexDigits(entry.getValue(), 6)))
             )
         );
     }
 
-    @Config(setter = @Config.Setter("setSeedMapBiomeY"))
+    @Config(setter = @Config.Setter("setSeedMapBiomeY"), temporary = true)
     public static int SeedMapBiomeY = 64;
     public static void setSeedMapBiomeY(int seedMapBiomeY) {
         SeedMapBiomeY = Mth.clamp(seedMapBiomeY & -SeedMapScreen.BIOME_Y_GRANULARITY, SeedMapScreen.MIN_BIOME_Y, SeedMapScreen.MAX_BIOME_Y);
