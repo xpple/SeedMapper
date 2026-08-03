@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper;
 
+import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -12,6 +13,10 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
     private static final Set<String> BARITONE_MIXINS = Set.of(
         "dev.xpple.seedmapper.mixin.baritone.CustomGoalProcessMixin",
         "dev.xpple.seedmapper.mixin.baritone.PathingBehaviorMixin"
+    );
+
+    private static final Set<String> DEV_ONLY_MIXINS = Set.of(
+        "dev.xpple.seedmapper.mixin.RandomizableContainerMixin"
     );
 
     @Override
@@ -27,6 +32,9 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (BARITONE_MIXINS.contains(mixinClassName)) {
             return SeedMapper.BARITONE_AVAILABLE;
+        }
+        if (DEV_ONLY_MIXINS.contains(mixinClassName)) {
+            return FabricLoader.getInstance().isDevelopmentEnvironment();
         }
         return true;
     }

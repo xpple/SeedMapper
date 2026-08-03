@@ -171,7 +171,7 @@ public class HighlightCommand {
                         }
                     });
 
-                int color = Configs.BlockColors.getOrDefault(block, 0xFFFFFF);
+                int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), 0xFFFFFF);
                 List<BlockPos> blockOres = generatedOres.entrySet().stream()
                     .filter(entry -> entry.getValue() == block)
                     .map(Map.Entry::getKey)
@@ -247,7 +247,7 @@ public class HighlightCommand {
                     Cubiomes.freePos3List(pos3List);
                 }
                 count[0] += ores.size();
-                RenderManager.drawBoxes(ores, Configs.BlockColors.getOrDefault(OreConfig.oreBlock(oreConfig), 0xFFFFFF));
+                RenderManager.drawBoxes(ores, Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(OreConfig.oreBlock(oreConfig)), 0xFFFFFF));
                 source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(ores.size())), ComponentUtils.formatXZ(chunkX, chunkZ)));
                 return false;
             });
@@ -304,7 +304,7 @@ public class HighlightCommand {
                         return;
                     }
                     count[0] += positions.size();
-                    int color = Configs.BlockColors.getOrDefault(block, 0xFFFFFF);
+                    int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), 0xFFFFFF);
                     RenderManager.drawBoxes(positions, color);
                     if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(positions);
@@ -326,7 +326,7 @@ public class HighlightCommand {
     private static int highlightTerrain(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
         SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
-        if (dimension != Cubiomes.DIM_OVERWORLD()) {
+        if (dimension == Cubiomes.DIM_END()) {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         int version = source.getVersion();
@@ -352,17 +352,31 @@ public class HighlightCommand {
             }
 
             Set<BlockPos> blocks = new HashSet<>();
-            SequenceLayout columnLayout = MemoryLayout.sequenceLayout(384, Cubiomes.C_INT);
+            int yMin;
+            int yMax;
+            if (dimension == Cubiomes.DIM_OVERWORLD()) {
+                yMin = -64;
+                yMax = 320;
+            } else {
+                yMin = 0;
+                yMax = 128;
+            }
+            int terrainHeight = yMax - yMin;
+            SequenceLayout columnLayout = MemoryLayout.sequenceLayout(terrainHeight, Cubiomes.C_INT);
             MemorySegment blockStates = arena.allocate(columnLayout, (long) blockW * blockH);
-            Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates, MemorySegment.NULL, 0);
+            if (dimension == Cubiomes.DIM_OVERWORLD()) {
+                Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates, MemorySegment.NULL, 0);
+            } else {
+                Cubiomes.generateNetherRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates);
+            }
 
             for (int relX = 0; relX < blockW; relX++) {
                 int x = minX + relX;
                 for (int relZ = 0; relZ < blockH; relZ++) {
                     int z = minZ + relZ;
-                    int columnIdx = (relX * blockH + relZ) * 384;
-                    for (int y = -64; y < 320; y++) {
-                        int block = blockStates.getAtIndex(Cubiomes.C_INT, columnIdx + y + 64);
+                    int columnIdx = (relX * blockH + relZ) * terrainHeight;
+                    for (int y = yMin; y < yMax; y++) {
+                        int block = blockStates.getAtIndex(Cubiomes.C_INT, columnIdx + y - yMin);
                         if (block == 1) {
                             blocks.add(new BlockPos(x, y, z));
                         }

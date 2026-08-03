@@ -49,3 +49,4 @@ src/main/java/com/github/cubiomes/*
 !src/main/java/com/github/cubiomes/.gitkeep
 
 dump_includes.txt
+dump_includes_filtered.txt

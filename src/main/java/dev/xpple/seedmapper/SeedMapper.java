@@ -3,7 +3,9 @@ package dev.xpple.seedmapper;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
+import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.seedmapper.command.arguments.BlockArgument;
 import dev.xpple.seedmapper.command.arguments.ColorWrapperArgument;
 import dev.xpple.seedmapper.command.arguments.DurationArgument;
 import dev.xpple.seedmapper.command.arguments.MapFeatureArgument;
@@ -51,6 +53,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SeedMapper implements ClientModInitializer {
 
@@ -97,6 +101,20 @@ public class SeedMapper implements ClientModInitializer {
                 }
             })
             .build();
+
+        // FIXME remove migration code at some point
+        Configs.BlockColors = Configs.BlockColors.entrySet().stream()
+            .collect(Collectors.toMap(entry -> {
+                String key = entry.getKey();
+                int id;
+                try {
+                    id = Integer.parseInt(key);
+                } catch (NumberFormatException _) {
+                    return key;
+                }
+                return BlockArgument.BLOCKS.inverse().get(id);
+            }, Map.Entry::getValue));
+        BetterConfigAPI.getInstance().getModConfig(MOD_ID).save();
 
         SimpleWaypointsAPI.getInstance().registerCommandAlias("sm:waypoint");
 
