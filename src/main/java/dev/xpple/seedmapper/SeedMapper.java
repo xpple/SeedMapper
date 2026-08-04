@@ -1,16 +1,22 @@
 package dev.xpple.seedmapper;
 
+import com.github.cubiomes.Cubiomes;
+import com.github.cubiomes.StructureConfig;
+import com.github.cubiomes.StructureConfigProvider;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.BlockArgument;
 import dev.xpple.seedmapper.command.arguments.ColorWrapperArgument;
 import dev.xpple.seedmapper.command.arguments.DurationArgument;
 import dev.xpple.seedmapper.command.arguments.MapFeatureArgument;
 import dev.xpple.seedmapper.command.arguments.SeedIdentifierArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
+import dev.xpple.seedmapper.command.arguments.StructurePredicateArgument;
 import dev.xpple.seedmapper.command.commands.BuildInfoCommand;
 import dev.xpple.seedmapper.command.commands.CheckSeedCommand;
 import dev.xpple.seedmapper.command.commands.ClearCommand;
@@ -44,11 +50,18 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.PermissionSet;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.lang.foreign.Arena;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -66,8 +79,8 @@ public class SeedMapper implements ClientModInitializer {
 
     public static final boolean BARITONE_AVAILABLE = FabricLoader.getInstance().getModContainer("baritone-meteor").isPresent();
 
-    private static void loadLibrary(String name) {
-        String libraryName = System.mapLibraryName(name);
+    static {
+        String libraryName = System.mapLibraryName("cubiomes");
         ModContainer modContainer = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
         Path tempFile;
         try {
@@ -77,11 +90,6 @@ public class SeedMapper implements ClientModInitializer {
             throw new RuntimeException(e);
         }
         System.load(tempFile.toAbsolutePath().toString());
-    }
-
-    static {
-        loadLibrary("getStructureConfig_override");
-        loadLibrary("cubiomes");
     }
 
     @Override
@@ -115,6 +123,27 @@ public class SeedMapper implements ClientModInitializer {
                 return BlockArgument.BLOCKS.inverse().get(id);
             }, Map.Entry::getValue));
         BetterConfigAPI.getInstance().getModConfig(MOD_ID).save();
+
+        Cubiomes.setStructureConfigProvider(StructureConfigProvider.allocate((stype, mc, sconf) -> {
+            if (Cubiomes.getStructureConfig_default(stype, mc, sconf) == 0) {
+                return 0;
+            }
+            CustomClientCommandSource commandSource = makeCommandSource();
+            if (commandSource == null) {
+                return 1;
+            }
+            Integer salt;
+            try {
+                String structureString = StructurePredicateArgument.STRUCTURES.inverse().get(stype);
+                salt = commandSource.getSeed().getSecond().customStructureSalts().get(structureString);
+            } catch (CommandSyntaxException _) {
+                return 1;
+            }
+            if (salt != null) {
+                StructureConfig.salt(sconf, salt);
+            }
+            return 1;
+        }, Arena.global()));
 
         SimpleWaypointsAPI.getInstance().registerCommandAlias("sm:waypoint");
 
@@ -154,5 +183,20 @@ public class SeedMapper implements ClientModInitializer {
         DiscordCommand.register(dispatcher);
         SampleCommand.register(dispatcher);
         MinimapCommand.register(dispatcher);
+    }
+
+    private static @Nullable CustomClientCommandSource makeCommandSource() {
+        Minecraft minecraft = Minecraft.getInstance();
+        ClientPacketListener connection = minecraft.getConnection();
+        if (connection == null) {
+            return null;
+        }
+        PermissionSet playerPermissions = permission -> {
+            LocalPlayer player = minecraft.player;
+            return player != null && player.permissions().hasPermission(permission);
+        };
+
+        ClientSuggestionProvider suggestionProvider = new ClientSuggestionProvider(connection, minecraft, playerPermissions.union(ClientPacketListener.ALLOW_RESTRICTED_COMMANDS));
+        return CustomClientCommandSource.of((FabricClientCommandSource) suggestionProvider);
     }
 }

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public class StructureSaltArgument implements ArgumentType<Pair<Integer, Integer>> {
+public class StructureSaltArgument implements ArgumentType<Pair<String, Integer>> {
 
     private static final Collection<String> EXAMPLES = List.of("shipwreck=2048571934");
 
@@ -25,12 +25,12 @@ public class StructureSaltArgument implements ArgumentType<Pair<Integer, Integer
     }
 
     @SuppressWarnings("unchecked")
-    public static Pair<Integer, Integer> getStructureSalt(CommandContext<FabricClientCommandSource> context, String name) {
-        return (Pair<Integer, Integer>) context.getArgument(name, Pair.class);
+    public static Pair<String, Integer> getStructureSalt(CommandContext<FabricClientCommandSource> context, String name) {
+        return (Pair<String, Integer>) context.getArgument(name, Pair.class);
     }
 
     @Override
-    public Pair<Integer, Integer> parse(StringReader reader) throws CommandSyntaxException {
+    public Pair<String, Integer> parse(StringReader reader) throws CommandSyntaxException {
         return new Parser(reader).parse();
     }
 
@@ -66,7 +66,7 @@ public class StructureSaltArgument implements ArgumentType<Pair<Integer, Integer
             this.reader = reader;
         }
 
-        private Pair<Integer, Integer> parse() throws CommandSyntaxException {
+        private Pair<String, Integer> parse() throws CommandSyntaxException {
             int cursor = this.reader.getCursor();
             this.suggester = builder -> {
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
@@ -74,14 +74,13 @@ public class StructureSaltArgument implements ArgumentType<Pair<Integer, Integer
                 builder.add(newBuilder);
             };
             String structureString = this.reader.readUnquotedString();
-            Integer structure = StructurePredicateArgument.STRUCTURES.get(structureString);
-            if (structure == null) {
+            if (!StructurePredicateArgument.STRUCTURES.containsKey(structureString)) {
                 this.reader.setCursor(cursor);
                 throw CommandExceptions.UNKNOWN_STRUCTURE_EXCEPTION.create(structureString);
             }
             this.reader.expect('=');
             int structureSalt = this.reader.readInt();
-            return Pair.of(structure, structureSalt);
+            return Pair.of(structureString, structureSalt);
         }
     }
 }

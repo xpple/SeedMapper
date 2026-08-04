@@ -149,7 +149,7 @@ public class SeedIdentifierArgument implements ArgumentType<SeedIdentifier> {
                 SharedSuggestionProvider.suggest(StructurePredicateArgument.STRUCTURES.keySet(), newBuilder);
                 builder.add(newBuilder);
             };
-            Pair<Integer, Integer> structureSalt = StructureSaltArgument.structureSalt().parse(reader);
+            Pair<String, Integer> structureSalt = StructureSaltArgument.structureSalt().parse(reader);
             return identifier.withCustomStructureSalt(structureSalt.getFirst(), structureSalt.getSecond());
         }
     }

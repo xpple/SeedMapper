@@ -3,6 +3,8 @@ package dev.xpple.seedmapper.command.arguments;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Piece;
 import com.github.cubiomes.StructureVariant;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -31,8 +33,8 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
 
     private static final Collection<String> EXAMPLES = Arrays.asList("village", "end_city[end_ship]", "ruined_portal{giant=true, underground=true}", "fortress[bridge_spawner, corridor_nether_wart]");
 
-    //<editor-fold defaultstate="collapsed" desc="static final Map<String, Integer> STRUCTURES;">
-    static final Map<String, Integer> STRUCTURES = ImmutableMap.<String, Integer>builder()
+    //<editor-fold defaultstate="collapsed" desc="public static final BiMap<String, Integer> STRUCTURES;">
+    public static final BiMap<String, Integer> STRUCTURES = ImmutableBiMap.<String, Integer>builder()
         .put("feature", Cubiomes.Feature())
         .put("desert_pyramid", Cubiomes.Desert_Pyramid())
         .put("jungle_pyramid", Cubiomes.Jungle_Pyramid())
