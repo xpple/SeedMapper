@@ -176,10 +176,10 @@ public class SeedMapScreen extends Screen {
     private static final Object2ObjectMap<BiomeSeedIdentifierWithDimension, Object2ObjectMap<ObjectIntPair<TilePos>, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<SeedIdentifierWithDimension, Object2ObjectMap<ChunkPos, ChunkStructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
     public static final Object2ObjectMap<BiomeSeedIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<BiomeSeedIdentifierWithDimension, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<BiomeSeedIdentifierWithDimension, Object2ObjectMap<TilePos, BitSet>> canyonDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<BiomeSeedIdentifierWithDimension, Object2ObjectMap<TilePos, BitSet>> slimeChunkDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<BiomeSeedIdentifierWithDimension, BlockPos> spawnDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, BitSet>> canyonDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, BitSet>> slimeChunkDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<BiomeSeedIdentifier, BlockPos> spawnDataCache = new Object2ObjectOpenHashMap<>();
 
     private final SeedMapExecutor seedMapExecutor = new SeedMapExecutor();
 
@@ -300,9 +300,9 @@ public class SeedMapScreen extends Screen {
 
         this.biomeCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(biomeDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension, _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
         this.structureCache = structureDataCache.computeIfAbsent(this.seedIdentifierWithDimension, _ -> new Object2ObjectOpenHashMap<>());
-        this.slimeChunkCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(slimeChunkDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension, _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
-        this.oreVeinCache = new SeedMapCache<>(oreVeinDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension, _ -> new Object2ObjectOpenHashMap<>()), this.seedMapExecutor);
-        this.canyonCache = canyonDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension, _ -> new Object2ObjectOpenHashMap<>());
+        this.slimeChunkCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(slimeChunkDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
+        this.oreVeinCache = new SeedMapCache<>(oreVeinDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> new Object2ObjectOpenHashMap<>()), this.seedMapExecutor);
+        this.canyonCache = canyonDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> new Object2ObjectOpenHashMap<>());
 
         if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.containsKey(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier())) {
             this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.version, this.generatorFlags))
@@ -523,7 +523,7 @@ public class SeedMapScreen extends Screen {
 
        // calculate spawn point
        if (this.toggleableFeatures.contains(MapFeature.WORLD_SPAWN) && Configs.ToggledFeatures.contains(MapFeature.WORLD_SPAWN)) {
-           BlockPos spawnPoint = spawnDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension, _ -> this.calculateSpawnData());
+           BlockPos spawnPoint = spawnDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> this.calculateSpawnData());
            this.addFeatureWidget(MapFeature.WORLD_SPAWN, spawnPoint);
        }
 
