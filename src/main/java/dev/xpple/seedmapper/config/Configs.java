@@ -134,7 +134,7 @@ public class Configs {
     @Config(setter = @Config.Setter("setTerrainHighlightCutoffY"))
     public static int TerrainHighlightCutoffY = 32;
     public static void setTerrainHighlightCutoffY(int terrainHighlightCutoffY) {
-        TerrainHighlightCutoffY = Mth.clamp(terrainHighlightCutoffY, -64, 320)
+        TerrainHighlightCutoffY = Mth.clamp(terrainHighlightCutoffY, -64, 320);
     }
     
     @Config(setter = @Config.Setter("setSeedMapBiomeY"), temporary = true)
