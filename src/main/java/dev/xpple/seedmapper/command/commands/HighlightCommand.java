@@ -354,9 +354,15 @@ public class HighlightCommand {
             Set<BlockPos> blocks = new HashSet<>();
             int yMin;
             int yMax;
+            int terrainHighlightCutoffY = 32; // idk how to add this to config things so i just hardcoded it here for now
             if (dimension == Cubiomes.DIM_OVERWORLD()) {
-                yMin = -64;
-                yMax = 320;
+                if (source.getPosition().y >= terrainHighlightCutoffY) {
+                    yMin = terrainHighlightCutoffY;
+                    yMax = 320;
+                } else {
+                    yMin = -64;
+                    yMax = terrainHighlightCutoffY;
+                }
             } else {
                 yMin = 0;
                 yMax = 128;
