@@ -354,7 +354,7 @@ public class HighlightCommand {
             Set<BlockPos> blocks = new HashSet<>();
             int yMin;
             int yMax;
-            int terrainHighlightCutoffY = 32; // idk how to add this to config things so i just hardcoded it here for now
+            int terrainHighlightCutoffY = Configs.TerrainHighlightCutoffY;
             if (dimension == Cubiomes.DIM_OVERWORLD()) {
                 if (source.getPosition().y >= terrainHighlightCutoffY) {
                     yMin = terrainHighlightCutoffY;
