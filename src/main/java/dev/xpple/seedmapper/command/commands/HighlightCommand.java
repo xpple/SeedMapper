@@ -341,8 +341,8 @@ public class HighlightCommand {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params = TerrainNoise.allocate(arena);
-            Cubiomes.setupTerrainNoise(params, version, generatorFlags)
-            Cubiomes.initTerrainNoise(params, seed.seed(), dimension)
+            Cubiomes.setupTerrainNoise(params, version, generatorFlags);
+            Cubiomes.initTerrainNoise(params, seed.seed(), dimension);
             
             Set<BlockPos> blocks = new HashSet<>();
             int yMin;
@@ -364,7 +364,7 @@ public class HighlightCommand {
             SequenceLayout columnLayout = MemoryLayout.sequenceLayout(terrainHeight, Cubiomes.C_INT);
             MemorySegment blockStates = arena.allocate(columnLayout, (long) blockW * blockH);
             
-            Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates, yMin, yMax, MemorySegment.NULL, 0):;
+            Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates, yMin, yMax, MemorySegment.NULL, 0);
             
             for (int relX = 0; relX < blockW; relX++) {
                 int x = minX + relX;
