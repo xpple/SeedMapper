@@ -326,9 +326,6 @@ public class HighlightCommand {
     private static int highlightTerrain(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
         SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
-        if (dimension == Cubiomes.DIM_END()) {
-            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
-        }
         int version = source.getVersion();
         int generatorFlags = source.getGeneratorFlags();
 
@@ -344,13 +341,9 @@ public class HighlightCommand {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params = TerrainNoise.allocate(arena);
-            if (Cubiomes.setupTerrainNoise(params, version, generatorFlags) == 0) {
-                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
-            }
-            if (Cubiomes.initTerrainNoise(params, seed.seed(), dimension) == 0) {
-                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
-            }
-
+            Cubiomes.setupTerrainNoise(params, version, generatorFlags)
+            Cubiomes.initTerrainNoise(params, seed.seed(), dimension)
+            
             Set<BlockPos> blocks = new HashSet<>();
             int yMin;
             int yMax;
@@ -363,19 +356,16 @@ public class HighlightCommand {
                     yMin = -64;
                     yMax = terrainHighlightCutoffY;
                 }
-            } else {
+            } else {// no need to change height here as terrian in nether and end do not go above or below this rage
                 yMin = 0;
                 yMax = 128;
             }
             int terrainHeight = yMax - yMin;
             SequenceLayout columnLayout = MemoryLayout.sequenceLayout(terrainHeight, Cubiomes.C_INT);
             MemorySegment blockStates = arena.allocate(columnLayout, (long) blockW * blockH);
-            if (dimension == Cubiomes.DIM_OVERWORLD()) {
-                Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates, MemorySegment.NULL, 0);
-            } else {
-                Cubiomes.generateNetherRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates);
-            }
-
+            
+            Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates, yMin, yMax, MemorySegment.NULL, 0):;
+            
             for (int relX = 0; relX < blockW; relX++) {
                 int x = minX + relX;
                 for (int relZ = 0; relZ < blockH; relZ++) {
