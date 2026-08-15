@@ -4,11 +4,13 @@ import com.google.common.cache.CacheBuilder;
 import dev.xpple.seedmapper.config.Configs;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -60,6 +62,55 @@ public final class RenderManager {
         RenderManager.lines.addAll(lines);
     }
 
+    public static void drawFaces(Collection<BlockPos> posBatch, int color, Direction direction) {
+        Set<Line> lines = new HashSet<>();
+
+        posBatch.forEach(pos -> {
+            Vec3 minPosition = new Vec3(pos);
+            Vec3 maxPosition = minPosition.add(1, 1, 1);
+
+            switch (direction) {
+                case DOWN -> {
+                    addLine(new Line(minPosition, minPosition.add(1, 0, 0), color), lines);
+                    addLine(new Line(minPosition, minPosition.add(0, 0, 1), color), lines);
+                    addLine(new Line(minPosition.add(1, 0, 1), minPosition.add(1, 0, 0), color), lines);
+                    addLine(new Line(minPosition.add(1, 0, 1), minPosition.add(0, 0, 1), color), lines);
+                }
+                case UP -> {
+                    addLine(new Line(minPosition.add(0, 1, 0), minPosition.add(1, 1, 0), color), lines);
+                    addLine(new Line(minPosition.add(0, 1, 0), minPosition.add(0, 1, 1), color), lines);
+                    addLine(new Line(maxPosition, minPosition.add(1, 1, 0), color), lines);
+                    addLine(new Line(maxPosition, minPosition.add(0, 1, 1), color), lines);
+                }
+                case NORTH -> {
+                    addLine(new Line(minPosition, minPosition.add(1, 0, 0), color), lines);
+                    addLine(new Line(minPosition, minPosition.add(0, 1, 0), color), lines);
+                    addLine(new Line(minPosition.add(1, 1, 0), minPosition.add(1, 0, 0), color), lines);
+                    addLine(new Line(minPosition.add(1, 1, 0), minPosition.add(0, 1, 0), color), lines);
+                }
+                case SOUTH -> {
+                    addLine(new Line(minPosition.add(0, 0, 1), minPosition.add(1, 0, 1), color), lines);
+                    addLine(new Line(minPosition.add(0, 0, 1), minPosition.add(0, 1, 1), color), lines);
+                    addLine(new Line(maxPosition, minPosition.add(1, 0, 1), color), lines);
+                    addLine(new Line(maxPosition, minPosition.add(0, 1, 1), color), lines);
+                }
+                case WEST -> {
+                    addLine(new Line(minPosition, minPosition.add(0, 1, 0), color), lines);
+                    addLine(new Line(minPosition, minPosition.add(0, 0, 1), color), lines);
+                    addLine(new Line(minPosition.add(0, 1, 1), minPosition.add(0, 0, 1), color), lines);
+                    addLine(new Line(minPosition.add(0, 1, 1), minPosition.add(0, 1, 0), color), lines);
+                }
+                case EAST -> {
+                    addLine(new Line(minPosition.add(1, 0, 0), minPosition.add(1, 1, 0), color), lines);
+                    addLine(new Line(minPosition.add(1, 0, 0), minPosition.add(1, 0, 1), color), lines);
+                    addLine(new Line(maxPosition, minPosition.add(1, 1, 0), color), lines);
+                    addLine(new Line(maxPosition, minPosition.add(1, 0, 1), color), lines);
+                }
+            }
+        });
+        RenderManager.lines.addAll(lines);
+    }
+
     public static void clear() {
         lines.clear();
     }
@@ -71,7 +122,7 @@ public final class RenderManager {
     }
 
     public static void registerEvents() {
-        LevelRenderEvents.END_EXTRACTION.register(RenderManager::extractLines);
+        LevelExtractionEvents.END_EXTRACTION.register(RenderManager::extractLines);
         LevelRenderEvents.END_MAIN.register(RenderManager::renderLines);
     }
 

@@ -15,7 +15,7 @@ import com.github.cubiomes.Range;
 import com.github.cubiomes.StructureConfig;
 import com.github.cubiomes.StructureSaltConfig;
 import com.github.cubiomes.StructureVariant;
-import com.github.cubiomes.SurfaceNoise;
+import com.github.cubiomes.TerrainNoise;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -190,15 +190,14 @@ public class SeedMapScreen extends Screen {
     private final WorldIdentifier worldIdentifier;
 
     /**
+     * {@link TerrainNoise} to be used for structure calculations. This is NOT thread safe.
+     */
+    private final MemorySegment structureGenerator;
+    /**
      * {@link Generator} to be used for biome calculations. This is thread safe.
      */
     private final MemorySegment biomeGenerator;
-    /**
-     * {@link Generator} to be used for structure calculations. This is NOT thread safe.
-     */
-    private final MemorySegment structureGenerator;
     private final @Nullable MemorySegment[] structureConfigs;
-    private final MemorySegment surfaceNoise;
     private final PositionalRandomFactory oreVeinRandom;
     private final MemorySegment oreVeinParameters;
     private final @Nullable MemorySegment[] canyonCarverConfigs;
@@ -251,12 +250,11 @@ public class SeedMapScreen extends Screen {
         this.generatorFlags = generatorFlags;
         this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version, this.generatorFlags);
 
+        this.structureGenerator = TerrainNoise.allocate(arena);
+        Cubiomes.setupTerrainNoise(this.structureGenerator, this.version, this.generatorFlags);
+        Cubiomes.initTerrainNoise(this.structureGenerator, this.seed, this.dimension);
         this.biomeGenerator = Generator.allocate(this.arena);
-        Cubiomes.setupGenerator(this.biomeGenerator, this.version, this.generatorFlags);
-        Cubiomes.applySeed(this.biomeGenerator, this.dimension, this.seed);
-
-        this.structureGenerator = Generator.allocate(this.arena);
-        this.structureGenerator.copyFrom(this.biomeGenerator);
+        this.biomeGenerator.copyFrom(TerrainNoise.g(this.structureGenerator));
 
         this.structureConfigs = IntStream.range(0, Cubiomes.FEATURE_NUM())
             .mapToObj(structure -> {
@@ -270,9 +268,6 @@ public class SeedMapScreen extends Screen {
                 return structureConfig;
             })
             .toArray(MemorySegment[]::new);
-
-        this.surfaceNoise = SurfaceNoise.allocate(this.arena);
-        Cubiomes.initSurfaceNoise(this.surfaceNoise, this.dimension, this.seed);
 
         this.oreVeinRandom = new XoroshiroRandomSource(this.seed).forkPositional().fromHashOf(Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "ore_vein_feature")).forkPositional();
         this.oreVeinParameters = OreVeinParameters.allocate(this.arena);
@@ -726,7 +721,7 @@ public class SeedMapScreen extends Screen {
     }
 
     private @Nullable StructureData calculateStructureData(MapFeature feature, RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
-        if (!generationCheck.check(this.structureGenerator, this.surfaceNoise, regionPos.x(), regionPos.z(), structurePos)) {
+        if (!generationCheck.check(this.structureGenerator, regionPos.x(), regionPos.z(), structurePos)) {
             return null;
         }
 
@@ -736,7 +731,7 @@ public class SeedMapScreen extends Screen {
         if (optionalBiome.isEmpty()) {
             texture = feature.getDefaultTexture();
         } else {
-            texture = feature.getVariantTexture(this.worldIdentifier, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
+            texture = feature.getVariantTexture(this.structureGenerator, this.worldIdentifier, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
         }
         return new StructureData(pos, texture);
     }

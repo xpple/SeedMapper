@@ -2,6 +2,8 @@ package dev.xpple.seedmapper.command.arguments;
 
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.OreConfig;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -26,9 +28,9 @@ public class BlockArgument implements ArgumentType<Integer> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("diamond_ore", "gold_ore", "nether_quartz_ore");
 
-    public static final Map<String, Integer> BLOCKS = IntStream.range(0, Cubiomes.BLOCK_NUM())
+    public static final BiMap<String, Integer> BLOCKS = IntStream.range(0, Cubiomes.BLOCK_NUM())
         .boxed()
-        .collect(Collectors.toUnmodifiableMap(block -> Cubiomes.block2str(block).getString(0), block -> block));
+        .collect(ImmutableBiMap.toImmutableBiMap(block -> Cubiomes.block2str(block).getString(0), block -> block));
 
     private static final Map<String, Integer> ORE_BLOCKS = Util.make(() -> {
         try (Arena arena = Arena.ofConfined()) {
