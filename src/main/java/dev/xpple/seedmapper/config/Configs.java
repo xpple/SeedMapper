@@ -187,6 +187,7 @@ public class Configs {
     public static EnumSet<MapFeature> ToggledFeatures = Util.make(() -> {
         EnumSet<MapFeature> toggledFeatures = EnumSet.allOf(MapFeature.class);
         toggledFeatures.remove(MapFeature.SLIME_CHUNK);
+        toggledFeatures.remove(MapFeature.NETHER_FOSSIL);
         return toggledFeatures;
     });
 

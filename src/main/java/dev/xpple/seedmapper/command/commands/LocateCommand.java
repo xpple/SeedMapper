@@ -14,6 +14,7 @@ import com.github.cubiomes.StructureConfig;
 import com.github.cubiomes.StructureSaltConfig;
 import com.github.cubiomes.StructureVariant;
 import com.github.cubiomes.SurfaceNoise;
+import com.github.cubiomes.TerrainNoise;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -158,9 +159,10 @@ public class LocateCommand {
                 throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
             }
 
-            MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, version, source.getGeneratorFlags());
-            Cubiomes.applySeed(generator, dimension, seed.seed());
+            MemorySegment terrainNoise = TerrainNoise.allocate(arena);
+            Cubiomes.setupTerrainNoise(terrainNoise, version, source.getGeneratorFlags());
+            Cubiomes.initTerrainNoise(terrainNoise, seed.seed(), dimension);
+            MemorySegment generator = TerrainNoise.g(terrainNoise);
 
             // currently only used for end cities
             MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
@@ -180,7 +182,7 @@ public class LocateCommand {
             MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
             MemorySegment structureVariant = StructureVariant.allocate(arena);
             SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
-                if (!generationCheck.check(generator, surfaceNoise, x, z, structurePos)) {
+                if (!generationCheck.check(terrainNoise, x, z, structurePos)) {
                     return false;
                 }
                 if (!piecesPredicateCheck.check(piecesPredicate, pieces, generator, structurePos)) {
@@ -338,9 +340,10 @@ public class LocateCommand {
         int dimension = source.getDimension();
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, version, source.getGeneratorFlags());
-            Cubiomes.applySeed(generator, dimension, seed.seed());
+            MemorySegment terrainNoise = TerrainNoise.allocate(arena);
+            Cubiomes.setupTerrainNoise(terrainNoise, version, source.getGeneratorFlags());
+            Cubiomes.initTerrainNoise(terrainNoise, seed.seed(), dimension);
+            MemorySegment generator = TerrainNoise.g(terrainNoise);
 
             // currently only used for end cities
             MemorySegment surfaceNoise = SurfaceNoise.allocate(arena);
@@ -412,7 +415,7 @@ public class LocateCommand {
                     }
 
                     boolean exhausted = !state.iterator.tryAdvance(pos -> {
-                        if (!state.generationCheck.check(generator, surfaceNoise, pos.x(), pos.z(), structurePos)) {
+                        if (!state.generationCheck.check(terrainNoise, pos.x(), pos.z(), structurePos)) {
                             return;
                         }
                         int posX = Pos.x(structurePos);

@@ -25,6 +25,7 @@ import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.ChunkPos;
@@ -36,6 +37,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SequenceLayout;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,7 +79,15 @@ public class HighlightCommand {
                 .requires(_ -> Configs.DevMode)
                 .executes(ctx -> highlightTerrain(CustomClientCommandSource.of(ctx.getSource())))
                 .then(argument("chunks", integer(0, 5))
-                    .executes(ctx -> submit(() -> highlightTerrain(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks"))))))
+                    .executes(ctx -> submit(() -> highlightTerrain(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks"))))
+                    .then(argument("minY", integer(-64, 320))
+                        .then(argument("maxY", integer(-64, 320))
+                            .executes(ctx -> submit(() -> highlightTerrain(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks"), getInteger(ctx, "minY"), getInteger(ctx, "maxY"))))))))
+            .then(literal("surface")
+                .requires(_ -> Configs.DevMode)
+                .executes(ctx -> highlightSurface(CustomClientCommandSource.of(ctx.getSource())))
+                .then(argument("chunks", integer(0, 10))
+                    .executes(ctx -> submit(() -> highlightSurface(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks"))))))
             .then(literal("canyon")
                 .requires(_ -> Configs.DevMode)
                 .then(argument("canyon", canyonCarver())
@@ -324,11 +334,15 @@ public class HighlightCommand {
     }
 
     private static int highlightTerrain(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
+        if (source.getDimension() == Cubiomes.DIM_OVERWORLD()) {
+            return highlightTerrain(source, chunkRange, -64, 320);
+        }
+        return highlightTerrain(source, chunkRange, 0, 128);
+    }
+
+    private static int highlightTerrain(CustomClientCommandSource source, int chunkRange, int minY, int maxY) throws CommandSyntaxException {
         SeedIdentifier seed = source.getSeed().getSecond();
         int dimension = source.getDimension();
-        if (dimension == Cubiomes.DIM_END()) {
-            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
-        }
         int version = source.getVersion();
         int generatorFlags = source.getGeneratorFlags();
 
@@ -342,41 +356,40 @@ public class HighlightCommand {
         int minX = minChunkX << 4;
         int minZ = minChunkZ << 4;
 
+        int worldMinY, worldMaxY;
+        if (source.getDimension() == Cubiomes.DIM_OVERWORLD()) {
+            worldMinY = source.getVersion() >= Cubiomes.MC_1_18() ? -64 : 0;
+            worldMaxY = 320;
+        } else {
+            worldMinY = 0;
+            worldMaxY = 128;
+        }
+        int cellHeight = source.getDimension() == Cubiomes.DIM_END() ? 4 : 8;
+        int colYMin = Math.max(0, Math.floorDiv(minY - worldMinY, cellHeight));
+        int colYMax = Math.min(Math.ceilDiv(worldMaxY - worldMinY, cellHeight) , Math.ceilDiv(maxY - worldMinY, cellHeight));
+
+        int height = (colYMax - colYMin) * cellHeight;
+
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params = TerrainNoise.allocate(arena);
-            if (Cubiomes.setupTerrainNoise(params, version, generatorFlags) == 0) {
-                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
-            }
-            if (Cubiomes.initTerrainNoise(params, seed.seed(), dimension) == 0) {
-                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
-            }
+            Cubiomes.setupTerrainNoise(params, version, generatorFlags);
+            Cubiomes.initTerrainNoise(params, seed.seed(), dimension);
 
-            Set<BlockPos> blocks = new HashSet<>();
-            int yMin;
-            int yMax;
-            if (dimension == Cubiomes.DIM_OVERWORLD()) {
-                yMin = -64;
-                yMax = 320;
-            } else {
-                yMin = 0;
-                yMax = 128;
-            }
-            int terrainHeight = yMax - yMin;
-            SequenceLayout columnLayout = MemoryLayout.sequenceLayout(terrainHeight, Cubiomes.C_INT);
-            MemorySegment blockStates = arena.allocate(columnLayout, (long) blockW * blockH);
-            if (dimension == Cubiomes.DIM_OVERWORLD()) {
-                Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates, MemorySegment.NULL, 0);
-            } else {
-                Cubiomes.generateNetherRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blockStates);
-            }
+            List<BlockPos> blocks = new ArrayList<>();
+
+            SequenceLayout columnLayout = MemoryLayout.sequenceLayout(height, Cubiomes.C_CHAR);
+            MemorySegment blocksArr = arena.allocate(columnLayout, (long) blockW * blockH);
+            Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, blocksArr, colYMin, colYMax, MemorySegment.NULL, 0);
 
             for (int relX = 0; relX < blockW; relX++) {
                 int x = minX + relX;
                 for (int relZ = 0; relZ < blockH; relZ++) {
                     int z = minZ + relZ;
-                    int columnIdx = (relX * blockH + relZ) * terrainHeight;
-                    for (int y = yMin; y < yMax; y++) {
-                        int block = blockStates.getAtIndex(Cubiomes.C_INT, columnIdx + y - yMin);
+                    int columnIdx = (relX * blockH + relZ) * height;
+                    for (int relIdx = 0; relIdx < height; relIdx++) {
+                        int y = worldMinY + (colYMin * cellHeight) + relIdx;
+                        int idx = columnIdx + relIdx;
+                        byte block = blocksArr.getAtIndex(Cubiomes.C_CHAR, idx);
                         if (block == 1) {
                             blocks.add(new BlockPos(x, y, z));
                         }
@@ -385,6 +398,61 @@ public class HighlightCommand {
             }
             RenderManager.drawBoxes(blocks, 0xFF_FF0000);
             return blocks.size();
+        }
+    }
+
+    private static int highlightSurface(CustomClientCommandSource source) throws CommandSyntaxException {
+        return highlightSurface(source, 0);
+    }
+
+    private static int highlightSurface(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
+        SeedIdentifier seed = source.getSeed().getSecond();
+        int dimension = source.getDimension();
+        int version = source.getVersion();
+        int generatorFlags = source.getGeneratorFlags();
+
+        ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
+        int minChunkX = center.x() - chunkRange;
+        int minChunkZ = center.z() - chunkRange;
+        int chunkW = chunkRange * 2 + 1;
+        int chunkH = chunkRange * 2 + 1;
+        int blockW = chunkW << 4;
+        int blockH = chunkH << 4;
+        int minX = minChunkX << 4;
+        int minZ = minChunkZ << 4;
+
+        int worldMinY, worldMaxY;
+        if (source.getDimension() == Cubiomes.DIM_OVERWORLD()) {
+            worldMinY = source.getVersion() >= Cubiomes.MC_1_18() ? -64 : 0;
+            worldMaxY = 320;
+        } else {
+            worldMinY = 0;
+            worldMaxY = 128;
+        }
+        int cellHeight = source.getDimension() == Cubiomes.DIM_END() ? 4 : 8;
+        int colYMin = 0;
+        int colYMax = Math.ceilDiv(worldMaxY - worldMinY, cellHeight);
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment params = TerrainNoise.allocate(arena);
+            Cubiomes.setupTerrainNoise(params, version, generatorFlags);
+            Cubiomes.initTerrainNoise(params, seed.seed(), dimension);
+
+            List<BlockPos> ys = new ArrayList<>();
+            MemorySegment ysArr = arena.allocate(Cubiomes.C_INT, (long) blockW * blockH);
+            Cubiomes.generateRegion(params, minChunkX, minChunkZ, chunkW, chunkH, MemorySegment.NULL, colYMin, colYMax, ysArr, 1);
+
+            for (int relX = 0; relX < blockW; relX++) {
+                int x = minX + relX;
+                for (int relZ = 0; relZ < blockH; relZ++) {
+                    int z = minZ + relZ;
+                    int idx = relX * blockH + relZ;
+                    int y = ysArr.getAtIndex(Cubiomes.C_INT, idx) - 1;
+                    ys.add(new BlockPos(x, y, z));
+                }
+            }
+            RenderManager.drawFaces(ys, 0xFF_FF0000, Direction.UP);
+            return ys.size();
         }
     }
 

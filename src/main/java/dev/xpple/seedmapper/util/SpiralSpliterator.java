@@ -24,7 +24,8 @@ public class SpiralSpliterator extends Spliterators.AbstractSpliterator<SpiralLo
     }
 
     public SpiralSpliterator(final int centerX, final int centerZ, final int radius, int step) {
-        super(((2L * radius) / step + 1) * ((2L * radius) / step + 1), Spliterator.DISTINCT | Spliterator.ORDERED | Spliterator.SIZED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
+        long l = (2L * radius) / step + 1;
+        super(l * l, Spliterator.DISTINCT | Spliterator.ORDERED | Spliterator.SIZED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
         this.maxX = centerX + radius;
         this.step = step;
 
@@ -38,21 +39,22 @@ public class SpiralSpliterator extends Spliterators.AbstractSpliterator<SpiralLo
             return false;
         }
         SpiralLoop.Coordinate returnValue = new SpiralLoop.Coordinate(this.x, this.z);
-        if (this.j < (this.n >> 1)) {
-            switch (i & 3) {
-                case 0: this.x += this.step; break;
-                case 1: this.z += this.step; break;
-                case 2: this.x -= this.step; break;
-                case 3: this.z -= this.step; break;
+
+        for (;;) {
+            if (this.j < (this.n >> 1)) {
+                switch (i & 3) {
+                    case 0: this.x += this.step; break;
+                    case 1: this.z += this.step; break;
+                    case 2: this.x -= this.step; break;
+                    case 3: this.z -= this.step; break;
+                }
+                this.j++;
+                action.accept(returnValue);
+                return true;
             }
-            this.j++;
-            action.accept(returnValue);
-            return true;
-        } else {
             this.j = 0;
             this.n++;
             this.i++;
-            return tryAdvance(action);
         }
     }
 
