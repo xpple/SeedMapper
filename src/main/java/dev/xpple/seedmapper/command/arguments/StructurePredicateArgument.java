@@ -55,6 +55,7 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
         .put("geode", Cubiomes.Geode())
         .put("fortress", Cubiomes.Fortress())
         .put("bastion_remnant", Cubiomes.Bastion())
+        .put("nether_fossil", Cubiomes.Nether_Fossil())
         .put("end_city", Cubiomes.End_City())
         .put("end_gateway", Cubiomes.End_Gateway())
         .put("end_island", Cubiomes.End_Island())

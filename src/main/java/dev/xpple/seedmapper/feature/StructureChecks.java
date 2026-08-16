@@ -3,11 +3,14 @@ package dev.xpple.seedmapper.feature;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.Pos;
+import com.github.cubiomes.StructureVariant;
+import com.github.cubiomes.TerrainNoise;
 import dev.xpple.seedmapper.command.arguments.StructurePredicateArgument;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.function.IntFunction;
 
@@ -28,8 +31,15 @@ public final class StructureChecks {
     static {
         Int2ObjectMap<IntFunction<GenerationCheck>> tempGenerationChecks = new Int2ObjectOpenHashMap<>();
         tempGenerationChecks.defaultReturnValue(baseGenerationCheck());
-        tempGenerationChecks.put(Cubiomes.End_City(), structure -> baseGenerationCheck().apply(structure).and((generator, surfaceNoise, _, _, structurePos) -> {
-            return Cubiomes.isViableEndCityTerrain(generator, surfaceNoise, Pos.x(structurePos), Pos.z(structurePos)) != 0;
+        tempGenerationChecks.put(Cubiomes.End_City(), structure -> baseGenerationCheck().apply(structure).and((terrainNoise, _, _, structurePos) -> {
+            return Cubiomes.isViableEndCityTerrain(TerrainNoise.g(terrainNoise), TerrainNoise.sn(terrainNoise), Pos.x(structurePos), Pos.z(structurePos)) != 0;
+        }));
+        tempGenerationChecks.put(Cubiomes.Nether_Fossil(), structure -> baseGenerationCheck().apply(structure).and((terrainNoise, _, _, structurePos) -> {
+            try (Arena arena = Arena.ofConfined()) {
+                MemorySegment variant = StructureVariant.allocate(arena);
+                Cubiomes.getVariant(variant, Cubiomes.Nether_Fossil(), Generator.mc(terrainNoise), Generator.seed(terrainNoise), Pos.x(structurePos), Pos.z(structurePos), -1);
+                return Cubiomes.isViableNetherFossilTerrain(Pos.x(structurePos) >> 4, Pos.z(structurePos) >> 4, variant, TerrainNoise.base3dNoise(terrainNoise), Generator.mc(TerrainNoise.g(terrainNoise))) != 0;
+            }
         }));
         GENERATION_CHECKS = Int2ObjectMaps.unmodifiable(tempGenerationChecks);
 
@@ -82,7 +92,7 @@ public final class StructureChecks {
     }
 
     private static IntFunction<GenerationCheck> baseGenerationCheck() {
-        return structure -> (generator, _, regionX, regionZ, structurePos) -> {
+        return structure -> (generator, regionX, regionZ, structurePos) -> {
             if (Cubiomes.getStructurePos(structure, Generator.mc(generator), Generator.seed(generator), regionX, regionZ, structurePos) == 0) {
                 return false;
             }
@@ -98,10 +108,10 @@ public final class StructureChecks {
 
     @FunctionalInterface
     public interface GenerationCheck {
-        boolean check(MemorySegment generator, MemorySegment surfaceNoise, int regionX, int regionZ, MemorySegment structurePos);
+        boolean check(MemorySegment terrainNoise, int regionX, int regionZ, MemorySegment structurePos);
 
         default GenerationCheck and(GenerationCheck other) {
-            return (generator, surfaceNoise, regionX, regionZ, structurePos) -> this.check(generator, surfaceNoise, regionX, regionZ, structurePos) && other.check(generator, surfaceNoise, regionX, regionZ, structurePos);
+            return (terrainNoise, regionX, regionZ, structurePos) -> this.check(terrainNoise, regionX, regionZ, structurePos) && other.check(terrainNoise, regionX, regionZ, structurePos);
         }
     }
 

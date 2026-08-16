@@ -24,7 +24,8 @@ public class SpiralSpliterator extends Spliterators.AbstractSpliterator<SpiralLo
     }
 
     public SpiralSpliterator(final int centerX, final int centerZ, final int radius, int step) {
-        super(((2L * radius) / step + 1) * ((2L * radius) / step + 1), Spliterator.DISTINCT | Spliterator.ORDERED | Spliterator.SIZED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
+        long l = (2L * radius) / step + 1;
+        super(l * l, Spliterator.DISTINCT | Spliterator.ORDERED | Spliterator.SIZED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
         this.maxX = centerX + radius;
         this.step = step;
 

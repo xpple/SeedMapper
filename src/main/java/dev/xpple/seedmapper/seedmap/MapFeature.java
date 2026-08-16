@@ -3,6 +3,7 @@ package dev.xpple.seedmapper.seedmap;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Piece;
 import com.github.cubiomes.StructureVariant;
+import com.github.cubiomes.TerrainNoise;
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.util.SeedIdentifierWithDimension;
@@ -23,7 +24,7 @@ public enum MapFeature {
     IGLOO("igloo", Cubiomes.Igloo(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_1_9(), "cubiomes_viewer_icons", 20, 20) {
         private static final Texture IGLOO_BASEMENT_TEXTURE = new Texture("igloo_basement", "cubiomes_viewer_icons", 20, 20);
         @Override
-        public Texture getVariantTexture(SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
+        public Texture getVariantTexture(MemorySegment terrainNoise, SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
             try (Arena arena = Arena.ofConfined()) {
                 MemorySegment variant = StructureVariant.allocate(arena);
                 Cubiomes.getVariant(variant, this.getStructureId(), identifier.version(), identifier.seed(), posX, posZ, biome);
@@ -37,7 +38,7 @@ public enum MapFeature {
     VILLAGE("village", Cubiomes.Village(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_B1_8(), "cubiomes_viewer_icons", 19, 20) {
         private static final Texture ZOMBIE_VILLAGE_TEXTURE = new Texture("zombie", "cubiomes_viewer_icons", 19, 20);
         @Override
-        public Texture getVariantTexture(SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
+        public Texture getVariantTexture(MemorySegment terrainNoise, SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
             try (Arena arena = Arena.ofConfined()) {
                 MemorySegment variant = StructureVariant.allocate(arena);
                 Cubiomes.getVariant(variant, this.getStructureId(), identifier.version(), identifier.seed(), posX, posZ, biome);
@@ -56,7 +57,7 @@ public enum MapFeature {
     RUINED_PORTAL("ruined_portal", Cubiomes.Ruined_Portal(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_1_16_1(), "cubiomes_viewer_icons", 20, 20) {
         private static final Texture RUINED_PORTAL_GIANT_TEXTURE = new Texture("portal_giant", "cubiomes_viewer_icons", 20, 20);
         @Override
-        public Texture getVariantTexture(SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
+        public Texture getVariantTexture(MemorySegment terrainNoise, SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
             try (Arena arena = Arena.ofConfined()) {
                 MemorySegment variant = StructureVariant.allocate(arena);
                 Cubiomes.getVariant(variant, this.getStructureId(), identifier.version(), identifier.seed(), posX, posZ, biome);
@@ -69,8 +70,8 @@ public enum MapFeature {
     },
     RUINED_PORTAL_N("ruined_portal_n", Cubiomes.Ruined_Portal_N(), Cubiomes.DIM_NETHER(), Cubiomes.MC_1_16_1(), "cubiomes_viewer_icons", 20, 20) {
         @Override
-        public Texture getVariantTexture(SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
-            return RUINED_PORTAL.getVariantTexture(identifier, posX, posZ, biome);
+        public Texture getVariantTexture(MemorySegment terrainNoise, SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
+            return RUINED_PORTAL.getVariantTexture(terrainNoise, identifier, posX, posZ, biome);
         }
     },
     ANCIENT_CITY("ancient_city", Cubiomes.Ancient_City(), Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_1_19_2(), "cubiomes_viewer_icons", 20, 20),
@@ -83,10 +84,27 @@ public enum MapFeature {
     CANYON("canyon", -1, Cubiomes.DIM_OVERWORLD(), Cubiomes.MC_1_13(), "feature_icons", 20, 20),
     FORTRESS("fortress", Cubiomes.Fortress(), Cubiomes.DIM_NETHER(), Cubiomes.MC_1_0(), "cubiomes_viewer_icons", 20, 20),
     BASTION("bastion_remnant", Cubiomes.Bastion(), Cubiomes.DIM_NETHER(), Cubiomes.MC_1_16_1(), "cubiomes_viewer_icons", 20, 20),
+    NETHER_FOSSIL("nether_fossil", Cubiomes.Nether_Fossil(), Cubiomes.DIM_NETHER(), Cubiomes.MC_1_16_1(), "feature_icons", 20, 20) {
+        private static final Texture NETHER_FOSSIL_GHAST_TEXTURE = new Texture("nether_fossil_ghast", "feature_icons", 20, 20);
+        @Override
+        public Texture getVariantTexture(MemorySegment terrainNoise, SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
+            try (Arena arena = Arena.ofConfined()) {
+                MemorySegment variant = StructureVariant.allocate(arena);
+                Cubiomes.getVariant(variant, this.getStructureId(), identifier.version(), identifier.seed(), posX, posZ, biome);
+                if (Cubiomes.isViableNetherFossilTerrain(posX >> 4, posZ >> 4, variant, TerrainNoise.base3dNoise(terrainNoise), identifier.version()) == 0) {
+                    return super.getVariantTexture(terrainNoise, identifier, posX, posZ, biome);
+                }
+                if (Cubiomes.netherFossilHasGhast(posX >> 4, posZ >> 4, identifier.seed(), variant) == 0) {
+                    return super.getVariantTexture(terrainNoise, identifier, posX, posZ, biome);
+                }
+                return NETHER_FOSSIL_GHAST_TEXTURE;
+            }
+        }
+    },
     END_CITY("end_city", Cubiomes.End_City(), Cubiomes.DIM_END(), Cubiomes.MC_1_9(), "cubiomes_viewer_icons", 20, 20) {
         private static final Texture END_CITY_SHIP_TEXTURE = new Texture("end_ship", "cubiomes_viewer_icons", 20, 20);
         @Override
-        public Texture getVariantTexture(SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
+        public Texture getVariantTexture(MemorySegment terrainNoise, SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
             try (Arena arena = Arena.ofConfined()) {
                 MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
                 int numPieces = Cubiomes.getEndCityPieces(pieces, identifier.seed(), posX >> 4, posZ >> 4);
@@ -146,7 +164,7 @@ public enum MapFeature {
         return this.defaultTexture;
     }
 
-    public Texture getVariantTexture(SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
+    public Texture getVariantTexture(MemorySegment terrainNoise, SeedIdentifierWithDimension identifier, int posX, int posZ, int biome) {
         return this.getDefaultTexture();
     }
 

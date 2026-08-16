@@ -43,12 +43,8 @@ public class SampleCommand {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params = TerrainNoise.allocate(arena);
-            if (Cubiomes.setupTerrainNoise(params, version, generatorFlags) == 0) {
-                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
-            }
-            if (Cubiomes.initTerrainNoise(params, seed.seed(), dimension) == 0) {
-                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
-            }
+            Cubiomes.setupTerrainNoise(params, version, generatorFlags);
+            Cubiomes.initTerrainNoise(params, seed.seed(), dimension);
 
             DENSITY_FUNCTIONS.forEach((key, densityFunction) -> {
                 double density = densityFunction.compute(params, pos.getX(), pos.getY(), pos.getZ());
@@ -72,12 +68,8 @@ public class SampleCommand {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params = TerrainNoise.allocate(arena);
-            if (Cubiomes.setupTerrainNoise(params, version, generatorFlags) == 0) {
-                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
-            }
-            if (Cubiomes.initTerrainNoise(params, seed.seed(), dimension) == 0) {
-                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
-            }
+            Cubiomes.setupTerrainNoise(params, version, generatorFlags);
+            Cubiomes.initTerrainNoise(params, seed.seed(), dimension);
             double density = densityFunction.compute(params, pos.getX(), pos.getY(), pos.getZ());
             source.sendFeedback(Component.translatable("command.sample.sampleDensity.success", ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ()), ComponentUtils.formatNumber(density)));
 
