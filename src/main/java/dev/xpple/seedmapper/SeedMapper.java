@@ -95,6 +95,7 @@ public class SeedMapper implements ClientModInitializer {
                     }
                 }
             })
+            .registerCommandAlias("sm:config")
             .build();
 
         // FIXME remove migration code at some point
