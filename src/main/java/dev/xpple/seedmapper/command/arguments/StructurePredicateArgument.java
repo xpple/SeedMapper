@@ -59,6 +59,7 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
         .put("end_island", Cubiomes.End_Island())
         .put("trail_ruins", Cubiomes.Trail_Ruins())
         .put("trial_chambers", Cubiomes.Trial_Chambers())
+        .put("abandoned_camp", Cubiomes.Abandoned_Camp())
         .build();
     //</editor-fold>
 
