@@ -9,7 +9,6 @@
     "RandomizableContainerMixin",
     "baritone.CustomGoalProcessMixin",
     "baritone.PathingBehaviorMixin",
-    "betterconfig.ConfigCommandClientMixin",
     "simplewaypoints.SerializationHelperInvoker"
   ],
   "injectors": {
