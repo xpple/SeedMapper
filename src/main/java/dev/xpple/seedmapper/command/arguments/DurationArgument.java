@@ -15,6 +15,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.Util;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -78,7 +79,7 @@ public class DurationArgument implements ArgumentType<Duration> {
         });
 
         private final StringReader reader;
-        private Consumer<SuggestionsBuilder> suggester;
+        private @Nullable Consumer<SuggestionsBuilder> suggester;
 
         private Parser(StringReader reader) {
             this.reader = reader;

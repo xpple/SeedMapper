@@ -14,6 +14,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.foreign.MemorySegment;
 import java.util.Arrays;
@@ -121,7 +122,7 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> GENERAL_VARIANTS;">
-    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> GENERAL_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
+    private static final Map<String, @Nullable Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> GENERAL_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
         .put("biome", Pair.of(BiomeArgument.BIOMES, m -> (int) StructureVariant.biome(m)))
         .put("rotation", Pair.of(ImmutableMap.<String, Integer>builder()
             .put("north", 0)
@@ -271,7 +272,7 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
     private static final class Parser {
 
         private final StringReader reader;
-        private Consumer<SuggestionsBuilder> suggestor;
+        private @Nullable Consumer<SuggestionsBuilder> suggestor;
 
         private Parser(StringReader reader) {
             this.reader = reader;

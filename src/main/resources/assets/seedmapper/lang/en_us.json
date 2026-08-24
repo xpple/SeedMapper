@@ -100,6 +100,13 @@
   "command.sample.sampleAll.success": "Sampled %s at %s: %s.",
   "command.sample.sampleDensity.success": "Sampled density at %s: %s.",
 
+  "command.vault.alreadyDetecting": "Already detecting vault loot drops!",
+  "command.vault.startedDetecting": "Started detecting vault loot drops!",
+  "command.vault.computedOffset": "Computed vault offset of %s!",
+  "command.vault.sequenceState": "Sequence state: %s.",
+  "command.vault.failed": "Failed to determine sequence state in %s attempts!",
+  "command.vault.malformedState": "Malformed sequence state!",
+
   "config.oreAirCheck.comment": "Whether or not SeedMapper should use in-game air checks to invalidate ore positions.",
   "config.devMode.comment": "Enables certain debug commands.",
 

@@ -22,6 +22,7 @@ import dev.xpple.seedmapper.command.commands.SampleCommand;
 import dev.xpple.seedmapper.command.commands.SeedMapCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
 import dev.xpple.seedmapper.command.commands.StopTaskCommand;
+import dev.xpple.seedmapper.command.commands.VaultCommand;
 import dev.xpple.seedmapper.config.ColorWrapper;
 import dev.xpple.seedmapper.config.ColorWrapperAdapter;
 import dev.xpple.seedmapper.config.Configs;
@@ -150,5 +151,6 @@ public class SeedMapper implements ClientModInitializer {
         DiscordCommand.register(dispatcher);
         SampleCommand.register(dispatcher);
         MinimapCommand.register(dispatcher);
+        VaultCommand.register(dispatcher);
     }
 }

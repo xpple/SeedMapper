@@ -195,4 +195,19 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
             case END -> Cubiomes.DIM_END();
         };
     }
+
+    public static @Nullable CustomClientCommandSource makeFakeCommandSource() {
+        Minecraft minecraft = Minecraft.getInstance();
+        ClientPacketListener connection = minecraft.getConnection();
+        if (connection == null) {
+            return null;
+        }
+        PermissionSet playerPermissions = permission -> {
+            LocalPlayer player = minecraft.player;
+            return player != null && player.permissions().hasPermission(permission);
+        };
+
+        ClientSuggestionProvider suggestionProvider = new ClientSuggestionProvider(connection, minecraft, playerPermissions.union(ClientPacketListener.ALLOW_RESTRICTED_COMMANDS));
+        return CustomClientCommandSource.of((FabricClientCommandSource) suggestionProvider);
+    }
 }

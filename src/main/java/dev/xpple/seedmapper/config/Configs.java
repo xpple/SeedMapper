@@ -24,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.material.MapColor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.EnumSet;
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "CanBeFinal"})
 public class Configs {
     public static final Supplier<ModConfig<Component>> CONFIG_REF = Suppliers.memoize(() -> BetterConfigAPI.getInstance().getModConfig(SeedMapper.MOD_ID));
 
@@ -45,7 +46,7 @@ public class Configs {
     }
 
     @Config(chatRepresentation = "displaySeed")
-    public static SeedIdentifier Seed = null;
+    public static @Nullable SeedIdentifier Seed = null;
     private static Component displaySeed() {
         return ComponentUtils.formatSeed(Seed);
     }
@@ -219,5 +220,11 @@ public class Configs {
         if (!newValue) {
             BaritoneIntegration.clearGoals();
         }
+    }
+
+    @Config(setter = @Config.Setter("setMaxVaultAttempts"))
+    public static int MaxVaultAttempts = 100;
+    private static void setMaxVaultAttempts(int maxVaultAttempts) {
+        MaxVaultAttempts = Math.clamp(maxVaultAttempts, 0, 1000);
     }
 }
