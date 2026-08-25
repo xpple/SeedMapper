@@ -1,8 +1,12 @@
 ## Changelog
-- Added support for Nether Fossils. In the seed map Nether Fossils with a Dried Ghast have a custom icon. Since Dried Ghast generation depends on the terrain, and SeedMapper's Nether terrain generation is not 100% accurate, this may not be always accurate.
-- Added the `minY` and `maxY` optional parameters to the `/sm:highlight terrain` command. If used only the terrain between those values will be highlighted.
-- Added support for surface highlighting (`/sm:highlight surface`). This will only highlight the upper face of the topmost surface block. Note that like terrain highlighting, this command is hidden behind the `DevMode` config.
-- Added support for End terrain highlighting.
+- Implemented vault prediction. Vault loot depends only on the world seed, and follows a predetermined sequence. (The items displayed in the vault when active are purely visual.) As such, given the world seed, you can predict all future vault loot drops. Note that the sequence is server global, so every player uses the same sequence.
+
+  To predict future loot, you must first determine the current offset in the sequence. To do this, execute `/sm:vault detect`, and open a vault. SeedMapper will detect the items ejected from the vault, and use those to compute the offset. The offset (an integer) is outputted, as well as the actual random state of the sequence (a hexadecimal string).
+
+  Next, you can predict the loot. You can use two methods. In both commands, `<ominous>` is either `true` or `false`, depending on whether the vault is an ominous vault.
+
+  1. `/sm:vault predict state <state> <ominous> [<amount>]`. When you enter the random state from the `detect` command, you will see the future loot based on that random state. This command is the fastest, as it reuses the state from the detection phase.
+  2. `/sm:vault predict offset <offset> <ominous> [<amount>]`. When you enter the offset from the `detect` command, you will see the future loot based on the provided offset. This command is slower, as it must iterate through every step of the sequence to get to the sequence position specified by the offset. This command is more customisable though, as you can for example specify a lower or higher offset.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
