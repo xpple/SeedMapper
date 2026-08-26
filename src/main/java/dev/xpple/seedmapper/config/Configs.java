@@ -223,8 +223,8 @@ public class Configs {
     }
 
     @Config(setter = @Config.Setter("setMaxVaultAttempts"))
-    public static int MaxVaultAttempts = 100;
+    public static int MaxVaultAttempts = 10_000;
     private static void setMaxVaultAttempts(int maxVaultAttempts) {
-        MaxVaultAttempts = Math.clamp(maxVaultAttempts, 0, 1000);
+        MaxVaultAttempts = Math.clamp(maxVaultAttempts, 0, 1_000_000);
     }
 }
