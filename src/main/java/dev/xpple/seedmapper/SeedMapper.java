@@ -61,6 +61,7 @@ import java.util.stream.Collectors;
 public class SeedMapper implements ClientModInitializer {
 
     public static final String MOD_ID = "seedmapper";
+    public static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
 
     public static final Path modConfigPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
 

@@ -1,218 +1,60 @@
 package dev.xpple.seedmapper.feature;
 
+import dev.xpple.seedmapper.SeedMapper;
 import net.minecraft.world.level.ChunkPos;
 
+import java.io.IOException;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
-// all (?) structure seeds that have a maximum cluster of 7 buried treasures at spawn
+// all structure seeds that have a maximum cluster of 7 buried treasures at spawn
 public final class BuriedTreasureClusterData {
-    public static final List<FormationEntry> FORMATION_ENTRIES = List.of(
-        new FormationEntry(List.of(new ChunkPos(0, 0), new ChunkPos(1, 1), new ChunkPos(2, 1), new ChunkPos(3, 2), new ChunkPos(4, 3), new ChunkPos(5, 2), new ChunkPos(6, 3)), List.of(
-            2759377182600L,
-            275678779039624L,
-            274545947860872L,
-            242454019342088L,
-            233898444488456L,
-            152910360117000L,
-            151777528938248L,
-            143221954084616L
-        )),
-        new FormationEntry(List.of(new ChunkPos(0, 0), new ChunkPos(-1, 1), new ChunkPos(0, 1), new ChunkPos(1, 1), new ChunkPos(1, 2), new ChunkPos(2, 3), new ChunkPos(1, 4)), List.of(
-            55690960895083L,
-            219930543848554L,
-            211374968994922L,
-            92696399109225L
-        )),
-        new FormationEntry(List.of(new ChunkPos(0, 0), new ChunkPos(1, 1), new ChunkPos(1, 2), new ChunkPos(0, 3), new ChunkPos(2, 3), new ChunkPos(-1, 2), new ChunkPos(2, 4)), List.of(
-            207073495281046L,
-            134643233910167L,
-            66574375398677L,
-            19880535338263L,
-            228925250678036L,
-            156494989307157L,
-            11324960484631L,
-            220369675824404L,
-            253252950101391L,
-            180822688730508L,
-            108392427359629L,
-            184120118291734L,
-            111689856920855L,
-            151446794333579L,
-            65441544219925L,
-            214873189453206L,
-            142442928082327L,
-            206317614599574L,
-            138248760274196L,
-            133887353228695L,
-            96194619567509L,
-            238236702027028L,
-            71766426848660L,
-            229681127173396L,
-            87639044713877L,
-            280811142188437L,
-            157250865802517L,
-            79083469860245L,
-            65614416768395L,
-            221125552319764L,
-            148695290948885L,
-            51389487181207L,
-            260434202520980L,
-            188003941150101L,
-            184875994787094L,
-            42833912327575L,
-            112445733416215L,
-            236006009802135L,
-            251878627667348L,
-            40015472045332L,
-            179448366296469L,
-            64685667724565L,
-            176320419933462L,
-            56130092870933L,
-            215629070134678L
-        )),
-        new FormationEntry(List.of(new ChunkPos(0, 0), new ChunkPos(1, 1), new ChunkPos(2, 0), new ChunkPos(3, 1), new ChunkPos(4, 2), new ChunkPos(5, 2), new ChunkPos(6, 3)), List.of(
-            241492517048280L,
-            51449911422936L,
-            92474365292632L,
-            42894336569304L,
-            198853189038168L,
-            190297614184536L,
-            41761505390552L,
-            242248397729752L,
-            33205930536920L,
-            233692822876120L,
-            197720357859416L,
-            189164783005784L,
-            180609208152152L
-        )),
-        new FormationEntry(List.of(new ChunkPos(0, 0), new ChunkPos(1, 1), new ChunkPos(1, 2), new ChunkPos(0, 3), new ChunkPos(1, 3), new ChunkPos(2, 3), new ChunkPos(-1, 2)), List.of(
-            54173301280013L,
-            28677836434830L,
-            59394368802061L,
-            108974397525389L,
-            140757155523852L,
-            259060387605900L,
-            65235490770315L,
-            104507597991182L,
-            254659654643088L,
-            141824993848719L,
-            58261537623309L,
-            236964422946190L,
-            228408848092558L,
-            225835627908364L,
-            224769402277136L,
-            190718362578317L,
-            222501120576780L,
-            221434894945552L,
-            149247737523599L,
-            181030495522062L,
-            145913230192015L,
-            177695988190478L,
-            32012343766414L,
-            62728876133645L
-        )),
-        new FormationEntry(List.of(new ChunkPos(0, 0), new ChunkPos(0, 1), new ChunkPos(1, 2), new ChunkPos(2, 1), new ChunkPos(1, 3), new ChunkPos(3, 2), new ChunkPos(2, 4)), List.of(
-            106792060615319L,
-            145444616583701L,
-            141733158754837L,
-            34361799244436L,
-            209319303100948L,
-            136889041730069L,
-            133177583901205L,
-            200763728247316L,
-            150665684105749L,
-            128333466876437L,
-            214540370622996L,
-            142110109252117L,
-            70746073512470L,
-            69476277451413L,
-            205984795769364L,
-            279587218422422L,
-            133554534398485L,
-            60920702597781L,
-            100639484197399L,
-            155202719365656L,
-            28209222826516L,
-            82772457994777L,
-            92083909343767L,
-            19653647972884L,
-            44323843652117L,
-            33430290348564L,
-            97304976865815L,
-            102082664512019L,
-            24874715494932L,
-            24671145065111L,
-            233715860404884L,
-            161285599034005L,
-            16115570211479L,
-            251856153786904L,
-            160871566580253L,
-            264879067150870L,
-            179425892416025L,
-            192448805779991L,
-            217119001459220L,
-            144688740088341L,
-            256323492297238L,
-            183893230926359L,
-            208563426605588L,
-            198736098933267L,
-            136133165234709L,
-            200007851751956L,
-            261544559819286L,
-            45904454523424L,
-            64458780359196L,
-            182965419416087L,
-            127577590381077L,
-            189114298448407L,
-            110535158045204L,
-            188910728018582L,
-            137644922411541L,
-            116480466647703L,
-            172313869072918L,
-            36008921184788L,
-            133554534398495L,
-            99883607702039L,
-            61124273027612L,
-            96172145687063L,
-            27453346331156L,
-            163758294219286L,
-            23741884316180L,
-            87616570833431L,
-            232583029226132L,
-            91328032848407L,
-            232786599655957L,
-            15186309462548L,
-            160152767855253L,
-            18897771477524L,
-            224231024802325L,
-            65730025658902L,
-            274774740998679L,
-            196537042123287L,
-            260411728640534L,
-            51472948951700L,
-            187777896839830L,
-            187981467269655L,
-            115347635468951L,
-            251856153786902L,
-            42917374098068L,
-            255567615801878L,
-            179425892416023L,
-            38723202103835L,
-            217874877954580L,
-            136133165234719L,
-            247767917443608L,
-            45148578028064L
-        )),
-        new FormationEntry(List.of(new ChunkPos(0, 0), new ChunkPos(-1, 1), new ChunkPos(-1, 2), new ChunkPos(0, 2), new ChunkPos(0, 3), new ChunkPos(1, 4), new ChunkPos(2, 5)), List.of(
-            23877196737821L,
-            233988137708830L,
-            263398932903198L,
-            82014981289245L,
-            188116779691292L,
-            101358406759707L
-        ))
+
+    private static final List<String> FORMATIONS = List.of(
+        "buried_treasure_formation_1.bin",
+        "buried_treasure_formation_2.bin",
+        "buried_treasure_formation_3.bin",
+        "buried_treasure_formation_4.bin",
+        "buried_treasure_formation_5.bin",
+        "buried_treasure_formation_6.bin",
+        "buried_treasure_formation_7.bin",
+        "buried_treasure_formation_8.bin",
+        "buried_treasure_formation_9.bin",
+        "buried_treasure_formation_10.bin"
     );
 
-    public record FormationEntry(List<ChunkPos> formation, List<Long> structureSeeds) {
+    public static Stream<FormationEntry> access(Arena arena) {
+        return FORMATIONS.stream()
+            .map(formation -> SeedMapper.MOD_CONTAINER.findPath("store/" + formation).orElseThrow())
+            .map(path -> {
+                try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
+                    MemorySegment segment = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size(), arena);
+                    int formationSize = segment.get(ValueLayout.JAVA_INT.withOrder(ByteOrder.BIG_ENDIAN), 0);
+                    segment = segment.asSlice(ValueLayout.JAVA_INT.byteSize());
+                    List<ChunkPos> formation = new ArrayList<>(formationSize);
+                    for (int i = 0; i < formationSize; i++) {
+                        int chunkX = segment.get(ValueLayout.JAVA_INT.withOrder(ByteOrder.BIG_ENDIAN), 0);
+                        segment = segment.asSlice(ValueLayout.JAVA_INT.byteSize());
+                        int chunkZ = segment.get(ValueLayout.JAVA_INT.withOrder(ByteOrder.BIG_ENDIAN), 0);
+                        segment = segment.asSlice(ValueLayout.JAVA_INT.byteSize());
+                        formation.add(new ChunkPos(chunkX, chunkZ));
+                    }
+                    int structureSeedsLen = segment.get(ValueLayout.JAVA_INT.withOrder(ByteOrder.BIG_ENDIAN), 0);
+                    segment = segment.asSlice(ValueLayout.JAVA_INT.byteSize());
+                    return new FormationEntry(formation, structureSeedsLen, segment);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+    }
+
+    public record FormationEntry(List<ChunkPos> formation, int structureSeedsLen, MemorySegment structureSeeds) {
     }
 }

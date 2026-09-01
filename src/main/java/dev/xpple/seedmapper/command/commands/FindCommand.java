@@ -3,7 +3,6 @@ package dev.xpple.seedmapper.command.commands;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
 import com.google.common.math.BigIntegerMath;
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
@@ -12,18 +11,24 @@ import dev.xpple.seedmapper.feature.BuriedTreasureClusterData;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static dev.xpple.seedmapper.thread.LocatorThreadHelper.*;
+import static dev.xpple.seedmapper.util.ChatBuilder.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class FindCommand {
@@ -67,6 +72,8 @@ public class FindCommand {
         int version = source.getVersion();
         long seed = source.getSeed().getSecond().seed();
 
+        String versionString = Cubiomes.mc2str(version).getString(0);
+
         long mask48 = (1L << 48) - 1;
         long structureSeed = seed & mask48;
 
@@ -77,9 +84,14 @@ public class FindCommand {
             Cubiomes.setupGenerator(generator, version, 0);
             Cubiomes.applySeed(generator, Cubiomes.DIM_OVERWORLD(), seed);
 
+            Set<ChunkPos> results = new HashSet<>();
+
             // much of this code can be optimised, but since these clusters are so rare it doesn't matter
-            for (BuriedTreasureClusterData.FormationEntry formationEntry : BuriedTreasureClusterData.FORMATION_ENTRIES) {
-                for (long formationStructureSeed : formationEntry.structureSeeds()) {
+            BuriedTreasureClusterData.access(arena).forEach(formationEntry -> {
+                MemorySegment structureSeedsSegment = formationEntry.structureSeeds();
+                for (int i = 0; i < formationEntry.structureSeedsLen(); i++) {
+                    long formationStructureSeed = structureSeedsSegment.getAtIndex(ValueLayout.JAVA_LONG.withOrder(ByteOrder.BIG_ENDIAN), i);
+
                     long offset = formationStructureSeed - structureSeed;
                     BigInteger factor = BigInteger.valueOf(offset);
                     // precomputed initial x and z using EEA
@@ -137,15 +149,36 @@ public class FindCommand {
                                 }
                             }
 
-                            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.find.cluster.buried_treasure.success", ComponentUtils.formatXZ(x << 4, z << 4))));
+                            results.add(new ChunkPos(x, z));
                         }
                     }
                 }
+            });
+
+            if (results.isEmpty()) {
+                source.getClient().schedule(() -> source.sendError(Component.translatable("command.find.cluster.buried_treasure.noResults")));
+                return 0;
             }
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.find.cluster.buried_treasure.searchEnded")));
-        }
+            source.getClient().schedule(() -> {
+                source.sendFeedback(Component.translatable("command.find.cluster.buried_treasure.success", results.size()));
+                for (ChunkPos result : results) {
+                    int x = result.x() << 4;
+                    int z = result.z() << 4;
+                    MutableComponent coords = ComponentUtils.formatXZ(x, z);
+                    MutableComponent commandComponent = command(
+                        hover(
+                            Component.translatable("command.find.cluster.buried_treasure.view"),
+                            Component.translatable("command.find.cluster.buried_treasure.clickToView")
+                        ),
+                        // below command technically ignores biome flags
+                        "sm:source seeded %d versioned %s positioned %d ~ %d run sm:seedmap".formatted(seed, versionString, x, z)
+                    );
+                    source.sendFeedback(Component.translatable("command.find.cluster.buried_treasure.cluster", coords, commandComponent));
+                }
+            });
 
-        return Command.SINGLE_SUCCESS;
+            return results.size();
+        }
     }
 }
