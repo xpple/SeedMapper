@@ -390,39 +390,42 @@ public class SeedMapScreen extends Screen {
        int horChunkRadius = Math.ceilDiv(this.seedMapWidth / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
        int verChunkRadius = Math.ceilDiv(this.seedMapHeight / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
 
-       // compute structures
-       Configs.ToggledFeatures.stream()
-           .filter(this.toggleableFeatures::contains)
-           .filter(f -> f.getStructureId() != -1)
-           .forEach(feature -> {
-               int structure = feature.getStructureId();
-               MemorySegment structureConfig = this.structureConfigs[structure];
-               if (structureConfig == null) {
-                   return;
-               }
-               int regionSize = StructureConfig.regionSize(structureConfig);
-               RegionPos centerRegion = RegionPos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart), regionSize);
-               int horRegionRadius = Math.ceilDiv(horChunkRadius, regionSize);
-               int verRegionRadius = Math.ceilDiv(verChunkRadius, regionSize);
-               StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
-               MemorySegment structurePos = Pos.allocate(this.arena);
-               for (int relRegionX = -horRegionRadius; relRegionX <= horRegionRadius; relRegionX++) {
-                   for (int relRegionZ = -verRegionRadius; relRegionZ <= verRegionRadius; relRegionZ++) {
-                       RegionPos regionPos = centerRegion.add(relRegionX, relRegionZ);
-                       if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionPos.x(), regionPos.z(), structurePos) == 0) {
-                           continue;
-                       }
-                       ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
+       try (Arena tempArena = Arena.ofConfined()) {
+           MemorySegment structurePos = Pos.allocate(tempArena);
 
-                       ChunkStructureData chunkStructureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new ChunkStructureData(chunkPos, new Int2ObjectArrayMap<>()));
-                       StructureData data = chunkStructureData.structures().computeIfAbsent(structure, _ -> this.calculateStructureData(feature, regionPos, structurePos, generationCheck));
-                       if (data == null) {
-                           continue;
-                       }
-                       this.addFeatureWidget(feature, data.texture(), data.pos());
+           // compute structures
+           Configs.ToggledFeatures.stream()
+               .filter(this.toggleableFeatures::contains)
+               .filter(f -> f.getStructureId() != -1)
+               .forEach(feature -> {
+                   int structure = feature.getStructureId();
+                   MemorySegment structureConfig = this.structureConfigs[structure];
+                   if (structureConfig == null) {
+                       return;
                    }
-               }
-           });
+                   int regionSize = StructureConfig.regionSize(structureConfig);
+                   RegionPos centerRegion = RegionPos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart), regionSize);
+                   int horRegionRadius = Math.ceilDiv(horChunkRadius, regionSize);
+                   int verRegionRadius = Math.ceilDiv(verChunkRadius, regionSize);
+                   StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
+                   for (int relRegionX = -horRegionRadius; relRegionX <= horRegionRadius; relRegionX++) {
+                       for (int relRegionZ = -verRegionRadius; relRegionZ <= verRegionRadius; relRegionZ++) {
+                           RegionPos regionPos = centerRegion.add(relRegionX, relRegionZ);
+                           if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionPos.x(), regionPos.z(), structurePos) == 0) {
+                               continue;
+                           }
+                           ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
+
+                           ChunkStructureData chunkStructureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new ChunkStructureData(chunkPos, new Int2ObjectArrayMap<>()));
+                           StructureData data = chunkStructureData.structures().computeIfAbsent(structure, _ -> this.calculateStructureData(feature, regionPos, structurePos, generationCheck));
+                           if (data == null) {
+                               continue;
+                           }
+                           this.addFeatureWidget(feature, data.texture(), data.pos());
+                       }
+                   }
+               });
+       }
 
        guiGraphicsExtractor.nextStratum();
 
@@ -815,8 +818,10 @@ public class SeedMapScreen extends Screen {
     }
 
     private BlockPos calculateSpawnData() {
-        MemorySegment pos = Cubiomes.getSpawn(this.arena, this.biomeGenerator);
-        return new BlockPos(Pos.x(pos), 0, Pos.z(pos));
+        try (Arena tempArena = Arena.ofConfined()) {
+            MemorySegment pos = Cubiomes.getSpawn(tempArena, this.biomeGenerator);
+            return new BlockPos(Pos.x(pos), 0, Pos.z(pos));
+        }
     }
 
     private void createTeleportField() {
