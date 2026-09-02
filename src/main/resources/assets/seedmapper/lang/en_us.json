@@ -107,6 +107,12 @@
   "command.vault.failed": "Failed to determine sequence state in %s attempts!",
   "command.vault.malformedState": "Malformed sequence state!",
 
+  "command.find.cluster.buried_treasure.noResults": "No clusters were found in your seed!",
+  "command.find.cluster.buried_treasure.success": "Found %s clusters!",
+  "command.find.cluster.buried_treasure.cluster": "Found cluster at %s [%s]!",
+  "command.find.cluster.buried_treasure.view": "view",
+  "command.find.cluster.buried_treasure.clickToView": "Click to view the cluster",
+
   "config.oreAirCheck.comment": "Whether or not SeedMapper should use in-game air checks to invalidate ore positions.",
   "config.devMode.comment": "Enables certain debug commands.",
 
