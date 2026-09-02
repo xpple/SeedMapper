@@ -2,10 +2,12 @@ package dev.xpple.seedmapper.command.commands;
 
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
+import com.github.cubiomes.StructureConfig;
 import com.google.common.math.BigIntegerMath;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
+import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.BuriedTreasureClusterData;
 import dev.xpple.seedmapper.util.ComponentUtils;
@@ -80,8 +82,13 @@ public class FindCommand {
         BigInteger twoPow48 = BigInteger.valueOf(1L << 48);
 
         try (Arena arena = Arena.ofConfined()) {
+            MemorySegment structureConfig = StructureConfig.allocate(arena);
+            if (Cubiomes.getStructureConfig(Cubiomes.Treasure(), version, structureConfig) == 0) {
+                throw CommandExceptions.INCOMPATIBLE_PARAMETERS_EXCEPTION.create();
+            }
+
             MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, version, 0);
+            Cubiomes.setupGenerator(generator, version, source.getGeneratorFlags());
             Cubiomes.applySeed(generator, Cubiomes.DIM_OVERWORLD(), seed);
 
             Set<ChunkPos> results = new HashSet<>();
