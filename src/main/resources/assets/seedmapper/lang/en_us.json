@@ -115,6 +115,7 @@
 
   "config.oreAirCheck.comment": "Whether or not SeedMapper should use in-game air checks to invalidate ore positions.",
   "config.devMode.comment": "Enables certain debug commands.",
+  "config.seed.customSalts": "(custom salts)",
 
   "key.category.seedmapper.seedmapper": "SeedMapper",
   "key.seedMap": "Seed map",

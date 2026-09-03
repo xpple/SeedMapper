@@ -24,13 +24,15 @@ import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.thread.SeedMapCache;
 import dev.xpple.seedmapper.thread.SeedMapExecutor;
+import dev.xpple.seedmapper.util.BiomeSeedIdentifier;
+import dev.xpple.seedmapper.util.BiomeSeedIdentifierWithDimension;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.CubiomesHelper;
 import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.QuartPos2f;
 import dev.xpple.seedmapper.util.RegionPos;
+import dev.xpple.seedmapper.util.SeedIdentifierWithDimension;
 import dev.xpple.seedmapper.util.TwoDTree;
-import dev.xpple.seedmapper.util.WorldIdentifier;
 import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import dev.xpple.simplewaypoints.api.Waypoint;
 import it.unimi.dsi.fastutil.ints.AbstractIntCollection;
@@ -163,13 +165,13 @@ public class SeedMapScreen extends Screen {
 
     private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
 
-    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ObjectIntPair<TilePos>, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<ChunkPos, ChunkStructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
-    public static final Object2ObjectMap<WorldIdentifier, @Nullable TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, BitSet>> canyonDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<WorldIdentifier, Object2ObjectMap<TilePos, BitSet>> slimeChunkDataCache = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<WorldIdentifier, BlockPos> spawnDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<BiomeSeedIdentifierWithDimension, Object2ObjectMap<ObjectIntPair<TilePos>, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<SeedIdentifierWithDimension, Object2ObjectMap<ChunkPos, ChunkStructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
+    public static final Object2ObjectMap<BiomeSeedIdentifier, @Nullable TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, BitSet>> canyonDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, BitSet>> slimeChunkDataCache = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<BiomeSeedIdentifier, BlockPos> spawnDataCache = new Object2ObjectOpenHashMap<>();
 
     private final SeedMapExecutor seedMapExecutor = new SeedMapExecutor();
 
@@ -179,7 +181,8 @@ public class SeedMapScreen extends Screen {
     private final int dimension;
     private final int version;
     private final int generatorFlags;
-    private final WorldIdentifier worldIdentifier;
+    private final BiomeSeedIdentifierWithDimension biomeSeedIdentifierWithDimension;
+    private final SeedIdentifierWithDimension seedIdentifierWithDimension;
 
     /// [TerrainNoise] to be used for structure calculations. This is NOT thread safe.
     private final MemorySegment structureGenerator;
@@ -235,13 +238,14 @@ public class SeedMapScreen extends Screen {
     @UnknownNullability
     private Registry<net.minecraft.world.effect.MobEffect> mobEffectRegistry;
 
-    public SeedMapScreen(long seed, int dimension, int version, int generatorFlags, BlockPos playerPos, Vec2 playerRotation) {
+    public SeedMapScreen(SeedIdentifierWithDimension seedIdentifierWithDimension, BlockPos playerPos, Vec2 playerRotation) {
         super(Component.empty());
-        this.seed = seed;
-        this.dimension = dimension;
-        this.version = version;
-        this.generatorFlags = generatorFlags;
-        this.worldIdentifier = new WorldIdentifier(this.seed, this.dimension, this.version, this.generatorFlags);
+        this.seedIdentifierWithDimension = seedIdentifierWithDimension;
+        this.seed = this.seedIdentifierWithDimension.seed();
+        this.version = this.seedIdentifierWithDimension.version();
+        this.generatorFlags = this.seedIdentifierWithDimension.generatorFlags();
+        this.dimension = this.seedIdentifierWithDimension.dimension();
+        this.biomeSeedIdentifierWithDimension = new BiomeSeedIdentifierWithDimension(this.seed, this.version, this.generatorFlags, this.dimension);
 
         this.structureGenerator = TerrainNoise.allocate(arena);
         Cubiomes.setupTerrainNoise(this.structureGenerator, this.version, this.generatorFlags);
@@ -282,17 +286,17 @@ public class SeedMapScreen extends Screen {
             .sorted(Comparator.comparing(MapFeature::getName))
             .toList();
 
-        this.biomeCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(biomeDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
-        this.structureCache = structureDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
-        this.slimeChunkCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(slimeChunkDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
-        this.oreVeinCache = new SeedMapCache<>(oreVeinDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>()), this.seedMapExecutor);
-        this.canyonCache = canyonDataCache.computeIfAbsent(this.worldIdentifier, _ -> new Object2ObjectOpenHashMap<>());
+        this.biomeCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(biomeDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension, _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
+        this.structureCache = structureDataCache.computeIfAbsent(this.seedIdentifierWithDimension, _ -> new Object2ObjectOpenHashMap<>());
+        this.slimeChunkCache = new SeedMapCache<>(Object2ObjectMaps.synchronize(slimeChunkDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> new Object2ObjectOpenHashMap<>())), this.seedMapExecutor);
+        this.oreVeinCache = new SeedMapCache<>(oreVeinDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> new Object2ObjectOpenHashMap<>()), this.seedMapExecutor);
+        this.canyonCache = canyonDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> new Object2ObjectOpenHashMap<>());
 
-        if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.containsKey(this.worldIdentifier)) {
-            this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.dimension, this.version, this.generatorFlags))
+        if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.containsKey(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier())) {
+            this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.version, this.generatorFlags))
                 .thenAccept(tree -> {
                     if (tree != null) {
-                        strongholdDataCache.put(this.worldIdentifier, tree);
+                        strongholdDataCache.put(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), tree);
                     }
                 });
         }
@@ -431,7 +435,7 @@ public class SeedMapScreen extends Screen {
 
        // draw strongholds
        if (this.toggleableFeatures.contains(MapFeature.STRONGHOLD) && Configs.ToggledFeatures.contains(MapFeature.STRONGHOLD)) {
-           TwoDTree tree = strongholdDataCache.get(this.worldIdentifier);
+           TwoDTree tree = strongholdDataCache.get(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier());
            if (tree != null) {
                for (BlockPos strongholdPos : tree) {
                    this.addFeatureWidget(MapFeature.STRONGHOLD, strongholdPos);
@@ -510,7 +514,7 @@ public class SeedMapScreen extends Screen {
 
        // calculate spawn point
        if (this.toggleableFeatures.contains(MapFeature.WORLD_SPAWN) && Configs.ToggledFeatures.contains(MapFeature.WORLD_SPAWN)) {
-           BlockPos spawnPoint = spawnDataCache.computeIfAbsent(this.worldIdentifier, _ -> this.calculateSpawnData());
+           BlockPos spawnPoint = spawnDataCache.computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> this.calculateSpawnData());
            this.addFeatureWidget(MapFeature.WORLD_SPAWN, spawnPoint);
        }
 
@@ -727,7 +731,7 @@ public class SeedMapScreen extends Screen {
         if (optionalBiome.isEmpty()) {
             texture = feature.getDefaultTexture();
         } else {
-            texture = feature.getVariantTexture(this.structureGenerator, this.worldIdentifier, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
+            texture = feature.getVariantTexture(this.structureGenerator, this.seedIdentifierWithDimension, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
         }
         return new StructureData(pos, texture);
     }
@@ -1291,19 +1295,7 @@ public class SeedMapScreen extends Screen {
         return VERTICAL_PADDING;
     }
 
-    protected long getSeed() {
-        return this.seed;
-    }
-
-    protected int getDimension() {
-        return this.dimension;
-    }
-
-    protected int getVersion() {
-        return this.version;
-    }
-
-    protected int getGeneratorFlags() {
-        return this.generatorFlags;
+    protected SeedIdentifierWithDimension getSeedIdentifierWithDimension() {
+        return this.seedIdentifierWithDimension;
     }
 }

@@ -3,7 +3,8 @@ accessible method net/minecraft/client/renderer/rendertype/RenderType create (Lj
 
 accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
 
-accessible field net/minecraft/client/multiplayer/ClientPacketListener ALLOW_RESTRICTED_COMMANDS Lnet/minecraft/server/permissions/PermissionSet;
-
 # seed map
 accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lcom/mojang/blaze3d/textures/GpuTextureView;Lcom/mojang/blaze3d/textures/GpuSampler;IIIIFFFFI)V
+
+# custom StructureConfigProvider
+accessible field net/minecraft/client/multiplayer/ClientPacketListener ALLOW_RESTRICTED_COMMANDS Lnet/minecraft/server/permissions/PermissionSet;

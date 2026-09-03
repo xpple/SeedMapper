@@ -1,16 +1,22 @@
 package dev.xpple.seedmapper;
 
+import com.github.cubiomes.Cubiomes;
+import com.github.cubiomes.StructureConfig;
+import com.github.cubiomes.StructureConfigProvider;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.BlockArgument;
 import dev.xpple.seedmapper.command.arguments.ColorWrapperArgument;
 import dev.xpple.seedmapper.command.arguments.DurationArgument;
 import dev.xpple.seedmapper.command.arguments.MapFeatureArgument;
 import dev.xpple.seedmapper.command.arguments.SeedIdentifierArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
+import dev.xpple.seedmapper.command.arguments.StructurePredicateArgument;
 import dev.xpple.seedmapper.command.commands.BuildInfoCommand;
 import dev.xpple.seedmapper.command.commands.CheckSeedCommand;
 import dev.xpple.seedmapper.command.commands.ClearCommand;
@@ -51,6 +57,7 @@ import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.lang.foreign.Arena;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -114,6 +121,27 @@ public class SeedMapper implements ClientModInitializer {
                 return BlockArgument.BLOCKS.inverse().get(id);
             }, Map.Entry::getValue));
         BetterConfigAPI.getInstance().getModConfig(MOD_ID).save();
+
+        Cubiomes.setStructureConfigProvider(StructureConfigProvider.allocate((stype, mc, sconf) -> {
+            if (Cubiomes.getStructureConfig_default(stype, mc, sconf) == 0) {
+                return 0;
+            }
+            CustomClientCommandSource commandSource = CustomClientCommandSource.makeFakeCommandSource();
+            if (commandSource == null) {
+                return 1;
+            }
+            Integer salt;
+            try {
+                String structureString = StructurePredicateArgument.STRUCTURES.inverse().get(stype);
+                salt = commandSource.getSeed().getSecond().customStructureSalts().get(structureString);
+            } catch (CommandSyntaxException _) {
+                return 1;
+            }
+            if (salt != null) {
+                StructureConfig.salt(sconf, salt);
+            }
+            return 1;
+        }, Arena.global()));
 
         SimpleWaypointsAPI.getInstance().registerCommandAlias("sm:waypoint");
 

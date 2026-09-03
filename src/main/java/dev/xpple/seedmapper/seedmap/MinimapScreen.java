@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.seedmap;
 
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.util.QuartPos2f;
+import dev.xpple.seedmapper.util.SeedIdentifierWithDimension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
@@ -16,8 +17,8 @@ public class MinimapScreen extends SeedMapScreen {
     private int lastWidth = -1;
     private int lastHeight = -1;
 
-    public MinimapScreen(long seed, int dimension, int version, int generatorFlags) {
-        super(seed, dimension, version, generatorFlags, Minecraft.getInstance().player.blockPosition(), Minecraft.getInstance().player.getRotationVector());
+    public MinimapScreen(SeedIdentifierWithDimension seedIdentifierWithDimension) {
+        super(seedIdentifierWithDimension, Minecraft.getInstance().player.blockPosition(), Minecraft.getInstance().player.getRotationVector());
     }
 
     public void initForOverlay(int width, int height) {

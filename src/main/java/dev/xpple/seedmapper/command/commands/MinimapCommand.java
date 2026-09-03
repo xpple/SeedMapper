@@ -5,7 +5,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.seedmap.MinimapManager;
 import dev.xpple.seedmapper.util.SeedIdentifier;
+import dev.xpple.seedmapper.util.SeedIdentifierWithDimension;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+
+import java.util.Map;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
@@ -30,7 +33,9 @@ public class MinimapCommand {
             int dimension = source.getDimension();
             int version = source.getVersion();
             int generatorFlags = source.getGeneratorFlags();
-            MinimapManager.show(seed.seed(), dimension, version, generatorFlags);
+            Map<String, Integer> customStructureSalts = seed.customStructureSalts();
+            SeedIdentifierWithDimension identifier = new SeedIdentifierWithDimension(seed.seed(), version, generatorFlags, customStructureSalts, dimension);
+            MinimapManager.show(identifier);
             return 1;
         } else {
             MinimapManager.hide();

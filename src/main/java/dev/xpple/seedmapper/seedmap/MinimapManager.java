@@ -1,6 +1,7 @@
 package dev.xpple.seedmapper.seedmap;
 
 import dev.xpple.seedmapper.SeedMapper;
+import dev.xpple.seedmapper.util.SeedIdentifierWithDimension;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -23,9 +24,9 @@ public final class MinimapManager {
         return minimapScreen != null;
     }
 
-    public static void show(long seed, int dimension, int version, int generatorFlags) {
+    public static void show(SeedIdentifierWithDimension seedIdentifierWithDimension) {
         hide();
-        minimapScreen = new MinimapScreen(seed, dimension, version, generatorFlags);
+        minimapScreen = new MinimapScreen(seedIdentifierWithDimension);
     }
 
     public static void hide() {
@@ -41,10 +42,10 @@ public final class MinimapManager {
         if (minimapScreen == null) {
             return;
         }
-        if (minimapScreen.getDimension() == dimension) {
+        if (minimapScreen.getSeedIdentifierWithDimension().dimension() == dimension) {
             return;
         }
-        show(minimapScreen.getSeed(), dimension, minimapScreen.getVersion(), minimapScreen.getGeneratorFlags());
+        show(minimapScreen.getSeedIdentifierWithDimension().withDimension(dimension));
     }
 
     private static void render(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {
