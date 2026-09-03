@@ -40,6 +40,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -456,6 +457,7 @@ public class LocateCommand {
                                     }
                                     continue;
                                 }
+                                Cubiomes.set_loot_prng_type(lootTableContext, Cubiomes.JAVA_RANDOM());
                                 Cubiomes.set_loot_seed(lootTableContext, lootSeeds.getAtIndex(Cubiomes.C_LONG_LONG, j));
                                 Cubiomes.generate_loot(lootTableContext);
                                 int lootCount = LootTableContext.generated_item_count(lootTableContext);
@@ -521,7 +523,7 @@ public class LocateCommand {
                 throw CommandExceptions.ORE_VEIN_WRONG_VERSION_EXCEPTION.create();
             }
             ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
-            BlockPos[] pos = {null};
+            @Nullable BlockPos[] pos = {null};
             SpiralLoop.spiral(center.x(), center.z(), 6400, (chunkX, chunkZ) -> {
                 int minX = chunkX << 4;
                 int minZ = chunkZ << 4;

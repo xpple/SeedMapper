@@ -21,6 +21,7 @@ import dev.xpple.seedmapper.command.commands.BuildInfoCommand;
 import dev.xpple.seedmapper.command.commands.CheckSeedCommand;
 import dev.xpple.seedmapper.command.commands.ClearCommand;
 import dev.xpple.seedmapper.command.commands.DiscordCommand;
+import dev.xpple.seedmapper.command.commands.FindCommand;
 import dev.xpple.seedmapper.command.commands.HighlightCommand;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.command.commands.MinimapCommand;
@@ -28,6 +29,7 @@ import dev.xpple.seedmapper.command.commands.SampleCommand;
 import dev.xpple.seedmapper.command.commands.SeedMapCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
 import dev.xpple.seedmapper.command.commands.StopTaskCommand;
+import dev.xpple.seedmapper.command.commands.VaultCommand;
 import dev.xpple.seedmapper.config.ColorWrapper;
 import dev.xpple.seedmapper.config.ColorWrapperAdapter;
 import dev.xpple.seedmapper.config.Configs;
@@ -72,6 +74,7 @@ import java.util.stream.Collectors;
 public class SeedMapper implements ClientModInitializer {
 
     public static final String MOD_ID = "seedmapper";
+    public static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
 
     public static final Path modConfigPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
 
@@ -108,6 +111,7 @@ public class SeedMapper implements ClientModInitializer {
                     }
                 }
             })
+            .registerCommandAlias("sm:config")
             .build();
 
         // FIXME remove migration code at some point
@@ -183,6 +187,8 @@ public class SeedMapper implements ClientModInitializer {
         DiscordCommand.register(dispatcher);
         SampleCommand.register(dispatcher);
         MinimapCommand.register(dispatcher);
+        VaultCommand.register(dispatcher);
+        FindCommand.register(dispatcher);
     }
 
     private static @Nullable CustomClientCommandSource makeCommandSource() {

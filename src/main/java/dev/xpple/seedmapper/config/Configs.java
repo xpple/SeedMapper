@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "CanBeFinal"})
 public class Configs {
     public static final Supplier<ModConfig<Component>> CONFIG_REF = Suppliers.memoize(() -> BetterConfigAPI.getInstance().getModConfig(SeedMapper.MOD_ID));
 
@@ -220,5 +220,11 @@ public class Configs {
         if (!newValue) {
             BaritoneIntegration.clearGoals();
         }
+    }
+
+    @Config(setter = @Config.Setter("setMaxVaultAttempts"))
+    public static int MaxVaultAttempts = 10_000;
+    private static void setMaxVaultAttempts(int maxVaultAttempts) {
+        MaxVaultAttempts = Math.clamp(maxVaultAttempts, 0, 1_000_000);
     }
 }

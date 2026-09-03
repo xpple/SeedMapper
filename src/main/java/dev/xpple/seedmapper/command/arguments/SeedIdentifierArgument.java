@@ -15,6 +15,7 @@ import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -64,7 +65,7 @@ public class SeedIdentifierArgument implements ArgumentType<SeedIdentifier> {
 
     private static class Parser {
         private final StringReader reader;
-        private Consumer<SuggestionsBuilder> suggester;
+        private @Nullable Consumer<SuggestionsBuilder> suggester;
 
         private final Map<String, CheckedFunction<SeedIdentifier, SeedIdentifier, CommandSyntaxException>> ARGUMENTS = ImmutableMap.<String, CheckedFunction<SeedIdentifier, SeedIdentifier, CommandSyntaxException>>builder()
             .put("--version", this::parseVersion)

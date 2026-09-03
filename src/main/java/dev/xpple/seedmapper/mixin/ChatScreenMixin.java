@@ -12,11 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ChatScreen.class)
 public class ChatScreenMixin {
     @Inject(method = "handleComponentClicked", at = @At("HEAD"), cancellable = true)
-    private void executeCode(Style style, boolean bl, CallbackInfoReturnable<Boolean> cir) {
-        if (style == null) {
-            return;
-        }
-        if (!(style.getClickEvent() instanceof ClickEvent.ChangePage(int page))) {
+    private void executeCode(Style clicked, boolean allowInsertions, CallbackInfoReturnable<Boolean> cir) {
+        if (!(clicked.getClickEvent() instanceof ClickEvent.ChangePage(int page))) {
             return;
         }
         Runnable runnable = RunnableClickEventActionHelper.runnables.get(page);

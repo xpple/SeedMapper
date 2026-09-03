@@ -2,6 +2,7 @@ package dev.xpple.seedmapper.thread;
 
 import com.mojang.logging.LogUtils;
 import dev.xpple.seedmapper.config.Configs;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -18,8 +19,8 @@ public class SeedMapExecutor {
     private final ExecutorService seedMapExecutor = Executors.newFixedThreadPool(Configs.SeedMapThreads);
     private final List<CompletableFuture<?>> futures = new ArrayList<>();
 
-    public <T> CompletableFuture<T> submitCalculation(Supplier<T> task) {
-        CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> {
+    public <T> CompletableFuture<@Nullable T> submitCalculation(Supplier<@Nullable T> task) {
+        CompletableFuture<@Nullable T> future = CompletableFuture.supplyAsync(() -> {
             try {
                 return task.get();
             } catch (Throwable t) {

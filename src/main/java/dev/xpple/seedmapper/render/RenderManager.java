@@ -9,6 +9,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.SubmitNodeCollection;
+import net.minecraft.client.renderer.feature.CustomFeatureRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.ARGB;
@@ -123,7 +125,7 @@ public final class RenderManager {
 
     public static void registerEvents() {
         LevelExtractionEvents.END_EXTRACTION.register(RenderManager::extractLines);
-        LevelRenderEvents.END_MAIN.register(RenderManager::renderLines);
+        LevelRenderEvents.BEFORE_GIZMOS.register(RenderManager::renderLines);
     }
 
     private static void extractLines(LevelExtractionContext levelExtractionContext) {
@@ -156,18 +158,20 @@ public final class RenderManager {
             float green = ARGB.greenFloat(color);
             float blue = ARGB.blueFloat(color);
 
-            context.submitNodeCollector().submitCustomGeometry(context.poseStack(), NoDepthLayer.LINES_NO_DEPTH_LAYER, (pose, buffer) -> {
-                buffer
-                    .addVertex(pose, (float) start.x, (float) start.y, (float) start.z)
-                    .setColor(red, green, blue, 1.0F)
-                    .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
-                    .setLineWidth(2);
-                buffer
-                    .addVertex(pose, (float) end.x, (float) end.y, (float) end.z)
-                    .setColor(red, green, blue, 1.0F)
-                    .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
-                    .setLineWidth(2);
-            });
+            if (context.submitNodeCollector().order(0) instanceof SubmitNodeCollection collection) {
+                collection.alwaysOnTop.submit(new CustomFeatureRenderer.Submit(context.poseStack().last().copy(), NoDepthLayer.LINES_NO_DEPTH_LAYER, (pose, buffer) -> {
+                    buffer
+                        .addVertex(pose, (float) start.x, (float) start.y, (float) start.z)
+                        .setColor(red, green, blue, 1.0F)
+                        .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
+                        .setLineWidth(2);
+                    buffer
+                        .addVertex(pose, (float) end.x, (float) end.y, (float) end.z)
+                        .setColor(red, green, blue, 1.0F)
+                        .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z)
+                        .setLineWidth(2);
+                }));
+            }
         });
     }
 }

@@ -2,12 +2,9 @@ package dev.xpple.seedmapper.seedmap;
 
 import com.github.cubiomes.CanyonCarverConfig;
 import com.github.cubiomes.Cubiomes;
-import com.github.cubiomes.EnchantInstance;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.ItemStack;
 import com.github.cubiomes.LootTableContext;
-import com.github.cubiomes.MobEffect;
-import com.github.cubiomes.MobEffectInstance;
 import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Piece;
 import com.github.cubiomes.Pos;
@@ -22,7 +19,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.arguments.CanyonCarverArgument;
-import dev.xpple.seedmapper.command.arguments.ItemAndEnchantmentsPredicateArgument;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.StructureChecks;
@@ -31,6 +27,7 @@ import dev.xpple.seedmapper.thread.SeedMapExecutor;
 import dev.xpple.seedmapper.util.BiomeSeedIdentifier;
 import dev.xpple.seedmapper.util.BiomeSeedIdentifierWithDimension;
 import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.CubiomesHelper;
 import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.QuartPos2f;
 import dev.xpple.seedmapper.util.RegionPos;
@@ -64,11 +61,9 @@ import net.minecraft.client.renderer.state.gui.BlitRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -78,10 +73,6 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -90,6 +81,7 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
 
@@ -175,7 +167,7 @@ public class SeedMapScreen extends Screen {
 
     private static final Object2ObjectMap<BiomeSeedIdentifierWithDimension, Object2ObjectMap<ObjectIntPair<TilePos>, int[]>> biomeDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<SeedIdentifierWithDimension, Object2ObjectMap<ChunkPos, ChunkStructureData>> structureDataCache = new Object2ObjectOpenHashMap<>();
-    public static final Object2ObjectMap<BiomeSeedIdentifier, TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
+    public static final Object2ObjectMap<BiomeSeedIdentifier, @Nullable TwoDTree> strongholdDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, OreVeinData>> oreVeinDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, BitSet>> canyonDataCache = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, BitSet>> slimeChunkDataCache = new Object2ObjectOpenHashMap<>();
@@ -192,13 +184,9 @@ public class SeedMapScreen extends Screen {
     private final BiomeSeedIdentifierWithDimension biomeSeedIdentifierWithDimension;
     private final SeedIdentifierWithDimension seedIdentifierWithDimension;
 
-    /**
-     * {@link TerrainNoise} to be used for structure calculations. This is NOT thread safe.
-     */
+    /// [TerrainNoise] to be used for structure calculations. This is NOT thread safe.
     private final MemorySegment structureGenerator;
-    /**
-     * {@link Generator} to be used for biome calculations. This is thread safe.
-     */
+    /// [Generator] to be used for biome calculations. This is thread safe.
     private final MemorySegment biomeGenerator;
     private final @Nullable MemorySegment[] structureConfigs;
     private final PositionalRandomFactory oreVeinRandom;
@@ -232,9 +220,12 @@ public class SeedMapScreen extends Screen {
 
     private int displayCoordinatesCopiedTicks = 0;
 
+    @UnknownNullability
     private EditBox teleportEditBoxX;
+    @UnknownNullability
     private EditBox teleportEditBoxZ;
 
+    @UnknownNullability
     private EditBox waypointNameEditBox;
 
     private @Nullable FeatureWidget markerWidget = null;
@@ -242,7 +233,9 @@ public class SeedMapScreen extends Screen {
 
     private static final Identifier DIRECTION_ARROW_TEXTURE = Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/arrow.png");
 
+    @UnknownNullability
     private Registry<Enchantment> enchantmentsRegistry;
+    @UnknownNullability
     private Registry<net.minecraft.world.effect.MobEffect> mobEffectRegistry;
 
     public SeedMapScreen(SeedIdentifierWithDimension seedIdentifierWithDimension, BlockPos playerPos, Vec2 playerRotation) {
@@ -401,39 +394,42 @@ public class SeedMapScreen extends Screen {
        int horChunkRadius = Math.ceilDiv(this.seedMapWidth / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
        int verChunkRadius = Math.ceilDiv(this.seedMapHeight / 2, SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
 
-       // compute structures
-       Configs.ToggledFeatures.stream()
-           .filter(this.toggleableFeatures::contains)
-           .filter(f -> f.getStructureId() != -1)
-           .forEach(feature -> {
-               int structure = feature.getStructureId();
-               MemorySegment structureConfig = this.structureConfigs[structure];
-               if (structureConfig == null) {
-                   return;
-               }
-               int regionSize = StructureConfig.regionSize(structureConfig);
-               RegionPos centerRegion = RegionPos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart), regionSize);
-               int horRegionRadius = Math.ceilDiv(horChunkRadius, regionSize);
-               int verRegionRadius = Math.ceilDiv(verChunkRadius, regionSize);
-               StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
-               MemorySegment structurePos = Pos.allocate(this.arena);
-               for (int relRegionX = -horRegionRadius; relRegionX <= horRegionRadius; relRegionX++) {
-                   for (int relRegionZ = -verRegionRadius; relRegionZ <= verRegionRadius; relRegionZ++) {
-                       RegionPos regionPos = centerRegion.add(relRegionX, relRegionZ);
-                       if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionPos.x(), regionPos.z(), structurePos) == 0) {
-                           continue;
-                       }
-                       ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
+       try (Arena tempArena = Arena.ofConfined()) {
+           MemorySegment structurePos = Pos.allocate(tempArena);
 
-                       ChunkStructureData chunkStructureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new ChunkStructureData(chunkPos, new Int2ObjectArrayMap<>()));
-                       StructureData data = chunkStructureData.structures().computeIfAbsent(structure, _ -> this.calculateStructureData(feature, regionPos, structurePos, generationCheck));
-                       if (data == null) {
-                           continue;
-                       }
-                       this.addFeatureWidget(feature, data.texture(), data.pos());
+           // compute structures
+           Configs.ToggledFeatures.stream()
+               .filter(this.toggleableFeatures::contains)
+               .filter(f -> f.getStructureId() != -1)
+               .forEach(feature -> {
+                   int structure = feature.getStructureId();
+                   MemorySegment structureConfig = this.structureConfigs[structure];
+                   if (structureConfig == null) {
+                       return;
                    }
-               }
-           });
+                   int regionSize = StructureConfig.regionSize(structureConfig);
+                   RegionPos centerRegion = RegionPos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart), regionSize);
+                   int horRegionRadius = Math.ceilDiv(horChunkRadius, regionSize);
+                   int verRegionRadius = Math.ceilDiv(verChunkRadius, regionSize);
+                   StructureChecks.GenerationCheck generationCheck = StructureChecks.getGenerationCheck(structure);
+                   for (int relRegionX = -horRegionRadius; relRegionX <= horRegionRadius; relRegionX++) {
+                       for (int relRegionZ = -verRegionRadius; relRegionZ <= verRegionRadius; relRegionZ++) {
+                           RegionPos regionPos = centerRegion.add(relRegionX, relRegionZ);
+                           if (Cubiomes.getStructurePos(structure, this.version, this.seed, regionPos.x(), regionPos.z(), structurePos) == 0) {
+                               continue;
+                           }
+                           ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(Pos.x(structurePos)), SectionPos.blockToSectionCoord(Pos.z(structurePos)));
+
+                           ChunkStructureData chunkStructureData = this.structureCache.computeIfAbsent(chunkPos, _ -> new ChunkStructureData(chunkPos, new Int2ObjectArrayMap<>()));
+                           StructureData data = chunkStructureData.structures().computeIfAbsent(structure, _ -> this.calculateStructureData(feature, regionPos, structurePos, generationCheck));
+                           if (data == null) {
+                               continue;
+                           }
+                           this.addFeatureWidget(feature, data.texture(), data.pos());
+                       }
+                   }
+               });
+       }
 
        guiGraphicsExtractor.nextStratum();
 
@@ -826,8 +822,10 @@ public class SeedMapScreen extends Screen {
     }
 
     private BlockPos calculateSpawnData() {
-        MemorySegment pos = Cubiomes.getSpawn(this.arena, this.biomeGenerator);
-        return new BlockPos(Pos.x(pos), 0, Pos.z(pos));
+        try (Arena tempArena = Arena.ofConfined()) {
+            MemorySegment pos = Cubiomes.getSpawn(tempArena, this.biomeGenerator);
+            return new BlockPos(Pos.x(pos), 0, Pos.z(pos));
+        }
     }
 
     private void createTeleportField() {
@@ -1041,36 +1039,15 @@ public class SeedMapScreen extends Screen {
                     MemorySegment chestPosInternal = Pos.asSlice(chestPoses, chestIdx);
                     BlockPos chestPos = new BlockPos(Pos.x(chestPosInternal), 0, Pos.z(chestPosInternal));
                     long lootSeed = lootSeeds.getAtIndex(Cubiomes.C_LONG_LONG, chestIdx);
+                    Cubiomes.set_loot_prng_type(lootTableContext, Cubiomes.JAVA_RANDOM());
                     Cubiomes.set_loot_seed(lootTableContext, lootSeed);
                     Cubiomes.generate_loot(lootTableContext);
                     int lootCount = LootTableContext.generated_item_count(lootTableContext);
                     SimpleContainer container = new SimpleContainer(3 * 9);
                     for (int lootIdx = 0; lootIdx < lootCount; lootIdx++) {
                         MemorySegment itemStackInternal = ItemStack.asSlice(LootTableContext.generated_items(lootTableContext), lootIdx);
-                        int itemId = Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStackInternal));
-                        Item item = ItemAndEnchantmentsPredicateArgument.ITEM_ID_TO_MC.get(itemId);
-                        net.minecraft.world.item.ItemStack itemStack = new net.minecraft.world.item.ItemStack(item, ItemStack.count(itemStackInternal));
-                        MemorySegment enchantments = ItemStack.enchantments(itemStackInternal);
-                        int enchantmentCount = ItemStack.enchantment_count(itemStackInternal);
-                        for (int enchantmentIdx = 0; enchantmentIdx < enchantmentCount; enchantmentIdx++) {
-                            MemorySegment enchantInstance = EnchantInstance.asSlice(enchantments, enchantmentIdx);
-                            int itemEnchantment = EnchantInstance.enchantment(enchantInstance);
-                            ResourceKey<Enchantment> enchantmentResourceKey = ItemAndEnchantmentsPredicateArgument.ENCHANTMENT_ID_TO_MC.get(itemEnchantment);
-                            Holder.Reference<Enchantment> enchantmentReference = this.enchantmentsRegistry.getOrThrow(enchantmentResourceKey);
-                            itemStack.enchant(enchantmentReference, EnchantInstance.level(enchantInstance));
-                        }
-                        MemorySegment mobEffectInstance = ItemStack.mob_effect(itemStackInternal);
-                        if (MobEffectInstance.effect(mobEffectInstance) != -1) {
-                            MemorySegment mobEffectInternal = MobEffect.asSlice(Cubiomes.MOB_EFFECTS(), MobEffectInstance.effect(mobEffectInstance));
-                            var mobEffect = this.mobEffectRegistry.getOptional(Identifier.parse(MobEffect.effect_name(mobEffectInternal).getString(0))).orElse(null);
-                            if (mobEffect != null) {
-                                SuspiciousStewEffects.Entry entry = new SuspiciousStewEffects.Entry(Holder.direct(mobEffect), MobEffectInstance.duration(mobEffectInstance));
-                                net.minecraft.world.effect.MobEffectInstance effectInstance = entry.createEffectInstance();
-                                MutableComponent description = PotionContents.getPotionDescription(effectInstance.getEffect(), effectInstance.getAmplifier());
-                                MutableComponent lore = Component.translatable("seedMap.chestLoot.stewEffect", description, (float) entry.duration() / SharedConstants.TICKS_PER_SECOND);
-                                itemStack.set(DataComponents.LORE, new ItemLore(List.of(lore)));
-                            }
-                        }
+                        var itemStack = CubiomesHelper.convertItemStack(lootTableContext, itemStackInternal, this.enchantmentsRegistry);
+                        CubiomesHelper.setMobEffectAsLore(itemStack, itemStackInternal, this.mobEffectRegistry);
                         container.addItem(itemStack);
                     }
                     chestLootDataList.add(new ChestLootData(structure, pieceName, chestPos, lootSeed, lootTableString, container));
@@ -1252,7 +1229,7 @@ public class SeedMapScreen extends Screen {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
