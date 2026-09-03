@@ -52,14 +52,8 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.ClientSuggestionProvider;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.permissions.PermissionSet;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -132,7 +126,7 @@ public class SeedMapper implements ClientModInitializer {
             if (Cubiomes.getStructureConfig_default(stype, mc, sconf) == 0) {
                 return 0;
             }
-            CustomClientCommandSource commandSource = makeCommandSource();
+            CustomClientCommandSource commandSource = CustomClientCommandSource.makeFakeCommandSource();
             if (commandSource == null) {
                 return 1;
             }
@@ -189,20 +183,5 @@ public class SeedMapper implements ClientModInitializer {
         MinimapCommand.register(dispatcher);
         VaultCommand.register(dispatcher);
         FindCommand.register(dispatcher);
-    }
-
-    private static @Nullable CustomClientCommandSource makeCommandSource() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientPacketListener connection = minecraft.getConnection();
-        if (connection == null) {
-            return null;
-        }
-        PermissionSet playerPermissions = permission -> {
-            LocalPlayer player = minecraft.player;
-            return player != null && player.permissions().hasPermission(permission);
-        };
-
-        ClientSuggestionProvider suggestionProvider = new ClientSuggestionProvider(connection, minecraft, playerPermissions.union(ClientPacketListener.ALLOW_RESTRICTED_COMMANDS));
-        return CustomClientCommandSource.of((FabricClientCommandSource) suggestionProvider);
     }
 }
