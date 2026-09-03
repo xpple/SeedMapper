@@ -47,6 +47,10 @@ public record SeedIdentifier(BiomeSeedIdentifier biomeSeedIdentifier, Map<String
         return this.biomeSeedIdentifier.hasFlags();
     }
 
+    public boolean hasCustomStructureSalts() {
+        return !this.customStructureSalts.isEmpty();
+    }
+
     public SeedIdentifier withVersion(int version) {
         return new SeedIdentifier(this.biomeSeedIdentifier.withVersion(version), this.customStructureSalts);
     }
