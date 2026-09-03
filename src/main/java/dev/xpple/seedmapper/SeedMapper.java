@@ -122,18 +122,18 @@ public class SeedMapper implements ClientModInitializer {
             }, Map.Entry::getValue));
         BetterConfigAPI.getInstance().getModConfig(MOD_ID).save();
 
+        CustomClientCommandSource fakeCommandSource = CustomClientCommandSource.makeFakeCommandSource();
         Cubiomes.setStructureConfigProvider(StructureConfigProvider.allocate((stype, mc, sconf) -> {
             if (Cubiomes.getStructureConfig_default(stype, mc, sconf) == 0) {
                 return 0;
             }
-            CustomClientCommandSource commandSource = CustomClientCommandSource.makeFakeCommandSource();
-            if (commandSource == null) {
+            if (fakeCommandSource == null) {
                 return 1;
             }
             Integer salt;
             try {
                 String structureString = StructurePredicateArgument.STRUCTURES.inverse().get(stype);
-                salt = commandSource.getSeed().getSecond().customStructureSalts().get(structureString);
+                salt = fakeCommandSource.getSeed().getSecond().customStructureSalts().get(structureString);
             } catch (CommandSyntaxException _) {
                 return 1;
             }

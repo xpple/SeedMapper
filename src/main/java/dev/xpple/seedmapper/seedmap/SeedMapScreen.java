@@ -33,6 +33,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
@@ -82,7 +83,7 @@ public class SeedMapScreen extends Screen {
     private @Nullable ChestLootWidget chestLootWidget = null;
 
     private final Registry<Enchantment> enchantmentsRegistry;
-    private final Registry<net.minecraft.world.effect.MobEffect> mobEffectRegistry;
+    private final Registry<MobEffect> mobEffectRegistry;
 
     public SeedMapScreen(SeedIdentifierWithDimension seedIdentifierWithDimension, BlockPos playerPos, Vec2 playerRotation) {
         super(Component.empty());

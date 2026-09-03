@@ -250,7 +250,7 @@ public class LocateCommand {
 
         BlockPos position = BlockPos.containing(source.getPosition());
 
-        TwoDTree tree = SeedMapData.strongholdDataCache.computeIfAbsent(new BiomeSeedIdentifier(seed.seed(), version, generatorFlags), _ -> calculateStrongholds(seed.seed(), version, generatorFlags));
+        TwoDTree tree = SeedMapData.strongholdDataCache.get().computeIfAbsent(new BiomeSeedIdentifier(seed.seed(), version, generatorFlags), _ -> calculateStrongholds(seed.seed(), version, generatorFlags));
 
         BlockPos pos = tree.nearestTo(position.atY(0));
         assert pos != null;
