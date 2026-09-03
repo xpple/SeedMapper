@@ -1,20 +1,19 @@
 package dev.xpple.seedmapper.thread;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
-import it.unimi.dsi.fastutil.objects.ObjectSets;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class SeedMapCache<K, V> {
-    private final ObjectSet<K> pendingCalculations = ObjectSets.synchronize(new ObjectOpenHashSet<>());
-    private final Object2ObjectMap<K, @Nullable V> cache;
+    private final Set<K> pendingCalculations = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final ConcurrentHashMap<K, @Nullable V> cache;
 
     private final SeedMapExecutor executor;
 
-    public SeedMapCache(Object2ObjectMap<K, @Nullable V> cache, SeedMapExecutor executor) {
+    public SeedMapCache(ConcurrentHashMap<K, @Nullable V> cache, SeedMapExecutor executor) {
         this.cache = cache;
         this.executor = executor;
     }

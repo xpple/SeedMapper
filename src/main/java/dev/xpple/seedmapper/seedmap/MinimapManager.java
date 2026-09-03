@@ -14,47 +14,47 @@ public final class MinimapManager {
     private MinimapManager() {
     }
 
-    private static @Nullable MinimapScreen minimapScreen;
+    private static @Nullable Minimap minimap;
 
     public static void registerHudElement() {
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "minimap"), MinimapManager::render);
     }
 
     public static boolean isVisible() {
-        return minimapScreen != null;
+        return minimap != null;
     }
 
     public static void show(SeedIdentifierWithDimension seedIdentifierWithDimension) {
         hide();
-        minimapScreen = new MinimapScreen(seedIdentifierWithDimension);
+        minimap = new Minimap(seedIdentifierWithDimension);
     }
 
     public static void hide() {
-        if (minimapScreen != null) {
-            if (minimapScreen.isInitialized()) {
-                minimapScreen.onClose();
+        if (minimap != null) {
+            if (minimap.isInitialized()) {
+                minimap.close();
             }
-            minimapScreen = null;
+            minimap = null;
         }
     }
 
     public static void updateDimension(int dimension) {
-        if (minimapScreen == null) {
+        if (minimap == null) {
             return;
         }
-        if (minimapScreen.getSeedIdentifierWithDimension().dimension() == dimension) {
+        if (minimap.getSeedMapRenderer().getSeedMapData().getSeedIdentifierWithDimension().dimension() == dimension) {
             return;
         }
-        show(minimapScreen.getSeedIdentifierWithDimension().withDimension(dimension));
+        show(minimap.getSeedMapRenderer().getSeedMapData().getSeedIdentifierWithDimension().withDimension(dimension));
     }
 
     private static void render(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {
-        if (minimapScreen == null) {
+        if (minimap == null) {
             return;
         }
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
-        minimapScreen.update(player.position(), player.getRotationVector());
-        minimapScreen.renderToHud(guiGraphicsExtractor, deltaTracker.getGameTimeDeltaTicks());
+        minimap.update(player.position(), player.getRotationVector());
+        minimap.renderToHud(guiGraphicsExtractor, deltaTracker.getGameTimeDeltaTicks());
     }
 }

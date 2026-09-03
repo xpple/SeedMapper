@@ -5,6 +5,8 @@ import com.github.cubiomes.EnchantInstance;
 import com.github.cubiomes.ItemStack;
 import com.github.cubiomes.MobEffect;
 import com.github.cubiomes.MobEffectInstance;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import dev.xpple.seedmapper.command.arguments.ItemAndEnchantmentsPredicateArgument;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
@@ -20,6 +22,7 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
 
 import java.lang.foreign.MemorySegment;
 import java.util.List;
@@ -27,6 +30,12 @@ import java.util.List;
 public final class CubiomesHelper {
     private CubiomesHelper() {
     }
+
+    private static final BiMap<Integer, ResourceKey<Level>> DIM_ID_TO_MC = ImmutableBiMap.of(
+        Cubiomes.DIM_OVERWORLD(), Level.OVERWORLD,
+        Cubiomes.DIM_NETHER(), Level.NETHER,
+        Cubiomes.DIM_END(), Level.END
+    );
 
     public static net.minecraft.world.item.ItemStack convertItemStack(MemorySegment lootTableContext, MemorySegment itemStackInternal, Registry<Enchantment> enchantmentsRegistry) {
         int itemId = Cubiomes.get_global_item_id(lootTableContext, ItemStack.item(itemStackInternal));
@@ -60,5 +69,13 @@ public final class CubiomesHelper {
                 itemStack.set(DataComponents.LORE, new ItemLore(List.of(lore)));
             }
         }
+    }
+
+    public static ResourceKey<Level> getMinecraftDimension(int dimension) {
+        return DIM_ID_TO_MC.get(dimension);
+    }
+
+    public static int getCubiomesDimension(ResourceKey<Level> resourceKey) {
+        return DIM_ID_TO_MC.inverse().get(resourceKey);
     }
 }

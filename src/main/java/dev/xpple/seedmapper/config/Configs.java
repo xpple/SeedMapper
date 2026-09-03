@@ -12,7 +12,7 @@ import dev.xpple.seedmapper.command.arguments.BlockArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.seedmap.MapFeature;
-import dev.xpple.seedmapper.seedmap.SeedMapScreen;
+import dev.xpple.seedmapper.seedmap.SeedMapRenderer;
 import dev.xpple.seedmapper.util.BaritoneIntegration;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
@@ -135,7 +135,7 @@ public class Configs {
     @Config(setter = @Config.Setter("setSeedMapBiomeY"), temporary = true)
     public static int SeedMapBiomeY = 64;
     public static void setSeedMapBiomeY(int seedMapBiomeY) {
-        SeedMapBiomeY = Mth.clamp(seedMapBiomeY & -SeedMapScreen.BIOME_Y_GRANULARITY, SeedMapScreen.MIN_BIOME_Y, SeedMapScreen.MAX_BIOME_Y);
+        SeedMapBiomeY = Mth.clamp(seedMapBiomeY & -SeedMapRenderer.BIOME_Y_GRANULARITY, SeedMapRenderer.MIN_BIOME_Y, SeedMapRenderer.MAX_BIOME_Y);
     }
 
     private static final int MAX_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
@@ -150,7 +150,7 @@ public class Configs {
     public static int PixelsPerBiome = 4;
 
     private static void setPixelsPerBiome(int pixelsPerBiome) {
-        PixelsPerBiome = Math.clamp(pixelsPerBiome, SeedMapScreen.MIN_PIXELS_PER_BIOME, SeedMapScreen.MAX_PIXELS_PER_BIOME);
+        PixelsPerBiome = Math.clamp(pixelsPerBiome, SeedMapRenderer.MIN_PIXELS_PER_BIOME, SeedMapRenderer.MAX_PIXELS_PER_BIOME);
     }
 
     @Config(setter = @Config.Setter("setMinimapOffsetX"))

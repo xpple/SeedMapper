@@ -10,6 +10,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -60,7 +61,7 @@ public class StructureSaltArgument implements ArgumentType<Pair<String, Integer>
 
     private static final class Parser {
         private final StringReader reader;
-        private Consumer<SuggestionsBuilder> suggester;
+        private @Nullable Consumer<SuggestionsBuilder> suggester;
 
         private Parser(StringReader reader) {
             this.reader = reader;

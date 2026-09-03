@@ -23,7 +23,7 @@ import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.CanyonCarverArgument;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
-import dev.xpple.seedmapper.seedmap.SeedMapScreen;
+import dev.xpple.seedmapper.seedmap.SeedMapData;
 import dev.xpple.seedmapper.util.BiomeSeedIdentifier;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
@@ -250,7 +250,7 @@ public class LocateCommand {
 
         BlockPos position = BlockPos.containing(source.getPosition());
 
-        TwoDTree tree = SeedMapScreen.strongholdDataCache.computeIfAbsent(new BiomeSeedIdentifier(seed.seed(), version, generatorFlags), _ -> calculateStrongholds(seed.seed(), version, generatorFlags));
+        TwoDTree tree = SeedMapData.strongholdDataCache.computeIfAbsent(new BiomeSeedIdentifier(seed.seed(), version, generatorFlags), _ -> calculateStrongholds(seed.seed(), version, generatorFlags));
 
         BlockPos pos = tree.nearestTo(position.atY(0));
         assert pos != null;
