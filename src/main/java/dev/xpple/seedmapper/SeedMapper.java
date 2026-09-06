@@ -78,11 +78,10 @@ public class SeedMapper implements ClientModInitializer {
 
     static {
         String libraryName = System.mapLibraryName("cubiomes");
-        ModContainer modContainer = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
         Path tempFile;
         try {
             tempFile = Files.createTempFile(libraryName, "");
-            Files.copy(modContainer.findPath(libraryName).orElseThrow(), tempFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(MOD_CONTAINER.findPath(libraryName).orElseThrow(), tempFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

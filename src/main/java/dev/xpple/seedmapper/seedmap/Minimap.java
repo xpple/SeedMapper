@@ -20,8 +20,8 @@ public class Minimap {
 
     public Minimap(SeedIdentifierWithDimension seedIdentifierWithDimension) {
         BlockPos playerPosition = Minecraft.getInstance().player.blockPosition();
-        Minecraft.getInstance().player.getRotationVector();
-        this.seedMapRenderer = new SeedMapRenderer(seedIdentifierWithDimension, playerPosition, Minecraft.getInstance().player.getRotationVector(), this::horizontalPadding, this::verticalPadding, true);
+        Vec2 playerRotation = Minecraft.getInstance().player.getRotationVector();
+        this.seedMapRenderer = new SeedMapRenderer(seedIdentifierWithDimension, playerPosition, playerRotation, this::horizontalPadding, this::verticalPadding, true);
     }
 
     public void initForOverlay(int contentWidth, int contentHeight) {

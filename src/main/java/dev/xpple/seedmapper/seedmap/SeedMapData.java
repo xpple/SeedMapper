@@ -19,6 +19,7 @@ import dev.xpple.seedmapper.util.BiomeSeedIdentifier;
 import dev.xpple.seedmapper.util.BiomeSeedIdentifierWithDimension;
 import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.RegionPos;
+import dev.xpple.seedmapper.util.RenewableSoftReference;
 import dev.xpple.seedmapper.util.SeedIdentifierWithDimension;
 import dev.xpple.seedmapper.util.TwoDTree;
 import it.unimi.dsi.fastutil.ints.AbstractIntCollection;
@@ -42,7 +43,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import dev.xpple.seedmapper.util.RenewableSoftReference;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;

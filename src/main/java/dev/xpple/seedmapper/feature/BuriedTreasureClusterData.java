@@ -9,6 +9,9 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +33,23 @@ public final class BuriedTreasureClusterData {
         "buried_treasure_formation_10.bin"
     );
 
+    private static final Path DATA_DIRECTORY;
+
+    static {
+        try {
+            DATA_DIRECTORY = Files.createTempDirectory("seedmapper_buried_treasure_data");
+            for (String formation : FORMATIONS) {
+                Path path = SeedMapper.MOD_CONTAINER.findPath("store/" + formation).orElseThrow();
+                Files.copy(path, DATA_DIRECTORY.resolve(formation), StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static Stream<FormationEntry> access(Arena arena) {
         return FORMATIONS.stream()
-            .map(formation -> SeedMapper.MOD_CONTAINER.findPath("store/" + formation).orElseThrow())
+            .map(DATA_DIRECTORY::resolve)
             .map(path -> {
                 try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
                     MemorySegment segment = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size(), arena);
