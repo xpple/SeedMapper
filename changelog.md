@@ -1,10 +1,11 @@
 ## Changelog
-- Fixed `/sm:find` not working outside a development environment.
+- Updated to 26.3. This includes support for the new Dappled Forest biome as well as Abandoned Camp structure and loot.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
 |:----:|:-------:|:------:|:----------:|:----:|:----:|:------------:|
-| 26.2 |   ✔️    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
+| 26.3 |   ✔️    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
+| 26.2 |   ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
 | 26.1 |   ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
 | 1.21 |   ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
 | 1.20 |   ❌    |   ✔️   |     ✔️     |  ✔️  |  ✔️  |      ✔️      |
