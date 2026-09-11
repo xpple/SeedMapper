@@ -77,7 +77,7 @@ public class ChestLootWidget {
         int titleWidth = font.width(title.getVisualOrderText());
         if (mouseX >= minX && mouseX <= minX + titleWidth && mouseY >= minY && mouseY <= minY + font.lineHeight) {
             List<ClientTooltipComponent> tooltips = this.extraChestInfo.get(this.chestIndex);
-            guiGraphicsExtractor.tooltip(font, tooltips, minX - 4 - 12, this.y - tooltips.size() * font.lineHeight - 8 + 12, DefaultTooltipPositioner.INSTANCE, null);
+            guiGraphicsExtractor.tooltip(font, tooltips, minX - 4 - 12, this.y - tooltips.size() * font.lineHeight - 8 + 12, DefaultTooltipPositioner.INSTANCE, null, false);
         }
 
         minY += 12;

@@ -129,6 +129,7 @@ public class BiomeArgument implements ArgumentType<Integer> {
         .put("cherry_grove", Cubiomes.cherry_grove())
         .put("pale_garden", Cubiomes.pale_garden())
         .put("sulfur_caves", Cubiomes.sulfur_caves())
+        .put("dappled_forest", Cubiomes.dappled_forest())
         .build();
     //</editor-fold>
 
