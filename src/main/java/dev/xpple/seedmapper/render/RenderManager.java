@@ -159,7 +159,7 @@ public final class RenderManager {
             float blue = ARGB.blueFloat(color);
 
             if (context.submitNodeCollector().order(0) instanceof SubmitNodeCollection collection) {
-                collection.alwaysOnTop.submit(new CustomFeatureRenderer.Submit(context.poseStack().last().copy(), NoDepthLayer.LINES_NO_DEPTH_LAYER, (pose, buffer) -> {
+                collection.afterTerrain.submit(new CustomFeatureRenderer.Submit(context.poseStack().last().copy(), NoDepthLayer.LINES_NO_DEPTH_LAYER, (pose, buffer) -> {
                     buffer
                         .addVertex(pose, (float) start.x, (float) start.y, (float) start.z)
                         .setColor(red, green, blue, 1.0F)
