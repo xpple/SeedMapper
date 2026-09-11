@@ -359,14 +359,14 @@ public class HighlightCommand {
         int worldMinY, worldMaxY;
         if (source.getDimension() == Cubiomes.DIM_OVERWORLD()) {
             worldMinY = source.getVersion() >= Cubiomes.MC_1_18() ? -64 : 0;
-            worldMaxY = 320;
+            worldMaxY = source.getVersion() >= Cubiomes.MC_1_18() ? 320 : 256;
         } else {
             worldMinY = 0;
             worldMaxY = 128;
         }
         int cellHeight = source.getDimension() == Cubiomes.DIM_END() ? 4 : 8;
         int colYMin = Math.max(0, Math.floorDiv(minY - worldMinY, cellHeight));
-        int colYMax = Math.min(Math.ceilDiv(worldMaxY - worldMinY, cellHeight) , Math.ceilDiv(maxY - worldMinY, cellHeight));
+        int colYMax = Math.min(Math.ceilDiv(worldMaxY - worldMinY, cellHeight), Math.ceilDiv(maxY - worldMinY, cellHeight));
 
         int height = (colYMax - colYMin) * cellHeight;
 

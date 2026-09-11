@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +68,7 @@ public class SeedResolutionArgument implements ArgumentType<SeedResolutionArgume
     private static class Parser {
 
         private final StringReader reader;
-        private Consumer<SuggestionsBuilder> suggestor;
+        private @Nullable Consumer<SuggestionsBuilder> suggestor;
 
         private final List<SeedResolution.Method> methods = new ArrayList<>(Arrays.asList(SeedResolution.Method.values()));
         private final List<SeedResolution.Method> order = new ArrayList<>();
@@ -122,7 +122,6 @@ public class SeedResolutionArgument implements ArgumentType<SeedResolutionArgume
             this.methods = methods;
         }
 
-        @NotNull
         @Override
         public Iterator<Method> iterator() {
             return this.methods.iterator();
@@ -144,7 +143,7 @@ public class SeedResolutionArgument implements ArgumentType<SeedResolutionArgume
             }
 
             @Override
-            public @NotNull String getSerializedName() {
+            public String getSerializedName() {
                 return this.name;
             }
 

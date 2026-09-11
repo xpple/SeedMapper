@@ -3,6 +3,8 @@ package dev.xpple.seedmapper.command.arguments;
 import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Piece;
 import com.github.cubiomes.StructureVariant;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -14,6 +16,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.foreign.MemorySegment;
 import java.util.Arrays;
@@ -31,8 +34,8 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
 
     private static final Collection<String> EXAMPLES = Arrays.asList("village", "end_city[end_ship]", "ruined_portal{giant=true, underground=true}", "fortress[bridge_spawner, corridor_nether_wart]");
 
-    //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> STRUCTURES;">
-    private static final Map<String, Integer> STRUCTURES = ImmutableMap.<String, Integer>builder()
+    //<editor-fold defaultstate="collapsed" desc="public static final BiMap<String, Integer> STRUCTURES;">
+    public static final BiMap<String, Integer> STRUCTURES = ImmutableBiMap.<String, Integer>builder()
         .put("feature", Cubiomes.Feature())
         .put("desert_pyramid", Cubiomes.Desert_Pyramid())
         .put("jungle_pyramid", Cubiomes.Jungle_Pyramid())
@@ -122,7 +125,7 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> GENERAL_VARIANTS;">
-    private static final Map<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> GENERAL_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
+    private static final Map<String, @Nullable Pair<Map<String, Integer>, Function<MemorySegment, Integer>>> GENERAL_VARIANTS = ImmutableMap.<String, Pair<Map<String, Integer>, Function<MemorySegment, Integer>>>builder()
         .put("biome", Pair.of(BiomeArgument.BIOMES, m -> (int) StructureVariant.biome(m)))
         .put("rotation", Pair.of(ImmutableMap.<String, Integer>builder()
             .put("north", 0)
@@ -272,7 +275,7 @@ public class StructurePredicateArgument implements ArgumentType<StructurePredica
     private static final class Parser {
 
         private final StringReader reader;
-        private Consumer<SuggestionsBuilder> suggestor;
+        private @Nullable Consumer<SuggestionsBuilder> suggestor;
 
         private Parser(StringReader reader) {
             this.reader = reader;

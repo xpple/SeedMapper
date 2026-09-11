@@ -4,7 +4,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 
 public record Tile(TilePos pos, DynamicTexture texture) {
 
-    public static final int TEXTURE_SIZE = TilePos.TILE_SIZE_CHUNKS * SeedMapScreen.SCALED_CHUNK_SIZE;
+    public static final int TEXTURE_SIZE = TilePos.TILE_SIZE_CHUNKS * SeedMapData.SCALED_CHUNK_SIZE;
 
     public Tile(TilePos pos, long seed, int dimension) {
         this(pos, initTexture(pos, seed, dimension));

@@ -23,7 +23,8 @@ public class FeatureToggleWidget extends Button {
         if (!Configs.ToggledFeatures.contains(this.feature)) {
             color = ARGB.color(255 >> 1, 255, 255, 255);
         }
-        SeedMapScreen.FeatureWidget.drawFeatureIcon(guiGraphicsExtractor, this.feature.getDefaultTexture(), this.getX(), this.getY(), color);
+        MapFeature.Texture texture = this.feature.getDefaultTexture();
+        SeedMapRenderer.drawIconStatic(guiGraphicsExtractor, texture.identifier(), this.getX(), this.getY(), texture.width(), texture.height(), color);
     }
 
     private static void onButtonPress(Button button) {

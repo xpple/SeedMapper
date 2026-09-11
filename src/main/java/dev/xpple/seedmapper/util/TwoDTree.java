@@ -1,7 +1,6 @@
 package dev.xpple.seedmapper.util;
 
 import net.minecraft.core.BlockPos;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ public class TwoDTree implements Iterable<BlockPos> {
         this.root = this.insert(this.root, pos, true);
     }
 
-    private Node insert(Node node, BlockPos pos, boolean x) {
+    private Node insert(@Nullable Node node, BlockPos pos, boolean x) {
         if (node == null) {
             return new Node(pos);
         }
@@ -59,7 +58,7 @@ public class TwoDTree implements Iterable<BlockPos> {
         this.root = null;
     }
 
-    private Result nearestTo(Node node, BlockPos target, boolean x, BlockPos bestPos, double bestDistanceSqr) {
+    private Result nearestTo(@Nullable Node node, BlockPos target, boolean x, BlockPos bestPos, double bestDistanceSqr) {
         if (node == null) {
             return new Result(bestPos, bestDistanceSqr);
         }
@@ -94,7 +93,7 @@ public class TwoDTree implements Iterable<BlockPos> {
         return bestResult;
     }
 
-    private Node buildBalanced(List<BlockPos> points, boolean x) {
+    private @Nullable Node buildBalanced(List<BlockPos> points, boolean x) {
         if (points.isEmpty()) {
             return null;
         }
@@ -113,7 +112,7 @@ public class TwoDTree implements Iterable<BlockPos> {
     }
 
     @Override
-    public @NonNull Iterator<BlockPos> iterator() {
+    public Iterator<BlockPos> iterator() {
         return new Iterator<>() {
             private final Stack<Node> stack = new Stack<>();
 
@@ -121,7 +120,7 @@ public class TwoDTree implements Iterable<BlockPos> {
                 this.pushLeft(root);
             }
 
-            private void pushLeft(Node node) {
+            private void pushLeft(@Nullable Node node) {
                 while (node != null) {
                     this.stack.push(node);
                     node = node.left;
@@ -147,8 +146,8 @@ public class TwoDTree implements Iterable<BlockPos> {
 
     private static class Node {
         private final BlockPos pos;
-        public Node left;
-        public Node right;
+        public @Nullable Node left;
+        public @Nullable Node right;
 
         public Node(BlockPos pos) {
             this.pos = pos;

@@ -22,11 +22,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.foreign.MemorySegment;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -52,7 +54,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
             String name = Cubiomes.global_id2item_name(item, Cubiomes.MC_NEWEST()).getString(0);
             Identifier identifier = Identifier.parse(name);
             Optional<Item> optionalItem = BuiltInRegistries.ITEM.getOptional(identifier);
-            return optionalItem.orElseThrow();
+            return optionalItem.orElseThrow(() -> new NoSuchElementException("Unknown identifier " + identifier));
         }));
 
     //<editor-fold defaultstate="collapsed" desc="private static final Map<String, Integer> ENCHANTMENTS;">
@@ -190,7 +192,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
 
     private static class Parser {
         private final StringReader reader;
-        private Consumer<SuggestionsBuilder> suggestor;
+        private @Nullable Consumer<SuggestionsBuilder> suggestor;
 
         private Parser(StringReader reader) {
             this.reader = reader;

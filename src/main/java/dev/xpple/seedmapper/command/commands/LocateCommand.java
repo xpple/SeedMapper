@@ -23,13 +23,13 @@ import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.CanyonCarverArgument;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
-import dev.xpple.seedmapper.seedmap.SeedMapScreen;
+import dev.xpple.seedmapper.seedmap.SeedMapData;
+import dev.xpple.seedmapper.util.BiomeSeedIdentifier;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.SpiralSpliterator;
 import dev.xpple.seedmapper.util.TwoDTree;
-import dev.xpple.seedmapper.util.WorldIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
@@ -40,6 +40,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -249,7 +250,7 @@ public class LocateCommand {
 
         BlockPos position = BlockPos.containing(source.getPosition());
 
-        TwoDTree tree = SeedMapScreen.strongholdDataCache.computeIfAbsent(new WorldIdentifier(seed.seed(), dimension, version, generatorFlags), _ -> calculateStrongholds(seed.seed(), dimension, version, generatorFlags));
+        TwoDTree tree = SeedMapData.strongholdDataCache.get().computeIfAbsent(new BiomeSeedIdentifier(seed.seed(), version, generatorFlags), _ -> calculateStrongholds(seed.seed(), version, generatorFlags));
 
         BlockPos pos = tree.nearestTo(position.atY(0));
         assert pos != null;
@@ -288,14 +289,14 @@ public class LocateCommand {
         }
     }
 
-    public static TwoDTree calculateStrongholds(long seed, int dimension, int version, int generatorFlags) {
+    public static TwoDTree calculateStrongholds(long seed, int version, int generatorFlags) {
         TwoDTree tree = new TwoDTree();
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment strongholdIter = StrongholdIter.allocate(arena);
             Cubiomes.initFirstStronghold(arena, strongholdIter, version, seed);
             MemorySegment generator = Generator.allocate(arena);
             Cubiomes.setupGenerator(generator, version, generatorFlags);
-            Cubiomes.applySeed(generator, dimension, seed);
+            Cubiomes.applySeed(generator, Cubiomes.DIM_OVERWORLD(), seed);
 
             final int count = version <= Cubiomes.MC_1_8() ? 3 : 128;
             for (int i = 0; i < count; i++) {
@@ -456,6 +457,7 @@ public class LocateCommand {
                                     }
                                     continue;
                                 }
+                                Cubiomes.set_loot_prng_type(lootTableContext, Cubiomes.JAVA_RANDOM());
                                 Cubiomes.set_loot_seed(lootTableContext, lootSeeds.getAtIndex(Cubiomes.C_LONG_LONG, j));
                                 Cubiomes.generate_loot(lootTableContext);
                                 int lootCount = LootTableContext.generated_item_count(lootTableContext);
@@ -521,7 +523,7 @@ public class LocateCommand {
                 throw CommandExceptions.ORE_VEIN_WRONG_VERSION_EXCEPTION.create();
             }
             ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
-            BlockPos[] pos = {null};
+            @Nullable BlockPos[] pos = {null};
             SpiralLoop.spiral(center.x(), center.z(), 6400, (chunkX, chunkZ) -> {
                 int minX = chunkX << 4;
                 int minZ = chunkZ << 4;

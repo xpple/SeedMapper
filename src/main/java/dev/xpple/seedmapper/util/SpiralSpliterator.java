@@ -4,9 +4,7 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
 
-/**
- * A stateful version of {@link SpiralLoop}.
- */
+/// A stateful version of [SpiralLoop].
 public class SpiralSpliterator extends Spliterators.AbstractSpliterator<SpiralLoop.Coordinate> {
 
     private final int maxX;

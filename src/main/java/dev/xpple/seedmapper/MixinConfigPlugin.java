@@ -1,6 +1,7 @@
 package dev.xpple.seedmapper;
 
 import net.fabricmc.loader.api.FabricLoader;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -24,7 +25,7 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public String getRefMapperConfig() {
+    public @Nullable String getRefMapperConfig() {
         return null;
     }
 
@@ -44,7 +45,7 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public List<String> getMixins() {
+    public @Nullable List<String> getMixins() {
         return null;
     }
 

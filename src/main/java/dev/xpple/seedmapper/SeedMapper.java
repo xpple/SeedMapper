@@ -1,20 +1,27 @@
 package dev.xpple.seedmapper;
 
+import com.github.cubiomes.Cubiomes;
+import com.github.cubiomes.StructureConfig;
+import com.github.cubiomes.StructureConfigProvider;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.BlockArgument;
 import dev.xpple.seedmapper.command.arguments.ColorWrapperArgument;
 import dev.xpple.seedmapper.command.arguments.DurationArgument;
 import dev.xpple.seedmapper.command.arguments.MapFeatureArgument;
 import dev.xpple.seedmapper.command.arguments.SeedIdentifierArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
+import dev.xpple.seedmapper.command.arguments.StructurePredicateArgument;
 import dev.xpple.seedmapper.command.commands.BuildInfoCommand;
 import dev.xpple.seedmapper.command.commands.CheckSeedCommand;
 import dev.xpple.seedmapper.command.commands.ClearCommand;
 import dev.xpple.seedmapper.command.commands.DiscordCommand;
+import dev.xpple.seedmapper.command.commands.FindCommand;
 import dev.xpple.seedmapper.command.commands.HighlightCommand;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.command.commands.MinimapCommand;
@@ -22,6 +29,7 @@ import dev.xpple.seedmapper.command.commands.SampleCommand;
 import dev.xpple.seedmapper.command.commands.SeedMapCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
 import dev.xpple.seedmapper.command.commands.StopTaskCommand;
+import dev.xpple.seedmapper.command.commands.VaultCommand;
 import dev.xpple.seedmapper.config.ColorWrapper;
 import dev.xpple.seedmapper.config.ColorWrapperAdapter;
 import dev.xpple.seedmapper.config.Configs;
@@ -49,6 +57,7 @@ import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.lang.foreign.Arena;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -59,6 +68,7 @@ import java.util.stream.Collectors;
 public class SeedMapper implements ClientModInitializer {
 
     public static final String MOD_ID = "seedmapper";
+    public static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
 
     public static final Path modConfigPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID);
 
@@ -68,11 +78,10 @@ public class SeedMapper implements ClientModInitializer {
 
     static {
         String libraryName = System.mapLibraryName("cubiomes");
-        ModContainer modContainer = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
         Path tempFile;
         try {
             tempFile = Files.createTempFile(libraryName, "");
-            Files.copy(modContainer.findPath(libraryName).orElseThrow(), tempFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(MOD_CONTAINER.findPath(libraryName).orElseThrow(), tempFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -112,6 +121,27 @@ public class SeedMapper implements ClientModInitializer {
             }, Map.Entry::getValue));
         BetterConfigAPI.getInstance().getModConfig(MOD_ID).save();
 
+        CustomClientCommandSource fakeCommandSource = CustomClientCommandSource.makeFakeCommandSource();
+        Cubiomes.setStructureConfigProvider(StructureConfigProvider.allocate((stype, mc, sconf) -> {
+            if (Cubiomes.getStructureConfig_default(stype, mc, sconf) == 0) {
+                return 0;
+            }
+            if (fakeCommandSource == null) {
+                return 1;
+            }
+            Integer salt;
+            try {
+                String structureString = StructurePredicateArgument.STRUCTURES.inverse().get(stype);
+                salt = fakeCommandSource.getSeed().getSecond().customStructureSalts().get(structureString);
+            } catch (CommandSyntaxException _) {
+                return 1;
+            }
+            if (salt != null) {
+                StructureConfig.salt(sconf, salt);
+            }
+            return 1;
+        }, Arena.global()));
+
         SimpleWaypointsAPI.getInstance().registerCommandAlias("sm:waypoint");
 
         SeedDatabaseHelper.fetchSeeds();
@@ -150,5 +180,7 @@ public class SeedMapper implements ClientModInitializer {
         DiscordCommand.register(dispatcher);
         SampleCommand.register(dispatcher);
         MinimapCommand.register(dispatcher);
+        VaultCommand.register(dispatcher);
+        FindCommand.register(dispatcher);
     }
 }

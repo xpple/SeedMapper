@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.concurrent.ExecutorService;
@@ -25,7 +26,7 @@ public final class LocatorThreadHelper {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final ExecutorService locatingExecutor = Executors.newCachedThreadPool();
-    private static Future<Integer> currentTask = null;
+    private static @Nullable Future<Integer> currentTask = null;
 
     public static final Component STOP_TASK_COMPONENT = run(hover(format(Component.translatable("commands.exceptions.alreadyBusyLocating.stopTask"), ChatFormatting.UNDERLINE), base(Component.translatable("commands.exceptions.alreadyBusyLocating.clickToStop"))), LocatorThreadHelper::stop);
 

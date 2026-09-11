@@ -12,7 +12,7 @@ import dev.xpple.seedmapper.command.arguments.BlockArgument;
 import dev.xpple.seedmapper.command.arguments.SeedResolutionArgument;
 import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.seedmap.MapFeature;
-import dev.xpple.seedmapper.seedmap.SeedMapScreen;
+import dev.xpple.seedmapper.seedmap.SeedMapRenderer;
 import dev.xpple.seedmapper.util.BaritoneIntegration;
 import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
@@ -24,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.material.MapColor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.EnumSet;
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "CanBeFinal"})
 public class Configs {
     public static final Supplier<ModConfig<Component>> CONFIG_REF = Suppliers.memoize(() -> BetterConfigAPI.getInstance().getModConfig(SeedMapper.MOD_ID));
 
@@ -45,7 +46,7 @@ public class Configs {
     }
 
     @Config(chatRepresentation = "displaySeed")
-    public static SeedIdentifier Seed = null;
+    public static @Nullable SeedIdentifier Seed = null;
     private static Component displaySeed() {
         return ComponentUtils.formatSeed(Seed);
     }
@@ -134,7 +135,7 @@ public class Configs {
     @Config(setter = @Config.Setter("setSeedMapBiomeY"), temporary = true)
     public static int SeedMapBiomeY = 64;
     public static void setSeedMapBiomeY(int seedMapBiomeY) {
-        SeedMapBiomeY = Mth.clamp(seedMapBiomeY & -SeedMapScreen.BIOME_Y_GRANULARITY, SeedMapScreen.MIN_BIOME_Y, SeedMapScreen.MAX_BIOME_Y);
+        SeedMapBiomeY = Mth.clamp(seedMapBiomeY & -SeedMapRenderer.BIOME_Y_GRANULARITY, SeedMapRenderer.MIN_BIOME_Y, SeedMapRenderer.MAX_BIOME_Y);
     }
 
     private static final int MAX_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
@@ -149,7 +150,7 @@ public class Configs {
     public static int PixelsPerBiome = 4;
 
     private static void setPixelsPerBiome(int pixelsPerBiome) {
-        PixelsPerBiome = Math.clamp(pixelsPerBiome, SeedMapScreen.MIN_PIXELS_PER_BIOME, SeedMapScreen.MAX_PIXELS_PER_BIOME);
+        PixelsPerBiome = Math.clamp(pixelsPerBiome, SeedMapRenderer.MIN_PIXELS_PER_BIOME, SeedMapRenderer.MAX_PIXELS_PER_BIOME);
     }
 
     @Config(setter = @Config.Setter("setMinimapOffsetX"))
@@ -219,5 +220,11 @@ public class Configs {
         if (!newValue) {
             BaritoneIntegration.clearGoals();
         }
+    }
+
+    @Config(setter = @Config.Setter("setMaxVaultAttempts"))
+    public static int MaxVaultAttempts = 10_000;
+    private static void setMaxVaultAttempts(int maxVaultAttempts) {
+        MaxVaultAttempts = Math.clamp(maxVaultAttempts, 0, 1_000_000);
     }
 }
