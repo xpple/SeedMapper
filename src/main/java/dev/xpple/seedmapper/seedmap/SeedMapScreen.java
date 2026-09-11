@@ -232,14 +232,10 @@ public class SeedMapScreen extends Screen {
         }
 
         if (!minecraft.hasControlDown()) {
-            return this.zoomMap(mouseX, mouseY, scrollX, scrollY);
+            return this.zoomMap(Math.signum(scrollY));
         }
 
         return this.changeBiomeY(mouseX, mouseY, scrollX, scrollY);
-    }
-
-    private boolean zoomMap(double mouseX, double mouseY, double scrollX, double scrollY) {
-        return this.zoomMap(Math.signum(scrollY));
     }
 
     public void pinchUpdated(float scale) {
