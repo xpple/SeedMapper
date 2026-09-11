@@ -239,8 +239,19 @@ public class SeedMapScreen extends Screen {
     }
 
     private boolean zoomMap(double mouseX, double mouseY, double scrollX, double scrollY) {
+        return this.zoomMap(Math.signum(scrollY));
+    }
+
+    public void pinchUpdated(float scale) {
+        if (scale != 1.0f) {
+            // a bit buggy but it works
+            this.zoomMap(Math.signum(scale - 1.0f));
+        }
+    }
+
+    private boolean zoomMap(double direction) {
         float currentScroll = Mth.clamp((float) Configs.PixelsPerBiome / SeedMapRenderer.MAX_PIXELS_PER_BIOME, 0.0F, 1.0F);
-        currentScroll = Mth.clamp(currentScroll - (float) (-scrollY / SeedMapRenderer.MAX_PIXELS_PER_BIOME), 0.0F, 1.0F);
+        currentScroll = Mth.clamp(currentScroll - (float) (-direction / SeedMapRenderer.MAX_PIXELS_PER_BIOME), 0.0F, 1.0F);
 
         Configs.PixelsPerBiome = Math.max((int) (currentScroll * SeedMapRenderer.MAX_PIXELS_PER_BIOME + 0.5), SeedMapRenderer.MIN_PIXELS_PER_BIOME);
 
@@ -305,6 +316,8 @@ public class SeedMapScreen extends Screen {
         }
         return false;
     }
+
+
 
     private boolean handleMapFeatureLeftClicked(MouseButtonEvent mouseButtonEvent, boolean doubleClick) {
         int button = mouseButtonEvent.button();
