@@ -18,6 +18,10 @@ loom {
     accessWidenerPath = file('src/main/resources/seedmapper.aw')
 }
 
+loom.runs.configureEach {
+    jvmArguments.add("-enableassertions")
+}
+
 repositories {
     mavenCentral()
     maven {

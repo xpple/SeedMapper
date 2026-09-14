@@ -146,11 +146,11 @@ public class Configs {
         SeedMapThreads = Math.clamp(seedMapThreads, 1, MAX_THREADS);
     }
 
-    @Config(setter = @Config.Setter("setPixelsPerBiome"))
-    public static int PixelsPerBiome = 4;
+    @Config(setter = @Config.Setter("setBlocksPerPixel"))
+    public static float BlocksPerPixel = 4;
 
-    private static void setPixelsPerBiome(int pixelsPerBiome) {
-        PixelsPerBiome = Math.clamp(pixelsPerBiome, SeedMapRenderer.MIN_PIXELS_PER_BIOME, SeedMapRenderer.MAX_PIXELS_PER_BIOME);
+    private static void setBlocksPerPixel(float blocksPerPixel) {
+        BlocksPerPixel = Math.clamp(blocksPerPixel, SeedMapRenderer.MIN_BLOCKS_PER_PIXEL, SeedMapRenderer.MAX_BLOCKS_PER_PIXEL);
     }
 
     @Config(setter = @Config.Setter("setMinimapOffsetX"))

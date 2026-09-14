@@ -67,7 +67,9 @@ public class Minimap {
             pose.rotate((float) (-Math.toRadians(this.seedMapRenderer.getPlayerRotation().y) + Math.PI));
             pose.translate(-this.seedMapRenderer.centerX, -this.seedMapRenderer.centerY);
         }
-        this.seedMapRenderer.renderBiomes(guiGraphicsExtractor, Integer.MIN_VALUE, Integer.MIN_VALUE, partialTick);
+        this.seedMapRenderer.renderBiomes(guiGraphicsExtractor);
+        guiGraphicsExtractor.nextStratum();
+        this.seedMapRenderer.renderSlimeChunks(guiGraphicsExtractor);
         guiGraphicsExtractor.nextStratum();
         this.seedMapRenderer.renderFeatures(guiGraphicsExtractor, Integer.MIN_VALUE, Integer.MIN_VALUE, partialTick);
         guiGraphicsExtractor.nextStratum();

@@ -29,11 +29,12 @@ public record RegionPos(int x, int z, int regionSizeChunks) {
     }
 
     public static RegionPos fromTilePos(TilePos tilePos, int regionSize) {
-        return new RegionPos(Mth.floorDiv(TilePos.TILE_SIZE_CHUNKS * tilePos.x(), regionSize), Mth.floorDiv(TilePos.TILE_SIZE_CHUNKS * tilePos.z(), regionSize), regionSize);
+        int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale());
+        return new RegionPos(Math.floorDiv(chunksPerTile * tilePos.x(), regionSize), Math.floorDiv(chunksPerTile * tilePos.z(), regionSize), regionSize);
     }
 
     public RegionPos add(RegionPos regionPos) {
-        checkRegionSize(regionPos.regionSizeChunks);
+        assert this.regionSizeChunks == regionPos.regionSizeChunks;
         return this.add(regionPos.x, regionPos.z);
     }
 
@@ -42,13 +43,7 @@ public record RegionPos(int x, int z, int regionSizeChunks) {
     }
 
     public RegionPos subtract(RegionPos regionPos) {
-        checkRegionSize(regionPos.regionSizeChunks);
+        assert this.regionSizeChunks == regionPos.regionSizeChunks;
         return this.add(-regionPos.x, -regionPos.z);
-    }
-
-    private void checkRegionSize(int regionSizeChunks) {
-        if (this.regionSizeChunks != regionSizeChunks) {
-            throw new IllegalArgumentException("Region sizes must match (expected %d , got %d)".formatted(this.regionSizeChunks, regionSizeChunks));
-        }
     }
 }
