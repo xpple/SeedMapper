@@ -95,8 +95,8 @@ public class SeedMapRenderer {
 
     private static final Identifier DIRECTION_ARROW_TEXTURE = Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/arrow.png");
 
-    private static final Identifier BIOMES_LOADING_TEXTURE_IDENTIFIER = Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/seedmap_loading.png");
-    private static final AbstractTexture BIOMES_LOADING_TEXTURE = Minecraft.getInstance().getTextureManager().getTexture(BIOMES_LOADING_TEXTURE_IDENTIFIER);
+    private static final Identifier SEED_MAP_LOADING_TEXTURE_IDENTIFIER = Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/seed_map_loading.png");
+    private static final AbstractTexture SEED_MAP_LOADING_TEXTURE = Minecraft.getInstance().getTextureManager().getTexture(SEED_MAP_LOADING_TEXTURE_IDENTIFIER);
 
     private static final Minecraft minecraft = Minecraft.getInstance();
 
@@ -174,7 +174,7 @@ public class SeedMapRenderer {
                 if (biomeData != null) {
                     tile = this.biomeTileCache.computeIfAbsent(pair, _ -> this.createBiomeTile(tilePos, biomeData));
                 } else {
-                    tile = new Tile(tilePos, BIOMES_LOADING_TEXTURE);
+                    tile = new Tile(tilePos, SEED_MAP_LOADING_TEXTURE);
                 }
                 this.drawTile(guiGraphicsExtractor, tile);
             }
