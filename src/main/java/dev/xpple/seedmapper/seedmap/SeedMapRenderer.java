@@ -355,11 +355,16 @@ public class SeedMapRenderer {
     private void drawTile(GuiGraphicsExtractor guiGraphicsExtractor, Tile tile) {
         TilePos tilePos = tile.pos();
         QuartPos2f relTileQuart = QuartPos2f.fromQuartPos(QuartPos2.fromTilePos(tilePos)).subtract(this.centerQuart);
-        int tileSizePixels = Mth.ceil((TilePos.SIZE_PIXELS * tilePos.biomeScale().val) / Configs.BlocksPerPixel);
-        int minX = this.centerX + Mth.floor((relTileQuart.x() * 4f) / Configs.BlocksPerPixel);
-        int minY = this.centerY + Mth.floor((relTileQuart.z() * 4f) / Configs.BlocksPerPixel);
-        int maxX = minX + tileSizePixels;
-        int maxY = minY + tileSizePixels;
+        float tileSizePixels = (TilePos.SIZE_PIXELS * tilePos.biomeScale().val) / Configs.BlocksPerPixel;
+        float minXFloat = this.centerX + (relTileQuart.x() * 4f) / Configs.BlocksPerPixel;
+        float minYFloat = this.centerY + (relTileQuart.z() * 4f) / Configs.BlocksPerPixel;
+        float maxXFloat = minXFloat + tileSizePixels;
+        float maxYFloat = minYFloat + tileSizePixels;
+        // round at the very last moment to avoid overlapping/gaps
+        int minX = Mth.floor(minXFloat);
+        int minY = Mth.floor(minYFloat);
+        int maxX = Mth.floor(maxXFloat);
+        int maxY = Mth.floor(maxYFloat);
 
         if (maxX < this.horizontalPadding.getAsInt() || minX > this.horizontalPadding.getAsInt() + this.seedMapWidth) {
             return;
