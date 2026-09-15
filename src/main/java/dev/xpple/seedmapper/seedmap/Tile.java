@@ -1,8 +1,9 @@
 package dev.xpple.seedmapper.seedmap;
 
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 
-public record Tile(TilePos pos, DynamicTexture texture) {
+public record Tile(TilePos pos, AbstractTexture texture) {
 
     public Tile(TilePos pos, long seed, int dimension) {
         this(pos, initTexture(pos, seed, dimension));

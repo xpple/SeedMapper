@@ -327,7 +327,7 @@ public class SeedMapScreen extends Screen {
         if (button != InputConstants.MOUSE_BUTTON_LEFT) {
             return false;
         }
-        if (SeedMapRenderer.getBiomeScale() > SeedMapData.DEFAULT_BIOME_SCALE) {
+        if (!SeedMapRenderer.shouldRenderFeatures(SeedMapRenderer.getBiomeScale())) {
             return false;
         }
         double mouseX = mouseButtonEvent.x();

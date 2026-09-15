@@ -54,7 +54,7 @@ import java.util.function.ToIntBiFunction;
 import java.util.stream.IntStream;
 
 public class SeedMapData {
-    public static final int DEFAULT_BIOME_SCALE = 4;
+    public static final BiomeScale DEFAULT_BIOME_SCALE = BiomeScale.SCALE_4;
 
     private static final RenewableSoftReference<Object2ObjectMap<BiomeSeedIdentifierWithDimension, ConcurrentHashMap<ObjectIntPair<TilePos>, int[]>>> biomeDataCache = new RenewableSoftReference<>(Object2ObjectOpenHashMap::new);
     private static final RenewableSoftReference<Object2ObjectMap<SeedIdentifierWithDimension, Object2ObjectMap<ChunkPos, ChunkStructureData>>> structureDataCache = new RenewableSoftReference<>(Object2ObjectOpenHashMap::new);
@@ -198,12 +198,12 @@ public class SeedMapData {
         // temporary arena so that everything will be deallocated after the biomes are calculated
         try (Arena tempArena = Arena.ofConfined()) {
             MemorySegment range = Range.allocate(tempArena);
-            Range.scale(range, tilePos.biomeScale());
-            Range.x(range, Math.floorDiv(blockPos.getX(), tilePos.biomeScale()));
-            Range.z(range, Math.floorDiv(blockPos.getZ(), tilePos.biomeScale()));
+            Range.scale(range, tilePos.biomeScale().val);
+            Range.x(range, Math.floorDiv(blockPos.getX(), tilePos.biomeScale().val));
+            Range.z(range, Math.floorDiv(blockPos.getZ(), tilePos.biomeScale().val));
             Range.sx(range, rangeSize);
             Range.sz(range, rangeSize);
-            int scaleY = tilePos.biomeScale() == 1 ? 1 : 4;
+            int scaleY = tilePos.biomeScale() == BiomeScale.SCALE_1 ? 1 : 4;
             Range.y(range, Math.floorDiv(seedMapBiomeY, scaleY));
             Range.sy(range, 1);
 
@@ -218,9 +218,9 @@ public class SeedMapData {
     }
 
     private BitSet calculateSlimeChunkData(TilePos tilePos) {
-        assert tilePos.biomeScale() <= SeedMapData.DEFAULT_BIOME_SCALE;
+        assert SeedMapRenderer.shouldRenderSlimeChunks(tilePos.biomeScale());
 
-        int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale());
+        int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale().val);
         BitSet slimeChunks = new BitSet(chunksPerTile * chunksPerTile);
         ChunkPos chunkPos = tilePos.toChunkPos();
         for (int relChunkX = 0; relChunkX < chunksPerTile; relChunkX++) {
@@ -249,10 +249,10 @@ public class SeedMapData {
     }
 
     private @Nullable OreVeinData calculateOreVein(TilePos tilePos) {
-        assert tilePos.biomeScale() <= SeedMapData.DEFAULT_BIOME_SCALE;
+        assert SeedMapRenderer.shouldRenderFeatures(tilePos.biomeScale());
 
         ChunkPos chunkPos = tilePos.toChunkPos();
-        int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale());
+        int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale().val);
         for (int relChunkX = 0; relChunkX < chunksPerTile; relChunkX++) {
             for (int relChunkZ = 0; relChunkZ < chunksPerTile; relChunkZ++) {
                 int minBlockX = SectionPos.sectionToBlockCoord(chunkPos.x() + relChunkZ);
@@ -282,7 +282,7 @@ public class SeedMapData {
     }
 
     private BitSet calculateCanyonData(TilePos tilePos) {
-        assert tilePos.biomeScale() <= SeedMapData.DEFAULT_BIOME_SCALE;
+        assert SeedMapRenderer.shouldRenderFeatures(tilePos.biomeScale());
 
         ToIntBiFunction<Integer, Integer> biomeFunction;
         if (this.version <= Cubiomes.MC_1_17()) {
@@ -292,7 +292,7 @@ public class SeedMapData {
         }
         try (Arena tempArena = Arena.ofConfined()) {
             ChunkPos chunkPos = tilePos.toChunkPos();
-            int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale());
+            int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale().val);
             BitSet canyons = new BitSet(chunksPerTile * chunksPerTile);
             MemorySegment rnd = tempArena.allocate(Cubiomes.C_LONG_LONG);
             for (int relChunkX = 0; relChunkX < chunksPerTile; relChunkX++) {
@@ -327,7 +327,7 @@ public class SeedMapData {
         return 64;
     }
 
-    public OptionalInt getBiome(QuartPos2 pos, int biomeScale) {
+    public OptionalInt getBiome(QuartPos2 pos, BiomeScale biomeScale) {
         TilePos tilePos = TilePos.fromQuartPos(pos, biomeScale);
         ObjectIntPair<TilePos> pair = ObjectIntPair.of(tilePos, this.getBiomeYHeight());
         int[] biomeCache = this.biomeCache.get(pair);
@@ -336,7 +336,7 @@ public class SeedMapData {
         }
         QuartPos2 quartPos = QuartPos2.fromTilePos(tilePos);
         QuartPos2 relQuartPos = pos.subtract(quartPos);
-        int quartsPerTile = QuartPos.fromBlock(TilePos.SIZE_PIXELS * tilePos.biomeScale());
+        int quartsPerTile = QuartPos.fromBlock(TilePos.SIZE_PIXELS * tilePos.biomeScale().val);
         int cacheX = Math.floorDiv(relQuartPos.x() * TilePos.SIZE_PIXELS, quartsPerTile);
         int cacheZ = Math.floorDiv(relQuartPos.z() * TilePos.SIZE_PIXELS, quartsPerTile);
         return OptionalInt.of(biomeCache[cacheZ * TilePos.SIZE_PIXELS + cacheX]);

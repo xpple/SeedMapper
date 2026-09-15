@@ -29,7 +29,7 @@ public record RegionPos(int x, int z, int regionSizeChunks) {
     }
 
     public static RegionPos fromTilePos(TilePos tilePos, int regionSize) {
-        int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale());
+        int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale().val);
         return new RegionPos(Math.floorDiv(chunksPerTile * tilePos.x(), regionSize), Math.floorDiv(chunksPerTile * tilePos.z(), regionSize), regionSize);
     }
 

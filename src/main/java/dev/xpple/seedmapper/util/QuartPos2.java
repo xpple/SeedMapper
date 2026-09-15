@@ -28,7 +28,7 @@ public record QuartPos2(int x, int z) {
     }
 
     public static QuartPos2 fromTilePos(TilePos tilePos) {
-        int quartsPerTile = QuartPos.fromBlock(TilePos.SIZE_PIXELS * tilePos.biomeScale());
+        int quartsPerTile = QuartPos.fromBlock(TilePos.SIZE_PIXELS * tilePos.biomeScale().val);
         return new QuartPos2(quartsPerTile * tilePos.x(), quartsPerTile * tilePos.z());
     }
 

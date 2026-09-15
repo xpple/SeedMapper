@@ -6,31 +6,30 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 
-// biome scale should be 1, 4, 16, 64 or 256
-public record TilePos(int x, int z, int biomeScale) {
+public record TilePos(int x, int z, BiomeScale biomeScale) {
     /// Represents {@value} blocks at biome scale `1`.
     public static final int SIZE_PIXELS = 256;
 
-    public static TilePos fromBlockPos(BlockPos blockPos, int biomeScale) {
-        int blocksPerTile = SIZE_PIXELS * biomeScale;
+    public static TilePos fromBlockPos(BlockPos blockPos, BiomeScale biomeScale) {
+        int blocksPerTile = SIZE_PIXELS * biomeScale.val;
         return new TilePos(Math.floorDiv(blockPos.getX(), blocksPerTile), Math.floorDiv(blockPos.getZ(), blocksPerTile), biomeScale);
     }
 
     public BlockPos toBlockPos() {
-        int blocksPerTile = SIZE_PIXELS * this.biomeScale;
+        int blocksPerTile = SIZE_PIXELS * this.biomeScale.val;
         return new BlockPos(blocksPerTile * this.x, 0, blocksPerTile * this.z);
     }
 
-    public static TilePos fromQuartPos(QuartPos2 quartPos, int biomeScale) {
-        return new TilePos(Math.floorDiv(QuartPos.toBlock(quartPos.x()), SIZE_PIXELS * biomeScale), Math.floorDiv(QuartPos.toBlock(quartPos.z()), SIZE_PIXELS * biomeScale), biomeScale);
+    public static TilePos fromQuartPos(QuartPos2 quartPos, BiomeScale biomeScale) {
+        return new TilePos(Math.floorDiv(QuartPos.toBlock(quartPos.x()), SIZE_PIXELS * biomeScale.val), Math.floorDiv(QuartPos.toBlock(quartPos.z()), SIZE_PIXELS * biomeScale.val), biomeScale);
     }
 
-    public static TilePos fromChunkPos(ChunkPos chunkPos, int biomeScale) {
-        return new TilePos(Math.floorDiv(SectionPos.sectionToBlockCoord(chunkPos.x()), SIZE_PIXELS * biomeScale), Math.floorDiv(SectionPos.sectionToBlockCoord(chunkPos.z()), SIZE_PIXELS * biomeScale), biomeScale);
+    public static TilePos fromChunkPos(ChunkPos chunkPos, BiomeScale biomeScale) {
+        return new TilePos(Math.floorDiv(SectionPos.sectionToBlockCoord(chunkPos.x()), SIZE_PIXELS * biomeScale.val), Math.floorDiv(SectionPos.sectionToBlockCoord(chunkPos.z()), SIZE_PIXELS * biomeScale.val), biomeScale);
     }
 
     public ChunkPos toChunkPos() {
-        int chunksPerTile = SectionPos.blockToSectionCoord(SIZE_PIXELS * this.biomeScale);
+        int chunksPerTile = SectionPos.blockToSectionCoord(SIZE_PIXELS * this.biomeScale.val);
         return new ChunkPos(this.x * chunksPerTile, this.z * chunksPerTile);
     }
 
