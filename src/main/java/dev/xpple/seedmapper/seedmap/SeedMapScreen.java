@@ -140,7 +140,7 @@ public class SeedMapScreen extends Screen {
 
         // draw hovered coordinates and biome
         MutableComponent coordinates = accent("x: %d, y: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), this.seedMapRenderer.getSeedMapData().getBiomeYHeight(), QuartPos.toBlock(this.mouseQuart.z())));
-        OptionalInt optionalBiome = this.seedMapRenderer.getSeedMapData().getBiome(this.mouseQuart);
+        OptionalInt optionalBiome = this.seedMapRenderer.getSeedMapData().getBiome(this.mouseQuart, SeedMapRenderer.getBiomeScale());
         if (optionalBiome.isPresent()) {
             coordinates = coordinates.append(" [%s]".formatted(Cubiomes.biome2str(seedIdentifierWithDimension.version(), optionalBiome.getAsInt()).getString(0)));
         }
@@ -352,7 +352,7 @@ public class SeedMapScreen extends Screen {
             return;
         }
         BlockPos pos = widget.featureLocation();
-        OptionalInt optionalBiome = this.seedMapRenderer.getSeedMapData().getBiome(QuartPos2.fromBlockPos(pos));
+        OptionalInt optionalBiome = this.seedMapRenderer.getSeedMapData().getBiome(QuartPos2.fromBlockPos(pos), SeedMapData.DEFAULT_BIOME_SCALE);
         if (optionalBiome.isEmpty()) {
             return;
         }

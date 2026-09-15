@@ -238,7 +238,7 @@ public class SeedMapData {
         }
 
         BlockPos pos = new BlockPos(Pos.x(structurePos), 0, Pos.z(structurePos));
-        OptionalInt optionalBiome = getBiome(QuartPos2.fromBlockPos(pos));
+        OptionalInt optionalBiome = getBiome(QuartPos2.fromBlockPos(pos), SeedMapData.DEFAULT_BIOME_SCALE);
         MapFeature.Texture texture;
         if (optionalBiome.isEmpty()) {
             texture = feature.getDefaultTexture();
@@ -286,7 +286,7 @@ public class SeedMapData {
 
         ToIntBiFunction<Integer, Integer> biomeFunction;
         if (this.version <= Cubiomes.MC_1_17()) {
-            biomeFunction = (chunkX, chunkZ) -> getBiome(new QuartPos2(QuartPos.fromSection(chunkX), QuartPos.fromSection(chunkZ))).orElseGet(() -> Cubiomes.getBiomeAt(this.biomeGenerator, 4, chunkX << 2, 0, chunkZ << 2));
+            biomeFunction = (chunkX, chunkZ) -> getBiome(new QuartPos2(QuartPos.fromSection(chunkX), QuartPos.fromSection(chunkZ)), SeedMapData.DEFAULT_BIOME_SCALE).orElseGet(() -> Cubiomes.getBiomeAt(this.biomeGenerator, 4, chunkX << 2, 0, chunkZ << 2));
         } else {
             biomeFunction = (_, _) -> -1;
         }
@@ -327,8 +327,8 @@ public class SeedMapData {
         return 64;
     }
 
-    public OptionalInt getBiome(QuartPos2 pos) {
-        TilePos tilePos = TilePos.fromQuartPos(pos, DEFAULT_BIOME_SCALE);
+    public OptionalInt getBiome(QuartPos2 pos, int biomeScale) {
+        TilePos tilePos = TilePos.fromQuartPos(pos, biomeScale);
         ObjectIntPair<TilePos> pair = ObjectIntPair.of(tilePos, this.getBiomeYHeight());
         int[] biomeCache = this.biomeCache.get(pair);
         if (biomeCache == null) {
@@ -336,7 +336,10 @@ public class SeedMapData {
         }
         QuartPos2 quartPos = QuartPos2.fromTilePos(tilePos);
         QuartPos2 relQuartPos = pos.subtract(quartPos);
-        return OptionalInt.of(biomeCache[relQuartPos.x() + relQuartPos.z() * TilePos.SIZE_PIXELS]);
+        int quartsPerTile = QuartPos.fromBlock(TilePos.SIZE_PIXELS * tilePos.biomeScale());
+        int cacheX = Math.floorDiv(relQuartPos.x() * TilePos.SIZE_PIXELS, quartsPerTile);
+        int cacheZ = Math.floorDiv(relQuartPos.z() * TilePos.SIZE_PIXELS, quartsPerTile);
+        return OptionalInt.of(biomeCache[cacheZ * TilePos.SIZE_PIXELS + cacheX]);
     }
 
     private BlockPos calculateSpawnData() {
