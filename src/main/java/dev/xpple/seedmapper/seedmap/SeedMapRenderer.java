@@ -474,17 +474,17 @@ public class SeedMapRenderer {
         }
         PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, minecraft.player.getSkin(), playerMinX, playerMinY, 20);
 
-        this.drawDirectionArrow(guiGraphicsExtractor, playerMinX, playerMinY);
+        this.drawDirectionArrow(guiGraphicsExtractor, playerMinX, playerMinY, -30);
     }
 
-    public void drawDirectionArrow(GuiGraphicsExtractor guiGraphicsExtractor, int playerMinX, int playerMinY) {
+    public void drawDirectionArrow(GuiGraphicsExtractor guiGraphicsExtractor, int playerMinX, int playerMinY, int verticalOffset) {
         guiGraphicsExtractor.pose().pushMatrix();
         Matrix3x2f transform = guiGraphicsExtractor.pose() // transformations are applied in reverse order
             .translate(10, 10)
             .translate(playerMinX, playerMinY)
             .rotate((float) (Math.toRadians(this.playerRotation.y) + Math.PI))
             .translate(-10, -10)
-            .translate(0, -30)
+            .translate(0, verticalOffset)
             ;
         boolean withinBounds = Stream.of(new Vector2f(20, 0), new Vector2f(20, 20), new Vector2f(0, 20), new Vector2f(0, 0))
             .map(transform::transformPosition)
