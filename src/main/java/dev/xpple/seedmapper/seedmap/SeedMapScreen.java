@@ -123,7 +123,9 @@ public class SeedMapScreen extends Screen {
         Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(seedIdentifierWithDimension.seed())), Cubiomes.mc2str(seedIdentifierWithDimension.version()).getString(0), ComponentUtils.formatGeneratorFlags(seedIdentifierWithDimension.generatorFlags()));
         guiGraphicsExtractor.text(this.font, seedComponent, this.horizontalPadding(), this.verticalPadding() - this.font.lineHeight - 1, -1);
 
-        this.seedMapRenderer.renderBiomes(guiGraphicsExtractor, mouseX, mouseY, partialTick);
+        this.seedMapRenderer.renderBiomes(guiGraphicsExtractor);
+        guiGraphicsExtractor.nextStratum();
+        this.seedMapRenderer.renderSlimeChunks(guiGraphicsExtractor);
         guiGraphicsExtractor.nextStratum();
         this.seedMapRenderer.renderFeatures(guiGraphicsExtractor, mouseX, mouseY, partialTick);
         guiGraphicsExtractor.nextStratum();
@@ -138,7 +140,7 @@ public class SeedMapScreen extends Screen {
 
         // draw hovered coordinates and biome
         MutableComponent coordinates = accent("x: %d, y: %d, z: %d".formatted(QuartPos.toBlock(this.mouseQuart.x()), this.seedMapRenderer.getSeedMapData().getBiomeYHeight(), QuartPos.toBlock(this.mouseQuart.z())));
-        OptionalInt optionalBiome = this.seedMapRenderer.getSeedMapData().getBiome(this.mouseQuart);
+        OptionalInt optionalBiome = this.seedMapRenderer.getSeedMapData().getBiome(this.mouseQuart, SeedMapRenderer.getBiomeScale());
         if (optionalBiome.isPresent()) {
             coordinates = coordinates.append(" [%s]".formatted(Cubiomes.biome2str(seedIdentifierWithDimension.version(), optionalBiome.getAsInt()).getString(0)));
         }
@@ -219,8 +221,8 @@ public class SeedMapScreen extends Screen {
             return;
         }
 
-        int relXQuart = (int) ((mouseX - this.seedMapRenderer.centerX) / Configs.PixelsPerBiome);
-        int relZQuart = (int) ((mouseY - this.seedMapRenderer.centerY) / Configs.PixelsPerBiome);
+        int relXQuart = (int) (((mouseX - this.seedMapRenderer.centerX) * Configs.BlocksPerPixel) / 4f);
+        int relZQuart = (int) (((mouseY - this.seedMapRenderer.centerY) * Configs.BlocksPerPixel) / 4f);
 
         this.mouseQuart = QuartPos2.fromQuartPos2f(this.seedMapRenderer.getCenterQuart().add(relXQuart, relZQuart));
     }
@@ -231,25 +233,29 @@ public class SeedMapScreen extends Screen {
             return true;
         }
 
-        if (!minecraft.hasControlDown()) {
-            return this.zoomMap(Math.signum(scrollY));
+        if (this.changeBiomeY(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
         }
 
-        return this.changeBiomeY(mouseX, mouseY, scrollX, scrollY);
+        return this.zoomMap(Mth.sign(scrollY));
     }
 
     public void pinchUpdated(float scale) {
         if (scale != 1.0f) {
             // a bit buggy but it works
-            this.zoomMap(Math.signum(scale - 1.0f));
+            this.zoomMap(Mth.sign(scale - 1.0f));
         }
     }
 
-    private boolean zoomMap(double direction) {
-        float currentScroll = Mth.clamp((float) Configs.PixelsPerBiome / SeedMapRenderer.MAX_PIXELS_PER_BIOME, 0.0F, 1.0F);
-        currentScroll = Mth.clamp(currentScroll - (float) (-direction / SeedMapRenderer.MAX_PIXELS_PER_BIOME), 0.0F, 1.0F);
+    private boolean zoomMap(int direction) {
+        // multiplicative zoom, this gives constant percentage changes
+        float currentZoom = Mth.inverseLerp((float) Math.log(Configs.BlocksPerPixel), (float) Math.log(SeedMapRenderer.MIN_BLOCKS_PER_PIXEL), (float) Math.log(SeedMapRenderer.MAX_BLOCKS_PER_PIXEL));
+        currentZoom = Mth.clamp(currentZoom, 0.0F, 1.0F);
 
-        Configs.PixelsPerBiome = Math.max((int) (currentScroll * SeedMapRenderer.MAX_PIXELS_PER_BIOME + 0.5), SeedMapRenderer.MIN_PIXELS_PER_BIOME);
+        float newZoom = currentZoom - direction / 64.0F;
+        newZoom = Mth.clamp(newZoom, 0.0F, 1.0F);
+
+        Configs.BlocksPerPixel = (float) Math.exp(Mth.lerp(newZoom, Math.log(SeedMapRenderer.MIN_BLOCKS_PER_PIXEL), Math.log(SeedMapRenderer.MAX_BLOCKS_PER_PIXEL)));
 
         this.seedMapRenderer.updateFeatureWidgets();
 
@@ -260,6 +266,9 @@ public class SeedMapScreen extends Screen {
     }
 
     private boolean changeBiomeY(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (!minecraft.hasControlDown()) {
+            return false;
+        }
         SeedIdentifierWithDimension seedIdentifierWithDimension = this.seedMapRenderer.getSeedMapData().getSeedIdentifierWithDimension();
         if (seedIdentifierWithDimension.dimension() != Cubiomes.DIM_OVERWORLD()) {
             return false;
@@ -283,8 +292,8 @@ public class SeedMapScreen extends Screen {
             return false;
         }
 
-        float relXQuart = (float) (-dragX / Configs.PixelsPerBiome);
-        float relZQuart = (float) (-dragY / Configs.PixelsPerBiome);
+        float relXQuart = (float) ((-dragX * Configs.BlocksPerPixel) / 4f);
+        float relZQuart = (float) ((-dragY * Configs.BlocksPerPixel) / 4f);
 
         this.moveCenter(this.seedMapRenderer.getCenterQuart().add(relXQuart, relZQuart));
         return true;
@@ -313,11 +322,12 @@ public class SeedMapScreen extends Screen {
         return false;
     }
 
-
-
     private boolean handleMapFeatureLeftClicked(MouseButtonEvent mouseButtonEvent, boolean doubleClick) {
         int button = mouseButtonEvent.button();
         if (button != InputConstants.MOUSE_BUTTON_LEFT) {
+            return false;
+        }
+        if (!SeedMapRenderer.shouldRenderFeatures(SeedMapRenderer.getBiomeScale())) {
             return false;
         }
         double mouseX = mouseButtonEvent.x();
@@ -342,7 +352,7 @@ public class SeedMapScreen extends Screen {
             return;
         }
         BlockPos pos = widget.featureLocation();
-        OptionalInt optionalBiome = this.seedMapRenderer.getSeedMapData().getBiome(QuartPos2.fromBlockPos(pos));
+        OptionalInt optionalBiome = this.seedMapRenderer.getSeedMapData().getBiome(QuartPos2.fromBlockPos(pos), SeedMapData.DEFAULT_BIOME_SCALE);
         if (optionalBiome.isEmpty()) {
             return;
         }

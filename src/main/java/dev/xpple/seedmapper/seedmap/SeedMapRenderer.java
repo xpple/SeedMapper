@@ -35,9 +35,9 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec2;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
@@ -90,12 +90,13 @@ public class SeedMapRenderer {
     public static final int MAX_BIOME_Y = 320;
     public static final int BIOME_Y_GRANULARITY = 16;
 
-    public static final int MIN_PIXELS_PER_BIOME = 1;
-    public static final int MAX_PIXELS_PER_BIOME = 100;
+    public static final float MIN_BLOCKS_PER_PIXEL = 1f / 2f;
+    public static final float MAX_BLOCKS_PER_PIXEL = 256f;
 
     private static final Identifier DIRECTION_ARROW_TEXTURE = Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/arrow.png");
 
-    private static final IntSupplier TILE_SIZE_PIXELS = () -> TilePos.TILE_SIZE_CHUNKS * SeedMapData.SCALED_CHUNK_SIZE * Configs.PixelsPerBiome;
+    private static final Identifier SEED_MAP_LOADING_TEXTURE_IDENTIFIER = Identifier.fromNamespaceAndPath(SeedMapper.MOD_ID, "textures/gui/seed_map_loading.png");
+    private static final AbstractTexture SEED_MAP_LOADING_TEXTURE = Minecraft.getInstance().getTextureManager().getTexture(SEED_MAP_LOADING_TEXTURE_IDENTIFIER);
 
     private static final Minecraft minecraft = Minecraft.getInstance();
 
@@ -133,12 +134,35 @@ public class SeedMapRenderer {
         this.rotateIcons = rotateIcons;
     }
 
-    public void renderBiomes(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
-        int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
+    public static BiomeScale getBiomeScale() {
+        float blocksPerPixel = Configs.BlocksPerPixel;
+        BiomeScale[] scales = BiomeScale.values();
+
+        for (BiomeScale scale : scales) {
+            if (scale.val >= blocksPerPixel) {
+                return scale;
+            }
+        }
+
+        return scales[scales.length - 1];
+    }
+
+    public static boolean shouldRenderSlimeChunks(BiomeScale biomeScale) {
+        return biomeScale.val <= BiomeScale.SCALE_4.val;
+    }
+
+    public static boolean shouldRenderFeatures(BiomeScale biomeScale) {
+        return biomeScale.val <= BiomeScale.SCALE_4.val;
+    }
+
+    public void renderBiomes(GuiGraphicsExtractor guiGraphicsExtractor) {
+        BiomeScale scale = getBiomeScale();
+
+        int tileSizePixels = TilePos.SIZE_PIXELS;
         int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
         int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
 
-        TilePos centerTile = TilePos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart));
+        TilePos centerTile = TilePos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart), scale);
         for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
             for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
                 TilePos tilePos = centerTile.add(relTileX, relTileZ);
@@ -146,32 +170,61 @@ public class SeedMapRenderer {
 
                 // compute biomes and store in texture
                 int[] biomeData = this.seedMapData.getBiomeData(pair);
+                Tile tile;
                 if (biomeData != null) {
-                    Tile tile = this.biomeTileCache.computeIfAbsent(pair, _ -> this.createBiomeTile(tilePos, biomeData));
-                    this.drawTile(guiGraphicsExtractor, tile);
+                    tile = this.biomeTileCache.computeIfAbsent(pair, _ -> this.createBiomeTile(tilePos, biomeData));
+                } else {
+                    tile = new Tile(tilePos, SEED_MAP_LOADING_TEXTURE);
                 }
+                this.drawTile(guiGraphicsExtractor, tile);
+            }
+        }
+    }
 
+    public void renderSlimeChunks(GuiGraphicsExtractor guiGraphicsExtractor) {
+        BiomeScale scale = getBiomeScale();
+
+        if (!shouldRenderSlimeChunks(scale)) {
+            return;
+        }
+
+        int tileSizePixels = TilePos.SIZE_PIXELS;
+        int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
+        int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
+
+        TilePos centerTile = TilePos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart), scale);
+        for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
+            for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
+                TilePos tilePos = centerTile.add(relTileX, relTileZ);
                 // compute slime chunks and store in texture
-                if (this.seedMapData.getAvailableFeatures().contains(MapFeature.SLIME_CHUNK) && Configs.ToggledFeatures.contains(MapFeature.SLIME_CHUNK)) {
-                    BitSet slimeChunkData = this.seedMapData.getSlimeChunkData(tilePos);
-                    if (slimeChunkData != null) {
-                        Tile tile = this.slimeChunkTileCache.computeIfAbsent(tilePos, _ -> this.createSlimeChunkTile(tilePos, slimeChunkData));
-                        this.drawTile(guiGraphicsExtractor, tile);
-                    }
+                if (!this.seedMapData.getAvailableFeatures().contains(MapFeature.SLIME_CHUNK) || !Configs.ToggledFeatures.contains(MapFeature.SLIME_CHUNK)) {
+                    continue;
+                }
+                BitSet slimeChunkData = this.seedMapData.getSlimeChunkData(tilePos);
+                if (slimeChunkData != null) {
+                    Tile tile = this.slimeChunkTileCache.computeIfAbsent(tilePos, _ -> this.createSlimeChunkTile(tilePos, slimeChunkData));
+                    this.drawTile(guiGraphicsExtractor, tile);
                 }
             }
         }
     }
 
     public void renderFeatures(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
-        int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
+        BiomeScale scale = getBiomeScale();
+
+        if (!shouldRenderFeatures(scale)) {
+            return;
+        }
+
+        int tileSizePixels = TilePos.SIZE_PIXELS;
         int horTileRadius = Math.ceilDiv(this.seedMapWidth, tileSizePixels) + 1;
         int verTileRadius = Math.ceilDiv(this.seedMapHeight, tileSizePixels) + 1;
 
-        TilePos centerTile = TilePos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart));
+        TilePos centerTile = TilePos.fromQuartPos(QuartPos2.fromQuartPos2f(this.centerQuart), scale);
 
-        int horChunkRadius = Math.ceilDiv(this.seedMapWidth / 2, SeedMapData.SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
-        int verChunkRadius = Math.ceilDiv(this.seedMapHeight / 2, SeedMapData.SCALED_CHUNK_SIZE * Configs.PixelsPerBiome);
+        int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * scale.val);
+        int horChunkRadius = chunksPerTile * horTileRadius;
+        int verChunkRadius = chunksPerTile * verTileRadius;
 
         SeedIdentifierWithDimension seedIdentifierWithDimension = this.seedMapData.getSeedIdentifierWithDimension();
 
@@ -229,7 +282,7 @@ public class SeedMapRenderer {
             && (Configs.ToggledFeatures.contains(MapFeature.COPPER_ORE_VEIN) || Configs.ToggledFeatures.contains(MapFeature.IRON_ORE_VEIN))) {
             for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
                 for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
-                    TilePos tilePos = new TilePos(centerTile.x() + relTileX, centerTile.z() + relTileZ);
+                    TilePos tilePos = centerTile.add(relTileX, relTileZ);
                     OreVeinData oreVeinData = this.seedMapData.getOreVeinData(tilePos);
                     if (oreVeinData == null) {
                         continue;
@@ -245,12 +298,12 @@ public class SeedMapRenderer {
         if ((this.seedMapData.getAvailableFeatures().contains(MapFeature.CANYON)) && Configs.ToggledFeatures.contains(MapFeature.CANYON)) {
             for (int relTileX = -horTileRadius; relTileX <= horTileRadius; relTileX++) {
                 for (int relTileZ = -verTileRadius; relTileZ <= verTileRadius; relTileZ++) {
-                    TilePos tilePos = new TilePos(centerTile.x() + relTileX, centerTile.z() + relTileZ);
+                    TilePos tilePos = centerTile.add(relTileX, relTileZ);
                     ChunkPos chunkPos = tilePos.toChunkPos();
                     BitSet canyonData = this.seedMapData.getCanyonData(tilePos);
                     canyonData.stream().forEach(i -> {
-                        int relChunkX = i % TilePos.TILE_SIZE_CHUNKS;
-                        int relChunkZ = i / TilePos.TILE_SIZE_CHUNKS;
+                        int relChunkX = i % chunksPerTile;
+                        int relChunkZ = i / chunksPerTile;
                         int chunkX = chunkPos.x() + relChunkX;
                         int chunkZ = chunkPos.z() + relChunkZ;
                         this.addFeatureWidget(MapFeature.CANYON, new BlockPos(SectionPos.sectionToBlockCoord(chunkX), 0, SectionPos.sectionToBlockCoord(chunkZ)));
@@ -302,11 +355,16 @@ public class SeedMapRenderer {
     private void drawTile(GuiGraphicsExtractor guiGraphicsExtractor, Tile tile) {
         TilePos tilePos = tile.pos();
         QuartPos2f relTileQuart = QuartPos2f.fromQuartPos(QuartPos2.fromTilePos(tilePos)).subtract(this.centerQuart);
-        int tileSizePixels = TILE_SIZE_PIXELS.getAsInt();
-        int minX = this.centerX + Mth.floor(Configs.PixelsPerBiome * relTileQuart.x());
-        int minY = this.centerY + Mth.floor(Configs.PixelsPerBiome * relTileQuart.z());
-        int maxX = minX + tileSizePixels;
-        int maxY = minY + tileSizePixels;
+        float tileSizePixels = (TilePos.SIZE_PIXELS * tilePos.biomeScale().val) / Configs.BlocksPerPixel;
+        float minXFloat = this.centerX + (relTileQuart.x() * 4f) / Configs.BlocksPerPixel;
+        float minYFloat = this.centerY + (relTileQuart.z() * 4f) / Configs.BlocksPerPixel;
+        float maxXFloat = minXFloat + tileSizePixels;
+        float maxYFloat = minYFloat + tileSizePixels;
+        // round at the very last moment to avoid overlapping/gaps
+        int minX = Mth.floor(minXFloat);
+        int minY = Mth.floor(minYFloat);
+        int maxX = Mth.floor(maxXFloat);
+        int maxY = Mth.floor(maxYFloat);
 
         if (maxX < this.horizontalPadding.getAsInt() || minX > this.horizontalPadding.getAsInt() + this.seedMapWidth) {
             return;
@@ -333,13 +391,15 @@ public class SeedMapRenderer {
             maxY = this.verticalPadding.getAsInt() + this.seedMapHeight;
         } else v1 = 1;
 
+        //noinspection resource
         guiGraphicsExtractor.innerBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), tile.texture().getSampler(), minX, minY, maxX, maxY, u0, u1, v0, v1, 0xFF_FFFFFF);
     }
 
     private Tile createBiomeTile(TilePos tilePos, int[] biomeData) {
         SeedIdentifierWithDimension seedIdentifierWithDimension = this.seedMapData.getSeedIdentifierWithDimension();
         Tile tile = new Tile(tilePos, seedIdentifierWithDimension.seed(), seedIdentifierWithDimension.dimension());
-        DynamicTexture texture = tile.texture();
+        //noinspection resource
+        DynamicTexture texture = (DynamicTexture) tile.texture();
         int width = texture.getPixels().getWidth();
         int height = texture.getPixels().getHeight();
         for (int relX = 0; relX < width; relX++) {
@@ -353,14 +413,20 @@ public class SeedMapRenderer {
     }
 
     private Tile createSlimeChunkTile(TilePos tilePos, BitSet slimeChunkData) {
+        assert shouldRenderSlimeChunks(tilePos.biomeScale());
+
+        int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale().val);
+        int chunkSize = SectionPos.SECTION_SIZE / tilePos.biomeScale().val;
+
         SeedIdentifierWithDimension seedIdentifierWithDimension = this.seedMapData.getSeedIdentifierWithDimension();
         Tile tile = new Tile(tilePos, seedIdentifierWithDimension.seed(), seedIdentifierWithDimension.dimension());
-        DynamicTexture texture = tile.texture();
-        for (int relChunkX = 0; relChunkX < TilePos.TILE_SIZE_CHUNKS; relChunkX++) {
-            for (int relChunkZ = 0; relChunkZ < TilePos.TILE_SIZE_CHUNKS; relChunkZ++) {
-                boolean isSlimeChunk = slimeChunkData.get(relChunkX + relChunkZ * TilePos.TILE_SIZE_CHUNKS);
+        //noinspection resource
+        DynamicTexture texture = (DynamicTexture) tile.texture();
+        for (int relChunkX = 0; relChunkX < chunksPerTile; relChunkX++) {
+            for (int relChunkZ = 0; relChunkZ < chunksPerTile; relChunkZ++) {
+                boolean isSlimeChunk = slimeChunkData.get(relChunkX + relChunkZ * chunksPerTile);
                 if (isSlimeChunk) {
-                    texture.getPixels().fillRect(SeedMapData.SCALED_CHUNK_SIZE * relChunkX, SeedMapData.SCALED_CHUNK_SIZE * relChunkZ, SeedMapData.SCALED_CHUNK_SIZE, SeedMapData.SCALED_CHUNK_SIZE, 0xFF_00FF00);
+                    texture.getPixels().fillRect(chunkSize * relChunkX, chunkSize * relChunkZ, chunkSize, chunkSize, 0xFF_00FF00);
                 }
             }
         }
@@ -399,8 +465,8 @@ public class SeedMapRenderer {
             return;
         }
         QuartPos2f relPlayerQuart = QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(this.playerPos)).subtract(this.centerQuart);
-        int playerMinX = this.centerX + Mth.floor(Configs.PixelsPerBiome * relPlayerQuart.x()) - 10;
-        int playerMinY = this.centerY + Mth.floor(Configs.PixelsPerBiome * relPlayerQuart.z()) - 10;
+        int playerMinX = this.centerX + Mth.floor((relPlayerQuart.x() * 4f) / Configs.BlocksPerPixel) - 10;
+        int playerMinY = this.centerY + Mth.floor((relPlayerQuart.z() * 4f) / Configs.BlocksPerPixel) - 10;
         int playerMaxX = playerMinX + 20;
         int playerMaxY = playerMinY + 20;
         if (playerMinX < this.horizontalPadding.getAsInt() || playerMaxX > this.horizontalPadding.getAsInt() + this.seedMapWidth || playerMinY < this.verticalPadding.getAsInt() || playerMaxY > this.verticalPadding.getAsInt() + this.seedMapHeight) {
@@ -408,17 +474,17 @@ public class SeedMapRenderer {
         }
         PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, minecraft.player.getSkin(), playerMinX, playerMinY, 20);
 
-        this.drawDirectionArrow(guiGraphicsExtractor, playerMinX, playerMinY);
+        this.drawDirectionArrow(guiGraphicsExtractor, playerMinX, playerMinY, -30);
     }
 
-    public void drawDirectionArrow(GuiGraphicsExtractor guiGraphicsExtractor, int playerMinX, int playerMinY) {
+    public void drawDirectionArrow(GuiGraphicsExtractor guiGraphicsExtractor, int playerMinX, int playerMinY, int verticalOffset) {
         guiGraphicsExtractor.pose().pushMatrix();
         Matrix3x2f transform = guiGraphicsExtractor.pose() // transformations are applied in reverse order
             .translate(10, 10)
             .translate(playerMinX, playerMinY)
             .rotate((float) (Math.toRadians(this.playerRotation.y) + Math.PI))
             .translate(-10, -10)
-            .translate(0, -30)
+            .translate(0, verticalOffset)
             ;
         boolean withinBounds = Stream.of(new Vector2f(20, 0), new Vector2f(20, 20), new Vector2f(0, 20), new Vector2f(0, 0))
             .map(transform::transformPosition)
@@ -501,8 +567,8 @@ public class SeedMapRenderer {
 
         public void updatePosition() {
             QuartPos2f relFeatureQuart = QuartPos2f.fromQuartPos(QuartPos2.fromBlockPos(this.featureLocation)).subtract(centerQuart);
-            this.x = centerX + Mth.floor(Configs.PixelsPerBiome * relFeatureQuart.x()) - this.featureTexture.width() / 2;
-            this.y = centerY + Mth.floor(Configs.PixelsPerBiome * relFeatureQuart.z()) - this.featureTexture.height() / 2;
+            this.x = centerX + Mth.floor((relFeatureQuart.x() * 4f) / Configs.BlocksPerPixel) - this.featureTexture.width() / 2;
+            this.y = centerY + Mth.floor((relFeatureQuart.z() * 4f) / Configs.BlocksPerPixel) - this.featureTexture.height() / 2;
         }
 
         public boolean withinBounds() {
