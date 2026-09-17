@@ -1,5 +1,7 @@
 ## Changelog
-- Updated to 26.3. This includes support for the new Dappled Forest biome as well as Abandoned Camp structure and loot.
+- Added support for zooming further in and out in the seed map.
+- Added support for zooming the seed map using touchpad pinch gestures.
+- Fixed rendering issues when Improved Transparency is enabled.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
