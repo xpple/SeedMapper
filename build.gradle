@@ -20,6 +20,7 @@ loom {
 
 loom.runs.configureEach {
     jvmArguments.add("-enableassertions")
+    systemProperties.put("fabric.loom.suppressNarratorError", "true")
 }
 
 repositories {
