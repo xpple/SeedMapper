@@ -424,7 +424,7 @@ public class HighlightCommand {
         int worldMinY, worldMaxY;
         if (source.getDimension() == Cubiomes.DIM_OVERWORLD()) {
             worldMinY = source.getVersion() >= Cubiomes.MC_1_18() ? -64 : 0;
-            worldMaxY = 320;
+            worldMaxY = source.getVersion() >= Cubiomes.MC_1_18() ? 320 : 256;
         } else {
             worldMinY = 0;
             worldMaxY = 128;
