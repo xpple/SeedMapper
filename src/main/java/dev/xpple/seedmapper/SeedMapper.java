@@ -26,6 +26,7 @@ import dev.xpple.seedmapper.command.commands.HighlightCommand;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.command.commands.MinimapCommand;
 import dev.xpple.seedmapper.command.commands.SampleCommand;
+import dev.xpple.seedmapper.command.commands.SeedInfoCommand;
 import dev.xpple.seedmapper.command.commands.SeedMapCommand;
 import dev.xpple.seedmapper.command.commands.SourceCommand;
 import dev.xpple.seedmapper.command.commands.StopTaskCommand;
@@ -182,5 +183,6 @@ public class SeedMapper implements ClientModInitializer {
         MinimapCommand.register(dispatcher);
         VaultCommand.register(dispatcher);
         FindCommand.register(dispatcher);
+        SeedInfoCommand.register(dispatcher);
     }
 }

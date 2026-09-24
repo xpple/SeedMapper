@@ -113,6 +113,12 @@
   "command.find.cluster.buried_treasure.view": "view",
   "command.find.cluster.buried_treasure.clickToView": "Click to view the cluster",
 
+  "command.seedinfo.info": "Info about your seed:",
+  "command.seedinfo.yes": "yes",
+  "command.seedinfo.no": "no",
+  "command.seedinfo.isTextSeed": "- is possible by entering text: %s",
+  "command.seedinfo.isRandomSeed": "- is possible by leaving seed field empty: %s",
+
   "config.oreAirCheck.comment": "Whether or not SeedMapper should use in-game air checks to invalidate ore positions.",
   "config.devMode.comment": "Enables certain debug commands.",
   "config.seed.customSalts": "(custom salts)",
