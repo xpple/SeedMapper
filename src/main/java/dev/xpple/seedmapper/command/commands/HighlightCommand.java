@@ -20,7 +20,7 @@ import dev.xpple.seedmapper.command.arguments.OreArgument;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.util.BaritoneIntegration;
-import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -192,7 +192,7 @@ public class HighlightCommand {
                     if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(blockOres);
                     }
-                    source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ComponentUtils.formatXZ(chunkX, chunkZ)));
+                    source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ExtraComponentUtils.formatXZ(chunkX, chunkZ)));
                 });
 
                 return false;
@@ -258,7 +258,7 @@ public class HighlightCommand {
                 }
                 count[0] += ores.size();
                 RenderManager.drawBoxes(ores, Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(OreConfig.oreBlock(oreConfig)), 0xFFFFFF));
-                source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(ores.size())), ComponentUtils.formatXZ(chunkX, chunkZ)));
+                source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(ores.size())), ExtraComponentUtils.formatXZ(chunkX, chunkZ)));
                 return false;
             });
 
@@ -320,7 +320,7 @@ public class HighlightCommand {
                         BaritoneIntegration.addGoals(positions);
                     }
                     if (block == Cubiomes.RAW_COPPER_BLOCK() || block == Cubiomes.RAW_IRON_BLOCK()) {
-                        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", ComponentUtils.formatXYZCollection(positions))));
+                        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", ExtraComponentUtils.formatXYZCollection(positions))));
                     }
                 });
 

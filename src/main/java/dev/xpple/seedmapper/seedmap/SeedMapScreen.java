@@ -12,8 +12,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.feature.StructureChecks;
-import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.CubiomesHelper;
+import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import dev.xpple.seedmapper.util.QuartPos2;
 import dev.xpple.seedmapper.util.QuartPos2f;
 import dev.xpple.seedmapper.util.SeedIdentifierWithDimension;
@@ -120,7 +120,7 @@ public class SeedMapScreen extends Screen {
         super.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, partialTick);
 
         SeedIdentifierWithDimension seedIdentifierWithDimension = this.seedMapRenderer.getSeedMapData().getSeedIdentifierWithDimension();
-        Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(seedIdentifierWithDimension.seed())), Cubiomes.mc2str(seedIdentifierWithDimension.version()).getString(0), ComponentUtils.formatGeneratorFlags(seedIdentifierWithDimension.generatorFlags()));
+        Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(seedIdentifierWithDimension.seed())), Cubiomes.mc2str(seedIdentifierWithDimension.version()).getString(0), ExtraComponentUtils.formatGeneratorFlags(seedIdentifierWithDimension.generatorFlags()));
         guiGraphicsExtractor.text(this.font, seedComponent, this.horizontalPadding(), this.verticalPadding() - this.font.lineHeight - 1, -1);
 
         this.seedMapRenderer.renderBiomes(guiGraphicsExtractor);

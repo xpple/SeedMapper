@@ -10,7 +10,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.BuriedTreasureClusterData;
-import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -172,7 +172,7 @@ public class FindCommand {
                 for (ChunkPos result : results) {
                     int x = result.x() << 4;
                     int z = result.z() << 4;
-                    MutableComponent coords = ComponentUtils.formatXZ(x, z);
+                    MutableComponent coords = ExtraComponentUtils.formatXZ(x, z);
                     MutableComponent commandComponent = command(
                         hover(
                             Component.translatable("command.find.cluster.buried_treasure.view"),

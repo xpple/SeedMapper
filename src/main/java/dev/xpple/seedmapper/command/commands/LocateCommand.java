@@ -25,7 +25,7 @@ import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
 import dev.xpple.seedmapper.seedmap.SeedMapData;
 import dev.xpple.seedmapper.util.BiomeSeedIdentifier;
-import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.SpiralSpliterator;
@@ -136,7 +136,7 @@ public class LocateCommand {
                 throw CommandExceptions.NO_BIOME_FOUND_EXCEPTION.create(BIOME_SEARCH_RADIUS);
             }
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.biome.foundAt", ComponentUtils.formatXZ(pos.x(), pos.z()))));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.biome.foundAt", ExtraComponentUtils.formatXZ(pos.x(), pos.z()))));
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -200,7 +200,7 @@ public class LocateCommand {
 
             int structureXPos = Pos.x(structurePos);
             int structureZPos = Pos.z(structurePos);
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.feature.structure.foundAt", ComponentUtils.formatXZ(structureXPos, structureZPos))));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.feature.structure.foundAt", ExtraComponentUtils.formatXZ(structureXPos, structureZPos))));
 
             if (structure == Cubiomes.End_City()) {
                 int numPieces = Cubiomes.getEndCityPieces(pieces, seed.seed(), structureXPos >> 4, structureZPos >> 4);
@@ -211,7 +211,7 @@ public class LocateCommand {
                     .map(Piece::pos)
                     .map(city -> new BlockPos(Pos3.x(city), Pos3.y(city) + 60, Pos3.z(city)))
                     .ifPresent(city -> source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ")
-                        .append(Component.translatable("command.locate.feature.structure.endCity.hasShip", ComponentUtils.formatXYZ(city.getX(), city.getY(), city.getZ()))))));
+                        .append(Component.translatable("command.locate.feature.structure.endCity.hasShip", ExtraComponentUtils.formatXYZ(city.getX(), city.getY(), city.getZ()))))));
             } else if (structure == Cubiomes.Fortress()) {
                 int numPieces = Cubiomes.getFortressPieces(pieces, StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, version, seed.seed(), structureXPos >> 4, structureZPos >> 4);
                 IntStream.range(0, numPieces)
@@ -220,7 +220,7 @@ public class LocateCommand {
                     .map(Piece::pos)
                     .map(monsterThrone -> new BlockPos(Pos3.x(monsterThrone), Pos3.y(monsterThrone) + 10, Pos3.z(monsterThrone)))
                     .forEach(spawnerPos -> source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ")
-                        .append(Component.translatable("command.locate.feature.structure.fortress.hasSpawner", ComponentUtils.formatXYZ(spawnerPos.getX(), spawnerPos.getY(), spawnerPos.getZ()))))));
+                        .append(Component.translatable("command.locate.feature.structure.fortress.hasSpawner", ExtraComponentUtils.formatXYZ(spawnerPos.getX(), spawnerPos.getY(), spawnerPos.getZ()))))));
             }
 
             if (!variantData) {
@@ -255,7 +255,7 @@ public class LocateCommand {
         BlockPos pos = tree.nearestTo(position.atY(0));
         assert pos != null;
 
-        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.feature.stronghold.success", ComponentUtils.formatXZ(pos.getX(), pos.getZ()))));
+        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.feature.stronghold.success", ExtraComponentUtils.formatXZ(pos.getX(), pos.getZ()))));
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
@@ -280,10 +280,10 @@ public class LocateCommand {
                 int eyesBitPack = Piece.additionalData(piece);
                 int eyes = Integer.bitCount(eyesBitPack);
                 source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ")
-                    .append(Component.translatable("command.locate.feature.stronghold.portal", ComponentUtils.formatXZ(portalRoomX, portalRoomZ), accent(Integer.toString(eyes))))));
+                    .append(Component.translatable("command.locate.feature.stronghold.portal", ExtraComponentUtils.formatXZ(portalRoomX, portalRoomZ), accent(Integer.toString(eyes))))));
             } else {
                 source.getClient().schedule(() -> source.sendFeedback(Component.literal(" - ")
-                    .append(Component.translatable("command.locate.feature.stronghold.portalNoEyes", ComponentUtils.formatXZ(portalRoomX, portalRoomZ)))));
+                    .append(Component.translatable("command.locate.feature.stronghold.portalNoEyes", ExtraComponentUtils.formatXZ(portalRoomX, portalRoomZ)))));
             }
             return numPieces;
         }
@@ -326,8 +326,8 @@ public class LocateCommand {
         int blockPosX = (pos.x() << 4) + 9;
         int blockPosZ = (pos.z() << 4) + 9;
         source.sendFeedback(Component.translatable("command.locate.feature.slimeChunk.foundAt",
-            ComponentUtils.formatXZ(blockPosX, blockPosZ, Component.translatable("command.locate.feature.slimeChunk.copy")),
-            ComponentUtils.formatXZ(pos.x(), pos.z(), Component.translatable("command.locate.feature.slimeChunk.copyChunk"))
+            ExtraComponentUtils.formatXZ(blockPosX, blockPosZ, Component.translatable("command.locate.feature.slimeChunk.copy")),
+            ExtraComponentUtils.formatXZ(pos.x(), pos.z(), Component.translatable("command.locate.feature.slimeChunk.copyChunk"))
         ));
         return Command.SINGLE_SUCCESS;
     }
@@ -489,7 +489,7 @@ public class LocateCommand {
                 int newlyFound = found[0] - previouslyFound;
                 if (newlyFound > 0) {
                     String structureName = Cubiomes.struct2str(StructureConfig.structType(structureConfig)).getString(0);
-                    source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.loot.foundAtStructure", accent(String.valueOf(newlyFound)), structureName, ComponentUtils.formatXZCollection(aggregatedLootPositions))));
+                    source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.loot.foundAtStructure", accent(String.valueOf(newlyFound)), structureName, ExtraComponentUtils.formatXZCollection(aggregatedLootPositions))));
                 }
                 if (found[0] >= amount) {
                     break;
@@ -509,7 +509,7 @@ public class LocateCommand {
             Cubiomes.applySeed(generator, source.getDimension(), seed.seed());
             MemorySegment pos = Cubiomes.getSpawn(arena, generator);
 
-            source.sendFeedback(Component.translatable("command.locate.spawn.success", ComponentUtils.formatXZ(Pos.x(pos), Pos.z(pos))));
+            source.sendFeedback(Component.translatable("command.locate.spawn.success", ExtraComponentUtils.formatXZ(Pos.x(pos), Pos.z(pos))));
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -549,7 +549,7 @@ public class LocateCommand {
                 throw CommandExceptions.NO_ORE_VEIN_FOUND_EXCEPTION.create(6400);
             }
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt", ComponentUtils.formatXYZ(pos[0].getX(), pos[0].getY(), pos[0].getZ(), Component.translatable("command.locate.oreVein.copy")))));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt", ExtraComponentUtils.formatXYZ(pos[0].getX(), pos[0].getY(), pos[0].getZ(), Component.translatable("command.locate.oreVein.copy")))));
 
             return Command.SINGLE_SUCCESS;
         }
@@ -598,7 +598,7 @@ public class LocateCommand {
             if (pos == null) {
                 throw CommandExceptions.NO_CANYON_FOUND_EXCEPTION.create(6400);
             }
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.canyon.foundAt", ComponentUtils.formatXZ(SectionPos.sectionToBlockCoord(pos.x()), SectionPos.sectionToBlockCoord(pos.z()), Component.translatable("command.locate.canyon.copy")))));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.canyon.foundAt", ExtraComponentUtils.formatXZ(SectionPos.sectionToBlockCoord(pos.x()), SectionPos.sectionToBlockCoord(pos.z()), Component.translatable("command.locate.canyon.copy")))));
             return Command.SINGLE_SUCCESS;
         }
     }

@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IsRandomSeedTest {
     @Test
     public void testRandomSeeds() {
-        // differential tests
+        // property-based tests
         Random seedRandom = new Random(0);
 
         for (int i = 0; i < 100; i++) {

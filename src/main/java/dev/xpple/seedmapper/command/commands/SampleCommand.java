@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.config.Configs;
-import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
@@ -48,7 +48,7 @@ public class SampleCommand {
 
             DENSITY_FUNCTIONS.forEach((key, densityFunction) -> {
                 double density = densityFunction.compute(params, pos.getX(), pos.getY(), pos.getZ());
-                source.sendFeedback(Component.translatable("command.sample.sampleAll.success", key, ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ()), ComponentUtils.formatNumber(density)));
+                source.sendFeedback(Component.translatable("command.sample.sampleAll.success", key, ExtraComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ()), ExtraComponentUtils.formatNumber(density)));
             });
 
             return DENSITY_FUNCTIONS.size();
@@ -71,7 +71,7 @@ public class SampleCommand {
             Cubiomes.setupTerrainNoise(params, version, generatorFlags);
             Cubiomes.initTerrainNoise(params, seed.seed(), dimension);
             double density = densityFunction.compute(params, pos.getX(), pos.getY(), pos.getZ());
-            source.sendFeedback(Component.translatable("command.sample.sampleDensity.success", ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ()), ComponentUtils.formatNumber(density)));
+            source.sendFeedback(Component.translatable("command.sample.sampleDensity.success", ExtraComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ()), ExtraComponentUtils.formatNumber(density)));
 
             return (int) density;
         }

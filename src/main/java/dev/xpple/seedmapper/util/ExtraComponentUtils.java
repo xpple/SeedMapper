@@ -13,19 +13,23 @@ import java.util.Map;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
-public final class ComponentUtils {
+public final class ExtraComponentUtils {
 
-    private ComponentUtils() {
+    private ExtraComponentUtils() {
+    }
+
+    public static MutableComponent formatString(@Nullable String string) {
+        return copy(
+            hover(
+                accent(String.valueOf(string)),
+                base(Component.translatable("chat.copy.click"))
+            ),
+            String.valueOf(string)
+        );
     }
 
     public static MutableComponent formatNumber(@Nullable Number number) {
-        return copy(
-            hover(
-                accent(String.valueOf(number)),
-                base(Component.translatable("chat.copy.click"))
-            ),
-            String.valueOf(number)
-        );
+        return formatString(String.valueOf(number));
     }
 
     public static MutableComponent formatSeed(@Nullable SeedIdentifier seed) {
@@ -84,25 +88,25 @@ public final class ComponentUtils {
 
     public static MutableComponent formatXZCollection(Collection<? extends Vec3i> collection) {
         return join(Component.literal(", "), collection.stream().map(pos -> {
-            return ComponentUtils.formatXZ(pos.getX(), pos.getZ());
+            return ExtraComponentUtils.formatXZ(pos.getX(), pos.getZ());
         }));
     }
 
     public static MutableComponent formatXZCollection(Collection<? extends Vec3i> collection, MutableComponent copyText) {
         return join(Component.literal(", "), collection.stream().map(pos -> {
-            return ComponentUtils.formatXZ(pos.getX(), pos.getZ(), copyText);
+            return ExtraComponentUtils.formatXZ(pos.getX(), pos.getZ(), copyText);
         }));
     }
 
     public static MutableComponent formatXYZCollection(Collection<? extends Vec3i> collection) {
         return join(Component.literal(", "), collection.stream().map(pos -> {
-            return ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ());
+            return ExtraComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ());
         }));
     }
 
     public static MutableComponent formatXYZCollection(Collection<? extends Vec3i> collection, MutableComponent copyText) {
         return join(Component.literal(", "), collection.stream().map(pos -> {
-            return ComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ(), copyText);
+            return ExtraComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ(), copyText);
         }));
     }
 }

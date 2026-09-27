@@ -13,8 +13,8 @@ import com.mojang.logging.LogUtils;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.config.Configs;
-import dev.xpple.seedmapper.util.ComponentUtils;
 import dev.xpple.seedmapper.util.CubiomesHelper;
+import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.Registry;
@@ -285,7 +285,7 @@ public class VaultCommand {
                         }
                     }
 
-                    source.sendFeedback(Component.translatable("command.vault.computedOffset", ComponentUtils.formatNumber(offset + 1)));
+                    source.sendFeedback(Component.translatable("command.vault.computedOffset", ExtraComponentUtils.formatNumber(offset + 1)));
                     source.sendFeedback(Component.translatable("command.vault.sequenceState", formatState(RandomSource.xr(LootTableContext.prng_state(lootTableContext)))));
                     return;
                 }

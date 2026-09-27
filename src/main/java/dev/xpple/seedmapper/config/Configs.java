@@ -14,7 +14,7 @@ import dev.xpple.seedmapper.render.RenderManager;
 import dev.xpple.seedmapper.seedmap.MapFeature;
 import dev.xpple.seedmapper.seedmap.SeedMapRenderer;
 import dev.xpple.seedmapper.util.BaritoneIntegration;
-import dev.xpple.seedmapper.util.ComponentUtils;
+import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import net.minecraft.ChatFormatting;
@@ -48,7 +48,7 @@ public class Configs {
     @Config(chatRepresentation = "displaySeed")
     public static @Nullable SeedIdentifier Seed = null;
     private static Component displaySeed() {
-        return ComponentUtils.formatSeed(Seed);
+        return ExtraComponentUtils.formatSeed(Seed);
     }
 
     @Config(putter = @Config.Putter("none"), adder = @Config.Adder(value = "addSavedSeed", type = SeedIdentifier.class), chatRepresentation = "displaySavedSeeds")
@@ -70,7 +70,7 @@ public class Configs {
                     entry.getKey()
                 ),
                 Component.literal(": "),
-                ComponentUtils.formatSeed(entry.getValue()))
+                ExtraComponentUtils.formatSeed(entry.getValue()))
             )
         );
     }
