@@ -117,7 +117,7 @@
   "command.seedinfo.yes": "yes",
   "command.seedinfo.no": "no",
   "command.seedinfo.isTextSeed": "- is possible by entering text: %s",
-  "command.seedinfo.possibleTexts": "- possible text input: %s",
+  "command.seedinfo.possibleTexts": "- possible text inputs: %s",
   "command.seedinfo.isRandomSeed": "- is possible by leaving seed field empty: %s",
 
   "config.oreAirCheck.comment": "Whether or not SeedMapper should use in-game air checks to invalidate ore positions.",
