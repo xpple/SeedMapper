@@ -13,7 +13,7 @@ import com.github.cubiomes.SurfaceNoise;
 import com.github.cubiomes.TerrainNoise;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.xpple.seedmapper.SeedMapper;
+import dev.xpple.seedmapper.MixinConfigPlugin;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.OreArgument;
@@ -189,7 +189,7 @@ public class HighlightCommand {
                 count[0] += blockOres.size();
                 source.getClient().schedule(() -> {
                     RenderManager.drawBoxes(blockOres, color);
-                    if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
+                    if (MixinConfigPlugin.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(blockOres);
                     }
                     source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ExtraComponentUtils.formatXZ(chunkX, chunkZ)));
@@ -316,7 +316,7 @@ public class HighlightCommand {
                     count[0] += positions.size();
                     int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), 0xFFFFFF);
                     RenderManager.drawBoxes(positions, color);
-                    if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
+                    if (MixinConfigPlugin.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(positions);
                     }
                     if (block == Cubiomes.RAW_COPPER_BLOCK() || block == Cubiomes.RAW_IRON_BLOCK()) {

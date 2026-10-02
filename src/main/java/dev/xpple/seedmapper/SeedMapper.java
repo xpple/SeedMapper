@@ -76,8 +76,6 @@ public class SeedMapper implements ClientModInitializer {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final boolean BARITONE_AVAILABLE = FabricLoader.getInstance().getModContainer("baritone-meteor").isPresent();
-
     private static final String OS = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
     private static final String ARCH = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
 
@@ -191,7 +189,7 @@ public class SeedMapper implements ClientModInitializer {
         RenderManager.registerEvents();
         MinimapManager.registerHudElement();
 
-        if (BARITONE_AVAILABLE) {
+        if (MixinConfigPlugin.BARITONE_AVAILABLE) {
             LOGGER.info("Baritone detected, Baritone integration will be available!");
             LOGGER.info("Set AutoMine to true to automatically mine certain blocks highlighted by `/sm:highlight`");
         }

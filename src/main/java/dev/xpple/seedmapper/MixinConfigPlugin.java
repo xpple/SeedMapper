@@ -1,15 +1,13 @@
 package dev.xpple.seedmapper;
 
 import net.fabricmc.loader.api.FabricLoader;
-import org.jspecify.annotations.Nullable;
-import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
-import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import java.util.List;
 import java.util.Set;
 
 public class MixinConfigPlugin implements IMixinConfigPlugin {
+
+    public static final boolean BARITONE_AVAILABLE = FabricLoader.getInstance().getModContainer("baritone-meteor").isPresent();
 
     private static final Set<String> BARITONE_MIXINS = Set.of(
         "dev.xpple.seedmapper.mixin.baritone.CustomGoalProcessMixin",
@@ -21,39 +19,13 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
     );
 
     @Override
-    public void onLoad(String mixinPackage) {
-    }
-
-    @Override
-    public @Nullable String getRefMapperConfig() {
-        return null;
-    }
-
-    @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (BARITONE_MIXINS.contains(mixinClassName)) {
-            return SeedMapper.BARITONE_AVAILABLE;
+            return BARITONE_AVAILABLE;
         }
         if (DEV_ONLY_MIXINS.contains(mixinClassName)) {
             return FabricLoader.getInstance().isDevelopmentEnvironment();
         }
         return true;
-    }
-
-    @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-    }
-
-    @Override
-    public @Nullable List<String> getMixins() {
-        return null;
-    }
-
-    @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-    }
-
-    @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
     }
 }
