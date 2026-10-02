@@ -5,7 +5,7 @@ import baritone.api.pathing.goals.Goal;
 import baritone.api.process.ICustomGoalProcess;
 import baritone.process.CustomGoalProcess;
 import baritone.utils.BaritoneProcessHelper;
-import dev.xpple.seedmapper.SeedMapper;
+import dev.xpple.seedmapper.MixinConfigPlugin;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.util.BaritoneIntegration;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,7 +24,7 @@ public abstract class CustomGoalProcessMixin extends BaritoneProcessHelper imple
 
     @Inject(method = "onLostControl", at = @At("HEAD"), remap = false)
     private void onFinished(CallbackInfo ci) {
-        if (SeedMapper.BARITONE_AVAILABLE && Configs.AutoMine) {
+        if (MixinConfigPlugin.BARITONE_AVAILABLE && Configs.AutoMine) {
             BaritoneIntegration.onGoalCompletion(this.a);
         }
     }
