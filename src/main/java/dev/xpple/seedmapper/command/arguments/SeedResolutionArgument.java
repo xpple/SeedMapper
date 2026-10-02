@@ -129,10 +129,10 @@ public class SeedResolutionArgument implements ArgumentType<SeedResolutionArgume
 
         public enum Method implements StringRepresentable {
 
-            COMMAND_SOURCE("CommandSource"),
-            SEED_CONFIG("SeedConfig"),
-            SAVED_SEEDS_CONFIG("SavedSeedsConfig"),
-            ONLINE_DATABASE("OnlineDatabase");
+            COMMAND_SOURCE("command_source"),
+            SAVED_SEEDS_CONFIG("saved_seeds_config"),
+            ONLINE_DATABASE("online_database"),
+            SEED_CONFIG("seed_config");
 
             public static final StringRepresentable.EnumCodec<Method> CODEC = StringRepresentable.fromEnum(Method::values);
 
