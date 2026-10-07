@@ -95,9 +95,9 @@ To build the mod locally, follow these steps:
 2. Compile cubiomes to a shared library. MSVC cannot be used to build the project! The following is for Windows:
    ```shell
    cd src/main/c/cubiomes
-   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-   cmake --build build --config Release
-   cp build/cubiomes.dll ../../resources/cubiomes.dll
+   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DINFER_POSTFIX=ON
+   cmake --build build
+   cp build/cubiomes_*.dll ../../resources/
    cd ../../../../
    ```
 3. Install LLVM (version 13.0.0 is recommended) and set the environment variable `LLVM_HOME` to the directory where LLVM was installed.

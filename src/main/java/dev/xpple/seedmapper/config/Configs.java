@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.Config;
 import dev.xpple.betterconfig.api.ModConfig;
+import dev.xpple.seedmapper.MixinConfigPlugin;
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.arguments.BlockArgument;
@@ -214,7 +215,7 @@ public class Configs {
     @Config(condition = "hasBaritoneAvailable", onChange = "updateBaritoneGoals")
     public static boolean AutoMine = false;
     private static boolean hasBaritoneAvailable(SharedSuggestionProvider source) {
-        return SeedMapper.BARITONE_AVAILABLE;
+        return MixinConfigPlugin.BARITONE_AVAILABLE;
     }
     private static void updateBaritoneGoals(boolean oldValue, boolean newValue) {
         if (!newValue) {

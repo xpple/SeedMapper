@@ -63,6 +63,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -75,10 +76,35 @@ public class SeedMapper implements ClientModInitializer {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final boolean BARITONE_AVAILABLE = FabricLoader.getInstance().getModContainer("baritone-meteor").isPresent();
+    private static final String OS = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+    private static final String ARCH = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
+
+    private static boolean isMacOS() {
+        return OS.contains("mac");
+    }
+
+    private static boolean isX86() {
+        return ARCH.equals("x86_64") || ARCH.equals("amd64");
+    }
+
+    private static boolean isArm() {
+        return ARCH.equals("aarch64") || ARCH.equals("arm64");
+    }
 
     static {
-        String libraryName = System.mapLibraryName("cubiomes");
+        String name = "cubiomes";
+
+        if (!isMacOS()) {
+            if (isX86()) {
+                name += "_x86";
+            } else if (isArm()) {
+                name += "_arm";
+            } else {
+                throw new UnsupportedOperationException("Unsupported architecture: " + ARCH);
+            }
+        }
+
+        String libraryName = System.mapLibraryName(name);
         Path tempFile;
         try {
             tempFile = Files.createTempFile(libraryName, "");
@@ -163,7 +189,7 @@ public class SeedMapper implements ClientModInitializer {
         RenderManager.registerEvents();
         MinimapManager.registerHudElement();
 
-        if (BARITONE_AVAILABLE) {
+        if (MixinConfigPlugin.BARITONE_AVAILABLE) {
             LOGGER.info("Baritone detected, Baritone integration will be available!");
             LOGGER.info("Set AutoMine to true to automatically mine certain blocks highlighted by `/sm:highlight`");
         }

@@ -1,7 +1,7 @@
 package dev.xpple.seedmapper.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.xpple.seedmapper.SeedMapper;
+import dev.xpple.seedmapper.MixinConfigPlugin;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.commands.VaultCommand;
 import dev.xpple.seedmapper.render.RenderManager;
@@ -40,7 +40,7 @@ public class ClientPacketListenerMixin {
 
         MinimapManager.hide();
 
-        if (SeedMapper.BARITONE_AVAILABLE) {
+        if (MixinConfigPlugin.BARITONE_AVAILABLE) {
             BaritoneIntegration.clearMinedBlocks();
         }
     }
@@ -52,7 +52,7 @@ public class ClientPacketListenerMixin {
         int dimension = CustomClientCommandSource.inferDimension(packet.commonPlayerSpawnInfo().dimensionType().value());
         MinimapManager.updateDimension(dimension);
 
-        if (SeedMapper.BARITONE_AVAILABLE) {
+        if (MixinConfigPlugin.BARITONE_AVAILABLE) {
             BaritoneIntegration.clearMinedBlocks();
         }
     }
