@@ -40,7 +40,7 @@ public abstract class CreateJavaBindingsTask extends DefaultTask {
             return;
         }
 
-        this.executeCommand(rootPath, "./jextract/build/jextract/bin/jextract" + EXTENSION, "--include-dir", "src/main/c/cubiomes", "--include-dir", "src/main/c/cubiomes", "--output", "src/main/java", "--use-system-load-library", "--target-package", "com.github.cubiomes", "--header-class-name", "Cubiomes", "@dump_includes_filtered.txt", "@src/main/c/cubiomes/build/headers.txt");
+        this.executeCommand(rootPath, "./jextract/build/jextract/bin/jextract" + EXTENSION, "--include-dir", "src/main/c/cubiomes", "--output", "src/main/java", "--copy-comments", "--use-system-load-library", "--target-package", "com.github.cubiomes", "--header-class-name", "Cubiomes", "@dump_includes_filtered.txt", "@src/main/c/cubiomes/build/headers.txt");
     }
 
     private void executeCommand(Path path, Object... args) {

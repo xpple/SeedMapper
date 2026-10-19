@@ -1,6 +1,6 @@
 package dev.xpple.seedmapper.util;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class SpiralLoop {
 

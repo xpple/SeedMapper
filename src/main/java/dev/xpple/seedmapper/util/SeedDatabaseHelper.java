@@ -1,6 +1,6 @@
 package dev.xpple.seedmapper.util;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,10 +24,11 @@ public final class SeedDatabaseHelper {
     private static final Map<String, Long> connectionToSeed = new HashMap<>();
     private static final Map<Long, Long> hashedSeedToSeed = new HashMap<>();
 
-    public static @Nullable SeedIdentifier getSeed(String connection, long hashedSeed) {
+    public static @Nullable SeedIdentifier getSeed(String connection, @Nullable Long hashedSeed) {
         return Optional
             .ofNullable(connectionToSeed.get(connection))
-            .or(() -> Optional.ofNullable(hashedSeedToSeed.get(hashedSeed)))
+            .or(() -> Optional.ofNullable(hashedSeed)
+                .flatMap(key -> Optional.ofNullable(hashedSeedToSeed.get(key))))
             .map(SeedIdentifier::new)
             .orElse(null);
     }

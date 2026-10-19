@@ -1,6 +1,6 @@
 package dev.xpple.seedmapper.thread;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Set;

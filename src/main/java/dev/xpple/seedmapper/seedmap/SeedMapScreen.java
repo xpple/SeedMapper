@@ -37,8 +37,8 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;

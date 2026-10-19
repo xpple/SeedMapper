@@ -5,7 +5,7 @@ import com.github.cubiomes.StructureConfig;
 import com.github.cubiomes.StructureConfigProvider;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
@@ -148,21 +148,16 @@ public class SeedMapper implements ClientModInitializer {
             }, Map.Entry::getValue));
         BetterConfigAPI.getInstance().getModConfig(MOD_ID).save();
 
-        CustomClientCommandSource fakeCommandSource = CustomClientCommandSource.makeFakeCommandSource();
         Cubiomes.setStructureConfigProvider(StructureConfigProvider.allocate((stype, mc, sconf) -> {
             if (Cubiomes.getStructureConfig_default(stype, mc, sconf) == 0) {
                 return 0;
             }
-            if (fakeCommandSource == null) {
+            String structureString = StructurePredicateArgument.STRUCTURES.inverse().get(stype);
+            Pair<SeedResolutionArgument.SeedResolution.Method, SeedIdentifier> seedPair = CustomClientCommandSource.getSeed(null);
+            if (seedPair == null) {
                 return 1;
             }
-            Integer salt;
-            try {
-                String structureString = StructurePredicateArgument.STRUCTURES.inverse().get(stype);
-                salt = fakeCommandSource.getSeed().getSecond().customStructureSalts().get(structureString);
-            } catch (CommandSyntaxException _) {
-                return 1;
-            }
+            Integer salt = seedPair.getSecond().customStructureSalts().get(structureString);
             if (salt != null) {
                 StructureConfig.salt(sconf, salt);
             }

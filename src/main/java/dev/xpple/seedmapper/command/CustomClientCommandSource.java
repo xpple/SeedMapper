@@ -30,6 +30,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
 
@@ -135,26 +136,45 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
     }
 
     public Pair<SeedResolutionArgument.SeedResolution.Method, SeedIdentifier> getSeed() throws CommandSyntaxException {
+        Pair<SeedResolutionArgument.SeedResolution.Method, SeedIdentifier> seedPair = getSeed(this);
+        if (seedPair == null) {
+            throw CommandExceptions.NO_SEED_AVAILABLE_EXCEPTION.create();
+        }
+        return seedPair;
+    }
+
+    public static @Nullable Pair<SeedResolutionArgument.SeedResolution.Method, SeedIdentifier> getSeed(@Nullable CustomClientCommandSource source) {
+        Optional<CustomClientCommandSource> optionalSource = Optional.ofNullable(source);
         SeedIdentifier seed;
         for (SeedResolutionArgument.SeedResolution.Method method : Configs.SeedResolutionOrder) {
             seed = switch (method) {
-                case COMMAND_SOURCE -> Optionull.map(this.getMeta("seed"), s -> new SeedIdentifier((long) s));
+                case COMMAND_SOURCE -> optionalSource.map(s -> s.getMeta("seed")).map(s -> new SeedIdentifier((long) s)).orElse(null);
                 case SEED_CONFIG -> Configs.Seed;
                 case SAVED_SEEDS_CONFIG -> {
-                    String key = SimpleWaypointsAPI.getInstance().getWorldIdentifier(this.client);
+                    String key = SimpleWaypointsAPI.getInstance().getWorldIdentifier(Minecraft.getInstance());
                     yield Optionull.map(key, k -> Configs.SavedSeeds.get(SerializationHelperInvoker.invokeUpgradeWorldIdentifier(k)));
                 }
                 case ONLINE_DATABASE -> {
                     // match SeedCrackerX's key format
-                    String key = this.client.getConnection().getConnection().getRemoteAddress().toString();
-                    yield SeedDatabaseHelper.getSeed(key, this.getLevel().getBiomeManager().biomeZoomSeed);
+                    Minecraft minecraft = Minecraft.getInstance();
+                    ClientPacketListener clientPacketListener = minecraft.getConnection();
+                    if (clientPacketListener == null) {
+                        yield null;
+                    }
+                    String key = clientPacketListener.getConnection().getRemoteAddress().toString();
+                    Long hashedSeed = optionalSource
+                        .map(CustomClientCommandSource::getLevel)
+                        .or(() -> Optional.ofNullable(minecraft.level))
+                        .map(l -> l.getBiomeManager().biomeZoomSeed)
+                        .orElse(null);
+                    yield SeedDatabaseHelper.getSeed(key, hashedSeed);
                 }
             };
             if (seed != null) {
                 return Pair.of(method, seed);
             }
         }
-        throw CommandExceptions.NO_SEED_AVAILABLE_EXCEPTION.create();
+        return null;
     }
 
     public int getDimension() throws CommandSyntaxException {
