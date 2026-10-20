@@ -70,6 +70,8 @@ public class LocateCommand {
     private static final int BIOME_SEARCH_HORIZONTAL_STEP = 32;
     private static final int BIOME_SEARCH_VERTICAL_STEP = 64;
 
+    private static final int MAX_CHUNK_RADIUS = 6400;
+
     public static final Set<Integer> LOOT_SUPPORTED_STRUCTURES = Set.of(Cubiomes.Treasure(), Cubiomes.Desert_Pyramid(), Cubiomes.End_City(), Cubiomes.Igloo(), Cubiomes.Jungle_Pyramid(), Cubiomes.Ruined_Portal(), Cubiomes.Ruined_Portal_N(), Cubiomes.Fortress(), Cubiomes.Bastion(), Cubiomes.Outpost(), Cubiomes.Shipwreck(), Cubiomes.Stronghold(), Cubiomes.Abandoned_Camp());
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -122,19 +124,19 @@ public class LocateCommand {
             int maxY = version <= Cubiomes.MC_1_17_1() ? 256 : 320;
             int[] ys = Mth.outFromOrigin(center.getY(), minY + 1, maxY + 1, BIOME_SEARCH_VERTICAL_STEP).toArray();
 
-            SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.getX(), center.getZ(), BIOME_SEARCH_RADIUS, BIOME_SEARCH_HORIZONTAL_STEP, (x, z) -> {
+            BlockPos pos = SpiralLoop.spiral(center.getX(), center.getZ(), BIOME_SEARCH_RADIUS, BIOME_SEARCH_HORIZONTAL_STEP, (x, z) -> {
                 for (int y : ys) {
                     if (Cubiomes.getBiomeAt(generator, 4, QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) == biome) {
-                        return true;
+                        return new BlockPos(x, y, z);
                     }
                 }
-                return false;
+                return null;
             });
             if (pos == null) {
                 throw CommandExceptions.NO_BIOME_FOUND_EXCEPTION.create(BIOME_SEARCH_RADIUS);
             }
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.biome.foundAt", ExtraComponentUtils.formatXZ(pos.x(), pos.z()))));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.biome.foundAt", ExtraComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ()))));
             return Command.SINGLE_SUCCESS;
         }
     }
@@ -180,19 +182,19 @@ public class LocateCommand {
             MemorySegment structurePos = Pos.allocate(arena);
             MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
             MemorySegment structureVariant = StructureVariant.allocate(arena);
-            SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
+            Boolean found = SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
                 if (!generationCheck.check(terrainNoise, x, z, structurePos)) {
-                    return false;
+                    return null;
                 }
                 if (!piecesPredicateCheck.check(piecesPredicate, pieces, generator, structurePos)) {
-                    return false;
+                    return null;
                 }
                 if (!variantPredicateCheck.check(variantPredicate, structureVariant, generator, structurePos)) {
-                    return false;
+                    return null;
                 }
                 return true;
             });
-            if (pos == null) {
+            if (found == null || !found) {
                 throw CommandExceptions.NO_STRUCTURE_FOUND_EXCEPTION.create(Level.MAX_LEVEL_SIZE);
             }
 
@@ -315,8 +317,11 @@ public class LocateCommand {
             throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
         }
         ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
-        SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.x(), center.z(), 6400, (x, z) -> {
-            return Cubiomes.isSlimeChunk(seed.seed(), x, z) != 0;
+        ChunkPos pos = SpiralLoop.spiral(center.x(), center.z(), MAX_CHUNK_RADIUS, (x, z) -> {
+            if (Cubiomes.isSlimeChunk(seed.seed(), x, z) == 0) {
+                return null;
+            }
+            return new ChunkPos(x, z);
         });
         assert pos != null;
 
@@ -521,7 +526,7 @@ public class LocateCommand {
             }
             ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
             @Nullable BlockPos[] pos = {null};
-            SpiralLoop.spiral(center.x(), center.z(), 6400, (chunkX, chunkZ) -> {
+            SpiralLoop.spiral(center.x(), center.z(), MAX_CHUNK_RADIUS, (chunkX, chunkZ) -> {
                 int minX = chunkX << 4;
                 int minZ = chunkZ << 4;
 
@@ -543,7 +548,7 @@ public class LocateCommand {
                 return false;
             });
             if (pos[0] == null) {
-                throw CommandExceptions.NO_ORE_VEIN_FOUND_EXCEPTION.create(6400);
+                throw CommandExceptions.NO_ORE_VEIN_FOUND_EXCEPTION.create(MAX_CHUNK_RADIUS);
             }
 
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt", ExtraComponentUtils.formatXYZ(pos[0].getX(), pos[0].getY(), pos[0].getZ(), Component.translatable("command.locate.oreVein.copy")))));
@@ -576,7 +581,7 @@ public class LocateCommand {
             }
             MemorySegment ccc = CanyonCarverConfig.allocate(arena);
             MemorySegment rnd = arena.allocate(Cubiomes.C_LONG_LONG);
-            SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.x(), center.z(), 6400, (chunkX, chunkZ) -> {
+            ChunkPos pos = SpiralLoop.spiral(center.x(), center.z(), MAX_CHUNK_RADIUS, (chunkX, chunkZ) -> {
                 for (int canyonCarver : CanyonCarverArgument.CANYON_CARVERS.values()) {
                     if (Cubiomes.getCanyonCarverConfig(canyonCarver, version, ccc) == 0) {
                         continue;
@@ -588,12 +593,12 @@ public class LocateCommand {
                     if (Cubiomes.checkCanyonStart(seed.seed(), chunkX, chunkZ, ccc, rnd) == 0) {
                         continue;
                     }
-                    return true;
+                    return new ChunkPos(chunkX, chunkZ);
                 }
-                return false;
+                return null;
             });
             if (pos == null) {
-                throw CommandExceptions.NO_CANYON_FOUND_EXCEPTION.create(6400);
+                throw CommandExceptions.NO_CANYON_FOUND_EXCEPTION.create(MAX_CHUNK_RADIUS);
             }
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.canyon.foundAt", ExtraComponentUtils.formatXZ(SectionPos.sectionToBlockCoord(pos.x()), SectionPos.sectionToBlockCoord(pos.z()), Component.translatable("command.locate.canyon.copy")))));
             return Command.SINGLE_SUCCESS;

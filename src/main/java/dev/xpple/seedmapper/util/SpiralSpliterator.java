@@ -5,7 +5,7 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 
 /// A stateful version of [SpiralLoop].
-public class SpiralSpliterator extends Spliterators.AbstractSpliterator<SpiralLoop.Coordinate> {
+public class SpiralSpliterator extends Spliterators.AbstractSpliterator<SpiralSpliterator.Coordinate> {
 
     private final int maxX;
     private final int step;
@@ -32,11 +32,11 @@ public class SpiralSpliterator extends Spliterators.AbstractSpliterator<SpiralLo
     }
 
     @Override
-    public boolean tryAdvance(Consumer<? super SpiralLoop.Coordinate> action) {
+    public boolean tryAdvance(Consumer<? super Coordinate> action) {
         if (this.x > this.maxX) {
             return false;
         }
-        SpiralLoop.Coordinate returnValue = new SpiralLoop.Coordinate(this.x, this.z);
+        Coordinate returnValue = new Coordinate(this.x, this.z);
 
         for (;;) {
             if (this.j < (this.n >> 1)) {
@@ -62,5 +62,8 @@ public class SpiralSpliterator extends Spliterators.AbstractSpliterator<SpiralLo
 
     public int getZ() {
         return this.z;
+    }
+
+    public record Coordinate(int x, int z) {
     }
 }
