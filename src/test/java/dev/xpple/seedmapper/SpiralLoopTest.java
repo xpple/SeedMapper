@@ -16,7 +16,7 @@ public class SpiralLoopTest {
         List<Pair<Integer, Integer>> coords = new ArrayList<>();
         SpiralLoop.spiral(0, 0, 2, 1, (x, z) -> {
             coords.add(Pair.of(x, z));
-            return false;
+            return null;
         });
         Iterator<Pair<Integer, Integer>> iterator = coords.iterator();
         assertEquals(Pair.of(0, 0), iterator.next());
@@ -52,7 +52,7 @@ public class SpiralLoopTest {
         List<Pair<Integer, Integer>> coords = new ArrayList<>();
         SpiralLoop.spiral(5, -10, 2, 1, (x, z) -> {
             coords.add(Pair.of(x, z));
-            return false;
+            return null;
         });
         Iterator<Pair<Integer, Integer>> iterator = coords.iterator();
         assertEquals(Pair.of(5, -10), iterator.next());
@@ -88,7 +88,7 @@ public class SpiralLoopTest {
         List<Pair<Integer, Integer>> coords = new ArrayList<>();
         SpiralLoop.spiral(0, 0, 20, 10, (x, z) -> {
             coords.add(Pair.of(x, z));
-            return false;
+            return null;
         });
         Iterator<Pair<Integer, Integer>> iterator = coords.iterator();
         assertEquals(Pair.of(0, 0), iterator.next());
@@ -124,7 +124,7 @@ public class SpiralLoopTest {
         List<Pair<Integer, Integer>> coords = new ArrayList<>();
         SpiralLoop.spiral(10, -5, 64, 32, (x, z) -> {
             coords.add(Pair.of(x, z));
-            return false;
+            return null;
         });
         Iterator<Pair<Integer, Integer>> iterator = coords.iterator();
         assertEquals(Pair.of(10, -5), iterator.next());
