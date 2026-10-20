@@ -44,6 +44,12 @@ public final class RenderManager {
     }
 
     public static void drawCancellingBoxes(Collection<BlockPos> posBatch, int color) {
+        Collection<Line> batchLines = CancellingEdges.create(posBatch, color, null);
+        if (batchLines != null) {
+            RenderManager.lines.addAll(batchLines);
+            return;
+        }
+
         Set<Line> lines = new HashSet<>();
 
         posBatch.forEach(pos -> {
@@ -78,6 +84,12 @@ public final class RenderManager {
     }
 
     public static void drawCancellingFaces(Collection<BlockPos> posBatch, int color, Direction direction) {
+        Collection<Line> batchLines = CancellingEdges.create(posBatch, color, direction);
+        if (batchLines != null) {
+            RenderManager.lines.addAll(batchLines);
+            return;
+        }
+
         Set<Line> lines = new HashSet<>();
 
         posBatch.forEach(pos -> {
