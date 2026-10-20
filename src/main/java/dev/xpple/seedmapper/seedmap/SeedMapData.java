@@ -37,7 +37,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import org.jspecify.annotations.Nullable;
 
@@ -225,8 +224,8 @@ public class SeedMapData {
         ChunkPos chunkPos = tilePos.toChunkPos();
         for (int relChunkX = 0; relChunkX < chunksPerTile; relChunkX++) {
             for (int relChunkZ = 0; relChunkZ < chunksPerTile; relChunkZ++) {
-                RandomSource random = WorldgenRandom.seedSlimeChunk(chunkPos.x() + relChunkX, chunkPos.z() + relChunkZ, this.seed, 987234911L);
-                slimeChunks.set(relChunkX + relChunkZ * chunksPerTile, random.nextInt(10) == 0);
+                boolean isSlimeChunk = Cubiomes.isSlimeChunk(this.seed, chunkPos.x() + relChunkX, chunkPos.z() + relChunkZ) != 0;
+                slimeChunks.set(relChunkX + relChunkZ * chunksPerTile, isSlimeChunk);
             }
         }
         return slimeChunks;

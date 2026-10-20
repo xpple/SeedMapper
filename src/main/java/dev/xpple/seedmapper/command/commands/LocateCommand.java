@@ -36,10 +36,8 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.foreign.Arena;
@@ -318,8 +316,7 @@ public class LocateCommand {
         }
         ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
         SpiralLoop.Coordinate pos = SpiralLoop.spiral(center.x(), center.z(), 6400, (x, z) -> {
-            RandomSource random = WorldgenRandom.seedSlimeChunk(x, z, seed.seed(), 987234911L);
-            return random.nextInt(10) == 0;
+            return Cubiomes.isSlimeChunk(seed.seed(), x, z) != 0;
         });
         assert pos != null;
 

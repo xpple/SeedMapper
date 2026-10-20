@@ -16,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Collection;
@@ -42,29 +43,41 @@ public final class RenderManager {
         temp.clear();
     }
 
-    public static void drawBoxes(Collection<BlockPos> posBatch, int color) {
+    public static void drawCancellingBoxes(Collection<BlockPos> posBatch, int color) {
         Set<Line> lines = new HashSet<>();
 
         posBatch.forEach(pos -> {
             Vec3 minPosition = new Vec3(pos);
             Vec3 size = new Vec3(1, 1, 1);
-            addLine(new Line(minPosition, minPosition.add(size.x(), 0, 0), color), lines);
-            addLine(new Line(minPosition, minPosition.add(0, size.y(), 0), color), lines);
-            addLine(new Line(minPosition, minPosition.add(0, 0, size.z()), color), lines);
-            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), 0, 0), color), lines);
-            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), size.y(), size.z()), color), lines);
-            addLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(0, 0, size.z()), color), lines);
-            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), 0, 0), color), lines);
-            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(0, size.y(), 0), color), lines);
-            addLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), size.y(), size.z()), color), lines);
-            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, 0, size.z()), color), lines);
-            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, size.y(), 0), color), lines);
-            addLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(size.x(), size.y(), size.z()), color), lines);
+            addCancellingLine(new Line(minPosition, minPosition.add(size.x(), 0, 0), color), lines);
+            addCancellingLine(new Line(minPosition, minPosition.add(0, size.y(), 0), color), lines);
+            addCancellingLine(new Line(minPosition, minPosition.add(0, 0, size.z()), color), lines);
+            addCancellingLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), 0, 0), color), lines);
+            addCancellingLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(size.x(), size.y(), size.z()), color), lines);
+            addCancellingLine(new Line(minPosition.add(size.x(), 0, size.z()), minPosition.add(0, 0, size.z()), color), lines);
+            addCancellingLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), 0, 0), color), lines);
+            addCancellingLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(0, size.y(), 0), color), lines);
+            addCancellingLine(new Line(minPosition.add(size.x(), size.y(), 0), minPosition.add(size.x(), size.y(), size.z()), color), lines);
+            addCancellingLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, 0, size.z()), color), lines);
+            addCancellingLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, size.y(), 0), color), lines);
+            addCancellingLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(size.x(), size.y(), size.z()), color), lines);
         });
         RenderManager.lines.addAll(lines);
     }
 
-    public static void drawFaces(Collection<BlockPos> posBatch, int color, Direction direction) {
+    public static void drawRectangles(Collection<AABB> rectangles, int color) {
+        for (AABB rectangle : rectangles) {
+            double y = (rectangle.minY + rectangle.maxY) / 2;
+            Vec3 minPosition = new Vec3(rectangle.minX, y, rectangle.minZ);
+            Vec3 maxPosition = new Vec3(rectangle.maxX, y, rectangle.maxZ);
+            lines.add(new Line(minPosition, new Vec3(maxPosition.x, y, minPosition.z), color));
+            lines.add(new Line(minPosition, new Vec3(minPosition.x, y, maxPosition.z), color));
+            lines.add(new Line(maxPosition, new Vec3(maxPosition.x, y, minPosition.z), color));
+            lines.add(new Line(maxPosition, new Vec3(minPosition.x, y, maxPosition.z), color));
+        }
+    }
+
+    public static void drawCancellingFaces(Collection<BlockPos> posBatch, int color, Direction direction) {
         Set<Line> lines = new HashSet<>();
 
         posBatch.forEach(pos -> {
@@ -73,40 +86,40 @@ public final class RenderManager {
 
             switch (direction) {
                 case DOWN -> {
-                    addLine(new Line(minPosition, minPosition.add(1, 0, 0), color), lines);
-                    addLine(new Line(minPosition, minPosition.add(0, 0, 1), color), lines);
-                    addLine(new Line(minPosition.add(1, 0, 1), minPosition.add(1, 0, 0), color), lines);
-                    addLine(new Line(minPosition.add(1, 0, 1), minPosition.add(0, 0, 1), color), lines);
+                    addCancellingLine(new Line(minPosition, minPosition.add(1, 0, 0), color), lines);
+                    addCancellingLine(new Line(minPosition, minPosition.add(0, 0, 1), color), lines);
+                    addCancellingLine(new Line(minPosition.add(1, 0, 1), minPosition.add(1, 0, 0), color), lines);
+                    addCancellingLine(new Line(minPosition.add(1, 0, 1), minPosition.add(0, 0, 1), color), lines);
                 }
                 case UP -> {
-                    addLine(new Line(minPosition.add(0, 1, 0), minPosition.add(1, 1, 0), color), lines);
-                    addLine(new Line(minPosition.add(0, 1, 0), minPosition.add(0, 1, 1), color), lines);
-                    addLine(new Line(maxPosition, minPosition.add(1, 1, 0), color), lines);
-                    addLine(new Line(maxPosition, minPosition.add(0, 1, 1), color), lines);
+                    addCancellingLine(new Line(minPosition.add(0, 1, 0), minPosition.add(1, 1, 0), color), lines);
+                    addCancellingLine(new Line(minPosition.add(0, 1, 0), minPosition.add(0, 1, 1), color), lines);
+                    addCancellingLine(new Line(maxPosition, minPosition.add(1, 1, 0), color), lines);
+                    addCancellingLine(new Line(maxPosition, minPosition.add(0, 1, 1), color), lines);
                 }
                 case NORTH -> {
-                    addLine(new Line(minPosition, minPosition.add(1, 0, 0), color), lines);
-                    addLine(new Line(minPosition, minPosition.add(0, 1, 0), color), lines);
-                    addLine(new Line(minPosition.add(1, 1, 0), minPosition.add(1, 0, 0), color), lines);
-                    addLine(new Line(minPosition.add(1, 1, 0), minPosition.add(0, 1, 0), color), lines);
+                    addCancellingLine(new Line(minPosition, minPosition.add(1, 0, 0), color), lines);
+                    addCancellingLine(new Line(minPosition, minPosition.add(0, 1, 0), color), lines);
+                    addCancellingLine(new Line(minPosition.add(1, 1, 0), minPosition.add(1, 0, 0), color), lines);
+                    addCancellingLine(new Line(minPosition.add(1, 1, 0), minPosition.add(0, 1, 0), color), lines);
                 }
                 case SOUTH -> {
-                    addLine(new Line(minPosition.add(0, 0, 1), minPosition.add(1, 0, 1), color), lines);
-                    addLine(new Line(minPosition.add(0, 0, 1), minPosition.add(0, 1, 1), color), lines);
-                    addLine(new Line(maxPosition, minPosition.add(1, 0, 1), color), lines);
-                    addLine(new Line(maxPosition, minPosition.add(0, 1, 1), color), lines);
+                    addCancellingLine(new Line(minPosition.add(0, 0, 1), minPosition.add(1, 0, 1), color), lines);
+                    addCancellingLine(new Line(minPosition.add(0, 0, 1), minPosition.add(0, 1, 1), color), lines);
+                    addCancellingLine(new Line(maxPosition, minPosition.add(1, 0, 1), color), lines);
+                    addCancellingLine(new Line(maxPosition, minPosition.add(0, 1, 1), color), lines);
                 }
                 case WEST -> {
-                    addLine(new Line(minPosition, minPosition.add(0, 1, 0), color), lines);
-                    addLine(new Line(minPosition, minPosition.add(0, 0, 1), color), lines);
-                    addLine(new Line(minPosition.add(0, 1, 1), minPosition.add(0, 0, 1), color), lines);
-                    addLine(new Line(minPosition.add(0, 1, 1), minPosition.add(0, 1, 0), color), lines);
+                    addCancellingLine(new Line(minPosition, minPosition.add(0, 1, 0), color), lines);
+                    addCancellingLine(new Line(minPosition, minPosition.add(0, 0, 1), color), lines);
+                    addCancellingLine(new Line(minPosition.add(0, 1, 1), minPosition.add(0, 0, 1), color), lines);
+                    addCancellingLine(new Line(minPosition.add(0, 1, 1), minPosition.add(0, 1, 0), color), lines);
                 }
                 case EAST -> {
-                    addLine(new Line(minPosition.add(1, 0, 0), minPosition.add(1, 1, 0), color), lines);
-                    addLine(new Line(minPosition.add(1, 0, 0), minPosition.add(1, 0, 1), color), lines);
-                    addLine(new Line(maxPosition, minPosition.add(1, 1, 0), color), lines);
-                    addLine(new Line(maxPosition, minPosition.add(1, 0, 1), color), lines);
+                    addCancellingLine(new Line(minPosition.add(1, 0, 0), minPosition.add(1, 1, 0), color), lines);
+                    addCancellingLine(new Line(minPosition.add(1, 0, 0), minPosition.add(1, 0, 1), color), lines);
+                    addCancellingLine(new Line(maxPosition, minPosition.add(1, 1, 0), color), lines);
+                    addCancellingLine(new Line(maxPosition, minPosition.add(1, 0, 1), color), lines);
                 }
             }
         });
@@ -117,7 +130,7 @@ public final class RenderManager {
         lines.clear();
     }
 
-    private static void addLine(Line line, Set<Line> lines) {
+    private static void addCancellingLine(Line line, Set<Line> lines) {
         if (!lines.add(line)) {
             lines.remove(line);
         }

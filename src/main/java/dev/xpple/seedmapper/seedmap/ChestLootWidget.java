@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class ChestLootWidget {
 
         int minX = this.x + 8;
         int minY = this.y + 6;
-        guiGraphicsExtractor.text(font, title, minX, minY, -1);
+        guiGraphicsExtractor.text(font, title, minX, minY, CommonColors.WHITE);
 
         int titleWidth = font.width(title.getVisualOrderText());
         if (mouseX >= minX && mouseX <= minX + titleWidth && mouseY >= minY && mouseY <= minY + font.lineHeight) {

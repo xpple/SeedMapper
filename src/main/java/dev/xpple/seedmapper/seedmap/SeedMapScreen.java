@@ -31,6 +31,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
@@ -121,7 +122,7 @@ public class SeedMapScreen extends Screen {
 
         SeedIdentifierWithDimension seedIdentifierWithDimension = this.seedMapRenderer.getSeedMapData().getSeedIdentifierWithDimension();
         Component seedComponent = Component.translatable("seedMap.seed", accent(Long.toString(seedIdentifierWithDimension.seed())), Cubiomes.mc2str(seedIdentifierWithDimension.version()).getString(0), ExtraComponentUtils.formatGeneratorFlags(seedIdentifierWithDimension.generatorFlags()));
-        guiGraphicsExtractor.text(this.font, seedComponent, this.horizontalPadding(), this.verticalPadding() - this.font.lineHeight - 1, -1);
+        guiGraphicsExtractor.text(this.font, seedComponent, this.horizontalPadding(), this.verticalPadding() - this.font.lineHeight - 1, CommonColors.WHITE);
 
         this.seedMapRenderer.renderBiomes(guiGraphicsExtractor);
         guiGraphicsExtractor.nextStratum();
@@ -132,7 +133,7 @@ public class SeedMapScreen extends Screen {
         this.seedMapRenderer.drawPlayerIndicator(guiGraphicsExtractor);
         guiGraphicsExtractor.nextStratum();
         if (this.markerWidget != null && this.markerWidget.withinBounds()) {
-            this.markerWidget.render(guiGraphicsExtractor, -1);
+            this.markerWidget.render(guiGraphicsExtractor, CommonColors.WHITE);
         }
         if (this.chestLootWidget != null) {
             this.chestLootWidget.render(guiGraphicsExtractor, mouseX, mouseY, this.font);
@@ -147,7 +148,7 @@ public class SeedMapScreen extends Screen {
         if (this.displayCoordinatesCopiedTicks > 0) {
             coordinates = Component.translatable("seedMap.coordinatesCopied", coordinates);
         }
-        guiGraphicsExtractor.text(this.font, coordinates, this.horizontalPadding(), this.verticalPadding() + this.seedMapRenderer.seedMapHeight + 1, -1);
+        guiGraphicsExtractor.text(this.font, coordinates, this.horizontalPadding(), this.verticalPadding() + this.seedMapRenderer.seedMapHeight + 1, CommonColors.WHITE);
     }
 
     private void createFeatureToggles() {

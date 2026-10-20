@@ -28,9 +28,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.foreign.Arena;
@@ -99,7 +102,11 @@ public class HighlightCommand {
                 .then(argument("cave", caveCarver())
                     .executes(ctx -> highlightCave(CustomClientCommandSource.of(ctx.getSource()), getCaveCarver(ctx, "cave")))
                     .then(argument("chunks", integer(0, 10))
-                        .executes(ctx -> submit(() -> highlightCave(CustomClientCommandSource.of(ctx.getSource()), getCaveCarver(ctx, "cave"), getInteger(ctx, "chunks"))))))));
+                        .executes(ctx -> submit(() -> highlightCave(CustomClientCommandSource.of(ctx.getSource()), getCaveCarver(ctx, "cave"), getInteger(ctx, "chunks")))))))
+            .then(literal("slimechunk")
+                .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource())))
+                .then(argument("chunks", integer(0, 20))
+                    .executes(ctx -> highlightSlimeChunk(CustomClientCommandSource.of(ctx.getSource()), getInteger(ctx, "chunks"))))));
     }
 
     private static int highlightBlock(CustomClientCommandSource source, int block) throws CommandSyntaxException {
@@ -188,7 +195,7 @@ public class HighlightCommand {
                     .toList();
                 count[0] += blockOres.size();
                 source.getClient().schedule(() -> {
-                    RenderManager.drawBoxes(blockOres, color);
+                    RenderManager.drawCancellingBoxes(blockOres, color);
                     if (MixinConfigPlugin.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(blockOres);
                     }
@@ -257,7 +264,7 @@ public class HighlightCommand {
                     Cubiomes.freePos3List(pos3List);
                 }
                 count[0] += ores.size();
-                RenderManager.drawBoxes(ores, Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(OreConfig.oreBlock(oreConfig)), 0xFFFFFF));
+                RenderManager.drawCancellingBoxes(ores, Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(OreConfig.oreBlock(oreConfig)), 0xFFFFFF));
                 source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(ores.size())), ExtraComponentUtils.formatXZ(chunkX, chunkZ)));
                 return false;
             });
@@ -315,7 +322,7 @@ public class HighlightCommand {
                     }
                     count[0] += positions.size();
                     int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), 0xFFFFFF);
-                    RenderManager.drawBoxes(positions, color);
+                    RenderManager.drawCancellingBoxes(positions, color);
                     if (MixinConfigPlugin.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(positions);
                     }
@@ -396,7 +403,7 @@ public class HighlightCommand {
                     }
                 }
             }
-            RenderManager.drawBoxes(blocks, 0xFF_FF0000);
+            RenderManager.drawCancellingBoxes(blocks, 0xFF_FF0000);
             return blocks.size();
         }
     }
@@ -451,7 +458,7 @@ public class HighlightCommand {
                     ys.add(new BlockPos(x, y, z));
                 }
             }
-            RenderManager.drawFaces(ys, 0xFF_FF0000, Direction.UP);
+            RenderManager.drawCancellingFaces(ys, 0xFF_FF0000, Direction.UP);
             return ys.size();
         }
     }
@@ -553,9 +560,35 @@ public class HighlightCommand {
             blocks.add(new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3)));
         }
         Cubiomes.freePos3List(pos3List);
-        RenderManager.drawBoxes(blocks, 0xFF_FF0000);
+        RenderManager.drawCancellingBoxes(blocks, 0xFF_FF0000);
         source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.carver.success", accent(String.valueOf(blocks.size())))));
         return blocks.size();
+    }
+
+    private static int highlightSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
+        return highlightSlimeChunk(source, 0);
+    }
+
+    private static int highlightSlimeChunk(CustomClientCommandSource source, int chunkRange) throws CommandSyntaxException {
+        long seed = source.getSeed().getSecond().seed();
+
+        Vec3 sourcePosition = source.getPosition();
+        ChunkPos centerChunk = ChunkPos.containing(BlockPos.containing(sourcePosition));
+
+        List<AABB> slimeChunks = new ArrayList<>();
+        SpiralLoop.spiral(centerChunk.x(), centerChunk.z(), chunkRange, (chunkX, chunkZ) -> {
+            boolean slimeChunk = Cubiomes.isSlimeChunk(seed, chunkX, chunkZ) != 0;
+            if (slimeChunk) {
+                ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
+                Vec3 begin = new Vec3(chunkPos.getMinBlockX(), sourcePosition.y, chunkPos.getMinBlockZ());
+                slimeChunks.add(new AABB(begin, begin.add(SectionPos.SECTION_SIZE, 0, SectionPos.SECTION_SIZE)));
+            }
+            return false;
+        });
+
+        RenderManager.drawRectangles(slimeChunks, CommonColors.GREEN);
+
+        return slimeChunks.size();
     }
 
     @FunctionalInterface
