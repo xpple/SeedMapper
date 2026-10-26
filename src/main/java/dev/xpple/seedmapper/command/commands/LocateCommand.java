@@ -30,6 +30,7 @@ import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
 import dev.xpple.seedmapper.util.SpiralSpliterator;
 import dev.xpple.seedmapper.util.TwoDTree;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
@@ -72,7 +73,22 @@ public class LocateCommand {
 
     private static final int MAX_CHUNK_RADIUS = 6400;
 
-    public static final Set<Integer> LOOT_SUPPORTED_STRUCTURES = Set.of(Cubiomes.Treasure(), Cubiomes.Desert_Pyramid(), Cubiomes.End_City(), Cubiomes.Igloo(), Cubiomes.Jungle_Pyramid(), Cubiomes.Ruined_Portal(), Cubiomes.Ruined_Portal_N(), Cubiomes.Fortress(), Cubiomes.Bastion(), Cubiomes.Outpost(), Cubiomes.Shipwreck(), Cubiomes.Stronghold(), Cubiomes.Abandoned_Camp());
+    public static final IntSet LOOT_SUPPORTED_STRUCTURES = IntSet.of(
+        Cubiomes.Treasure(),
+        Cubiomes.Desert_Pyramid(),
+        Cubiomes.End_City(),
+        Cubiomes.Igloo(),
+        Cubiomes.Jungle_Pyramid(),
+        Cubiomes.Ruined_Portal(),
+        Cubiomes.Ruined_Portal_N(),
+        Cubiomes.Fortress(),
+        Cubiomes.Bastion(),
+        Cubiomes.Outpost(),
+        Cubiomes.Shipwreck(),
+        Cubiomes.Stronghold(),
+        Cubiomes.Abandoned_Camp(),
+        Cubiomes.Mineshaft()
+    );
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("sm:locate")
@@ -356,7 +372,8 @@ public class LocateCommand {
 
             record StructureIterationState(MemorySegment structureConfig, StructureChecks.GenerationCheck generationCheck, SpiralSpliterator iterator) {
             }
-            List<StructureIterationState> structureStates = LOOT_SUPPORTED_STRUCTURES.stream()
+            List<StructureIterationState> structureStates = LOOT_SUPPORTED_STRUCTURES.intStream()
+                .boxed()
                 .<MemorySegment>mapMulti((s, consumer) -> {
                     MemorySegment structureConfig = StructureConfig.allocate(arena);
                     if (Cubiomes.getStructureConfig(s, version, structureConfig) != 0) {
