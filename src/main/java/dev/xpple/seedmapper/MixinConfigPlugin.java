@@ -15,7 +15,8 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
     );
 
     private static final Set<String> DEV_ONLY_MIXINS = Set.of(
-        "dev.xpple.seedmapper.mixin.RandomizableContainerMixin"
+        "dev.xpple.seedmapper.mixin.RandomizableContainerMixin",
+        "dev.xpple.seedmapper.mixin.ContainerEntityMixin"
     );
 
     @Override
