@@ -39,7 +39,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import org.jspecify.annotations.Nullable;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -542,8 +541,7 @@ public class LocateCommand {
                 throw CommandExceptions.ORE_VEIN_WRONG_VERSION_EXCEPTION.create();
             }
             ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
-            @Nullable BlockPos[] pos = {null};
-            SpiralLoop.spiral(center.x(), center.z(), MAX_CHUNK_RADIUS, (chunkX, chunkZ) -> {
+            BlockPos pos = SpiralLoop.spiral(center.x(), center.z(), MAX_CHUNK_RADIUS, (chunkX, chunkZ) -> {
                 int minX = chunkX << 4;
                 int minZ = chunkZ << 4;
 
@@ -556,19 +554,18 @@ public class LocateCommand {
                             }
                             boolean isCopperVein = block == Cubiomes.RAW_COPPER_BLOCK() || block == Cubiomes.COPPER_ORE() || block == Cubiomes.GRANITE();
                             if (wantCopperVein == isCopperVein) {
-                                pos[0] = new BlockPos(minX + x, y, minZ + z);
-                                return true;
+                                return new BlockPos(minX + x, y, minZ + z);
                             }
                         }
                     }
                 }
-                return false;
+                return null;
             });
-            if (pos[0] == null) {
+            if (pos == null) {
                 throw CommandExceptions.NO_ORE_VEIN_FOUND_EXCEPTION.create(MAX_CHUNK_RADIUS);
             }
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt", ExtraComponentUtils.formatXYZ(pos[0].getX(), pos[0].getY(), pos[0].getZ(), Component.translatable("command.locate.oreVein.copy")))));
+            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.locate.oreVein.foundAt", ExtraComponentUtils.formatXYZ(pos.getX(), pos.getY(), pos.getZ(), Component.translatable("command.locate.oreVein.copy")))));
 
             return Command.SINGLE_SUCCESS;
         }

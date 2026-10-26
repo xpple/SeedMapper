@@ -202,7 +202,7 @@ public class HighlightCommand {
                     source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ExtraComponentUtils.formatXZ(chunkX, chunkZ)));
                 });
 
-                return false;
+                return null;
             });
 
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.block.success", accent(String.valueOf(count[0])))));
@@ -243,13 +243,13 @@ public class HighlightCommand {
                 }
 
                 if (biomes.stream().noneMatch(biome -> Cubiomes.isViableOreBiome(version, ore, biome) != 0)) {
-                    return false;
+                    return null;
                 }
 
                 MemorySegment oreConfig = OreConfig.allocate(arena);
                 // just do biomes.getFirst() because in 1.17 there is only one, and in 1.18 it does not matter
                 if (Cubiomes.getOreConfig(ore, version, biomes.getFirst(), oreConfig) == 0) {
-                    return false;
+                    return null;
                 }
 
                 Set<BlockPos> ores = new HashSet<>();
@@ -266,7 +266,7 @@ public class HighlightCommand {
                 count[0] += ores.size();
                 RenderManager.drawCancellingBoxes(ores, Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(OreConfig.oreBlock(oreConfig)), 0xFFFFFF));
                 source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(ores.size())), ExtraComponentUtils.formatXZ(chunkX, chunkZ)));
-                return false;
+                return null;
             });
 
             source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.block.success", accent(String.valueOf(count[0])))));
@@ -310,7 +310,7 @@ public class HighlightCommand {
                         }
                     }
                 }
-                return false;
+                return null;
             });
 
             int[] count = {0};
@@ -549,7 +549,7 @@ public class HighlightCommand {
                 Cubiomes.genBiomes(generator, biomes, range);
             }
             carverFunction.carve(chunkX, chunkZ, biomes, pos3List);
-            return false;
+            return null;
         });
 
         Set<BlockPos> blocks = new HashSet<>();
@@ -583,7 +583,7 @@ public class HighlightCommand {
                 Vec3 begin = new Vec3(chunkPos.getMinBlockX(), sourcePosition.y, chunkPos.getMinBlockZ());
                 slimeChunks.add(new AABB(begin, begin.add(SectionPos.SECTION_SIZE, 0, SectionPos.SECTION_SIZE)));
             }
-            return false;
+            return null;
         });
 
         RenderManager.drawRectangles(slimeChunks, CommonColors.GREEN);
