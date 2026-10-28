@@ -10,8 +10,10 @@ import com.mojang.datafixers.util.Pair;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.BuriedTreasureClusterData;
+import dev.xpple.seedmapper.feature.SinkholeFinder;
 import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.ChunkPos;
@@ -27,7 +29,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 
 import static dev.xpple.seedmapper.thread.LocatorThreadHelper.*;
 import static dev.xpple.seedmapper.util.ChatBuilder.*;
@@ -38,7 +42,9 @@ public class FindCommand {
         dispatcher.register(literal("sm:find")
             .then(literal("cluster")
                 .then(literal("buried_treasure")
-                    .executes(ctx -> submit(() -> findBuriedTreasureCluster(CustomClientCommandSource.of(ctx.getSource())))))));
+                    .executes(ctx -> submit(() -> findBuriedTreasureCluster(CustomClientCommandSource.of(ctx.getSource()))))))
+            .then(literal("sinkhole")
+                .executes(ctx -> submit(() -> findSinkhole(CustomClientCommandSource.of(ctx.getSource()))))));
     }
 
     /*
@@ -187,5 +193,33 @@ public class FindCommand {
 
             return results.size();
         }
+    }
+
+    private static int findSinkhole(CustomClientCommandSource source) throws CommandSyntaxException {
+        int version = source.getVersion();
+        if (version < Cubiomes.MC_1_18()) {
+            throw CommandExceptions.SINKHOLE_WRONG_VERSION_EXCEPTION.create();
+        }
+        if (source.getDimension() != Cubiomes.DIM_OVERWORLD()) {
+            throw CommandExceptions.INVALID_DIMENSION_EXCEPTION.create();
+        }
+        long seed = source.getSeed().getSecond().seed();
+        boolean largeBiomes = (source.getGeneratorFlags() & Cubiomes.LARGE_BIOMES()) != 0;
+        BlockPos origin = BlockPos.containing(source.getPosition());
+        Optional<SinkholeFinder.Hit> result;
+        try {
+            result = SinkholeFinder.find(seed, version, largeBiomes, origin.getX(), origin.getZ());
+        } catch (CancellationException cancelled) {
+            return 0;
+        }
+        source.getClient().schedule(() -> {
+            if (result.isEmpty()) {
+                source.sendError(Component.translatable("command.find.sinkhole.noResults"));
+                return;
+            }
+            SinkholeFinder.Hit hit = result.get();
+            source.sendFeedback(Component.translatable("command.find.sinkhole.success", ExtraComponentUtils.formatXZ(hit.x(), hit.z()), accent(Integer.toString(hit.floorY()))));
+        });
+        return result.isPresent() ? 1 : 0;
     }
 }

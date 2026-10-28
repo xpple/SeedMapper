@@ -38,6 +38,7 @@ public final class CommandExceptions {
     public static final SimpleCommandExceptionType ORE_VEIN_WRONG_VERSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.oreVeinWrongVersion"));
     public static final SimpleCommandExceptionType CANYON_WRONG_VERSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.canyonWrongVersion"));
     public static final SimpleCommandExceptionType CAVE_WRONG_VERSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.caveWrongVersion"));
+    public static final SimpleCommandExceptionType SINKHOLE_WRONG_VERSION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.sinkholeWrongVersion"));
     public static final SimpleCommandExceptionType LOOT_NOT_SUPPORTED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.lootNotSupported"));
     public static final SimpleCommandExceptionType LOOT_NOT_AVAILABLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.lootNotAvailable"));
     public static final SimpleCommandExceptionType COULD_NOT_DETERMINE_WORLD_IDENTIFIER = new SimpleCommandExceptionType(Component.translatable("commands.exceptions.couldNotDetermineWorldIdentifier"));
