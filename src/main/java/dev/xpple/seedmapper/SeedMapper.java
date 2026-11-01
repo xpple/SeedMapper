@@ -65,6 +65,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 public class SeedMapper implements ClientModInitializer {
@@ -108,7 +109,7 @@ public class SeedMapper implements ClientModInitializer {
         Path tempFile;
         try {
             tempFile = Files.createTempFile(libraryName, "");
-            Files.copy(MOD_CONTAINER.findPath(libraryName).orElseThrow(), tempFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(MOD_CONTAINER.findPath(libraryName).orElseThrow(() -> new NoSuchElementException("Could not find " + libraryName + " in " + MOD_CONTAINER.getRootPaths())), tempFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
