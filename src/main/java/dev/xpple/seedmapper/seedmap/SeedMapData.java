@@ -253,8 +253,8 @@ public class SeedMapData {
         ChunkPos chunkPos = tilePos.toChunkPos();
         int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale().val);
         for (int relChunkX = 0; relChunkX < chunksPerTile; relChunkX++) {
+            int minBlockX = SectionPos.sectionToBlockCoord(chunkPos.x() + relChunkX);
             for (int relChunkZ = 0; relChunkZ < chunksPerTile; relChunkZ++) {
-                int minBlockX = SectionPos.sectionToBlockCoord(chunkPos.x() + relChunkZ);
                 int minBlockZ = SectionPos.sectionToBlockCoord(chunkPos.z() + relChunkZ);
                 RandomSource rnd = this.oreVeinRandom.at(minBlockX, 0, minBlockZ);
                 BlockPos pos = new BlockPos(minBlockX + rnd.nextInt(SectionPos.SECTION_SIZE), 0, minBlockZ + rnd.nextInt(SectionPos.SECTION_SIZE));
