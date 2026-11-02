@@ -1,7 +1,7 @@
 ## Changelog
-- Added slime chunk highlighting (`/sm:highlight slimechunk [<chunks>]`). The chunks will be highlighted at your current Y level.
-- Added support for Mineshaft loot. You can now click Mineshafts in the seed map to view their loot. They will also appear in the results of `/sm:locate loot`. This in particular means that you can now search for Name Tags, since those generate in Mineshaft chests.
-- Made terrain rendering (only accessible in dev mode) much faster.
+- Added a sinkhole finder (`/sm:find sinkhole`). Sinkholes are formations that occur at very low depth values, where additionally the weirdness climate is extremely high in magnitude. The resulting terrain forms a very large open pit with steep sides. Up until 1.19.2 they would generate with lava pits in the center. After 1.19.2 the lava no longer generates but the large water lakes remain.
+- Fixed a bug with displaying ore veins on the seed map.
+- Fixed a bug where the seed map would use incorrect biome parameters.
 
 ## Mod compatibility
 |      | Mod JAR | Biomes | Structures | Loot | Ores | Slime chunks |
