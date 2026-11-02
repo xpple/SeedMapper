@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -66,6 +67,12 @@ public final class LocatorThreadHelper {
             Minecraft.getInstance().player.sendSystemMessage(Component.translatable("command.locate.taskStopped"));
         } else {
             Minecraft.getInstance().player.sendSystemMessage(error(Component.translatable("command.locate.noTaskRunning")));
+        }
+    }
+
+    public static void checkCancelled() throws CancellationException {
+        if (Thread.currentThread().isInterrupted()) {
+            throw new CancellationException();
         }
     }
 }
