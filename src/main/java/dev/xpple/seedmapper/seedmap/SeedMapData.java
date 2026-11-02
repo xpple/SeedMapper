@@ -97,7 +97,7 @@ public class SeedMapData {
         this.version = this.seedIdentifierWithDimension.version();
         this.generatorFlags = this.seedIdentifierWithDimension.generatorFlags();
         this.dimension = this.seedIdentifierWithDimension.dimension();
-        this.biomeSeedIdentifierWithDimension = new BiomeSeedIdentifierWithDimension(this.seed, this.version, this.generatorFlags, this.dimension);
+        this.biomeSeedIdentifierWithDimension = new BiomeSeedIdentifierWithDimension(this.seed, this.dimension, this.version, this.generatorFlags);
 
         this.structureGenerator = TerrainNoise.allocate(arena);
         Cubiomes.setupTerrainNoise(this.structureGenerator, this.version, this.generatorFlags);
