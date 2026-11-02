@@ -97,7 +97,7 @@ public class SeedMapData {
         this.version = this.seedIdentifierWithDimension.version();
         this.generatorFlags = this.seedIdentifierWithDimension.generatorFlags();
         this.dimension = this.seedIdentifierWithDimension.dimension();
-        this.biomeSeedIdentifierWithDimension = new BiomeSeedIdentifierWithDimension(this.seed, this.version, this.generatorFlags, this.dimension);
+        this.biomeSeedIdentifierWithDimension = new BiomeSeedIdentifierWithDimension(this.seed, this.dimension, this.version, this.generatorFlags);
 
         this.structureGenerator = TerrainNoise.allocate(arena);
         Cubiomes.setupTerrainNoise(this.structureGenerator, this.version, this.generatorFlags);
@@ -253,8 +253,8 @@ public class SeedMapData {
         ChunkPos chunkPos = tilePos.toChunkPos();
         int chunksPerTile = SectionPos.blockToSectionCoord(TilePos.SIZE_PIXELS * tilePos.biomeScale().val);
         for (int relChunkX = 0; relChunkX < chunksPerTile; relChunkX++) {
+            int minBlockX = SectionPos.sectionToBlockCoord(chunkPos.x() + relChunkX);
             for (int relChunkZ = 0; relChunkZ < chunksPerTile; relChunkZ++) {
-                int minBlockX = SectionPos.sectionToBlockCoord(chunkPos.x() + relChunkZ);
                 int minBlockZ = SectionPos.sectionToBlockCoord(chunkPos.z() + relChunkZ);
                 RandomSource rnd = this.oreVeinRandom.at(minBlockX, 0, minBlockZ);
                 BlockPos pos = new BlockPos(minBlockX + rnd.nextInt(SectionPos.SECTION_SIZE), 0, minBlockZ + rnd.nextInt(SectionPos.SECTION_SIZE));
