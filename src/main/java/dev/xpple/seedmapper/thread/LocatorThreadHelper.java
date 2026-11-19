@@ -36,6 +36,9 @@ public final class LocatorThreadHelper {
     }
 
     public static int submit(CheckedSupplier<Integer, CommandSyntaxException> task) throws CommandSyntaxException {
+        if (!Minecraft.getInstance().isSameThread()) {
+            throw new IllegalCallerException("Called from wrong thread " + Thread.currentThread());
+        }
         if (currentTask != null && !currentTask.isDone()) {
             throw CommandExceptions.ALREADY_BUSY_LOCATING_EXCEPTION.create();
         }
@@ -44,14 +47,18 @@ public final class LocatorThreadHelper {
                 return task.get();
             } catch (Throwable e) {
                 Player player = Minecraft.getInstance().player;
-                if (e instanceof CommandSyntaxException cse) {
-                    if (player != null) {
-                        Minecraft.getInstance().schedule(() -> player.sendSystemMessage(error((MutableComponent) cse.getRawMessage())));
+                switch (e) {
+                    case CommandSyntaxException cse -> {
+                        if (player != null) {
+                            Minecraft.getInstance().schedule(() -> player.sendSystemMessage(error((MutableComponent) cse.getRawMessage())));
+                        }
                     }
-                } else {
-                    LOGGER.error("An error occurred while executing one of SeedMapper's tasks!", e);
-                    if (player != null) {
-                        Minecraft.getInstance().schedule(() -> player.sendSystemMessage(error(Component.translatable("commands.exceptions.unknownError"))));
+                    case CancellationException _ -> {}
+                    default -> {
+                        LOGGER.error("An error occurred while executing one of SeedMapper's tasks!", e);
+                        if (player != null) {
+                            Minecraft.getInstance().schedule(() -> player.sendSystemMessage(error(Component.translatable("commands.exceptions.unknownError"))));
+                        }
                     }
                 }
                 return 0;
@@ -72,7 +79,7 @@ public final class LocatorThreadHelper {
 
     public static void checkCancelled() throws CancellationException {
         if (Thread.currentThread().isInterrupted()) {
-            throw new CancellationException();
+            throw new CancellationException("Task stopped by user.");
         }
     }
 }

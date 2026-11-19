@@ -24,6 +24,7 @@ import dev.xpple.seedmapper.command.arguments.CanyonCarverArgument;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
 import dev.xpple.seedmapper.seedmap.SeedMapData;
+import dev.xpple.seedmapper.thread.LocatorThreadHelper;
 import dev.xpple.seedmapper.util.BiomeSeedIdentifier;
 import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
@@ -140,6 +141,7 @@ public class LocateCommand {
             int[] ys = Mth.outFromOrigin(center.getY(), minY + 1, maxY + 1, BIOME_SEARCH_VERTICAL_STEP).toArray();
 
             BlockPos pos = SpiralLoop.spiral(center.getX(), center.getZ(), BIOME_SEARCH_RADIUS, BIOME_SEARCH_HORIZONTAL_STEP, (x, z) -> {
+                LocatorThreadHelper.checkCancelled();
                 for (int y : ys) {
                     if (Cubiomes.getBiomeAt(generator, 4, QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) == biome) {
                         return new BlockPos(x, y, z);
@@ -198,6 +200,7 @@ public class LocateCommand {
             MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
             MemorySegment structureVariant = StructureVariant.allocate(arena);
             Boolean found = SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
+                LocatorThreadHelper.checkCancelled();
                 if (!generationCheck.check(terrainNoise, x, z, structurePos)) {
                     return null;
                 }
@@ -434,6 +437,7 @@ public class LocateCommand {
                     }
 
                     boolean exhausted = !state.iterator.tryAdvance(pos -> {
+                        LocatorThreadHelper.checkCancelled();
                         if (!state.generationCheck.check(terrainNoise, pos.x(), pos.z(), structurePos)) {
                             return;
                         }
@@ -542,6 +546,7 @@ public class LocateCommand {
             }
             ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
             BlockPos pos = SpiralLoop.spiral(center.x(), center.z(), MAX_CHUNK_RADIUS, (chunkX, chunkZ) -> {
+                LocatorThreadHelper.checkCancelled();
                 int minX = chunkX << 4;
                 int minZ = chunkZ << 4;
 
@@ -596,6 +601,7 @@ public class LocateCommand {
             MemorySegment ccc = CanyonCarverConfig.allocate(arena);
             MemorySegment rnd = arena.allocate(Cubiomes.C_LONG_LONG);
             ChunkPos pos = SpiralLoop.spiral(center.x(), center.z(), MAX_CHUNK_RADIUS, (chunkX, chunkZ) -> {
+                LocatorThreadHelper.checkCancelled();
                 for (int canyonCarver : CanyonCarverArgument.CANYON_CARVERS.values()) {
                     if (Cubiomes.getCanyonCarverConfig(canyonCarver, version, ccc) == 0) {
                         continue;

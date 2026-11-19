@@ -19,6 +19,7 @@ import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.OreArgument;
 import dev.xpple.seedmapper.config.Configs;
 import dev.xpple.seedmapper.render.RenderManager;
+import dev.xpple.seedmapper.thread.LocatorThreadHelper;
 import dev.xpple.seedmapper.util.BaritoneIntegration;
 import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
@@ -153,6 +154,7 @@ public class HighlightCommand {
                     })
                     .sorted(Comparator.comparingInt(OreConfig::index))
                     .forEachOrdered(oreConfig -> {
+                        LocatorThreadHelper.checkCancelled();
                         int oreBlock = OreConfig.oreBlock(oreConfig);
                         int numReplaceBlocks = OreConfig.numReplaceBlocks(oreConfig);
                         MemorySegment replaceBlocks = OreConfig.replaceBlocks(oreConfig);
@@ -230,6 +232,7 @@ public class HighlightCommand {
 
             int[] count = {0};
             SpiralLoop.spiral(center.x(), center.z(), chunkRange, (chunkX, chunkZ) -> {
+                LocatorThreadHelper.checkCancelled();
                 List<Integer> biomes;
                 if (version <= Cubiomes.MC_1_17()) {
                     biomes = List.of(Cubiomes.getBiomeForOreGen(generator, chunkX, chunkZ, 0));
@@ -290,6 +293,7 @@ public class HighlightCommand {
             ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
             Map<BlockPos, Integer> blocks = new HashMap<>();
             SpiralLoop.spiral(center.x(), center.z(), chunkRange, (chunkX, chunkZ) -> {
+                LocatorThreadHelper.checkCancelled();
                 LevelChunk chunk = source.getLevel().getChunkSource().getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
                 boolean doAirCheck = Configs.OreAirCheck && chunk != null;
                 int minX = chunkX << 4;
@@ -403,6 +407,7 @@ public class HighlightCommand {
                     }
                 }
             }
+            LocatorThreadHelper.checkCancelled();
             RenderManager.drawCancellingBoxes(blocks, 0xFF_FF0000);
             return blocks.size();
         }
@@ -458,6 +463,7 @@ public class HighlightCommand {
                     ys.add(new BlockPos(x, y, z));
                 }
             }
+            LocatorThreadHelper.checkCancelled();
             RenderManager.drawCancellingFaces(ys, 0xFF_FF0000, Direction.UP);
             return ys.size();
         }
@@ -542,6 +548,7 @@ public class HighlightCommand {
 
         ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
         SpiralLoop.spiral(center.x(), center.z(), chunkRange, (chunkX, chunkZ) -> {
+            LocatorThreadHelper.checkCancelled();
             if (version <= Cubiomes.MC_1_17_1()) {
                 assert range != null;
                 Range.x(range, chunkX - 8);

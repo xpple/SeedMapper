@@ -11,6 +11,7 @@ import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.feature.BuriedTreasureClusterData;
 import dev.xpple.seedmapper.feature.SinkholeFinder;
+import dev.xpple.seedmapper.thread.LocatorThreadHelper;
 import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
@@ -103,6 +104,7 @@ public class FindCommand {
             BuriedTreasureClusterData.access(arena).forEach(formationEntry -> {
                 MemorySegment structureSeedsSegment = formationEntry.structureSeeds();
                 for (int i = 0; i < formationEntry.structureSeedsLen(); i++) {
+                    LocatorThreadHelper.checkCancelled();
                     long formationStructureSeed = structureSeedsSegment.getAtIndex(ValueLayout.JAVA_LONG.withOrder(ByteOrder.BIG_ENDIAN), i);
 
                     long offset = formationStructureSeed - structureSeed;
