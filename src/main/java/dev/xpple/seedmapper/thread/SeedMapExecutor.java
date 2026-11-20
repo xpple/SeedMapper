@@ -5,9 +5,9 @@ import dev.xpple.seedmapper.config.Configs;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
@@ -17,7 +17,7 @@ public class SeedMapExecutor {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final ExecutorService seedMapExecutor = Executors.newFixedThreadPool(Configs.SeedMapThreads);
-    private final List<CompletableFuture<?>> futures = new ArrayList<>();
+    private final Set<CompletableFuture<?>> futures = ConcurrentHashMap.newKeySet();
 
     public <T> CompletableFuture<@Nullable T> submitCalculation(Supplier<@Nullable T> task) {
         CompletableFuture<@Nullable T> future = CompletableFuture.supplyAsync(() -> {
@@ -29,6 +29,7 @@ public class SeedMapExecutor {
             }
         }, this.seedMapExecutor);
         this.futures.add(future);
+        future.whenComplete((_, _) -> this.futures.remove(future));
         return future;
     }
 

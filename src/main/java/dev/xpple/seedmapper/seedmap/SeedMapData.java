@@ -10,8 +10,8 @@ import com.github.cubiomes.StructureConfig;
 import com.github.cubiomes.TerrainNoise;
 import dev.xpple.seedmapper.SeedMapper;
 import dev.xpple.seedmapper.command.arguments.CanyonCarverArgument;
-import dev.xpple.seedmapper.command.commands.LocateCommand;
 import dev.xpple.seedmapper.config.Configs;
+import dev.xpple.seedmapper.feature.StrongholdCache;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.thread.SeedMapCache;
 import dev.xpple.seedmapper.thread.SeedMapExecutor;
@@ -57,7 +57,6 @@ public class SeedMapData {
 
     private static final RenewableSoftReference<Object2ObjectMap<BiomeSeedIdentifierWithDimension, ConcurrentHashMap<ObjectIntPair<TilePos>, int[]>>> biomeDataCache = new RenewableSoftReference<>(Object2ObjectOpenHashMap::new);
     private static final RenewableSoftReference<Object2ObjectMap<SeedIdentifierWithDimension, Object2ObjectMap<ChunkPos, ChunkStructureData>>> structureDataCache = new RenewableSoftReference<>(Object2ObjectOpenHashMap::new);
-    public static final RenewableSoftReference<Object2ObjectMap<BiomeSeedIdentifier, @Nullable TwoDTree>> strongholdDataCache = new RenewableSoftReference<>(Object2ObjectOpenHashMap::new);
     private static final RenewableSoftReference<Object2ObjectMap<BiomeSeedIdentifier, ConcurrentHashMap<TilePos, OreVeinData>>> oreVeinDataCache = new RenewableSoftReference<>(Object2ObjectOpenHashMap::new);
     private static final RenewableSoftReference<Object2ObjectMap<BiomeSeedIdentifier, Object2ObjectMap<TilePos, BitSet>>> canyonDataCache = new RenewableSoftReference<>(Object2ObjectOpenHashMap::new);
     private static final RenewableSoftReference<Object2ObjectMap<BiomeSeedIdentifier, ConcurrentHashMap<TilePos, BitSet>>> slimeChunkDataCache = new RenewableSoftReference<>(Object2ObjectOpenHashMap::new);
@@ -144,11 +143,11 @@ public class SeedMapData {
         this.oreVeinCache = new SeedMapCache<>(oreVeinDataCache.get().computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> new ConcurrentHashMap<>()), this.seedMapExecutor);
         this.canyonCache = canyonDataCache.get().computeIfAbsent(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), _ -> new Object2ObjectOpenHashMap<>());
 
-        if (this.availableFeatures.contains(MapFeature.STRONGHOLD) && !strongholdDataCache.get().containsKey(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier())) {
-            this.seedMapExecutor.submitCalculation(() -> LocateCommand.calculateStrongholds(this.seed, this.version, this.generatorFlags))
+        if (this.availableFeatures.contains(MapFeature.STRONGHOLD) && !StrongholdCache.cache.get().containsKey(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier())) {
+            this.seedMapExecutor.submitCalculation(() -> StrongholdCache.calculateStrongholds(this.seed, this.version, this.generatorFlags))
                 .thenAccept(tree -> {
                     if (tree != null) {
-                        strongholdDataCache.get().put(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), tree);
+                        StrongholdCache.cache.get().put(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier(), tree);
                     }
                 });
         }
@@ -175,7 +174,7 @@ public class SeedMapData {
     }
 
     public @Nullable TwoDTree getStrongholdData() {
-        return strongholdDataCache.get().get(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier());
+        return StrongholdCache.cache.get().get(this.biomeSeedIdentifierWithDimension.biomeSeedIdentifier());
     }
 
     public @Nullable OreVeinData getOreVeinData(TilePos tilePos) {

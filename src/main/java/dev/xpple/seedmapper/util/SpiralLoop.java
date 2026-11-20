@@ -1,5 +1,6 @@
 package dev.xpple.seedmapper.util;
 
+import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
 public final class SpiralLoop {
@@ -15,7 +16,7 @@ public final class SpiralLoop {
         int x = centerX, dx = 0, z = centerZ, dz = -step;
         final int leftBoundX = centerX - radius, rightBoundX = centerX + radius;
         final int bottomBoundZ = centerZ - radius, topBoundZ = centerZ + radius;
-        final long max = (2L * radius + 1) * (2L * radius + 1);
+        final long max = Mth.square((2L * Mth.floorDiv(radius, step) + 1));
         for (long i = 0; i < max; i++) {
             if (leftBoundX <= x && x <= rightBoundX && bottomBoundZ <= z && z <= topBoundZ) {
                 T obj = callback.produce(x, z);

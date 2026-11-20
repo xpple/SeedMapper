@@ -9,7 +9,6 @@ import com.github.cubiomes.OreVeinParameters;
 import com.github.cubiomes.Piece;
 import com.github.cubiomes.Pos;
 import com.github.cubiomes.Pos3;
-import com.github.cubiomes.StrongholdIter;
 import com.github.cubiomes.StructureConfig;
 import com.github.cubiomes.StructureSaltConfig;
 import com.github.cubiomes.StructureVariant;
@@ -21,11 +20,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.seedmapper.command.CommandExceptions;
 import dev.xpple.seedmapper.command.CustomClientCommandSource;
 import dev.xpple.seedmapper.command.arguments.CanyonCarverArgument;
+import dev.xpple.seedmapper.feature.StrongholdCache;
 import dev.xpple.seedmapper.feature.StructureChecks;
 import dev.xpple.seedmapper.feature.StructureVariantFeedbackHelper;
-import dev.xpple.seedmapper.seedmap.SeedMapData;
 import dev.xpple.seedmapper.thread.LocatorThreadHelper;
-import dev.xpple.seedmapper.util.BiomeSeedIdentifier;
 import dev.xpple.seedmapper.util.ExtraComponentUtils;
 import dev.xpple.seedmapper.util.SeedIdentifier;
 import dev.xpple.seedmapper.util.SpiralLoop;
@@ -199,7 +197,7 @@ public class LocateCommand {
             MemorySegment structurePos = Pos.allocate(arena);
             MemorySegment pieces = Piece.allocateArray(StructureChecks.MAX_END_CITY_AND_FORTRESS_PIECES, arena);
             MemorySegment structureVariant = StructureVariant.allocate(arena);
-            Boolean found = SpiralLoop.spiral(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize, (x, z) -> {
+            Boolean found = SpiralLoop.spiral(Mth.floorDiv(center.getX(), regionSize), Mth.floorDiv(center.getZ(), regionSize), Mth.floorDiv(Level.MAX_LEVEL_SIZE, regionSize), (x, z) -> {
                 LocatorThreadHelper.checkCancelled();
                 if (!generationCheck.check(terrainNoise, x, z, structurePos)) {
                     return null;
@@ -268,7 +266,7 @@ public class LocateCommand {
 
         BlockPos position = BlockPos.containing(source.getPosition());
 
-        TwoDTree tree = SeedMapData.strongholdDataCache.get().computeIfAbsent(new BiomeSeedIdentifier(seed.seed(), version, generatorFlags), _ -> calculateStrongholds(seed.seed(), version, generatorFlags));
+        TwoDTree tree = StrongholdCache.compute(seed.seed(), version, generatorFlags);
 
         BlockPos pos = tree.nearestTo(position.atY(0));
         assert pos != null;
@@ -305,28 +303,6 @@ public class LocateCommand {
             }
             return numPieces;
         }
-    }
-
-    public static TwoDTree calculateStrongholds(long seed, int version, int generatorFlags) {
-        TwoDTree tree = new TwoDTree();
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment strongholdIter = StrongholdIter.allocate(arena);
-            Cubiomes.initFirstStronghold(arena, strongholdIter, version, seed);
-            MemorySegment generator = Generator.allocate(arena);
-            Cubiomes.setupGenerator(generator, version, generatorFlags);
-            Cubiomes.applySeed(generator, Cubiomes.DIM_OVERWORLD(), seed);
-
-            final int count = version <= Cubiomes.MC_1_8() ? 3 : 128;
-            for (int i = 0; i < count; i++) {
-                if (Cubiomes.nextStronghold(strongholdIter, generator) == 0) {
-                    break;
-                }
-                MemorySegment pos = StrongholdIter.pos(strongholdIter);
-                tree.insert(new BlockPos(Pos.x(pos), 0, Pos.z(pos)));
-            }
-        }
-        tree.balance();
-        return tree;
     }
 
     private static int locateSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {
@@ -386,7 +362,7 @@ public class LocateCommand {
                 .sorted(Comparator.comparingInt(StructureConfig::regionSize))
                 .map(sconf -> {
                     int regionSize = StructureConfig.regionSize(sconf) << 4;
-                    return new StructureIterationState(sconf, StructureChecks.getGenerationCheck(StructureConfig.structType(sconf)), new SpiralSpliterator(center.getX() / regionSize, center.getZ() / regionSize, Level.MAX_LEVEL_SIZE / regionSize));
+                    return new StructureIterationState(sconf, StructureChecks.getGenerationCheck(StructureConfig.structType(sconf)), new SpiralSpliterator(Mth.floorDiv(center.getX(), regionSize), Mth.floorDiv(center.getZ(), regionSize), Mth.floorDiv(Level.MAX_LEVEL_SIZE, regionSize)));
                 })
                 .collect(Collectors.toList());
 
