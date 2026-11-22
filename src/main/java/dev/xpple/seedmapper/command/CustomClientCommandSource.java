@@ -27,6 +27,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import oshi.annotation.concurrent.ThreadSafe;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -64,9 +65,17 @@ public class CustomClientCommandSource extends ClientSuggestionProvider implemen
     }
 
     @Override
+    @ThreadSafe
     public void sendFeedback(Component message) {
-        this.client.gui.hud.getChat().addClientSystemMessage(message);
-        this.client.getNarrator().saySystemChatQueued(message);
+        Runnable action = () -> {
+            this.client.gui.hud.getChat().addClientSystemMessage(message);
+            this.client.getNarrator().saySystemChatQueued(message);
+        };
+        if (this.client.isSameThread()) {
+            action.run();
+        } else {
+            this.client.schedule(action);
+        }
     }
 
     @Override

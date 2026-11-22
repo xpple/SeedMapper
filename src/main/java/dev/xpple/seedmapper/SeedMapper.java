@@ -110,6 +110,7 @@ public class SeedMapper implements ClientModInitializer {
         try {
             tempFile = Files.createTempFile(libraryName, "");
             Files.copy(MOD_CONTAINER.findPath(libraryName).orElseThrow(() -> new NoSuchElementException("Could not find " + libraryName + " in " + MOD_CONTAINER.getRootPaths())), tempFile, StandardCopyOption.REPLACE_EXISTING);
+            tempFile.toFile().deleteOnExit();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

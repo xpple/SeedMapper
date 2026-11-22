@@ -259,13 +259,20 @@ public class VaultCommand {
                 Cubiomes.set_loot_prng_type(lootTableContext, Cubiomes.XOROSHIRO());
                 Cubiomes.set_internal_loot_seed(lootTableContext, state);
 
+                for (int i = 0; i < this.startingOffset; i++) {
+                    Cubiomes.generate_loot(lootTableContext);
+                }
+
                 offsetLoop:
-                for (int offset = this.startingOffset; offset < Configs.MaxVaultAttempts; offset++) {
+                for (int i = 0; i < Configs.MaxVaultAttempts; i++) {
                     List<ItemStack> generatedLoot = generateLoot(lootTableContext, enchantmentRegistry, null);
-                    List<ItemStack> reversed = ejectedItems.reversed();
-                    for (int i = 0; i < reversed.size(); i++) {
-                        ItemStack ejectedItem = reversed.get(i);
-                        ItemStack generatedItem = generatedLoot.get(i);
+                    List<ItemStack> reversed = this.ejectedItems.reversed();
+                    if (reversed.size() != generatedLoot.size()) {
+                        continue;
+                    }
+                    for (int j = 0; j < reversed.size(); j++) {
+                        ItemStack ejectedItem = reversed.get(j);
+                        ItemStack generatedItem = generatedLoot.get(j);
                         if (!ItemStack.isSameItem(ejectedItem, generatedItem)) {
                             continue offsetLoop;
                         }
@@ -285,7 +292,7 @@ public class VaultCommand {
                         }
                     }
 
-                    source.sendFeedback(Component.translatable("command.vault.computedOffset", ExtraComponentUtils.formatNumber(offset + 1)));
+                    source.sendFeedback(Component.translatable("command.vault.computedOffset", ExtraComponentUtils.formatNumber(this.startingOffset + i + 1)));
                     source.sendFeedback(Component.translatable("command.vault.sequenceState", formatState(RandomSource.xr(LootTableContext.prng_state(lootTableContext)))));
                     return;
                 }

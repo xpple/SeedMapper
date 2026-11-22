@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
 
 public class FeatureToggleWidget extends Button {
 
@@ -19,7 +20,7 @@ public class FeatureToggleWidget extends Button {
 
     @Override
     protected void extractContents(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
-        int color = 0xff_ffffff;
+        int color = CommonColors.WHITE;
         if (!Configs.ToggledFeatures.contains(this.feature)) {
             color = ARGB.color(255 >> 1, 255, 255, 255);
         }

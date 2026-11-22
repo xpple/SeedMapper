@@ -18,35 +18,61 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import oshi.annotation.concurrent.ThreadSafe;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+@ThreadSafe
 public final class RenderManager {
 
     private RenderManager() {
     }
 
+    // allow concurrent writes (as CacheBuilder is concurrent), but lock rebuilds
+    // this means that adding uses the read lock, and rebuilding uses the write lock
+    // clears are also use the write lock to prevent interrupting batched additions
+    private static final ReadWriteLock LINES_LOCK = new ReentrantReadWriteLock();
+
     private static final RenderStateDataKey<Set<Line>> LINES_SET_KEY = RenderStateDataKey.create(() -> "SeedMapper lines set");
 
-    private static Set<Line> lines = Collections.emptySet();
+    private static volatile Set<Line> lines = Collections.emptySet();
     static {
         rebuildLineSet();
     }
 
     public static void rebuildLineSet() {
-        Set<Line> temp = lines;
-        lines = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Configs.HighlightDuration).<Line, Boolean>build().asMap());
-        lines.addAll(temp);
-        temp.clear();
+        Lock writeLock = LINES_LOCK.writeLock();
+        writeLock.lock();
+        try {
+            Set<Line> next = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Configs.HighlightDuration).<Line, Boolean>build().asMap());
+            next.addAll(lines);
+            lines = next;
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    private static void addLines(Collection<Line> additions) {
+        Lock readLock = LINES_LOCK.readLock();
+        readLock.lock();
+        try {
+            lines.addAll(additions);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public static void drawCancellingBoxes(Collection<BlockPos> posBatch, int color) {
         Collection<Line> batchLines = CancellingEdges.create(posBatch, color, null);
         if (batchLines != null) {
-            RenderManager.lines.addAll(batchLines);
+            addLines(batchLines);
             return;
         }
 
@@ -68,25 +94,27 @@ public final class RenderManager {
             addCancellingLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(0, size.y(), 0), color), lines);
             addCancellingLine(new Line(minPosition.add(0, size.y(), size.z()), minPosition.add(size.x(), size.y(), size.z()), color), lines);
         });
-        RenderManager.lines.addAll(lines);
+        addLines(lines);
     }
 
     public static void drawRectangles(Collection<AABB> rectangles, int color) {
+        Collection<Line> batchLines = new ArrayList<>();
         for (AABB rectangle : rectangles) {
             double y = (rectangle.minY + rectangle.maxY) / 2;
             Vec3 minPosition = new Vec3(rectangle.minX, y, rectangle.minZ);
             Vec3 maxPosition = new Vec3(rectangle.maxX, y, rectangle.maxZ);
-            lines.add(new Line(minPosition, new Vec3(maxPosition.x, y, minPosition.z), color));
-            lines.add(new Line(minPosition, new Vec3(minPosition.x, y, maxPosition.z), color));
-            lines.add(new Line(maxPosition, new Vec3(maxPosition.x, y, minPosition.z), color));
-            lines.add(new Line(maxPosition, new Vec3(minPosition.x, y, maxPosition.z), color));
+            batchLines.add(new Line(minPosition, new Vec3(maxPosition.x, y, minPosition.z), color));
+            batchLines.add(new Line(minPosition, new Vec3(minPosition.x, y, maxPosition.z), color));
+            batchLines.add(new Line(maxPosition, new Vec3(maxPosition.x, y, minPosition.z), color));
+            batchLines.add(new Line(maxPosition, new Vec3(minPosition.x, y, maxPosition.z), color));
         }
+        addLines(batchLines);
     }
 
     public static void drawCancellingFaces(Collection<BlockPos> posBatch, int color, Direction direction) {
         Collection<Line> batchLines = CancellingEdges.create(posBatch, color, direction);
         if (batchLines != null) {
-            RenderManager.lines.addAll(batchLines);
+            addLines(batchLines);
             return;
         }
 
@@ -135,11 +163,17 @@ public final class RenderManager {
                 }
             }
         });
-        RenderManager.lines.addAll(lines);
+        addLines(lines);
     }
 
     public static void clear() {
-        lines.clear();
+        Lock writeLock = LINES_LOCK.writeLock();
+        writeLock.lock();
+        try {
+            lines.clear();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     private static void addCancellingLine(Line line, Set<Line> lines) {

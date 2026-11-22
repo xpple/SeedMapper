@@ -32,6 +32,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec2;
@@ -392,7 +393,7 @@ public class SeedMapRenderer {
         } else v1 = 1;
 
         //noinspection resource
-        guiGraphicsExtractor.innerBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), tile.texture().getSampler(), minX, minY, maxX, maxY, u0, u1, v0, v1, 0xFF_FFFFFF);
+        guiGraphicsExtractor.innerBlit(RenderPipelines.GUI_TEXTURED, tile.texture().getTextureView(), tile.texture().getSampler(), minX, minY, maxX, maxY, u0, u1, v0, v1, CommonColors.WHITE);
     }
 
     private Tile createBiomeTile(TilePos tilePos, int[] biomeData) {
@@ -426,7 +427,7 @@ public class SeedMapRenderer {
             for (int relChunkZ = 0; relChunkZ < chunksPerTile; relChunkZ++) {
                 boolean isSlimeChunk = slimeChunkData.get(relChunkX + relChunkZ * chunksPerTile);
                 if (isSlimeChunk) {
-                    texture.getPixels().fillRect(chunkSize * relChunkX, chunkSize * relChunkZ, chunkSize, chunkSize, 0xFF_00FF00);
+                    texture.getPixels().fillRect(chunkSize * relChunkX, chunkSize * relChunkZ, chunkSize, chunkSize, CommonColors.GREEN);
                 }
             }
         }
@@ -453,7 +454,7 @@ public class SeedMapRenderer {
             FeatureWidget widget = iterator.next();
             if (Configs.ToggledFeatures.contains(widget.feature)) {
                 MapFeature.Texture texture = widget.texture();
-                this.drawIcon(guiGraphicsExtractor, texture.identifier(), widget.x, widget.y, texture.width(), texture.height(), 0xFF_FFFFFF);
+                this.drawIcon(guiGraphicsExtractor, texture.identifier(), widget.x, widget.y, texture.width(), texture.height(), CommonColors.WHITE);
             } else {
                 iterator.remove();
             }
@@ -491,7 +492,7 @@ public class SeedMapRenderer {
             .allMatch(v -> v.x >= this.horizontalPadding.getAsInt() && v.x <= this.horizontalPadding.getAsInt() + this.seedMapWidth &&
                 v.y >= this.verticalPadding.getAsInt() && v.y <= this.verticalPadding.getAsInt() + this.seedMapHeight);
         if (withinBounds) {
-            drawIconStatic(guiGraphicsExtractor, DIRECTION_ARROW_TEXTURE, 0, 0, 20, 20, 0xFF_FFFFFF);
+            drawIconStatic(guiGraphicsExtractor, DIRECTION_ARROW_TEXTURE, 0, 0, 20, 20, CommonColors.WHITE);
         }
         guiGraphicsExtractor.pose().popMatrix();
     }

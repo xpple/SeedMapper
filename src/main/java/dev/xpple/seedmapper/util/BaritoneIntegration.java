@@ -8,6 +8,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import oshi.annotation.concurrent.ThreadSafe;
 
 import java.util.Comparator;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /*
  * This class should NOT be loaded if Baritone is not available.
  */
+@ThreadSafe
 public class BaritoneIntegration {
     /*
      * There probably exists a more efficient data structure, but I couldn't find one that really appealed to me.
@@ -24,7 +26,7 @@ public class BaritoneIntegration {
      * instance rules out 3D-trees. I figured for a not too large number of blocks, a hash set suffices.
      */
     private static final ConcurrentHashMap.KeySetView<BlockPos, ?> targetBlocks = ConcurrentHashMap.newKeySet();
-    private static @Nullable GoalBlock currentGoal = null;
+    private static volatile @Nullable GoalBlock currentGoal = null;
     private static final Object CURRENT_GOAL_LOCK = new Object();
 
     private static final ConcurrentHashMap.KeySetView<BlockPos, ?> minedBlocks = ConcurrentHashMap.newKeySet();
@@ -73,8 +75,8 @@ public class BaritoneIntegration {
     }
 
     public static void clearGoals() {
-        targetBlocks.clear();
         synchronized (CURRENT_GOAL_LOCK) {
+            targetBlocks.clear();
             currentGoal = null;
         }
         BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoal(null);

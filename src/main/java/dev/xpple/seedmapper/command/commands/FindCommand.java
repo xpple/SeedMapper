@@ -4,6 +4,7 @@ import com.github.cubiomes.Cubiomes;
 import com.github.cubiomes.Generator;
 import com.github.cubiomes.StructureConfig;
 import com.google.common.math.BigIntegerMath;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
@@ -171,27 +172,25 @@ public class FindCommand {
             });
 
             if (results.isEmpty()) {
-                source.getClient().schedule(() -> source.sendError(Component.translatable("command.find.cluster.buried_treasure.noResults")));
+                source.sendError(Component.translatable("command.find.cluster.buried_treasure.noResults"));
                 return 0;
             }
 
-            source.getClient().schedule(() -> {
-                source.sendFeedback(Component.translatable("command.find.cluster.buried_treasure.success", results.size()));
-                for (ChunkPos result : results) {
-                    int x = result.x() << 4;
-                    int z = result.z() << 4;
-                    MutableComponent coords = ExtraComponentUtils.formatXZ(x, z);
-                    MutableComponent commandComponent = command(
-                        hover(
-                            Component.translatable("command.find.cluster.buried_treasure.view"),
-                            Component.translatable("command.find.cluster.buried_treasure.clickToView")
-                        ),
-                        // below command technically ignores biome flags
-                        "sm:source seeded %d versioned %s positioned %d ~ %d run sm:seedmap".formatted(seed, versionString, x, z)
-                    );
-                    source.sendFeedback(Component.translatable("command.find.cluster.buried_treasure.cluster", coords, commandComponent));
-                }
-            });
+            source.sendFeedback(Component.translatable("command.find.cluster.buried_treasure.success", results.size()));
+            for (ChunkPos result : results) {
+                int x = result.x() << 4;
+                int z = result.z() << 4;
+                MutableComponent coords = ExtraComponentUtils.formatXZ(x, z);
+                MutableComponent commandComponent = command(
+                    hover(
+                        Component.translatable("command.find.cluster.buried_treasure.view"),
+                        Component.translatable("command.find.cluster.buried_treasure.clickToView")
+                    ),
+                    // below command technically ignores biome flags
+                    "sm:source seeded %d versioned %s positioned %d ~ %d run sm:seedmap".formatted(seed, versionString, x, z)
+                );
+                source.sendFeedback(Component.translatable("command.find.cluster.buried_treasure.cluster", coords, commandComponent));
+            }
 
             return results.size();
         }
@@ -214,14 +213,13 @@ public class FindCommand {
         } catch (CancellationException cancelled) {
             return 0;
         }
-        source.getClient().schedule(() -> {
-            if (result.isEmpty()) {
-                source.sendError(Component.translatable("command.find.sinkhole.noResults"));
-                return;
-            }
-            SinkholeFinder.Hit hit = result.get();
-            source.sendFeedback(Component.translatable("command.find.sinkhole.success", ExtraComponentUtils.formatXZ(hit.x(), hit.z()), accent(Integer.toString(hit.floorY()))));
-        });
-        return result.isPresent() ? 1 : 0;
+        if (result.isEmpty()) {
+            source.sendError(Component.translatable("command.find.sinkhole.noResults"));
+            return 0;
+        }
+        SinkholeFinder.Hit hit = result.get();
+        source.sendFeedback(Component.translatable("command.find.sinkhole.success", ExtraComponentUtils.formatXZ(hit.x(), hit.z()), accent(Integer.toString(hit.floorY()))));
+
+        return Command.SINGLE_SUCCESS;
     }
 }

@@ -6,6 +6,7 @@ import dev.xpple.seedmapper.util.SeedIdentifierWithDimension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -87,7 +88,7 @@ public class Minimap {
 
     private void drawCenterCross(GuiGraphicsExtractor guiGraphicsExtractor, int centerX, int centerY) {
         int crossHalf = 3;
-        int color = 0xFF_FFFFFF;
+        int color = CommonColors.WHITE;
         guiGraphicsExtractor.fill(centerX - crossHalf, centerY, centerX + crossHalf + 1, centerY + 1, color);
         guiGraphicsExtractor.fill(centerX, centerY - crossHalf, centerX + 1, centerY + crossHalf + 1, color);
     }

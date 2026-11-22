@@ -190,24 +190,22 @@ public class HighlightCommand {
                         }
                     });
 
-                int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), 0xFFFFFF);
+                int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), CommonColors.WHITE);
                 List<BlockPos> blockOres = generatedOres.entrySet().stream()
                     .filter(entry -> entry.getValue() == block)
                     .map(Map.Entry::getKey)
                     .toList();
                 count[0] += blockOres.size();
-                source.getClient().schedule(() -> {
-                    RenderManager.drawCancellingBoxes(blockOres, color);
-                    if (MixinConfigPlugin.BARITONE_AVAILABLE && Configs.AutoMine) {
-                        BaritoneIntegration.addGoals(blockOres);
-                    }
-                    source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ExtraComponentUtils.formatXZ(chunkX, chunkZ)));
-                });
+                RenderManager.drawCancellingBoxes(blockOres, color);
+                if (MixinConfigPlugin.BARITONE_AVAILABLE && Configs.AutoMine) {
+                    BaritoneIntegration.addGoals(blockOres);
+                }
+                source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(blockOres.size())), ExtraComponentUtils.formatXZ(chunkX, chunkZ)));
 
                 return null;
             });
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.block.success", accent(String.valueOf(count[0])))));
+            source.sendFeedback(Component.translatable("command.highlight.block.success", accent(String.valueOf(count[0]))));
             return count[0];
         }
     }
@@ -267,12 +265,12 @@ public class HighlightCommand {
                     Cubiomes.freePos3List(pos3List);
                 }
                 count[0] += ores.size();
-                RenderManager.drawCancellingBoxes(ores, Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(OreConfig.oreBlock(oreConfig)), 0xFFFFFF));
+                RenderManager.drawCancellingBoxes(ores, Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(OreConfig.oreBlock(oreConfig)), CommonColors.WHITE));
                 source.sendFeedback(Component.translatable("command.highlight.block.chunkSuccess", accent(String.valueOf(ores.size())), ExtraComponentUtils.formatXZ(chunkX, chunkZ)));
                 return null;
             });
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.block.success", accent(String.valueOf(count[0])))));
+            source.sendFeedback(Component.translatable("command.highlight.block.success", accent(String.valueOf(count[0]))));
             return count[0];
         }
     }
@@ -325,17 +323,17 @@ public class HighlightCommand {
                         return;
                     }
                     count[0] += positions.size();
-                    int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), 0xFFFFFF);
+                    int color = Configs.BlockColors.getOrDefault(BLOCKS.inverse().get(block), CommonColors.WHITE);
                     RenderManager.drawCancellingBoxes(positions, color);
                     if (MixinConfigPlugin.BARITONE_AVAILABLE && Configs.AutoMine) {
                         BaritoneIntegration.addGoals(positions);
                     }
                     if (block == Cubiomes.RAW_COPPER_BLOCK() || block == Cubiomes.RAW_IRON_BLOCK()) {
-                        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", ExtraComponentUtils.formatXYZCollection(positions))));
+                        source.sendFeedback(Component.translatable("command.highlight.oreVein.rawBlocks", ExtraComponentUtils.formatXYZCollection(positions)));
                     }
                 });
 
-            source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.oreVein.success", accent(String.valueOf(count[0])))));
+            source.sendFeedback(Component.translatable("command.highlight.oreVein.success", accent(String.valueOf(count[0]))));
             return count[0];
         }
     }
@@ -408,7 +406,7 @@ public class HighlightCommand {
                 }
             }
             LocatorThreadHelper.checkCancelled();
-            RenderManager.drawCancellingBoxes(blocks, 0xFF_FF0000);
+            RenderManager.drawCancellingBoxes(blocks, CommonColors.RED);
             return blocks.size();
         }
     }
@@ -464,7 +462,7 @@ public class HighlightCommand {
                 }
             }
             LocatorThreadHelper.checkCancelled();
-            RenderManager.drawCancellingFaces(ys, 0xFF_FF0000, Direction.UP);
+            RenderManager.drawCancellingFaces(ys, CommonColors.RED, Direction.UP);
             return ys.size();
         }
     }
@@ -545,31 +543,33 @@ public class HighlightCommand {
 
         MemorySegment pos3List = Pos3List.allocate(arena);
         Cubiomes.createPos3List(pos3List, 1024);
+        try {
+            ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
+            SpiralLoop.spiral(center.x(), center.z(), chunkRange, (chunkX, chunkZ) -> {
+                LocatorThreadHelper.checkCancelled();
+                if (version <= Cubiomes.MC_1_17_1()) {
+                    assert range != null;
+                    Range.x(range, chunkX - 8);
+                    Range.z(range, chunkZ - 8);
+                    Cubiomes.genBiomes(generator, biomes, range);
+                }
+                carverFunction.carve(chunkX, chunkZ, biomes, pos3List);
+                return null;
+            });
 
-        ChunkPos center = ChunkPos.containing(BlockPos.containing(source.getPosition()));
-        SpiralLoop.spiral(center.x(), center.z(), chunkRange, (chunkX, chunkZ) -> {
-            LocatorThreadHelper.checkCancelled();
-            if (version <= Cubiomes.MC_1_17_1()) {
-                assert range != null;
-                Range.x(range, chunkX - 8);
-                Range.z(range, chunkZ - 8);
-                Cubiomes.genBiomes(generator, biomes, range);
+            Set<BlockPos> blocks = new HashSet<>();
+            int size = Pos3List.size(pos3List);
+            MemorySegment pos3s = Pos3List.pos3s(pos3List);
+            for (int i = 0; i < size; i++) {
+                MemorySegment pos3 = Pos3.asSlice(pos3s, i);
+                blocks.add(new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3)));
             }
-            carverFunction.carve(chunkX, chunkZ, biomes, pos3List);
-            return null;
-        });
-
-        Set<BlockPos> blocks = new HashSet<>();
-        int size = Pos3List.size(pos3List);
-        MemorySegment pos3s = Pos3List.pos3s(pos3List);
-        for (int i = 0; i < size; i++) {
-            MemorySegment pos3 = Pos3.asSlice(pos3s, i);
-            blocks.add(new BlockPos(Pos3.x(pos3), Pos3.y(pos3), Pos3.z(pos3)));
+            RenderManager.drawCancellingBoxes(blocks, CommonColors.RED);
+            source.sendFeedback(Component.translatable("command.highlight.carver.success", accent(String.valueOf(blocks.size()))));
+            return blocks.size();
+        } finally {
+            Cubiomes.freePos3List(pos3List);
         }
-        Cubiomes.freePos3List(pos3List);
-        RenderManager.drawCancellingBoxes(blocks, 0xFF_FF0000);
-        source.getClient().schedule(() -> source.sendFeedback(Component.translatable("command.highlight.carver.success", accent(String.valueOf(blocks.size())))));
-        return blocks.size();
     }
 
     private static int highlightSlimeChunk(CustomClientCommandSource source) throws CommandSyntaxException {

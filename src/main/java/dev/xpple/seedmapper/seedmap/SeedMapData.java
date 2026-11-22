@@ -74,7 +74,7 @@ public class SeedMapData {
     private final SeedIdentifierWithDimension seedIdentifierWithDimension;
 
     /// [TerrainNoise] to be used for structure calculations. This is NOT thread safe.
-    private final MemorySegment structureGenerator;
+    private final MemorySegment structureTerrainNoise;
     /// [Generator] to be used for biome calculations. This is thread safe.
     private final MemorySegment biomeGenerator;
     private final @Nullable MemorySegment[] structureConfigs;
@@ -98,11 +98,11 @@ public class SeedMapData {
         this.dimension = this.seedIdentifierWithDimension.dimension();
         this.biomeSeedIdentifierWithDimension = new BiomeSeedIdentifierWithDimension(this.seed, this.dimension, this.version, this.generatorFlags);
 
-        this.structureGenerator = TerrainNoise.allocate(arena);
-        Cubiomes.setupTerrainNoise(this.structureGenerator, this.version, this.generatorFlags);
-        Cubiomes.initTerrainNoise(this.structureGenerator, this.seed, this.dimension);
+        this.structureTerrainNoise = TerrainNoise.allocate(arena);
+        Cubiomes.setupTerrainNoise(this.structureTerrainNoise, this.version, this.generatorFlags);
+        Cubiomes.initTerrainNoise(this.structureTerrainNoise, this.seed, this.dimension);
         this.biomeGenerator = Generator.allocate(this.arena);
-        this.biomeGenerator.copyFrom(TerrainNoise.g(this.structureGenerator));
+        Cubiomes.copyGenerator(TerrainNoise.g(this.structureTerrainNoise), this.biomeGenerator);
 
         this.structureConfigs = IntStream.range(0, Cubiomes.FEATURE_NUM())
             .mapToObj(structure -> {
@@ -231,7 +231,7 @@ public class SeedMapData {
     }
 
     private @Nullable StructureData calculateStructureData(MapFeature feature, RegionPos regionPos, MemorySegment structurePos, StructureChecks.GenerationCheck generationCheck) {
-        if (!generationCheck.check(this.structureGenerator, regionPos.x(), regionPos.z(), structurePos)) {
+        if (!generationCheck.check(this.structureTerrainNoise, regionPos.x(), regionPos.z(), structurePos)) {
             return null;
         }
 
@@ -241,7 +241,7 @@ public class SeedMapData {
         if (optionalBiome.isEmpty()) {
             texture = feature.getDefaultTexture();
         } else {
-            texture = feature.getVariantTexture(this.structureGenerator, this.seedIdentifierWithDimension, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
+            texture = feature.getVariantTexture(this.structureTerrainNoise, this.seedIdentifierWithDimension, pos.getX(), pos.getZ(), optionalBiome.getAsInt());
         }
         return new StructureData(pos, texture);
     }
